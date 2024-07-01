@@ -1,0 +1,136 @@
+.content {
+    background-color: #F1F3F4;
+    overflow-y: auto;
+    margin-top: 20px;
+}
+
+.heading {
+    color: #000;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+
+.input_row {
+    display: flex;
+    gap: 200px;
+}
+
+.form_group {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.label {
+    color: #000;
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 2px;
+}
+
+.input_field {
+    border: 1px solid #51BBCC;
+    background: #FFF;
+    border-radius: 10px;
+    height: 46px;
+    width: 100%;
+    outline: none;
+    padding-left: 10px;
+}
+
+.submit_button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #D4DE00;
+    color: #000000;
+    font-family: 'Poppins', sans-serif;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-top: 30px;
+    width: 30%;
+    align-self: center;
+}
+
+.submit_button:hover {
+    background-color: #C4CE00;
+}
+
+.image_preview {
+    margin-top: 10px;
+}
+
+.image {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+.question_box {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding-right: 20px;
+    padding-left: 20px;
+    background-color: #c2e7ed;
+    border: #51BBCC;
+    border-radius: 10px;
+    padding-bottom: 20px;
+}
+
+.add_button {
+    padding: 5px 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #D4DE00;
+    color: #000000;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-top: 30px;
+    width: 15%;
+    align-self: center;
+    margin-bottom: 30px;
+}
+
+.remove_button {
+    padding: 5px 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #de0f00;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-top: 30px;
+    min-width: 150px;
+    max-width: 150px;
+    align-self: center;
+    margin-bottom: 30px;
+}

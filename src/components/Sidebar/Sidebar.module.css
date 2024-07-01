@@ -1,0 +1,47 @@
+.sidebar {
+    height: 88vh;
+    position: fixed;
+    top: 86px;
+    margin: 16px 18px;
+    width: 225px;
+    background: #FFF;
+    border-radius: 15px;
+}
+
+.menu {
+    list-style-type: none;
+    padding: 0;
+}
+
+.menu li a {
+    text-decoration: none;
+}
+
+.active {
+    background-color: #51BBCC;
+    color: #FFF;
+}
+
+.active:first-child {
+    border-radius: 15px 15px 0 0;
+}
+
+.menu_item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 21px;
+}
+
+.logout {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 20px 0;
+    background: #DE2F2F;
+    color: #FFF;
+    text-align: center;
+    border-radius: 0 0 15px 15px;
+    cursor: pointer;
+}

@@ -1,0 +1,15 @@
+.main_page {
+    display: flex;
+    background: #F1F3F4;
+    height: 100vh;
+    flex-direction: column;
+}
+
+.content {
+    margin-left: 265px;
+    padding: 20px;
+    flex-grow: 1;
+    background: #F1F3F4;
+    height: 100%;
+    overflow-y: auto;
+}

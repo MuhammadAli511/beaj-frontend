@@ -1,0 +1,45 @@
+.main_page {
+    display: flex;
+    background: #F1F3F4;
+    height: 100vh;
+    flex-direction: column;
+}
+
+.content {
+    margin-left: 265px;
+    padding: 20px;
+    flex-grow: 1;
+    background: #F1F3F4;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.sub_tabs {
+    margin-top: 10px;
+}
+
+.tabs button,
+.sub_tabs button {
+    padding: 10px;
+    margin: 5px;
+    background-color: #eaf7f9;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 1px solid #c2e7ed;
+    flex: 1;
+}
+
+.tabs button.active,
+.sub_tabs button.active {
+    background-color: #c2e7ed;
+    ;
+    color: black;
+}
+
+.tabs,
+.sub_tabs {
+    display: flex;
+    justify-content: flex-start;
+}
