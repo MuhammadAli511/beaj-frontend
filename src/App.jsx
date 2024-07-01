@@ -1,4 +1,4 @@
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Route, HashRouter as Router, Routes } from "react-router-dom";
 import { NotFound, Login, Dashboard, ContentManager, UserData, BeajOperations } from "./pages";
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
