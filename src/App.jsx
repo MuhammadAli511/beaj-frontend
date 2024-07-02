@@ -1,5 +1,5 @@
 import { Route, HashRouter as Router, Routes } from "react-router-dom";
-import { NotFound, Login, Dashboard, ContentManager, UserData, BeajOperations } from "./pages";
+import { NotFound, Login, Dashboard, ContentManager, UserData, BeajOperations, ChatbotLogs } from "./pages";
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 function App() {
@@ -27,6 +27,11 @@ function App() {
         <Route path="/beaj-operations" element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <BeajOperations />
+          </ProtectedRoute>
+        } />
+        <Route path="/chatbot-logs" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ChatbotLogs />
           </ProtectedRoute>
         } />
         <Route path="*" element={<NotFound />} />

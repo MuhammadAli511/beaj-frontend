@@ -624,3 +624,34 @@ export const deleteMultipleChoiceQuestionAnswer = async (multipleChoiceQuestionA
     const data = await response.json();
     return { status: response.status, data };
 };
+
+
+// CHATBOT
+// API call to get all chatbot logs
+export const getAllChatbotLogs = async () => {
+    const response = await fetch(`${API_URL}/chatbot/getallfeedback`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// API call to create a chatbot log
+export const createChatbotLog = async (userAudio, prompt) => {
+    const formData = new FormData();
+    formData.append('file', userAudio);
+    formData.append('prompt', prompt);
+    console.log(formData);
+
+    const response = await fetch(`${API_URL}/chatbot/feedback`, {
+        method: "POST",
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: formData,
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};

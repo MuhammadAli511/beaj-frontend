@@ -4,6 +4,7 @@ import Dashboard from './Dashboard/Dashboard';
 import ContentManager from './ContentManager/ContentManager';
 import UserData from './UserData/UserData';
 import BeajOperations from './BeajOperations/BeajOperations';
+import ChatbotLogs from './ChatbotLogs/ChatbotLogs';
 
 export {
     NotFound,
@@ -12,5 +13,6 @@ export {
     ContentManager,
     UserData,
     BeajOperations,
+    ChatbotLogs,
 };
 
