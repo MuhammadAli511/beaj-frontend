@@ -34,6 +34,14 @@
 .table_row td {
     padding: 10px;
     border-right: 1px solid #ccc;
+    vertical-align: top;
+}
+
+.table_cell_text {
+    display: block;
+    overflow-y: auto;
+    max-height: 200px;
+    padding: 10px;
 }
 
 .table_row:last-child td {
@@ -47,7 +55,6 @@
 
 
 
-
 .form_input {
     display: flex;
     flex-direction: column;
@@ -57,7 +64,7 @@
 
 .text_area {
     height: 200px;
-    resize: both;
+    resize: vertical;
     padding: 10px;
     font-size: 16px;
     border-radius: 4px;
