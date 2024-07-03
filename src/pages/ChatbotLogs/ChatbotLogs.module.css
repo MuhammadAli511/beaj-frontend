@@ -14,9 +14,15 @@
     overflow-y: auto;
 }
 
+.table_container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
 .table {
     width: 100%;
-    margin-top: 20px;
+    min-width: 600px;
+    /* Ensures the table has a minimum width if necessary */
     border-collapse: collapse;
 }
 
@@ -51,9 +57,6 @@
 .table_row td:last-child {
     border-right: none;
 }
-
-
-
 
 .form_input {
     display: flex;
@@ -90,4 +93,32 @@
 
 .submit_button:hover {
     background-color: #b3c100;
+}
+
+@media (max-width: 1000px) {
+    .main_page {
+        flex-direction: column;
+    }
+
+    .content {
+        margin-left: 0;
+        padding: 10px;
+    }
+
+    .table,
+    .table_row,
+    .table_cell,
+    .table_heading {
+        font-size: 14px;
+    }
+
+    .submit_button,
+    .text_area,
+    .file_input {
+        width: 100%;
+    }
+
+    .form_input {
+        gap: 10px;
+    }
 }
