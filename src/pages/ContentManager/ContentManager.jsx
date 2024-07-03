@@ -8,8 +8,10 @@ import ManageCourse from "./Course/ManageCourse/ManageCourse"
 import CreateCourseWeek from "./CourseWeek/CreateCourseWeek/CreateCourseWeek"
 import ManageCourseWeek from "./CourseWeek/ManageCourseWeek/ManageCourseWeek"
 import CreateLesson from "./Lesson/CreateLesson/CreateLesson"
+import { useSidebar } from "../../components/SidebarContext"
 
 const ContentManager = () => {
+    const { isSidebarOpen } = useSidebar();
     const [mainTab, setMainTab] = useState('Manage');
     const [subTab, setSubTab] = useState('Category');
     const renderContent = () => {
@@ -35,7 +37,7 @@ const ContentManager = () => {
     return (
         <div className={styles.main_page}>
             <Navbar />
-            <Sidebar />
+            {isSidebarOpen && <Sidebar />}
             <div className={styles.content}>
                 <div className={styles.tabs}>
                     <button className={isActive('Manage') ? styles.active : ''} onClick={() => setMainTab('Manage')}>Manage</button>
