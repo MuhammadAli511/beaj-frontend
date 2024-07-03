@@ -29,7 +29,7 @@ const Login = () => {
             const response = await loginBeajEmployee({ email, password });
             if (response.status === 200) {
                 localStorage.setItem('token', response.data.token);
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise(resolve => setTimeout(resolve, 500));
                 navigate("/dashboard");
             } else {
                 toast.error(response.data.message || "Invalid Credentials");
