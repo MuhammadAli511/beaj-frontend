@@ -43,7 +43,7 @@ const ListenLesson = ({ category, course }) => {
                             <th className={styles.table_heading}>Sequence Number</th>
                             <th className={styles.table_heading}>Week Number</th>
                             <th className={styles.table_heading}>Day Number</th>
-                            <th className={styles.table_heading}>Listen</th>
+                            <th className={styles.table_heading}>Audio</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
