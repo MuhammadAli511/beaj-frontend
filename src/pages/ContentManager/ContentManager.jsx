@@ -8,6 +8,7 @@ import ManageCourse from "./Course/ManageCourse/ManageCourse"
 import CreateCourseWeek from "./CourseWeek/CreateCourseWeek/CreateCourseWeek"
 import ManageCourseWeek from "./CourseWeek/ManageCourseWeek/ManageCourseWeek"
 import CreateLesson from "./Lesson/CreateLesson/CreateLesson"
+import ManageLesson from "./Lesson/ManageLesson/ManageLesson"
 
 const ContentManager = () => {
     const [mainTab, setMainTab] = useState('Manage');
@@ -17,7 +18,7 @@ const ContentManager = () => {
             if (subTab === 'Category') return <ManageCategory />;
             if (subTab === 'Course') return <ManageCourse />;
             if (subTab === 'Weeks') return <ManageCourseWeek />;
-            // if (subTab === 'Lesson') return <ManageLesson />;
+            if (subTab === 'Lesson') return <ManageLesson />;
         }
         if (mainTab === 'Create') {
             if (subTab === 'Category') return <CreateCategory />;
