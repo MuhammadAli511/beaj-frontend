@@ -74,3 +74,32 @@
     display: flex;
     justify-content: flex-start;
 }
+
+
+
+@media (max-width: 1000px) {
+    .heading {
+        font-size: 24px;
+    }
+
+    .input_row {
+        flex-direction: column;
+        gap: 0px;
+    }
+
+    .label {
+        font-size: 16px;
+    }
+
+    .input_field {
+        width: 100%;
+    }
+
+    .submit_button {
+        width: 100%;
+    }
+
+    .tabs {
+        overflow-x: auto;
+    }
+}
