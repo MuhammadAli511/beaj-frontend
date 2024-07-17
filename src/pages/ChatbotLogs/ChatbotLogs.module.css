@@ -22,7 +22,6 @@
 .table {
     width: 100%;
     min-width: 600px;
-    /* Ensures the table has a minimum width if necessary */
     border-collapse: collapse;
 }
 

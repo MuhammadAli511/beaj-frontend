@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ManageLesson.module.css';
-import edit from '../../../../assets/images/edit.svg';
-import deleteIcon from '../../../../assets/images/delete.svg';
-import { getAllCourses, getAllCategories, getCoursesByCategoryId } from '../../../../helper';
+import { getAllCategories, getCoursesByCategoryId } from '../../../../helper';
+
+import WatchLesson from './LessonTypes/WatchLesson';
+import ListenLesson from './LessonTypes/ListenLesson';
 
 const lessonTypes = [
     'Watch', 'Listen', 'Read', 'Listen & Speak', 'Watch & Speak',
@@ -15,7 +16,7 @@ const SelectField = ({ label, options, onChange, value, name, id }) => (
         <label className={styles.label} htmlFor={id}>{label}</label>
         <select className={styles.input_field} onChange={onChange} value={value} name={name} id={id}>
             {options.map(option => (
-                <option className={styles.select_option} key={option.key} value={option.value}>{option.label}</option>
+                <option className={styles.select_option} key={option.value} value={option.value}>{option.label}</option>
             ))}
         </select>
     </div>
@@ -31,6 +32,7 @@ const ManageLesson = () => {
 
     useEffect(() => {
         const fetchCategoriesAndDefaultCourses = async () => {
+            setIsLoading(true);
             try {
                 const categoriesResponse = await getAllCategories();
                 if (categoriesResponse.status === 200) {
@@ -55,28 +57,48 @@ const ManageLesson = () => {
                 }
             } catch (error) {
                 alert(error);
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchCategoriesAndDefaultCourses();
     }, []);
 
     const handleCategoryChange = async (e) => {
-        const selectedCategory = e.target.value;
-        setCategory(selectedCategory);
-        const coursesResponse = await getCoursesByCategoryId(selectedCategory);
-        if (coursesResponse.status === 200) {
-            setCourses(coursesResponse.data);
-            if (coursesResponse.data.length > 0) {
-                const firstCourseId = coursesResponse.data[0].CourseId;
-                setCourse(firstCourseId);
+        try {
+            setIsLoading(true);
+            const selectedCategory = e.target.value;
+            setCategory(selectedCategory);
+            const coursesResponse = await getCoursesByCategoryId(selectedCategory);
+            if (coursesResponse.status === 200) {
+                setCourses(coursesResponse.data);
+                if (coursesResponse.data.length > 0) {
+                    const firstCourseId = coursesResponse.data[0].CourseId;
+                    setCourse(firstCourseId);
+                }
+            } else {
+                alert(coursesResponse.data.message);
             }
-        } else {
-            alert(coursesResponse.data.message);
+        } catch (error) {
+            alert(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleCourseChange = (e) => {
         setCourse(e.target.value);
+    };
+
+    const renderLessonContent = () => {
+        switch (activeTab) {
+            case 'Watch':
+                return <WatchLesson category={category} course={course} />;
+            case 'Listen':
+                return <ListenLesson category={category} course={course} />;
+            default:
+                return null;
+        }
     };
 
     return (
@@ -96,21 +118,9 @@ const ManageLesson = () => {
                     </button>
                 ))}
             </div>
-            <div className={styles.lessonContent}>
-                {activeTab === 'Watch' && <div>Watch Content</div>}
-                {activeTab === 'Listen' && <div>Listen Content</div>}
-                {activeTab === 'Read' && <div>Read Content</div>}
-                {activeTab === 'Listen & Speak' && <div>Listen & Speak Content</div>}
-                {activeTab === 'Watch & Speak' && <div>Watch & Speak Content</div>}
-                {activeTab === 'MCQs' && <div>MCQs Content</div>}
-                {activeTab === 'Pre Listen & Speak' && <div>Pre Listen & Speak Content</div>}
-                {activeTab === 'Pre MCQs' && <div>Pre MCQs Content</div>}
-                {activeTab === 'Post Listen & Speak' && <div>Post Listen & Speak Content</div>}
-                {activeTab === 'Post MCQs' && <div>Post MCQs Content</div>}
-                {activeTab === 'Placement Test' && <div>Placement Test Content</div>}
-            </div>
+            {!isLoading && renderLessonContent()}
         </div>
-    )
+    );
 };
 
 export default ManageLesson;

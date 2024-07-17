@@ -1,0 +1,77 @@
+.content {
+    background-color: #F1F3F4;
+    overflow-y: auto;
+    margin-top: 40px;
+}
+
+.heading {
+    color: #000;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table_heading {
+    text-align: left;
+    padding: 10px;
+    background-color: #f2f2f2;
+    border-bottom: 2px solid #000;
+}
+
+.table_body tr {
+    border-bottom: 1px solid #ccc;
+}
+
+.table_row td {
+    padding: 10px;
+    border-right: 1px solid #ccc;
+    vertical-align: top;
+}
+
+.table_heading {
+    text-align: left;
+    padding-bottom: 10px;
+}
+
+.table_body {
+    border-top: 1px solid #000;
+}
+
+.category_number {
+    width: 10%;
+}
+
+.table_row td {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.edit,
+.delete {
+    cursor: pointer;
+}
+
+.video_section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.video {
+    width: 100%;
+    height: 100%;
+}
+
+img {
+    cursor: pointer;
+}

@@ -353,6 +353,17 @@ export const deleteLesson = async (lessonId) => {
     return { status: response.status, data };
 };
 
+// API call to get lessons by activity
+export const getLessonsByActivity = async (course, activity) => {
+    const response = await fetch(`${API_URL}/lesson/getLessonsByActivity`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ course, activity }),
+    });
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
 
 // DOCUMENT FILES
 // API call to upload a document file
