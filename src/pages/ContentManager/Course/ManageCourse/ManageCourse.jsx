@@ -242,7 +242,9 @@ const ManageCourse = () => {
                                 <td>{course.CourseWeeks}</td>
                                 <td>{categoryNames[course.CourseCategoryId]}</td>
                                 <td>{course.status}</td>
-                                <td className={styles.description}>{course.CourseDescription}</td>
+                                <td className={styles.description} >
+                                    <p className={styles.description_text} dangerouslySetInnerHTML={{ __html: course.CourseDescription }}></p>
+                                </td>
                                 <td><img onClick={() => openEditModal(course)} className={styles.edit} src={edit} alt="edit" /></td>
                                 <td><img onClick={() => handleDeleteCourse(course.CourseId)} className={styles.delete} src={deleteIcon} alt="delete" /></td>
                             </tr>

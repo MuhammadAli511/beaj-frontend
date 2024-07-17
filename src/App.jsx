@@ -1,43 +1,35 @@
+import React from 'react';
 import { Route, HashRouter as Router, Routes } from "react-router-dom";
 import { NotFound, Login, Dashboard, ContentManager, UserData, BeajOperations, ChatbotLogs } from "./pages";
-import ProtectedRoute from './components/Auth/ProtectedRoute';
+import { SidebarProvider } from './components/SidebarContext';
 
 function App() {
-  var isAuthenticated = localStorage.getItem('token') ? true : false;
 
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
+      <SidebarProvider>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/dashboard" element={
             <Dashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/content-manager" element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
+          } />
+          <Route path="/content-manager" element={
             <ContentManager />
-          </ProtectedRoute>
-        } />
-        <Route path="/user-data" element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
+          } />
+          <Route path="/user-data" element={
             <UserData />
-          </ProtectedRoute>
-        } />
-        <Route path="/beaj-operations" element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
+          } />
+          <Route path="/beaj-operations" element={
             <BeajOperations />
-          </ProtectedRoute>
-        } />
-        <Route path="/chatbot-logs" element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
+          } />
+          <Route path="/chatbot-logs" element={
             <ChatbotLogs />
-          </ProtectedRoute>
-        } />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          } />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </SidebarProvider>
     </Router>
-  )
+  );
 }
 
 export default App;
