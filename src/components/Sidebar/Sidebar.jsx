@@ -15,6 +15,7 @@ const Sidebar = () => {
         { name: "User data", path: "/user-data" },
         { name: "Beaj operations", path: "/beaj-operations" },
         { name: "Chatbot Logs", path: "/chatbot-logs" },
+        { name: "Chatbot Stats", path: "/chatbot-stats" },
     ];
     const location = useLocation();
     return (
@@ -23,7 +24,7 @@ const Sidebar = () => {
                 {menuItems.map((item, index) => (
                     <li key={index} className={location.pathname.includes(item.path) ? styles.active : styles.not_active}>
                         <Link to={item.path} className={styles.menu_item}>
-                            <p>{item.name}</p>
+                            <p className={location.pathname.includes(item.path) ? styles.active : styles.not_active}>{item.name}</p>
                             <img src={greater_arrow} alt="greater_arrow" className={styles.arrow} />
                         </Link>
                     </li>

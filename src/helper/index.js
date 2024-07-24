@@ -666,3 +666,13 @@ export const createChatbotLog = async (userAudio, prompt) => {
     const data = await response.json();
     return { status: response.status, data };
 };
+
+// API call to get chatbot stats
+export const getChatbotStats = async () => {
+    const response = await fetch(`${API_URL}/wauser/getAllWaUsers`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};

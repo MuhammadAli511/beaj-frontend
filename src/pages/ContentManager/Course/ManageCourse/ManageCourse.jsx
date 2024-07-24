@@ -161,7 +161,7 @@ const ManageCourse = () => {
 
     useEffect(() => {
         fetchCourses();
-    });
+    }, []);
 
     const openEditModal = (course) => {
         setSelectedCourse(course);
