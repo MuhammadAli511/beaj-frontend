@@ -17,7 +17,9 @@
 .stats_summary {
     display: flex;
     justify-content: space-between;
-    margin-top: 20px;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
 .stats_summary_text {
@@ -65,6 +67,22 @@
 
 .table_row td:last-child {
     border-right: none;
+}
+
+.download_button {
+    background-color: #c4ce00;
+    color: black;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none;
+}
+
+.download_button:hover {
+    background-color: #b3c100;
 }
 
 @media (max-width: 1000px) {
