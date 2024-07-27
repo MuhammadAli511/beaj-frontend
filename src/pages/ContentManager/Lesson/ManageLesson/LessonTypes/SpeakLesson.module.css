@@ -13,6 +13,7 @@
     font-weight: 400;
     line-height: normal;
     margin-bottom: 20px;
+    margin-top: 20px;
 }
 
 .table {
@@ -78,4 +79,19 @@
 
 img {
     cursor: pointer;
+}
+
+.submit_button {
+    background-color: #c4ce00;
+    color: black;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit_button:hover {
+    background-color: #b3c100;
 }

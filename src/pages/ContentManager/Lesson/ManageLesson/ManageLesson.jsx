@@ -4,6 +4,8 @@ import { getAllCategories, getCoursesByCategoryId } from '../../../../helper';
 
 import WatchLesson from './LessonTypes/WatchLesson';
 import ListenLesson from './LessonTypes/ListenLesson';
+import ReadLesson from './LessonTypes/ReadLesson';
+import SpeakLesson from './LessonTypes/SpeakLesson';
 
 const lessonTypes = [
     'Watch', 'Listen', 'Read', 'Listen & Speak', 'Watch & Speak',
@@ -96,6 +98,16 @@ const ManageLesson = () => {
                 return <WatchLesson category={category} course={course} />;
             case 'Listen':
                 return <ListenLesson category={category} course={course} />;
+            case 'Read':
+                return <ReadLesson category={category} course={course} />;
+            case 'Listen & Speak':
+                return <SpeakLesson category={category} course={course} activity='listenAndSpeak' />;
+            case 'Pre Listen & Speak':
+                return <SpeakLesson category={category} course={course} activity='preListenAndSpeak' />;
+            case 'Post Listen & Speak':
+                return <SpeakLesson category={category} course={course} activity='postListenAndSpeak' />;
+            case 'Watch & Speak':
+                return <SpeakLesson category={category} course={course} activity='watchAndSpeak' />;
             default:
                 return null;
         }
@@ -115,11 +127,11 @@ const ManageLesson = () => {
                         onClick={() => setActiveTab(type)}
                     >
                         {type}
-                    </button>
+                    </button >
                 ))}
-            </div>
+            </div >
             {!isLoading && renderLessonContent()}
-        </div>
+        </div >
     );
 };
 

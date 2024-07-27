@@ -37,6 +37,10 @@
     vertical-align: top;
 }
 
+.table_row td:first-child {
+    border-left: 1px solid #ccc;
+}
+
 .table_heading {
     text-align: left;
     padding-bottom: 10px;

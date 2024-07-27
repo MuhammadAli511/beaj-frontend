@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getLessonsByActivity } from '../../../../../helper';
 import edit from '../../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../../assets/images/delete.svg';
-import styles from './WatchLesson.module.css';
+import styles from './ListenLesson.module.css';
 
 const ListenLesson = ({ category, course }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +24,9 @@ const ListenLesson = ({ category, course }) => {
                 setIsLoading(false);
             }
         };
-        fetchLessons();
+        if (category !== "" && course !== "") {
+            fetchLessons();
+        }
     }, [category, course]);
 
     return (
@@ -57,7 +59,7 @@ const ListenLesson = ({ category, course }) => {
                                 <td style={{ width: "15%" }}>{lesson.dayNumber}</td>
                                 <td style={{ width: "100%" }} className={styles.audio_section}>
                                     <audio controls className={styles.audio}>
-                                        <source src={lesson.documentFiles[0].audio} type="audio/mp3" />
+                                        {lesson.documentFiles && <source src={lesson.documentFiles[0].audio} type="audio/mp3" />}
                                     </audio>
                                 </td>
                                 <td style={{ width: "10%" }}><img src={edit} alt="Edit" /></td>

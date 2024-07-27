@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { getLessonsByActivity } from '../../../../../helper';
 import edit from '../../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../../assets/images/delete.svg';
-import styles from './WatchLesson.module.css';
+import styles from './SpeakLesson.module.css';
+import SpeakQuestionModal from './SpeakQuestionModal';
 
-const WatchLesson = ({ category, course }) => {
+const SpeakLesson = ({ category, course, activity }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [lessons, setLessons] = useState([]);
+    const [selectedLesson, setSelectedLesson] = useState(null);
 
     useEffect(() => {
         const fetchLessons = async () => {
             try {
                 setIsLoading(true);
-                const lessonsResponse = await getLessonsByActivity(course, 'video');
+                const lessonsResponse = await getLessonsByActivity(course, activity);
                 if (lessonsResponse.status === 200) {
                     setLessons(lessonsResponse.data);
                 } else {
@@ -27,11 +29,19 @@ const WatchLesson = ({ category, course }) => {
         if (category !== "" && course !== "") {
             fetchLessons();
         }
-    }, [category, course]);
+    }, [category, course, activity]);
+
+    const openModal = (lesson) => {
+        setSelectedLesson(lesson);
+    };
+
+    const closeModal = () => {
+        setSelectedLesson(null);
+    };
 
     return (
         <div>
-            <h1 className={styles.heading}>Manage your watch lessons</h1>
+            <h1 className={styles.heading}>Manage your Listen And Speak lessons</h1>
             {/* loading */}
             {isLoading && <div>Fetching Data...</div>}
             {/* no data */}
@@ -45,7 +55,7 @@ const WatchLesson = ({ category, course }) => {
                             <th className={styles.table_heading}>Sequence Number</th>
                             <th className={styles.table_heading}>Week Number</th>
                             <th className={styles.table_heading}>Day Number</th>
-                            <th className={styles.table_heading}>Video</th>
+                            <th className={styles.table_heading}>Questions</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -57,10 +67,8 @@ const WatchLesson = ({ category, course }) => {
                                 <td style={{ width: "15%" }}>{lesson.SequenceNumber}</td>
                                 <td style={{ width: "15%" }}>{lesson.weekNumber}</td>
                                 <td style={{ width: "15%" }}>{lesson.dayNumber}</td>
-                                <td style={{ width: "100%" }} className={styles.video_section}>
-                                    <video controls className={styles.video}>
-                                        {lesson.documentFiles && <source src={lesson.documentFiles[0].video} type="video/mp4" />}
-                                    </video>
+                                <td style={{ width: "15%" }}>
+                                    <button className={styles.submit_button} onClick={() => openModal(lesson)}>Show Questions</button>
                                 </td>
                                 <td style={{ width: "10%" }}><img src={edit} alt="Edit" /></td>
                                 <td style={{ width: "10%" }}><img src={deleteIcon} alt="Delete" /></td>
@@ -69,8 +77,11 @@ const WatchLesson = ({ category, course }) => {
                     </tbody>
                 </table>
             )}
+            {selectedLesson && (
+                <SpeakQuestionModal lesson={selectedLesson} onClose={closeModal} activity={activity} />
+            )}
         </div>
     );
 };
 
-export default WatchLesson;
+export default SpeakLesson;
