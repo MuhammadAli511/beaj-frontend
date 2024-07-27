@@ -1,0 +1,86 @@
+.content {
+    background-color: #F1F3F4;
+    overflow-y: auto;
+    margin-top: 40px;
+}
+
+.heading {
+    color: #000;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table_heading {
+    text-align: left;
+    padding: 10px;
+    background-color: #f2f2f2;
+    border-bottom: 2px solid #000;
+}
+
+.table_body tr {
+    border-bottom: 1px solid #ccc;
+}
+
+.table_row td {
+    padding: 10px;
+    border-right: 1px solid #ccc;
+    vertical-align: top;
+}
+
+.table_row td:first-child {
+    border-left: 1px solid #ccc;
+}
+
+.table_heading {
+    text-align: left;
+    padding-bottom: 10px;
+}
+
+.table_body {
+    border-top: 1px solid #000;
+}
+
+.category_number {
+    width: 10%;
+}
+
+.table_row td {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.edit,
+.delete {
+    cursor: pointer;
+}
+
+
+img {
+    cursor: pointer;
+}
+
+.submit_button {
+    background-color: #c4ce00;
+    color: black;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit_button:hover {
+    background-color: #b3c100;
+}

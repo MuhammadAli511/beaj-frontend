@@ -6,6 +6,7 @@ import WatchLesson from './LessonTypes/WatchLesson';
 import ListenLesson from './LessonTypes/ListenLesson';
 import ReadLesson from './LessonTypes/ReadLesson';
 import SpeakLesson from './LessonTypes/SpeakLesson';
+import MCQsLesson from './LessonTypes/MCQsLesson';
 
 const lessonTypes = [
     'Watch', 'Listen', 'Read', 'Listen & Speak', 'Watch & Speak',
@@ -108,6 +109,14 @@ const ManageLesson = () => {
                 return <SpeakLesson category={category} course={course} activity='postListenAndSpeak' />;
             case 'Watch & Speak':
                 return <SpeakLesson category={category} course={course} activity='watchAndSpeak' />;
+            case 'MCQs':
+                return <MCQsLesson category={category} course={course} activity='mcqs' />;
+            case 'Pre MCQs':
+                return <MCQsLesson category={category} course={course} activity='preMCQs' />;
+            case 'Post MCQs':
+                return <MCQsLesson category={category} course={course} activity='postMCQs' />;
+            case 'Placement Test':
+                return <MCQsLesson category={category} course={course} activity='placementTest' />;
             default:
                 return null;
         }
