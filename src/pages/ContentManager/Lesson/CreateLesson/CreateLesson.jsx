@@ -48,59 +48,87 @@ const CreateLesson = () => {
     // Listen
     const [image, setImage] = useState(null);
     const [audio, setAudio] = useState(null);
+
     const handleImageChange = (e) => {
-        setImage(e.target.files[0]);
-    };
-    const handleAudioChange = (e) => {
-        setAudio(e.target.files[0]);
+        const file = e.target.files[0];
+        if (file && file.type === 'image/jpeg' && file.size <= 4 * 1024 * 1024) {
+            setImage(file);
+        } else {
+            alert('Please upload a JPG image not larger than 4MB.');
+        }
     };
 
+    const handleAudioChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+            setAudio(file);
+        } else {
+            alert('Please upload an MP3 audio not larger than 16MB.');
+        }
+    };
 
     // Watch
     const [video, setVideo] = useState(null);
-    const handleVideoChange = (e) => {
-        setVideo(e.target.files[0]);
-    };
 
+    const handleVideoChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
+            setVideo(file);
+        } else {
+            alert('Please upload an MP4 video not larger than 16MB.');
+        }
+    };
 
     // Read
     const [urduAudio, setUrduAudio] = useState(null);
-    const handleUrduAudioChange = (e) => {
-        setUrduAudio(e.target.files[0]);
-    };
 
+    const handleUrduAudioChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+            setUrduAudio(file);
+        } else {
+            alert('Please upload an MP3 audio not larger than 16MB.');
+        }
+    };
 
     // Listen and Speak
     const [questions, setQuestions] = useState([
         { questionText: '', audio: '', answers: [{ answerText: '' }] }
     ]);
+
     const handleQuestionChange = (index, event) => {
         const newQuestions = [...questions];
         if (event.target.type === 'file') {
             const file = event.target.files[0];
-            newQuestions[index][event.target.name] = file;
-            setQuestions(newQuestions);
+            if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+                newQuestions[index][event.target.name] = file;
+            } else {
+                alert('Please upload an MP3 audio not larger than 16MB.');
+            }
         } else {
-            const newQuestions = [...questions];
             newQuestions[index][event.target.name] = event.target.value;
-            setQuestions(newQuestions);
         }
+        setQuestions(newQuestions);
     };
+
     const handleAnswerChange = (questionIndex, answerIndex, event) => {
         const newQuestions = [...questions];
         newQuestions[questionIndex].answers[answerIndex][event.target.name] = event.target.value;
         setQuestions(newQuestions);
     };
+
     const addAnswer = (questionIndex, event) => {
         event.preventDefault();
         const newQuestions = [...questions];
         newQuestions[questionIndex].answers.push({ answerText: '' });
         setQuestions(newQuestions);
     };
+
     const addQuestion = (event) => {
         event.preventDefault();
         setQuestions([...questions, { questionText: '', audio: '', answers: [{ answerText: '' }] }]);
     };
+
     const removeQuestion = (index, event) => {
         event.preventDefault();
         if (questions.length > 1) {
@@ -109,6 +137,7 @@ const CreateLesson = () => {
             setQuestions(newQuestions);
         }
     };
+
     const removeAnswer = (questionIndex, answerIndex, event) => {
         event.preventDefault();
         if (questions[questionIndex].answers.length > 1) {
@@ -118,7 +147,6 @@ const CreateLesson = () => {
         }
     };
 
-
     // MCQs
     const [mcqs, setMcqs] = useState([
         {
@@ -126,21 +154,33 @@ const CreateLesson = () => {
             answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false }))
         }
     ]);
+
     const handleMCQQuestionChange = (index, event) => {
         const newMcqs = [...mcqs];
         if (event.target.type === 'file') {
             const file = event.target.files[0];
-            newMcqs[index][event.target.name] = file;
+            if ((event.target.name === 'questionImage' && file && file.type === 'image/jpeg' && file.size <= 4 * 1024 * 1024) ||
+                (event.target.name === 'questionAudio' && file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024)) {
+                newMcqs[index][event.target.name] = file;
+            } else {
+                alert('Please upload a valid file with correct format and size.');
+            }
         } else {
             newMcqs[index][event.target.name] = event.target.value;
         }
         setMcqs(newMcqs);
     };
+
     const handleMCQAnswerChange = (qIndex, aIndex, event) => {
         const newMcqs = [...mcqs];
         if (event.target.type === 'file') {
             const file = event.target.files[0];
-            newMcqs[qIndex].answers[aIndex][event.target.name] = file;
+            if ((event.target.name === 'answerImage' && file && file.type === 'image/jpeg' && file.size <= 4 * 1024 * 1024) ||
+                (event.target.name === 'answerAudio' && file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024)) {
+                newMcqs[qIndex].answers[aIndex][event.target.name] = file;
+            } else {
+                alert('Please upload a valid file with correct format and size.');
+            }
         } else if (event.target.type === 'checkbox') {
             newMcqs[qIndex].answers[aIndex].isCorrect = event.target.checked;
         } else if (event.target.name === 'answerType') {
@@ -152,6 +192,7 @@ const CreateLesson = () => {
         }
         setMcqs(newMcqs);
     };
+
     const addMCQQuestion = (event) => {
         event.preventDefault();
         setMcqs([...mcqs, {
@@ -159,6 +200,7 @@ const CreateLesson = () => {
             answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false }))
         }]);
     };
+
     const removeMCQQuestion = (index, event) => {
         event.preventDefault();
         if (mcqs.length > 1) {
@@ -167,7 +209,6 @@ const CreateLesson = () => {
             setMcqs(newMcqs);
         }
     };
-
 
     useEffect(() => {
         const fetchCategoriesAndDefaultCourses = async () => {

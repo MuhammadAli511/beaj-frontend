@@ -406,6 +406,26 @@ export const getDocumentFileById = async (documentFileId) => {
     return { status: response.status, data };
 };
 
+// API call to update a document file
+export const updateDocumentFile = async (documentFileId, file, lessonId, language, mediaType) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('lessonId', lessonId);
+    formData.append('language', language);
+    formData.append('mediaType', mediaType);
+
+    const response = await fetch(`${API_URL}/documentFiles/update/${documentFileId}`, {
+        method: "PUT",
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: formData,
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
 
 // SPEAK ACTIVITY QUESTIONS
 // API call to create a speak activity question
