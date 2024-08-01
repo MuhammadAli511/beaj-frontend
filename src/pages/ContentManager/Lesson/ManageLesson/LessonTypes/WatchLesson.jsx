@@ -374,6 +374,7 @@ const WatchLesson = ({ category, course }) => {
                             <th className={styles.table_heading}>Week Number</th>
                             <th className={styles.table_heading}>Day Number</th>
                             <th className={styles.table_heading}>Video</th>
+                            <th className={styles.table_heading}>Status</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -381,8 +382,8 @@ const WatchLesson = ({ category, course }) => {
                     <tbody className={styles.table_body}>
                         {lessons.map((lesson) => (
                             <tr key={lesson.LessonId} className={styles.table_row}>
-                                <td style={{ width: "15%" }}>{lesson.LessonId}</td>
-                                <td style={{ width: "15%" }}>{lesson.SequenceNumber}</td>
+                                <td style={{ width: "10%" }}>{lesson.LessonId}</td>
+                                <td style={{ width: "10%" }}>{lesson.SequenceNumber}</td>
                                 <td style={{ width: "15%" }}>{lesson.weekNumber}</td>
                                 <td style={{ width: "15%" }}>{lesson.dayNumber}</td>
                                 <td style={{ width: "100%" }} className={styles.video_section}>
@@ -394,6 +395,11 @@ const WatchLesson = ({ category, course }) => {
                                             />
                                         )}
                                     </video>
+                                </td>
+                                <td style={{ width: "10%" }} >
+                                    <span className={lesson.status === "Active" ? styles.active : styles.inactive}>
+                                        {lesson.status}
+                                    </span>
                                 </td>
                                 <td style={{ width: "10%" }}>
                                     <img
