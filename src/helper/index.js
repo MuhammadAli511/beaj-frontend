@@ -299,11 +299,11 @@ export const deleteActivityAlias = async (aliasId) => {
 
 // LESSON
 // API call to create a lesson
-export const createLesson = async (lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber) => {
+export const createLesson = async (lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status) => {
     const response = await fetch(`${API_URL}/lesson/create`, {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({ lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber }),
+        body: JSON.stringify({ lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status }),
     });
 
     const data = await response.json();
@@ -331,11 +331,11 @@ export const getLessonById = async (lessonId) => {
 };
 
 // API call to update a lesson
-export const updateLesson = async (lessonId, lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber) => {
+export const updateLesson = async (lessonId, lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status) => {
     const response = await fetch(`${API_URL}/lesson/update/${lessonId}`, {
         method: "PUT",
         headers: getHeaders(),
-        body: JSON.stringify({ lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber }),
+        body: JSON.stringify({ lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status }),
     });
 
     const data = await response.json();

@@ -97,6 +97,7 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
             weekNumber: document.getElementById("weekNumber").value,
             dayNumber: document.getElementById("dayNumber").value,
             Alias: document.getElementById("activity_alias").value,
+            status: document.getElementById("status").value,
             video,
         };
 
@@ -111,7 +112,8 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                 updatedLessonData.weekNumber,
                 updatedLessonData.text,
                 updatedLessonData.CourseId,
-                updatedLessonData.SequenceNumber
+                updatedLessonData.SequenceNumber,
+                updatedLessonData.status
             );
             if (updateResponse.status === 200) {
                 if (updatedLessonData.video) {
@@ -179,7 +181,7 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         className={styles.input_field}
                                         id="course_id"
                                         name="course_id"
-                                        defaultValue={lessonData.CourseId}
+                                        defaultValue={lessonData.CourseId || "Not Available"}
                                     >
                                         {sortedCourses().map((course) => (
                                             <option key={course.CourseId} value={course.CourseId}>
@@ -194,7 +196,7 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         className={styles.input_field}
                                         type="text"
                                         id="sequenceNumber"
-                                        defaultValue={lessonData.SequenceNumber}
+                                        defaultValue={lessonData.SequenceNumber || "Not Available"}
                                         onChange={(e) =>
                                             setLessonData({
                                                 ...lessonData,
@@ -209,7 +211,7 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         className={styles.input_field}
                                         type="text"
                                         id="weekNumber"
-                                        defaultValue={lessonData.weekNumber}
+                                        defaultValue={lessonData.weekNumber || "Not Available"}
                                         onChange={(e) =>
                                             setLessonData({
                                                 ...lessonData,
@@ -224,7 +226,7 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         className={styles.input_field}
                                         type="text"
                                         id="dayNumber"
-                                        defaultValue={lessonData.dayNumber}
+                                        defaultValue={lessonData.dayNumber || "Not Available"}
                                         onChange={(e) =>
                                             setLessonData({
                                                 ...lessonData,
@@ -241,7 +243,7 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         className={styles.input_field}
                                         id="activity_alias"
                                         name="activity_alias"
-                                        defaultValue={lessonData.Alias}
+                                        defaultValue={lessonData.Alias || "Not Available"}
                                     >
                                         {sortedActivityAliases().map((activityAlias) => (
                                             <option
@@ -254,13 +256,33 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                     </select>
                                 </div>
                                 <div className={styles.form_group}>
+                                    <label className={styles.label}>Status</label>
+                                    <select
+                                        className={styles.input_field}
+                                        id="status"
+                                        name="status"
+                                        defaultValue={lessonData.status || "Not Available"}
+                                        onChange={(e) =>
+                                            setLessonData({
+                                                ...lessonData,
+                                                status: e.target.value,
+                                            })
+                                        }
+                                    >
+                                        <option value="Active">Active</option>
+                                        <option value="Not Active">Not Active</option>
+                                    </select>
+                                </div>
+                                <div className={styles.form_group}>
                                     <label className={styles.label}>Video</label>
                                     <video controls className={styles.video}>
-                                        {lessonData.documentFiles && (
+                                        {lessonData.documentFiles ? (
                                             <source
-                                                src={lessonData.documentFiles[0].video}
+                                                src={lessonData.documentFiles[0].video || "Not Available"}
                                                 type="video/mp4"
                                             />
+                                        ) : (
+                                            <p>Not Available</p>
                                         )}
                                     </video>
                                 </div>
@@ -382,23 +404,25 @@ const WatchLesson = ({ category, course }) => {
                     <tbody className={styles.table_body}>
                         {lessons.map((lesson) => (
                             <tr key={lesson.LessonId} className={styles.table_row}>
-                                <td style={{ width: "10%" }}>{lesson.LessonId}</td>
-                                <td style={{ width: "10%" }}>{lesson.SequenceNumber}</td>
-                                <td style={{ width: "15%" }}>{lesson.weekNumber}</td>
-                                <td style={{ width: "15%" }}>{lesson.dayNumber}</td>
+                                <td style={{ width: "10%" }}>{lesson.LessonId || "Not Available"}</td>
+                                <td style={{ width: "10%" }}>{lesson.SequenceNumber || "Not Available"}</td>
+                                <td style={{ width: "15%" }}>{lesson.weekNumber || "Not Available"}</td>
+                                <td style={{ width: "15%" }}>{lesson.dayNumber || "Not Available"}</td>
                                 <td style={{ width: "100%" }} className={styles.video_section}>
-                                    <video controls className={styles.video}>
-                                        {lesson.documentFiles && (
+                                    {lesson.documentFiles ? (
+                                        <video controls className={styles.video}>
                                             <source
-                                                src={lesson.documentFiles[0].video}
+                                                src={lesson.documentFiles[0]?.video || ""}
                                                 type="video/mp4"
                                             />
-                                        )}
-                                    </video>
+                                        </video>
+                                    ) : (
+                                        <p>Not Available</p>
+                                    )}
                                 </td>
-                                <td style={{ width: "10%" }} >
+                                <td style={{ width: "10%" }}>
                                     <span className={lesson.status === "Active" ? styles.active : styles.inactive}>
-                                        {lesson.status}
+                                        {lesson.status || "Not Available"}
                                     </span>
                                 </td>
                                 <td style={{ width: "10%" }}>

@@ -42,6 +42,7 @@ const CreateLesson = () => {
     const [lessonText, setLessonText] = useState('');
     const [day, setDay] = useState('1');
     const [week, setWeek] = useState('1');
+    const [status, setStatus] = useState('Active');
     const editor = useRef(null);
 
 
@@ -319,20 +320,24 @@ const CreateLesson = () => {
         setWeek(e.target.value);
     };
 
+    const handleStatusChange = (e) => {
+        setStatus(e.target.value);
+    };
+
     const handleCreateLesson = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         try {
             if (activityType === 'audio') {
-                await createAudioLesson(course, sequenceNumber, alias, activityType, image, audio, lessonText, day, week);
+                await createAudioLesson(course, sequenceNumber, alias, activityType, image, audio, lessonText, day, week, status);
             } else if (activityType === 'video') {
-                await createVideoLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week);
+                await createVideoLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status);
             } else if (activityType === 'read') {
-                await createReadLesson(course, sequenceNumber, alias, activityType, image, audio, urduAudio, lessonText, day, week);
+                await createReadLesson(course, sequenceNumber, alias, activityType, image, audio, urduAudio, lessonText, day, week, status);
             } else if (activityType === 'listenAndSpeak' || activityType === 'preListenAndSpeak' || activityType === 'postListenAndSpeak') {
-                await createListenAndSpeakLesson(course, sequenceNumber, alias, activityType, questions, lessonText, day, week);
+                await createListenAndSpeakLesson(course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status);
             } else if (activityType === 'mcqs' || activityType === 'preMCQs' || activityType === 'postMCQs') {
-                await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week);
+                await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status);
             }
         } catch (error) {
             alert(error);
@@ -372,6 +377,10 @@ const CreateLesson = () => {
                         { value: 'postMCQs', label: 'Post-test Part 2 (MCQs)' },
                         { value: 'placementtest', label: 'Placement Test' }
                     ]} onChange={handleActivityTypeChange} value={activityType} name="activity_type" id="activity_type" />
+                    <SelectField label="Status" options={[
+                        { value: 'Active', label: 'Active' },
+                        { value: 'Inactive', label: 'Inactive' }
+                    ]} onChange={handleStatusChange} value={status} name="status" id="status" />
                 </div>
                 {activityType === 'audio' && (
                     <>
