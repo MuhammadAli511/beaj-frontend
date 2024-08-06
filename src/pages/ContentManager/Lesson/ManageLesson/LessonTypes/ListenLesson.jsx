@@ -17,6 +17,7 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [lessonData, setLessonData] = useState(null);
     const [audio, setAudio] = useState(null);
+    const [image, setImage] = useState(null);  // New state for image
     const [courses, setCourses] = useState([]);
     const [activityAliases, setActivityAliases] = useState([]);
 
@@ -86,6 +87,7 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         setCourses([]);
         setActivityAliases([]);
         setAudio(null);
+        setImage(null); // Reset image on cancel
         onClose();
     };
 
@@ -99,6 +101,7 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
             Alias: document.getElementById("activity_alias").value,
             status: document.getElementById("status").value,
             audio,
+            image,  // Include image in updated data
         };
 
         try {
@@ -116,18 +119,40 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                 updatedLessonData.status
             );
             if (updateResponse.status === 200) {
+                // Update audio if provided
                 if (updatedLessonData.audio) {
-                    const updateFileResponse = await updateDocumentFile(
-                        updatedLessonData.documentFiles[0]?.id,
-                        updatedLessonData.audio,
-                        updatedLessonData.LessonId,
-                        updatedLessonData.documentFiles[0]?.language,
-                        updatedLessonData.documentFiles[0]?.mediaType
-                    );
-                    if (updateFileResponse.status !== 200) {
-                        alert(updateFileResponse.data.message);
+                    const audioFile = getDocumentFile('audio');
+                    if (audioFile) {
+                        const updateFileResponse = await updateDocumentFile(
+                            audioFile.id,
+                            updatedLessonData.audio,
+                            updatedLessonData.LessonId,
+                            audioFile.language,
+                            audioFile.mediaType
+                        );
+                        if (updateFileResponse.status !== 200) {
+                            alert(updateFileResponse.data.message);
+                        }
                     }
                 }
+
+                // Update image if provided
+                if (updatedLessonData.image) {
+                    const imageFile = getDocumentFile('image');
+                    if (imageFile) {
+                        const updateImageResponse = await updateDocumentFile(
+                            imageFile.id,
+                            updatedLessonData.image,
+                            updatedLessonData.LessonId,
+                            imageFile.language,
+                            imageFile.mediaType
+                        );
+                        if (updateImageResponse.status !== 200) {
+                            alert(updateImageResponse.data.message);
+                        }
+                    }
+                }
+
                 onSave();
             } else {
                 alert(updateResponse.data.message);
@@ -162,6 +187,11 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     : 0
         );
         return sorted;
+    };
+
+    const getDocumentFile = (mediaType) => {
+        if (!lessonData || !lessonData.documentFiles) return null;
+        return lessonData.documentFiles.find((file) => file.mediaType === mediaType);
     };
 
     return (
@@ -276,15 +306,23 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                 <div className={styles.form_group}>
                                     <label className={styles.label}>Audio</label>
                                     <audio controls className={styles.audio}>
-                                        {lessonData.documentFiles ? (
-                                            <source
-                                                src={lessonData.documentFiles[0]?.audio || ""}
-                                                type="audio/mp3"
-                                            />
-                                        ) : (
-                                            <p>Not Available</p>
-                                        )}
+                                        <source
+                                            src={getDocumentFile('audio')?.audio || ""}
+                                            type="audio/mp3"
+                                        />
                                     </audio>
+                                </div>
+                                <div className={styles.form_group}>
+                                    <label className={styles.label}>Image</label>
+                                    {getDocumentFile('image') ? (
+                                        <img
+                                            src={getDocumentFile('image')?.image}
+                                            alt="Lesson Image"
+                                            className={styles.image}
+                                        />
+                                    ) : (
+                                        <p>Not Available</p>
+                                    )}
                                 </div>
                                 <div className={styles.form_group}>
                                     <label className={styles.label}>Upload Audio</label>
@@ -292,6 +330,14 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         type="file"
                                         accept="audio/*"
                                         onChange={(e) => setAudio(e.target.files[0])}
+                                    />
+                                </div>
+                                <div className={styles.form_group}>
+                                    <label className={styles.label}>Upload Image</label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => setImage(e.target.files[0])}
                                     />
                                 </div>
                                 <div className={styles.form_group_row}>
@@ -379,6 +425,11 @@ const ListenLesson = ({ category, course }) => {
         }
     };
 
+    const getDocumentFile = (lesson, mediaType) => {
+        if (!lesson || !lesson.documentFiles) return null;
+        return lesson.documentFiles.find((file) => file.mediaType === mediaType);
+    };
+
     return (
         <div>
             <h1 className={styles.heading}>Manage your listen lessons</h1>
@@ -396,6 +447,7 @@ const ListenLesson = ({ category, course }) => {
                             <th className={styles.table_heading}>Week Number</th>
                             <th className={styles.table_heading}>Day Number</th>
                             <th className={styles.table_heading}>Audio</th>
+                            <th className={styles.table_heading}>Image</th>
                             <th className={styles.table_heading}>Status</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
@@ -404,20 +456,34 @@ const ListenLesson = ({ category, course }) => {
                     <tbody className={styles.table_body}>
                         {lessons.map((lesson) => (
                             <tr key={lesson.LessonId} className={styles.table_row}>
-                                <td style={{ width: "15%" }}>{lesson.LessonId || "Not Available"}</td>
-                                <td style={{ width: "15%" }}>{lesson.SequenceNumber || "Not Available"}</td>
-                                <td style={{ width: "15%" }}>{lesson.weekNumber || "Not Available"}</td>
-                                <td style={{ width: "15%" }}>{lesson.dayNumber || "Not Available"}</td>
-                                <td className={styles.audio_section}>
-                                    {lesson.documentFiles ? (
+                                <td style={{ width: "10%" }}>{lesson.LessonId || "Not Available"}</td>
+                                <td style={{ width: "10%" }}>{lesson.SequenceNumber || "Not Available"}</td>
+                                <td style={{ width: "10%" }}>{lesson.weekNumber || "Not Available"}</td>
+                                <td style={{ width: "10%" }}>{lesson.dayNumber || "Not Available"}</td>
+                                <td className={styles.audio_section} style={{ width: "10%" }}>
+                                    {getDocumentFile(lesson, 'audio') ? (
                                         <audio controls className={styles.audio}>
-                                            <source src={lesson.documentFiles[0]?.audio || ""} type="audio/mp3" />
+                                            <source
+                                                src={getDocumentFile(lesson, 'audio')?.audio || ""}
+                                                type="audio/mp3"
+                                            />
                                         </audio>
                                     ) : (
                                         <p>Not Available</p>
                                     )}
                                 </td>
-                                <td style={{ width: "10%" }} >
+                                <td className={styles.image_section} style={{ width: "10%" }}>
+                                    {getDocumentFile(lesson, 'image') ? (
+                                        <img
+                                            src={getDocumentFile(lesson, 'image')?.image}
+                                            alt="Lesson Image"
+                                            className={styles.image}
+                                        />
+                                    ) : (
+                                        <p>Not Available</p>
+                                    )}
+                                </td>
+                                <td style={{ width: "10%" }}>
                                     <span className={lesson.status === "Active" ? styles.active : styles.inactive}>
                                         {lesson.status || "Not Available"}
                                     </span>
