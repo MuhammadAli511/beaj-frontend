@@ -17,7 +17,7 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [lessonData, setLessonData] = useState(null);
     const [audio, setAudio] = useState(null);
-    const [image, setImage] = useState(null);  // New state for image
+    const [image, setImage] = useState(null);
     const [courses, setCourses] = useState([]);
     const [activityAliases, setActivityAliases] = useState([]);
 
@@ -87,7 +87,7 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         setCourses([]);
         setActivityAliases([]);
         setAudio(null);
-        setImage(null); // Reset image on cancel
+        setImage(null);
         onClose();
     };
 
@@ -101,7 +101,7 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
             Alias: document.getElementById("activity_alias").value,
             status: document.getElementById("status").value,
             audio,
-            image,  // Include image in updated data
+            image,
         };
 
         try {
@@ -119,7 +119,6 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                 updatedLessonData.status
             );
             if (updateResponse.status === 200) {
-                // Update audio if provided
                 if (updatedLessonData.audio) {
                     const audioFile = getDocumentFile('audio');
                     if (audioFile) {
@@ -136,7 +135,6 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     }
                 }
 
-                // Update image if provided
                 if (updatedLessonData.image) {
                     const imageFile = getDocumentFile('image');
                     if (imageFile) {
