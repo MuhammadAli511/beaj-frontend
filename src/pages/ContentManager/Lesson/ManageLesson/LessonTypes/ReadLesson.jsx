@@ -1,8 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { getLessonsByActivity, getLessonById, updateLesson, updateDocumentFile } from '../../../../../helper';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+    getLessonsByActivity,
+    getLessonById,
+    deleteLesson,
+    getAllCourses,
+    getAllActivityAliases,
+    updateLesson,
+    updateDocumentFile,
+} from "../../../../../helper";
 import edit from '../../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../../assets/images/delete.svg';
 import styles from './ReadLesson.module.css';
+import JoditEditor from 'jodit-react';
 
 const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -11,12 +20,16 @@ const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const [englishAudio, setEnglishAudio] = useState(null);
     const [urduAudio, setUrduAudio] = useState(null);
     const [image, setImage] = useState(null);
+    const [courses, setCourses] = useState([]);
+    const [activityAliases, setActivityAliases] = useState([]);
+    const [lessonText, setLessonText] = useState('');
+    const editor = useRef(null);
 
     useEffect(() => {
         if (lesson) {
             try {
                 setIsLoading(true);
-                fetchLessonData();
+                fetchAllData();
             } catch (error) {
                 alert(error);
             } finally {
@@ -38,10 +51,48 @@ const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         }
     };
 
+    const fetchCourses = async () => {
+        try {
+            const response = await getAllCourses();
+            if (response.status === 200) {
+                setCourses(response.data);
+            } else {
+                alert(response.data.message);
+            }
+        } catch (error) {
+            alert(error);
+        }
+    };
+
+    const fetchActivityAliases = async () => {
+        try {
+            const response = await getAllActivityAliases();
+            if (response.status === 200) {
+                setActivityAliases(response.data);
+            } else {
+                alert(response.data.message);
+            }
+        } catch (error) {
+            alert(error);
+        }
+    };
+
+    const fetchAllData = async () => {
+        const promises = [
+            fetchCourses(),
+            fetchLessonData(),
+            fetchActivityAliases(),
+        ];
+        await Promise.all(promises);
+    };
+
     const handleCancel = () => {
         setLessonData(null);
+        setCourses([]);
+        setActivityAliases([]);
         setEnglishAudio(null);
         setUrduAudio(null);
+        setLessonText('');
         setImage(null);
         onClose();
     };
@@ -49,9 +100,13 @@ const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const handleSave = async () => {
         const updatedLessonData = {
             ...lessonData,
+            CourseId: document.getElementById("course_id").value,
             SequenceNumber: document.getElementById("sequenceNumber").value,
             weekNumber: document.getElementById("weekNumber").value,
             dayNumber: document.getElementById("dayNumber").value,
+            Alias: document.getElementById("activity_alias").value,
+            status: document.getElementById("status").value,
+            text: lessonText,
             englishAudio,
             urduAudio,
             image,
@@ -64,10 +119,10 @@ const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                 updatedLessonData.lessonType,
                 updatedLessonData.dayNumber,
                 updatedLessonData.activity,
-                updatedLessonData.activityAlias,
+                updatedLessonData.Alias,
                 updatedLessonData.weekNumber,
                 updatedLessonData.text,
-                updatedLessonData.courseId,
+                updatedLessonData.CourseId,
                 updatedLessonData.SequenceNumber,
                 updatedLessonData.status
             );
@@ -132,11 +187,39 @@ const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         }
     };
 
+    const sortedCourses = () => {
+        if (!lessonData) return courses;
+        const sorted = [...courses].sort((a, b) =>
+            a.CourseId === lessonData.courseId
+                ? -1
+                : b.CourseId === lessonData.courseId
+                    ? 1
+                    : 0
+        );
+        return sorted;
+    };
+
+    const sortedActivityAliases = () => {
+        if (!lessonData) return activityAliases;
+        const sorted = [...activityAliases].sort((a, b) =>
+            a.Alias === lessonData.activityAlias
+                ? -1
+                : b.Alias === lessonData.activityAlias
+                    ? 1
+                    : 0
+        );
+        return sorted;
+    };
+
     const getDocumentFile = (mediaType, language) => {
         if (!lessonData || !lessonData.documentFiles) return null;
         return lessonData.documentFiles.find(
             (file) => file.mediaType === mediaType && file.language === language
         );
+    };
+
+    const handleTextEditorChange = (newText) => {
+        setLessonText(newText);
     };
 
     return (
@@ -148,6 +231,23 @@ const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         {isLoading && <div>Loading...</div>}
                         {!isLoading && lessonData && (
                             <div>
+                                <div className={styles.form_group}>
+                                    <label className={styles.label} htmlFor="course_id">
+                                        Select Course
+                                    </label>
+                                    <select
+                                        className={styles.input_field}
+                                        id="course_id"
+                                        name="course_id"
+                                        defaultValue={lessonData.CourseId || "Not Available"}
+                                    >
+                                        {sortedCourses().map((course) => (
+                                            <option key={course.CourseId} value={course.CourseId}>
+                                                {course.CourseName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                                 <div className={styles.form_group}>
                                     <label className={styles.label}>Sequence Number</label>
                                     <input
@@ -192,6 +292,48 @@ const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                             })
                                         }
                                     />
+                                </div>
+                                <div className={styles.form_group}>
+                                    <label className={styles.label} htmlFor="activity_alias">
+                                        Select Activity Alias
+                                    </label>
+                                    <select
+                                        className={styles.input_field}
+                                        id="activity_alias"
+                                        name="activity_alias"
+                                        defaultValue={lessonData.Alias || "Not Available"}
+                                    >
+                                        {sortedActivityAliases().map((activityAlias) => (
+                                            <option
+                                                key={activityAlias.id}
+                                                value={activityAlias.Alias}
+                                            >
+                                                {activityAlias.Alias}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className={styles.form_group}>
+                                    <label className={styles.label}>Status</label>
+                                    <select
+                                        className={styles.input_field}
+                                        id="status"
+                                        name="status"
+                                        defaultValue={lessonData.status || "Not Available"}
+                                        onChange={(e) =>
+                                            setLessonData({
+                                                ...lessonData,
+                                                status: e.target.value,
+                                            })
+                                        }
+                                    >
+                                        <option value="Active">Active</option>
+                                        <option value="Not Active">Not Active</option>
+                                    </select>
+                                </div>
+                                <div className={styles.form_group}>
+                                    <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
+                                    <JoditEditor ref={editor} value={lessonData.text} onChange={handleTextEditorChange} />
                                 </div>
                                 <div className={styles.form_group}>
                                     <label className={styles.label}>English Audio</label>
@@ -278,22 +420,23 @@ const ReadLesson = ({ category, course }) => {
     const [isEditReadLessonModalOpen, setIsEditReadLessonModalOpen] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState(null);
 
-    useEffect(() => {
-        const fetchLessons = async () => {
-            try {
-                setIsLoading(true);
-                const lessonsResponse = await getLessonsByActivity(course, 'read');
-                if (lessonsResponse.status === 200) {
-                    setLessons(lessonsResponse.data);
-                } else {
-                    alert(lessonsResponse.data.message);
-                }
-            } catch (error) {
-                alert(error);
-            } finally {
-                setIsLoading(false);
+    const fetchLessons = async () => {
+        try {
+            setIsLoading(true);
+            const lessonsResponse = await getLessonsByActivity(course, 'read');
+            if (lessonsResponse.status === 200) {
+                setLessons(lessonsResponse.data);
+            } else {
+                alert(lessonsResponse.data.message);
             }
-        };
+        } catch (error) {
+            alert(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
         if (category !== "" && course !== "") {
             fetchLessons();
         }
@@ -315,6 +458,28 @@ const ReadLesson = ({ category, course }) => {
         );
     };
 
+    const handleDeleteLesson = async (lesson) => {
+        const isConfirmed = window.confirm(
+            "Are you sure you want to delete this lesson?"
+        );
+        if (isConfirmed) {
+            try {
+                setIsLoading(true);
+                const deleteResponse = await deleteLesson(lesson.LessonId);
+                if (deleteResponse.status === 200) {
+                    fetchLessons();
+                } else {
+                    alert(deleteResponse.data.message);
+                }
+            } catch (error) {
+                alert(error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    };
+
+
     return (
         <div>
             <h1 className={styles.heading}>Manage your read lessons</h1>
@@ -334,6 +499,7 @@ const ReadLesson = ({ category, course }) => {
                             <th className={styles.table_heading}>English Audio</th>
                             <th className={styles.table_heading}>Urdu Audio</th>
                             <th className={styles.table_heading}>Image</th>
+                            <th className={styles.table_heading}>Status</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -345,6 +511,7 @@ const ReadLesson = ({ category, course }) => {
                             const image = extractMedia(lesson.documentFiles, 'image', 'image');
 
                             return (
+
                                 <tr key={lesson.LessonId} className={styles.table_row}>
                                     <td style={{ width: "10%" }}>{lesson.LessonId || "Not Available"}</td>
                                     <td style={{ width: "10%" }}>{lesson.SequenceNumber || "Not Available"}</td>
@@ -381,6 +548,11 @@ const ReadLesson = ({ category, course }) => {
                                         )}
                                     </td>
                                     <td style={{ width: "10%" }}>
+                                        <span className={lesson.status === "Active" ? styles.active : styles.inactive}>
+                                            {lesson.status || "Not Available"}
+                                        </span>
+                                    </td>
+                                    <td style={{ width: "10%" }}>
                                         <img
                                             onClick={() => openEditReadLessonModal(lesson)}
                                             src={edit}
@@ -389,13 +561,13 @@ const ReadLesson = ({ category, course }) => {
                                     </td>
                                     <td style={{ width: "10%" }}>
                                         <img
-                                            onClick={() => { }}  // Add delete functionality if needed
+                                            onClick={() => handleDeleteLesson(lesson)}
                                             src={deleteIcon}
                                             alt="Delete"
                                         />
                                     </td>
                                 </tr>
-                            );
+                            )
                         })}
                     </tbody>
                 </table>
@@ -404,21 +576,7 @@ const ReadLesson = ({ category, course }) => {
                 isOpen={isEditReadLessonModalOpen}
                 onClose={closeEditReadLessonModal}
                 lesson={selectedLesson}
-                onSave={() => {
-                    const fetchLessons = async () => {
-                        try {
-                            const lessonsResponse = await getLessonsByActivity(course, 'read');
-                            if (lessonsResponse.status === 200) {
-                                setLessons(lessonsResponse.data);
-                            } else {
-                                alert(lessonsResponse.data.message);
-                            }
-                        } catch (error) {
-                            alert(error);
-                        }
-                    };
-                    fetchLessons();
-                }}
+                onSave={fetchLessons}
             />
         </div>
     );

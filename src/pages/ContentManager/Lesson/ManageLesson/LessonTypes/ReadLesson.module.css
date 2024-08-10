@@ -64,6 +64,22 @@
   cursor: pointer;
 }
 
+.active {
+  background-color: #4caf50;
+  color: white;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 14px;
+}
+
+.inactive {
+  background-color: #f44336;
+  color: white;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 14px;
+}
+
 .video_section {
   display: flex;
   justify-content: center;
