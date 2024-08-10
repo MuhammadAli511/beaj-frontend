@@ -6,7 +6,8 @@ import {
     getAllCourses,
     getAllActivityAliases,
     updateLesson,
-    updateSpeakActivityQuestion
+    updateSpeakActivityQuestion,
+    deleteSpeakActivityQuestion
 } from "../../../../../helper";
 import edit from '../../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../../assets/images/delete.svg';
@@ -161,6 +162,23 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         setQuestions(updatedQuestions);
     };
 
+    const handleDeleteQuestion = async (questionId) => {
+        const isConfirmed = window.confirm("Are you sure you want to delete this question?");
+        if (isConfirmed) {
+            try {
+                const deleteResponse = await deleteSpeakActivityQuestion(questionId);
+                if (deleteResponse.status === 200) {
+                    setQuestions(questions.filter(q => q.id !== questionId));
+                    alert("Question deleted successfully");
+                } else {
+                    alert(deleteResponse.data.message);
+                }
+            } catch (error) {
+                alert(error);
+            }
+        }
+    };
+
     const sortedCourses = () => {
         if (!lessonData) return courses;
         const sorted = [...courses].sort((a, b) =>
@@ -279,6 +297,13 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                             value={question.answer.join(', ') || ""}
                                             onChange={(e) => handleQuestionChange(index, 'answer', e.target.value.split(','))}
                                         />
+                                        <label className={styles.label}>Question Number</label>
+                                        <input
+                                            className={styles.input_field}
+                                            type="number"
+                                            value={question.questionNumber || ""}
+                                            onChange={(e) => handleQuestionChange(index, 'questionNumber', e.target.value)}
+                                        />
                                         <label className={styles.label}>Upload Media File</label>
                                         <input
                                             type="file"
@@ -290,6 +315,12 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                 <audio controls src={question.mediaFile} className={styles.audio}></audio>
                                             </div>
                                         )}
+                                        <button
+                                            className={styles.delete_button}
+                                            onClick={() => handleDeleteQuestion(question.id)}
+                                        >
+                                            Delete Question
+                                        </button>
                                     </div>
                                 ))}
 
@@ -317,6 +348,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         </div>
     );
 };
+
 
 
 const SpeakLesson = ({ category, course, activity }) => {
