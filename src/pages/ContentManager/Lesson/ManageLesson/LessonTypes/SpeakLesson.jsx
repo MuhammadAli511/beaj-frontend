@@ -134,7 +134,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     question.id,
                     question.question,
                     question.mediaFile,
-                    question.answer.join(', '),
+                    question.answer, // This now handles an array of answers
                     lesson.LessonId,
                     question.questionNumber
                 );
@@ -159,6 +159,39 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         const updatedQuestions = questions.map((question, i) =>
             i === index ? { ...question, [field]: value, isChanged: true } : question
         );
+        setQuestions(updatedQuestions);
+    };
+
+    const handleAnswerChange = (questionIndex, answerIndex, value) => {
+        const updatedQuestions = questions.map((question, i) => {
+            if (i === questionIndex) {
+                const updatedAnswers = [...question.answer];
+                updatedAnswers[answerIndex] = value;
+                return { ...question, answer: updatedAnswers, isChanged: true };
+            }
+            return question;
+        });
+        setQuestions(updatedQuestions);
+    };
+
+    const addNewAnswer = (questionIndex) => {
+        const updatedQuestions = questions.map((question, i) => {
+            if (i === questionIndex) {
+                return { ...question, answer: [...question.answer, ""], isChanged: true };
+            }
+            return question;
+        });
+        setQuestions(updatedQuestions);
+    };
+
+    const removeAnswer = (questionIndex, answerIndex) => {
+        const updatedQuestions = questions.map((question, i) => {
+            if (i === questionIndex) {
+                const updatedAnswers = question.answer.filter((_, ai) => ai !== answerIndex);
+                return { ...question, answer: updatedAnswers, isChanged: true };
+            }
+            return question;
+        });
         setQuestions(updatedQuestions);
     };
 
@@ -290,13 +323,29 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                             value={question.question || ""}
                                             onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
                                         />
-                                        <label className={styles.label}>Answer</label>
-                                        <input
-                                            className={styles.input_field}
-                                            type="text"
-                                            value={question.answer.join(', ') || ""}
-                                            onChange={(e) => handleQuestionChange(index, 'answer', e.target.value.split(','))}
-                                        />
+                                        <label className={styles.label}>Answers</label>
+                                        {question.answer.map((ans, ansIndex) => (
+                                            <div key={ansIndex} className={styles.answer_group}>
+                                                <input
+                                                    className={styles.input_field}
+                                                    type="text"
+                                                    value={ans}
+                                                    onChange={(e) => handleAnswerChange(index, ansIndex, e.target.value)}
+                                                />
+                                                <button
+                                                    className={styles.delete_button}
+                                                    onClick={() => removeAnswer(index, ansIndex)}
+                                                >
+                                                    Remove Answer
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button
+                                            className={styles.add_button}
+                                            onClick={() => addNewAnswer(index)}
+                                        >
+                                            Add New Answer
+                                        </button>
                                         <label className={styles.label}>Question Number</label>
                                         <input
                                             className={styles.input_field}
@@ -348,7 +397,6 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         </div>
     );
 };
-
 
 
 const SpeakLesson = ({ category, course, activity }) => {
