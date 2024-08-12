@@ -77,23 +77,13 @@
   height: 100%;
 }
 
+.videoSmall {
+  width: 50%;
+  height: 50%;
+}
+
 img {
   cursor: pointer;
-}
-
-.submit_button {
-  background-color: #c4ce00;
-  color: black;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.submit_button:hover {
-  background-color: #b3c100;
 }
 
 .modal {
@@ -112,8 +102,8 @@ img {
   background-color: white;
   padding: 20px;
   border-radius: 5px;
-  width: 600px;
-  height: 600px;
+  width: 700px;
+  height: 700px;
   overflow-y: auto;
 }
 
@@ -214,4 +204,105 @@ img {
 
 .submit_button:hover {
   background-color: #c4ce00;
+}
+
+.question_box {
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin: 20px 0px;
+  padding-right: 20px;
+  padding-left: 20px;
+  background-color: #c2e7ed;
+  border: #51bbcc;
+  border-radius: 10px;
+  padding-bottom: 20px;
+}
+
+.questionEditLabel {
+  color: #000;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 5px;
+}
+
+.answerEditLabel {
+  color: #000;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 5px;
+  margin-top: 25px;
+}
+
+.edit_input_field {
+  border: 1px solid #51bbcc;
+  background: #fff;
+  border-radius: 10px;
+  height: 46px;
+  width: 100%;
+  outline: none;
+  padding-left: 10px;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.answer_group {
+  background-color: #4dd1e5;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.mediaSection {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.add_button {
+  background-color: #d4de00;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 17px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 20px;
+  margin-left: 20%;
+  margin-right: 20%;
+}
+
+.add_button:hover {
+  background-color: #b3c100;
+}
+
+.delete_button {
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 60%;
+  margin-top: 5px;
+  margin-left: 20%;
+  margin-right: 20%;
+}
+
+.delete_button:hover {
+  background-color: #e60000;
 }

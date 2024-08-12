@@ -15,7 +15,7 @@ import styles from './SpeakLesson.module.css';
 import SpeakQuestionModal from './SpeakQuestionModal';
 
 
-const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
+const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [lessonData, setLessonData] = useState(null);
@@ -40,8 +40,9 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         try {
             const lessonResponse = await getLessonById(lesson.LessonId);
             if (lessonResponse.status === 200) {
+                const fetchedQuestions = lessonResponse.data.speakActivityQuestionFiles || [];
                 setLessonData(lessonResponse.data);
-                setQuestions(lessonResponse.data.speakActivityQuestionFiles);
+                setQuestions(fetchedQuestions.sort((a, b) => a.questionNumber - b.questionNumber));
             } else {
                 alert(lessonResponse.data.message);
             }
@@ -134,7 +135,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     question.id,
                     question.question,
                     question.mediaFile,
-                    question.answer, // This now handles an array of answers
+                    question.answer,
                     lesson.LessonId,
                     question.questionNumber
                 );
@@ -313,57 +314,79 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                     </select>
                                 </div>
 
-                                {/* Edit Questions */}
+
                                 {questions.map((question, index) => (
-                                    <div key={question.id} className={styles.form_group}>
-                                        <label className={styles.label}>Question {index + 1}</label>
+                                    <div key={question.id} className={styles.question_box}>
+                                        <label className={styles.answerEditLabel}>Question Number</label>
                                         <input
-                                            className={styles.input_field}
-                                            type="text"
-                                            value={question.question || ""}
-                                            onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
-                                        />
-                                        <label className={styles.label}>Answers</label>
-                                        {question.answer.map((ans, ansIndex) => (
-                                            <div key={ansIndex} className={styles.answer_group}>
-                                                <input
-                                                    className={styles.input_field}
-                                                    type="text"
-                                                    value={ans}
-                                                    onChange={(e) => handleAnswerChange(index, ansIndex, e.target.value)}
-                                                />
-                                                <button
-                                                    className={styles.delete_button}
-                                                    onClick={() => removeAnswer(index, ansIndex)}
-                                                >
-                                                    Remove Answer
-                                                </button>
-                                            </div>
-                                        ))}
-                                        <button
-                                            className={styles.add_button}
-                                            onClick={() => addNewAnswer(index)}
-                                        >
-                                            Add New Answer
-                                        </button>
-                                        <label className={styles.label}>Question Number</label>
-                                        <input
-                                            className={styles.input_field}
+                                            className={styles.edit_input_field}
                                             type="number"
-                                            value={question.questionNumber || ""}
+                                            value={question.questionNumber !== undefined ? question.questionNumber : ""}
                                             onChange={(e) => handleQuestionChange(index, 'questionNumber', e.target.value)}
                                         />
-                                        <label className={styles.label}>Upload Media File</label>
-                                        <input
-                                            type="file"
-                                            onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])}
-                                        />
-                                        {question.mediaFile && (
-                                            <div>
-                                                <label className={styles.label}>Current Media File:</label>
-                                                <audio controls src={question.mediaFile} className={styles.audio}></audio>
-                                            </div>
+
+                                        {['listenAndSpeak', 'preListenAndSpeak', 'postListenAndSpeak'].includes(activity) && (
+                                            <>
+                                                <label className={styles.answerEditLabel}>Question</label>
+                                                <input
+                                                    className={styles.edit_input_field}
+                                                    type="text"
+                                                    value={question.question || ""}
+                                                    onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
+                                                />
+                                                <label className={styles.answerEditLabel}>Answers</label>
+                                                {question.answer.map((ans, ansIndex) => (
+                                                    <div key={ansIndex} className={styles.answer_group}>
+                                                        <input
+                                                            className={styles.edit_input_field}
+                                                            type="text"
+                                                            value={ans}
+                                                            onChange={(e) => handleAnswerChange(index, ansIndex, e.target.value)}
+                                                        />
+                                                        <button
+                                                            className={styles.delete_button}
+                                                            onClick={() => removeAnswer(index, ansIndex)}
+                                                        >
+                                                            Remove Answer
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                <button
+                                                    className={styles.add_button}
+                                                    onClick={() => addNewAnswer(index)}
+                                                >
+                                                    Add New Answer
+                                                </button>
+                                                <label className={styles.answerEditLabel}>Upload Media File</label>
+                                                <input
+                                                    type="file"
+                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])}
+                                                />
+                                                {question.mediaFile && (
+                                                    <div className={styles.mediaSection}>
+                                                        <label className={styles.answerEditLabel}>Current Media File:</label>
+                                                        <audio controls src={question.mediaFile} className={styles.audio}></audio>
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
+
+                                        {activity === 'watchAndSpeak' && (
+                                            <>
+                                                <label className={styles.answerEditLabel}>Upload Media File (Video)</label>
+                                                <input
+                                                    type="file"
+                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])}
+                                                />
+                                                {question.mediaFile && (
+                                                    <div className={styles.mediaSection}>
+                                                        <label className={styles.answerEditLabel}>Current Media File (Video):</label>
+                                                        <video controls src={question.mediaFile} className={styles.videoSmall}></video>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+
                                         <button
                                             className={styles.delete_button}
                                             onClick={() => handleDeleteQuestion(question.id)}
@@ -372,6 +395,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         </button>
                                     </div>
                                 ))}
+
 
                                 <div className={styles.form_group_row}>
                                     <button
@@ -426,7 +450,7 @@ const SpeakLesson = ({ category, course, activity }) => {
         if (category !== "" && course !== "") {
             fetchLessons();
         }
-    }, [category, course]);
+    }, [category, course, activity]);
 
     const openSpeakQuestionModal = (lesson) => {
         setSelectedLesson(lesson);
@@ -465,9 +489,16 @@ const SpeakLesson = ({ category, course, activity }) => {
         }
     };
 
+    const activityMapper = {
+        'watchAndSpeak': 'Watch & Speak',
+        'listenAndSpeak': 'Listen & Speak',
+        'postListenAndSpeak': 'Post Listen & Speak',
+        'preListenAndSpeak': 'Pre Listen & Speak',
+    };
+
     return (
         <div>
-            <h1 className={styles.heading}>Manage your Listen And Speak lessons</h1>
+            <h1 className={styles.heading}>Manage your {activityMapper[activity]} lessons</h1>
             {/* loading */}
             {isLoading && <div>Fetching Data...</div>}
             {/* no data */}
@@ -528,6 +559,7 @@ const SpeakLesson = ({ category, course, activity }) => {
                     onClose={closeEditSpeakLessonModal}
                     lesson={selectedLesson}
                     onSave={fetchLessons}
+                    activity={activity}
                 />
             )}
         </div>
