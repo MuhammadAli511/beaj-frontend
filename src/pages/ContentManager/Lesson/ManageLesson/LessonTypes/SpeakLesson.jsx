@@ -513,6 +513,7 @@ const SpeakLesson = ({ category, course, activity }) => {
                             <th className={styles.table_heading}>Week Number</th>
                             <th className={styles.table_heading}>Day Number</th>
                             <th className={styles.table_heading}>Questions</th>
+                            <th className={styles.table_heading}>Status</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -526,6 +527,11 @@ const SpeakLesson = ({ category, course, activity }) => {
                                 <td style={{ width: "15%" }}>{lesson.dayNumber}</td>
                                 <td style={{ width: "15%" }}>
                                     <button className={styles.submit_button} onClick={() => openSpeakQuestionModal(lesson)}>Show Questions</button>
+                                </td>
+                                <td style={{ width: "10%" }}>
+                                    <span className={lesson.status === "Active" ? styles.active : styles.inactive}>
+                                        {lesson.status || "Not Available"}
+                                    </span>
                                 </td>
                                 <td style={{ width: "10%" }}>
                                     <img

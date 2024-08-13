@@ -16,7 +16,7 @@ import deleteIcon from "../../../../../assets/images/delete.svg";
 import styles from "./MCQsLesson.module.css";
 import MCQsQuestionModal from "./MCQsQuestionModal";
 
-const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
+const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [lessonData, setLessonData] = useState(null);
@@ -42,8 +42,24 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
             const lessonResponse = await getLessonById(lesson.LessonId);
             if (lessonResponse.status === 200) {
                 const fetchedQuestions = lessonResponse.data.multipleChoiceQuestions || [];
+                const mappedQuestions = fetchedQuestions.map((question) => ({
+                    id: question.dataValues.Id,
+                    questionType: question.dataValues.QuestionType,
+                    questionText: question.dataValues.QuestionText || "",
+                    questionImageUrl: question.dataValues.QuestionImageUrl,
+                    questionAudioUrl: question.dataValues.QuestionAudioUrl,
+                    questionNumber: question.dataValues.QuestionNumber,
+                    optionsType: question.dataValues.OptionsType,
+                    answers: question.multipleChoiceQuestionAnswers.map((answer) => ({
+                        id: answer.Id,
+                        answerText: answer.AnswerText || "",
+                        answerImageUrl: answer.AnswerImageUrl,
+                        answerAudioUrl: answer.AnswerAudioUrl,
+                        isCorrect: answer.IsCorrect,
+                    })),
+                }));
                 setLessonData(lessonResponse.data);
-                setQuestions(fetchedQuestions.sort((a, b) => a.questionNumber - b.questionNumber));
+                setQuestions(mappedQuestions.sort((a, b) => a.questionNumber - b.questionNumber));
             } else {
                 alert(lessonResponse.data.message);
             }
@@ -94,28 +110,263 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
         onClose();
     };
 
+    const handleSave = async () => {
+        try {
+            setIsSaving(true);
+
+            // Save the updated lesson data
+            const updateLessonResponse = await updateLesson({
+                LessonId: lessonData.LessonId,
+                lessonType: lessonData.lessonType,
+                dayNumber: lessonData.dayNumber,
+                activity: lessonData.activity,
+                activityAlias: lessonData.activityAlias,
+                weekNumber: lessonData.weekNumber,
+                text: lessonData.text,
+                courseId: lessonData.courseId,
+                SequenceNumber: lessonData.SequenceNumber,
+                status: lessonData.status,
+            });
+
+            if (updateLessonResponse.status !== 200) {
+                alert(updateLessonResponse.data.message);
+                return;
+            }
+
+            // Update questions
+            for (let question of questions) {
+                const questionPayload = {
+                    QuestionType: question.questionType,
+                    QuestionText: question.questionText,
+                    QuestionImageUrl: question.questionImageUrl,
+                    QuestionAudioUrl: question.questionAudioUrl,
+                    QuestionNumber: question.questionNumber,
+                    OptionsType: question.optionsType,
+                    LessonId: lessonData.LessonId,
+                };
+
+                if (question.isNew) {
+                    await updateMultipleChoiceQuestion(null, questionPayload);
+                } else if (question.isChanged) {
+                    await updateMultipleChoiceQuestion(question.id, questionPayload);
+                }
+            }
+
+            alert("Lesson and updated questions saved successfully!");
+            onSave();
+        } catch (error) {
+            alert(error);
+        } finally {
+            setIsSaving(false);
+            onClose();
+        }
+    };
+
+    const handleQuestionChange = (index, field, value) => {
+        const updatedQuestions = questions.map((question, i) =>
+            i === index ? { ...question, [field]: value, isChanged: true } : question
+        );
+        setQuestions(updatedQuestions);
+    };
+
+    const handleAnswerChange = (questionIndex, answerIndex, field, value) => {
+        const updatedQuestions = questions.map((question, i) => {
+            if (i === questionIndex) {
+                const updatedAnswers = question.answers.map((answer, ai) =>
+                    ai === answerIndex ? { ...answer, [field]: value, isChanged: true } : answer
+                );
+                return { ...question, answers: updatedAnswers, isChanged: true };
+            }
+            return question;
+        });
+        setQuestions(updatedQuestions);
+    };
+
+    const addNewQuestion = () => {
+        setQuestions([
+            ...questions,
+            {
+                id: null,
+                questionType: "Text",
+                questionText: "",
+                questionImageUrl: null,
+                questionAudioUrl: null,
+                questionNumber: questions.length + 1,
+                optionsType: "Text",
+                answers: [{ text: "", isCorrect: false }],
+                isNew: true,
+            }
+        ]);
+    };
+
+    const removeQuestion = (index) => {
+        const questionToRemove = questions[index];
+        if (questionToRemove.id) {
+            deleteMultipleChoiceQuestion(questionToRemove.id).then(response => {
+                if (response.status === 200) {
+                    setQuestions(questions.filter((_, i) => i !== index));
+                } else {
+                    alert(response.data.message);
+                }
+            });
+        } else {
+            setQuestions(questions.filter((_, i) => i !== index));
+        }
+    };
+
+    const addNewAnswer = (questionIndex) => {
+        const updatedQuestions = questions.map((question, i) => {
+            if (i === questionIndex) {
+                return { ...question, answers: [...question.answers, { text: "", isCorrect: false }], isChanged: true };
+            }
+            return question;
+        });
+        setQuestions(updatedQuestions);
+    };
+
+    const removeAnswer = (questionIndex, answerIndex) => {
+        const updatedQuestions = questions.map((question, i) => {
+            if (i === questionIndex) {
+                const updatedAnswers = question.answers.filter((_, ai) => ai !== answerIndex);
+                return { ...question, answers: updatedAnswers, isChanged: true };
+            }
+            return question;
+        });
+        setQuestions(updatedQuestions);
+    };
+
     const sortedCourses = () => {
         if (!lessonData) return courses;
-        const sorted = [...courses].sort((a, b) =>
+        return [...courses].sort((a, b) =>
             a.CourseId === lessonData.courseId
                 ? -1
                 : b.CourseId === lessonData.courseId
                     ? 1
                     : 0
         );
-        return sorted;
     };
 
     const sortedActivityAliases = () => {
         if (!lessonData) return activityAliases;
-        const sorted = [...activityAliases].sort((a, b) =>
+        return [...activityAliases].sort((a, b) =>
             a.Alias === lessonData.activityAlias
                 ? -1
                 : b.Alias === lessonData.activityAlias
                     ? 1
                     : 0
         );
-        return sorted;
+    };
+
+    const renderQuestionInputs = (question, qIndex) => {
+        switch (question.questionType) {
+            case "Text":
+                return (
+                    <>
+                        <label className={styles.label}>Question Text</label>
+                        <input
+                            className={styles.input_field}
+                            type="text"
+                            value={question.questionText}
+                            onChange={(e) => handleQuestionChange(qIndex, "questionText", e.target.value)}
+                        />
+                    </>
+                );
+            case "Image":
+                return (
+                    <>
+                        <label className={styles.label}>Upload Question Image</label>
+                        <input
+                            className={styles.input_field}
+                            type="file"
+                            onChange={(e) => handleQuestionChange(qIndex, "questionImageUrl", e.target.files[0])}
+                        />
+                        {question.questionImageUrl && (
+                            <img src={question.questionImageUrl} alt="Question" className={styles.image} />
+                        )}
+                    </>
+                );
+            case "Audio":
+                return (
+                    <>
+                        <label className={styles.label}>Upload Question Audio</label>
+                        <input
+                            className={styles.input_field}
+                            type="file"
+                            onChange={(e) => handleQuestionChange(qIndex, "questionAudioUrl", e.target.files[0])}
+                        />
+                        {question.questionAudioUrl && (
+                            <audio controls src={question.questionAudioUrl} className={styles.audio} />
+                        )}
+                    </>
+                );
+            case "Text+Audio":
+                return (
+                    <>
+                        <label className={styles.label}>Question Text</label>
+                        <input
+                            className={styles.input_field}
+                            type="text"
+                            value={question.questionText}
+                            onChange={(e) => handleQuestionChange(qIndex, "questionText", e.target.value)}
+                        />
+                        <label className={styles.label}>Upload Question Audio</label>
+                        <input
+                            className={styles.input_field}
+                            type="file"
+                            onChange={(e) => handleQuestionChange(qIndex, "questionAudioUrl", e.target.files[0])}
+                        />
+                        {question.questionAudioUrl && (
+                            <audio controls src={question.questionAudioUrl} className={styles.audio} />
+                        )}
+                    </>
+                );
+            case "Text+Image":
+                return (
+                    <>
+                        <label className={styles.label}>Question Text</label>
+                        <input
+                            className={styles.input_field}
+                            type="text"
+                            value={question.questionText}
+                            onChange={(e) => handleQuestionChange(qIndex, "questionText", e.target.value)}
+                        />
+                        <label className={styles.label}>Upload Question Image</label>
+                        <input
+                            className={styles.input_field}
+                            type="file"
+                            onChange={(e) => handleQuestionChange(qIndex, "questionImageUrl", e.target.files[0])}
+                        />
+                        {question.questionImageUrl && (
+                            <img src={question.questionImageUrl} alt="Question" className={styles.image} />
+                        )}
+                    </>
+                );
+            case "Image+Audio":
+                return (
+                    <>
+                        <label className={styles.label}>Upload Question Image</label>
+                        <input
+                            className={styles.input_field}
+                            type="file"
+                            onChange={(e) => handleQuestionChange(qIndex, "questionImageUrl", e.target.files[0])}
+                        />
+                        {question.questionImageUrl && (
+                            <img src={question.questionImageUrl} alt="Question" className={styles.image} />
+                        )}
+                        <label className={styles.label}>Upload Question Audio</label>
+                        <input
+                            className={styles.input_field}
+                            type="file"
+                            onChange={(e) => handleQuestionChange(qIndex, "questionAudioUrl", e.target.files[0])}
+                        />
+                        {question.questionAudioUrl && (
+                            <audio controls src={question.questionAudioUrl} className={styles.audio} />
+                        )}
+                    </>
+                );
+            default:
+                return null;
+        }
     };
 
     return (
@@ -194,11 +445,72 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                     </select>
                                 </div>
 
+                                {/* Edit Questions */}
+                                {questions.map((question, qIndex) => (
+                                    <div key={qIndex} className={styles.question_box}>
+                                        <div className={styles.input_row}>
+                                            <label className={styles.label}>Question Number</label>
+                                            <input
+                                                className={styles.input_field}
+                                                type="number"
+                                                value={question.questionNumber}
+                                                onChange={(e) => handleQuestionChange(qIndex, "questionNumber", e.target.value)}
+                                            />
+                                            <label className={styles.label}>Question Type</label>
+                                            <select
+                                                className={styles.input_field}
+                                                value={question.questionType}
+                                                onChange={(e) => handleQuestionChange(qIndex, "questionType", e.target.value)}
+                                            >
+                                                <option value="Text">Text</option>
+                                                <option value="Image">Image</option>
+                                                <option value="Audio">Audio</option>
+                                                <option value="Text+Audio">Text + Audio</option>
+                                                <option value="Text+Image">Text + Image</option>
+                                                <option value="Image+Audio">Image + Audio</option>
+                                            </select>
+                                            <button className={styles.remove_button} onClick={() => removeQuestion(qIndex)}>Remove Question</button>
+                                        </div>
+
+                                        {renderQuestionInputs(question, qIndex)}
+
+                                        {question.answers.map((answer, aIndex) => (
+                                            <div key={aIndex} className={styles.input_row}>
+                                                <label className={styles.label}>Answer</label>
+                                                <input
+                                                    className={styles.input_field}
+                                                    type="text"
+                                                    value={answer.answerText}
+                                                    onChange={(e) => handleAnswerChange(qIndex, aIndex, "answerText", e.target.value)}
+                                                />
+                                                <label className={styles.label}>Correct</label>
+                                                <input
+                                                    className={styles.input_field}
+                                                    type="checkbox"
+                                                    checked={answer.isCorrect}
+                                                    onChange={(e) => handleAnswerChange(qIndex, aIndex, "isCorrect", e.target.checked)}
+                                                />
+                                                {question.answers.length > 1 && (
+                                                    <button
+                                                        className={styles.remove_button}
+                                                        onClick={() => removeAnswer(qIndex, aIndex)}
+                                                    >
+                                                        Remove Answer
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                        {question.answers.length < 4 && (
+                                            <button className={styles.add_button} onClick={() => addNewAnswer(qIndex)}>Add Answer</button>
+                                        )}
+                                    </div>
+                                ))}
+                                <button className={styles.add_button} onClick={addNewQuestion}>Add New Question</button>
 
                                 <div className={styles.form_group_row}>
                                     <button
                                         className={styles.submit_button}
-                                        // onClick={handleSave}
+                                        onClick={handleSave}
                                         disabled={isSaving}
                                     >
                                         {isSaving ? <div className="loader"></div> : "Save Changes"}
@@ -219,7 +531,6 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
         </div>
     );
 };
-
 
 const MCQsLesson = ({ category, course, activity }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -312,6 +623,7 @@ const MCQsLesson = ({ category, course, activity }) => {
                             <th className={styles.table_heading}>Week Number</th>
                             <th className={styles.table_heading}>Day Number</th>
                             <th className={styles.table_heading}>Questions</th>
+                            <th className={styles.table_heading}>Status</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -330,6 +642,11 @@ const MCQsLesson = ({ category, course, activity }) => {
                                     >
                                         Show Questions
                                     </button>
+                                </td>
+                                <td style={{ width: "10%" }}>
+                                    <span className={lesson.status === "Active" ? styles.active : styles.inactive}>
+                                        {lesson.status || "Not Available"}
+                                    </span>
                                 </td>
                                 <td style={{ width: "10%" }}>
                                     <img
