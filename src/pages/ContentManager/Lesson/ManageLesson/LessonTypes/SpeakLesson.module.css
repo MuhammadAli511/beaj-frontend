@@ -184,6 +184,10 @@ img {
   align-self: center;
 }
 
+.submit_button:hover {
+  background-color: #c4ce00;
+}
+
 .cancel_button {
   width: 180px;
   height: 50px;
@@ -200,10 +204,6 @@ img {
   line-height: normal;
   align-self: center;
   margin-left: 20px;
-}
-
-.submit_button:hover {
-  background-color: #c4ce00;
 }
 
 .question_box {
