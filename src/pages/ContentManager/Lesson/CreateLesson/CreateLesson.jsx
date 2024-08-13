@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './CreateLesson.module.css';
 import { getAllCategories, getCoursesByCategoryId, getCourseById, getAllActivityAliases } from '../../../../helper';
 import JoditEditor from 'jodit-react';
-import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson } from '../../../../utils/createLessonFunctions';
+import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson } from '../../../../utils/createLessonFunctions';
 
 const SelectField = ({ label, options, onChange, value, name, id }) => (
     <div className={styles.form_group}>
@@ -89,6 +89,62 @@ const CreateLesson = () => {
             setUrduAudio(file);
         } else {
             alert('Please upload an MP3 audio not larger than 16MB.');
+        }
+    };
+
+    // Watch and Speak
+    const [wsQuestions, setWsQuestions] = useState([
+        { questionText: '', video: '', answers: [{ answerText: '' }] }
+    ]);
+
+    const handleWsQuestionChange = (index, event) => {
+        const newWsQuestions = [...wsQuestions];
+        if (event.target.type === 'file') {
+            const file = event.target.files[0];
+            if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
+                newWsQuestions[index][event.target.name] = file;
+            } else {
+                alert('Please upload an MP4 video not larger than 16MB.');
+            }
+        } else {
+            newWsQuestions[index][event.target.name] = event.target.value;
+        }
+        setWsQuestions(newWsQuestions);
+    };
+
+    const handleWsAnswerChange = (questionIndex, answerIndex, event) => {
+        const newWsQuestions = [...wsQuestions];
+        newWsQuestions[questionIndex].answers[answerIndex][event.target.name] = event.target.value;
+        setWsQuestions(newWsQuestions);
+    };
+
+    const addWsAnswer = (questionIndex, event) => {
+        event.preventDefault();
+        const newWsQuestions = [...wsQuestions];
+        newWsQuestions[questionIndex].answers.push({ answerText: '' });
+        setWsQuestions(newWsQuestions);
+    };
+
+    const addWsQuestion = (event) => {
+        event.preventDefault();
+        setWsQuestions([...wsQuestions, { questionText: '', video: '', answers: [{ answerText: '' }] }]);
+    };
+
+    const removeWsQuestion = (index, event) => {
+        event.preventDefault();
+        if (wsQuestions.length > 1) {
+            const newWsQuestions = [...wsQuestions];
+            newWsQuestions.splice(index, 1);
+            setWsQuestions(newWsQuestions);
+        }
+    };
+
+    const removeWsAnswer = (questionIndex, answerIndex, event) => {
+        event.preventDefault();
+        if (wsQuestions[questionIndex].answers.length > 1) {
+            const newWsQuestions = [...wsQuestions];
+            newWsQuestions[questionIndex].answers.splice(answerIndex, 1);
+            setWsQuestions(newWsQuestions);
         }
     };
 
@@ -338,6 +394,8 @@ const CreateLesson = () => {
                 await createListenAndSpeakLesson(course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status);
             } else if (activityType === 'mcqs' || activityType === 'preMCQs' || activityType === 'postMCQs') {
                 await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status);
+            } else if (activityType === 'watchAndSpeak') {
+                await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status);
             }
         } catch (error) {
             alert(error);
@@ -449,6 +507,33 @@ const CreateLesson = () => {
                             </div>
                         ))}
                         <button className={styles.add_button} onClick={(e) => addQuestion(e)}>Add Another Question</button>
+                    </>
+                )}
+                {activityType === 'watchAndSpeak' && (
+                    <>
+                        <div className={styles.input_row}>
+                            <div className={styles.form_group}>
+                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
+                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            </div>
+                        </div>
+                        {wsQuestions.map((question, qIndex) => (
+                            <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.input_row}>
+                                    <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleWsQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
+                                    <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
+                                    {wsQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>Remove Question</button>}
+                                </div>
+                                {question.answers.map((answer, aIndex) => (
+                                    <div key={aIndex} className={styles.input_row}>
+                                        <InputField label={`Answer ${aIndex + 1}`} type="text" onChange={e => handleWsAnswerChange(qIndex, aIndex, e)} value={answer.answerText} name="answerText" id={`answerText-${qIndex}-${aIndex}`} />
+                                        {question.answers.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsAnswer(qIndex, aIndex, e)}>Remove Answer</button>}
+                                    </div>
+                                ))}
+                                <button className={styles.add_button} onClick={(e) => addWsAnswer(qIndex, e)}>Add Another Answer</button>
+                            </div>
+                        ))}
+                        <button className={styles.add_button} onClick={(e) => addWsQuestion(e)}>Add Another Question</button>
                     </>
                 )}
                 {(activityType === 'mcqs' || activityType === 'preMCQs' || activityType === 'postMCQs') && (

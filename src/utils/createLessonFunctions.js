@@ -120,6 +120,39 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
     }
 }
 
+export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {
+    if (!questions) {
+        alert('Please upload questions');
+        return;
+    }
+    if (!sequenceNumber) {
+        alert('Please enter a sequence number');
+        return;
+    }
+    const lessonType = "week";
+
+    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
+    const answersArray = questions.map(question => question.answers.map(answer => answer.answerText));
+    const lessonId = response.data.lesson.LessonId;
+    const questionResponses = await Promise.all(
+        questions.map((question, index) =>
+            createSpeakActivityQuestion(
+                question.questionText,
+                question.video,
+                answersArray[index],
+                lessonId,
+                (index + 1).toString()
+            )
+        )
+    );
+
+    if (questionResponses.every(response => response.status === 200) && response.status === 200) {
+        alert('Lesson created successfully');
+    } else {
+        alert('Error creating lesson');
+    }
+}
+
 export const createMCQLesson = async (course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status) => {
     if (!mcqs) {
         alert('Please upload questions');
