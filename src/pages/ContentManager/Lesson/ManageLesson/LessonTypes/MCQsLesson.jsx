@@ -261,7 +261,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         switch (question.questionType) {
             case "Text":
                 return (
-                    <>
+                    <div className={styles.form_group}>
                         <label className={styles.label}>Question Text</label>
                         <input
                             className={styles.input_field}
@@ -269,11 +269,11 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                             value={question.questionText}
                             onChange={(e) => handleQuestionChange(qIndex, "questionText", e.target.value)}
                         />
-                    </>
+                    </div>
                 );
             case "Image":
                 return (
-                    <>
+                    <div className={styles.form_group}>
                         <label className={styles.label}>Upload Question Image</label>
                         <input
                             className={styles.input_field}
@@ -283,11 +283,11 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         {question.questionImageUrl && (
                             <img src={question.questionImageUrl} alt="Question" className={styles.image} />
                         )}
-                    </>
+                    </div>
                 );
             case "Audio":
                 return (
-                    <>
+                    <div className={styles.form_group}>
                         <label className={styles.label}>Upload Question Audio</label>
                         <input
                             className={styles.input_field}
@@ -297,11 +297,11 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         {question.questionAudioUrl && (
                             <audio controls src={question.questionAudioUrl} className={styles.audio} />
                         )}
-                    </>
+                    </div>
                 );
             case "Text+Audio":
                 return (
-                    <>
+                    <div className={styles.form_group}>
                         <label className={styles.label}>Question Text</label>
                         <input
                             className={styles.input_field}
@@ -318,11 +318,11 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         {question.questionAudioUrl && (
                             <audio controls src={question.questionAudioUrl} className={styles.audio} />
                         )}
-                    </>
+                    </div>
                 );
             case "Text+Image":
                 return (
-                    <>
+                    <div className={styles.form_group}>
                         <label className={styles.label}>Question Text</label>
                         <input
                             className={styles.input_field}
@@ -339,11 +339,11 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         {question.questionImageUrl && (
                             <img src={question.questionImageUrl} alt="Question" className={styles.image} />
                         )}
-                    </>
+                    </div>
                 );
             case "Image+Audio":
                 return (
-                    <>
+                    <div className={styles.form_group}>
                         <label className={styles.label}>Upload Question Image</label>
                         <input
                             className={styles.input_field}
@@ -362,7 +362,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         {question.questionAudioUrl && (
                             <audio controls src={question.questionAudioUrl} className={styles.audio} />
                         )}
-                    </>
+                    </div>
                 );
             default:
                 return null;
@@ -449,13 +449,15 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                 {questions.map((question, qIndex) => (
                                     <div key={qIndex} className={styles.question_box}>
                                         <div className={styles.input_row}>
-                                            <label className={styles.label}>Question Number</label>
+                                            <label className={styles.label}>Question Num</label>
                                             <input
                                                 className={styles.input_field}
                                                 type="number"
                                                 value={question.questionNumber}
                                                 onChange={(e) => handleQuestionChange(qIndex, "questionNumber", e.target.value)}
                                             />
+                                        </div>
+                                        <div className={styles.input_row}>
                                             <label className={styles.label}>Question Type</label>
                                             <select
                                                 className={styles.input_field}
@@ -469,35 +471,41 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                 <option value="Text+Image">Text + Image</option>
                                                 <option value="Image+Audio">Image + Audio</option>
                                             </select>
-                                            <button className={styles.remove_button} onClick={() => removeQuestion(qIndex)}>Remove Question</button>
+
                                         </div>
+
+                                        <button className={styles.remove_button} onClick={() => removeQuestion(qIndex)}>Remove Question</button>
 
                                         {renderQuestionInputs(question, qIndex)}
 
                                         {question.answers.map((answer, aIndex) => (
-                                            <div key={aIndex} className={styles.input_row}>
-                                                <label className={styles.label}>Answer</label>
-                                                <input
-                                                    className={styles.input_field}
-                                                    type="text"
-                                                    value={answer.answerText}
-                                                    onChange={(e) => handleAnswerChange(qIndex, aIndex, "answerText", e.target.value)}
-                                                />
-                                                <label className={styles.label}>Correct</label>
-                                                <input
-                                                    className={styles.input_field}
-                                                    type="checkbox"
-                                                    checked={answer.isCorrect}
-                                                    onChange={(e) => handleAnswerChange(qIndex, aIndex, "isCorrect", e.target.checked)}
-                                                />
-                                                {question.answers.length > 1 && (
-                                                    <button
-                                                        className={styles.remove_button}
-                                                        onClick={() => removeAnswer(qIndex, aIndex)}
-                                                    >
-                                                        Remove Answer
-                                                    </button>
-                                                )}
+                                            <div key={aIndex} className={styles.answer_group}>
+                                                <div className={styles.input_row}>
+                                                    <label className={styles.label}>Answer</label>
+                                                    <input
+                                                        className={styles.input_field}
+                                                        type="text"
+                                                        value={answer.answerText}
+                                                        onChange={(e) => handleAnswerChange(qIndex, aIndex, "answerText", e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className={styles.input_row_correct}>
+                                                    <label className={styles.label}>Correct</label>
+                                                    <input
+                                                        className={styles.input_field}
+                                                        type="checkbox"
+                                                        checked={answer.isCorrect}
+                                                        onChange={(e) => handleAnswerChange(qIndex, aIndex, "isCorrect", e.target.checked)}
+                                                    />
+                                                    {question.answers.length > 1 && (
+                                                        <button
+                                                            className={styles.remove_button}
+                                                            onClick={() => removeAnswer(qIndex, aIndex)}
+                                                        >
+                                                            Remove Answer
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         ))}
                                         {question.answers.length < 4 && (
