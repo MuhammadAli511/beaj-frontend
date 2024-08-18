@@ -9,6 +9,8 @@ import CreateCourseWeek from "./CourseWeek/CreateCourseWeek/CreateCourseWeek"
 import ManageCourseWeek from "./CourseWeek/ManageCourseWeek/ManageCourseWeek"
 import CreateLesson from "./Lesson/CreateLesson/CreateLesson"
 import ManageLesson from "./Lesson/ManageLesson/ManageLesson"
+import CreateAlias from "./Alias/CreateAlias/CreateAlias"
+import ManageAlias from "./Alias/ManageAlias/ManageAlias"
 import { useSidebar } from "../../components/SidebarContext"
 
 const ContentManager = () => {
@@ -21,12 +23,14 @@ const ContentManager = () => {
             if (subTab === 'Course') return <ManageCourse />;
             if (subTab === 'Weeks') return <ManageCourseWeek />;
             if (subTab === 'Lesson') return <ManageLesson />;
+            if (subTab === 'Alias') return <ManageAlias />;
         }
         if (mainTab === 'Create') {
             if (subTab === 'Category') return <CreateCategory />;
             if (subTab === 'Course') return <CreateCourse />;
             if (subTab === 'Weeks') return <CreateCourseWeek />;
             if (subTab === 'Lesson') return <CreateLesson />;
+            if (subTab === 'Alias') return <CreateAlias />;
         }
 
     };
@@ -50,6 +54,7 @@ const ContentManager = () => {
                         <button className={isSubActive('Course') ? styles.active : ''} onClick={() => setSubTab('Course')}>Course</button>
                         <button className={isSubActive('Weeks') ? styles.active : ''} onClick={() => setSubTab('Weeks')}>Weeks</button>
                         <button className={isSubActive('Lesson') ? styles.active : ''} onClick={() => setSubTab('Lesson')}>Lesson</button>
+                        <button className={isSubActive('Alias') ? styles.active : ''} onClick={() => setSubTab('Alias')}>Alias</button>
                     </div>
                 )}
                 {renderContent()}

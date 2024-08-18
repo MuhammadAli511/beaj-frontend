@@ -45,7 +45,7 @@ const EditCourseWeeksModal = ({ isOpen, onClose, courseWeek, onSave }) => {
 
     if (!isOpen) {
         return null;
-    }
+    };
 
     const handleSave = () => {
         onSave(courseWeek.id, weekNumber, currentImage || courseWeek.image, description, courseId);
@@ -75,7 +75,6 @@ const EditCourseWeeksModal = ({ isOpen, onClose, courseWeek, onSave }) => {
         setCurrentImage(null);
     };
 
-    if (!isOpen) return null;
 
     return (
         <div className={styles.modal}>
@@ -233,14 +232,14 @@ const ManageCourseWeek = () => {
                                 <td className={styles.table_data}>{courseWeek.description}</td>
                                 <td className={styles.table_data}>{courseNames[courseWeek.courseId]}</td>
                                 <td className={styles.table_data}>
-                                    <button onClick={() => openEditModal(courseWeek)}>
+                                    <div onClick={() => openEditModal(courseWeek)}>
                                         <img src={edit} alt="edit" />
-                                    </button>
+                                    </div>
                                 </td>
                                 <td className={styles.table_data}>
-                                    <button onClick={() => handleDeleteCourseWeek(courseWeek.id)}>
+                                    <div onClick={() => handleDeleteCourseWeek(courseWeek.id)}>
                                         <img src={deleteIcon} alt="delete" />
-                                    </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
