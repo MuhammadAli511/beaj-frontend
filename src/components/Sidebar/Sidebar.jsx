@@ -12,8 +12,6 @@ const Sidebar = () => {
     const menuItems = [
         { name: "Dashboard", path: "/dashboard" },
         { name: "Content Manager", path: "/content-manager" },
-        { name: "User data", path: "/user-data" },
-        { name: "Beaj operations", path: "/beaj-operations" },
         { name: "Chatbot Logs", path: "/chatbot-logs" },
         { name: "Chatbot Stats", path: "/chatbot-stats" },
     ];

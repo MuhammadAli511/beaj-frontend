@@ -122,6 +122,16 @@ export const getAllCourses = async () => {
     return { status: response.status, data };
 };
 
+// API call to get all courses from production
+export const getAllCoursesfromProduction = async () => {
+    const response = await fetch(`${API_URL}/course/getAll`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
 // API call to get a course by ID
 export const getCourseById = async (courseId) => {
     const response = await fetch(`${API_URL}/course/getById/${courseId}`, {

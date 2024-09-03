@@ -397,6 +397,7 @@ const WatchLesson = ({ category, course }) => {
                             <th className={styles.table_heading}>Day Number</th>
                             <th className={styles.table_heading}>Video</th>
                             <th className={styles.table_heading}>Status</th>
+                            <th className={styles.table_heading}>Migrate</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -425,14 +426,15 @@ const WatchLesson = ({ category, course }) => {
                                         {lesson.status || "Not Available"}
                                     </span>
                                 </td>
-                                <td style={{ width: "10%" }}>
+                                <td style={{ width: "6.66%" }}>Migrate</td>
+                                <td style={{ width: "6.66%" }}>
                                     <img
                                         onClick={() => openEditWatchLessonModal(lesson)}
                                         src={edit}
                                         alt="Edit"
                                     />
                                 </td>
-                                <td style={{ width: "10%" }}>
+                                <td style={{ width: "6.66%" }}>
                                     <img
                                         onClick={() => handleDeleteLesson(lesson)}
                                         src={deleteIcon}
