@@ -6,8 +6,10 @@ import {
     getAllCourses,
     getAllActivityAliases,
     updateLesson,
+    createMultipleChoiceQuestion,
     updateMultipleChoiceQuestion,
     deleteMultipleChoiceQuestion,
+    createMultipleChoiceQuestionAnswer,
     updateMultipleChoiceQuestionAnswer,
     deleteMultipleChoiceQuestionAnswer,
     migrateLesson,
@@ -58,6 +60,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         answerImageUrl: answer.AnswerImageUrl,
                         answerAudioUrl: answer.AnswerAudioUrl,
                         isCorrect: answer.IsCorrect,
+                        SequenceNumber: answer.SequenceNumber,
                     })),
                 }));
                 setLessonData(lessonResponse.data);
@@ -117,18 +120,18 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
             setIsSaving(true);
 
             // Save the updated lesson data
-            const updateLessonResponse = await updateLesson({
-                LessonId: lessonData.LessonId,
-                lessonType: lessonData.lessonType,
-                dayNumber: lessonData.dayNumber,
-                activity: lessonData.activity,
-                activityAlias: lessonData.activityAlias,
-                weekNumber: lessonData.weekNumber,
-                text: lessonData.text,
-                courseId: lessonData.courseId,
-                SequenceNumber: lessonData.SequenceNumber,
-                status: lessonData.status,
-            });
+            const updateLessonResponse = await updateLesson(
+                lessonData.LessonId,
+                lessonData.lessonType,
+                lessonData.dayNumber,
+                lessonData.activity,
+                lessonData.activityAlias,
+                lessonData.weekNumber,
+                lessonData.text,
+                lessonData.courseId,
+                lessonData.SequenceNumber,
+                lessonData.status,
+            );
 
             if (updateLessonResponse.status !== 200) {
                 alert(updateLessonResponse.data.message);
@@ -137,20 +140,91 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
 
             // Update questions
             for (let question of questions) {
-                const questionPayload = {
-                    QuestionType: question.questionType,
-                    QuestionText: question.questionText,
-                    QuestionImageUrl: question.questionImageUrl,
-                    QuestionAudioUrl: question.questionAudioUrl,
-                    QuestionNumber: question.questionNumber,
-                    OptionsType: question.optionsType,
-                    LessonId: lessonData.LessonId,
-                };
-
                 if (question.isNew) {
-                    await updateMultipleChoiceQuestion(null, questionPayload);
+                    // Create new question
+                    const createQuestionResponse = await createMultipleChoiceQuestion(
+                        question.file || null,
+                        question.image || null,
+                        question.questionType,
+                        question.questionText,
+                        question.questionNumber,
+                        lessonData.LessonId,
+                        question.optionsType
+                    );
+
+                    if (createQuestionResponse.status !== 200) {
+                        alert(createQuestionResponse.data.message);
+                        return;
+                    }
+
+                    // Handle answers for new question
+                    const questionId = createQuestionResponse.data.Id;
+                    for (let answer of question.answers) {
+                        const createAnswerResponse = await createMultipleChoiceQuestionAnswer(
+                            answer.answerText,
+                            answer.file || null,
+                            answer.image || null,
+                            answer.isCorrect,
+                            questionId,
+                            answer.SequenceNumber
+                        );
+
+                        if (createAnswerResponse.status !== 200) {
+                            alert(createAnswerResponse.data.message);
+                            return;
+                        }
+                    }
                 } else if (question.isChanged) {
-                    await updateMultipleChoiceQuestion(question.id, questionPayload);
+                    // Update existing question
+                    const updateQuestionResponse = await updateMultipleChoiceQuestion(
+                        question.id,
+                        question.file || null,
+                        question.image || null,
+                        question.questionType,
+                        question.questionText,
+                        question.questionNumber,
+                        lessonData.LessonId,
+                        question.optionsType
+                    );
+
+                    if (updateQuestionResponse.status !== 200) {
+                        alert(updateQuestionResponse.data.message);
+                        return;
+                    }
+
+                    // Handle answers for updated question
+                    for (let answer of question.answers) {
+                        if (answer.isNew) {
+                            const createAnswerResponse = await createMultipleChoiceQuestionAnswer(
+                                answer.answerText,
+                                answer.file || null,
+                                answer.image || null,
+                                answer.isCorrect,
+                                question.id,
+                                answer.SequenceNumber
+                            );
+
+                            if (createAnswerResponse.status !== 200) {
+                                alert(createAnswerResponse.data.message);
+                                return;
+                            }
+                        } else if (answer.isChanged) {
+                            const updateAnswerResponse = await updateMultipleChoiceQuestionAnswer(
+                                answer.id,
+                                answer.answerText,
+                                answer.file || null,
+                                answer.image || null,
+                                answer.isCorrect,
+                                question.id,
+                                answer.SequenceNumber
+                            );
+
+                            if (updateAnswerResponse.status !== 200) {
+                                alert(updateAnswerResponse.data.message);
+                                return;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -399,7 +473,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                     <input
                                         className={styles.input_field}
                                         type="text"
-                                        id="sequenceNumber"
+                                        id="SequenceNumber"
                                         defaultValue={lessonData.SequenceNumber || "Not Available"}
                                     />
                                 </div>
@@ -549,6 +623,7 @@ const MCQsLesson = ({ category, course, activity }) => {
     const [isMCQModalOpen, setIsMCQModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
+    const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT == "DEV";
 
     const fetchLessons = async () => {
         try {
@@ -657,7 +732,7 @@ const MCQsLesson = ({ category, course, activity }) => {
                             <th className={styles.table_heading}>Day Number</th>
                             <th className={styles.table_heading}>Questions</th>
                             <th className={styles.table_heading}>Status</th>
-                            <th className={styles.table_heading}>Migrate</th>
+                            {isDevEnvironment && <th className={styles.table_heading}>Migrate</th>}
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -682,9 +757,16 @@ const MCQsLesson = ({ category, course, activity }) => {
                                         {lesson.status || "Not Available"}
                                     </span>
                                 </td>
-                                <td style={{ width: "6.66%" }}>
-                                    <button className={styles.migrate_button} onClick={() => openMigrateLessonModal(lesson)}>Migrate</button>
-                                </td>
+                                {isDevEnvironment && (
+                                    <td style={{ width: "6.66%" }}>
+                                        <button
+                                            className={styles.migrate_button}
+                                            onClick={() => openMigrateLessonModal(lesson)}
+                                        >
+                                            Migrate
+                                        </button>
+                                    </td>
+                                )}
                                 <td style={{ width: "6.66%" }}>
                                     <img
                                         onClick={() => openEditModal(lesson)}

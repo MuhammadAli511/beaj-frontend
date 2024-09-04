@@ -348,6 +348,7 @@ const ListenLesson = ({ category, course }) => {
         useState(false);
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
+    const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT == "DEV";
 
     const fetchLessons = async () => {
         try {
@@ -448,7 +449,7 @@ const ListenLesson = ({ category, course }) => {
                             <th className={styles.table_heading}>Audio</th>
                             <th className={styles.table_heading}>Image</th>
                             <th className={styles.table_heading}>Status</th>
-                            <th className={styles.table_heading}>Migrate</th>
+                            {isDevEnvironment && <th className={styles.table_heading}>Migrate</th>}
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -488,9 +489,16 @@ const ListenLesson = ({ category, course }) => {
                                         {lesson.status || "Not Available"}
                                     </span>
                                 </td>
-                                <td style={{ width: "6.66%" }}>
-                                    <button className={styles.migrate_button} onClick={() => openMigrateLessonModal(lesson)}>Migrate</button>
-                                </td>
+                                {isDevEnvironment && (
+                                    <td style={{ width: "6.66%" }}>
+                                        <button
+                                            className={styles.migrate_button}
+                                            onClick={() => openMigrateLessonModal(lesson)}
+                                        >
+                                            Migrate
+                                        </button>
+                                    </td>
+                                )}
                                 <td style={{ width: "6.66%" }}>
                                     <img
                                         onClick={() => openEditListenLessonModal(lesson)}
