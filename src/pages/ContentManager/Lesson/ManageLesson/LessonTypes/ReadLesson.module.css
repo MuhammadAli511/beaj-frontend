@@ -216,3 +216,18 @@ img {
 .submit_button:hover {
   background-color: #c4ce00;
 }
+
+.migrate_button {
+  padding: 5px 10px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #d4de00;
+  color: #000000;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  align-self: center;
+}

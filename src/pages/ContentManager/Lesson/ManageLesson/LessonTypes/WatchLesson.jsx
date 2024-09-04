@@ -352,7 +352,6 @@ const WatchLesson = ({ category, course }) => {
         if (migrateResponse.status !== 200) {
             alert(migrateResponse.data.message);
         } else {
-            console.log(migrateResponse.data);
             alert("Lesson migrated successfully.");
         }
         closeMigrateLessonModal();
@@ -428,7 +427,7 @@ const WatchLesson = ({ category, course }) => {
                                     </span>
                                 </td>
                                 <td style={{ width: "6.66%" }}>
-                                    <button onClick={() => openMigrateLessonModal(lesson)}>Migrate</button>
+                                    <button className={styles.migrate_button} onClick={() => openMigrateLessonModal(lesson)}>Migrate</button>
                                 </td>
                                 <td style={{ width: "6.66%" }}>
                                     <img

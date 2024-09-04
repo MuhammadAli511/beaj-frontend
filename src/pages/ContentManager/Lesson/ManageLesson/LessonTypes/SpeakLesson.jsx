@@ -560,7 +560,7 @@ const SpeakLesson = ({ category, course, activity }) => {
                                     </span>
                                 </td>
                                 <td style={{ width: "6.66%" }}>
-                                    <button onClick={() => openMigrateLessonModal(lesson)}>Migrate</button>
+                                    <button className={styles.migrate_button} onClick={() => openMigrateLessonModal(lesson)}>Migrate</button>
                                 </td>
                                 <td style={{ width: "6.66%" }}>
                                     <img
