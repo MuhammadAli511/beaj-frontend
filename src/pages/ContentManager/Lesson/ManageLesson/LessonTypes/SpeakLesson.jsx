@@ -7,16 +7,18 @@ import {
     getAllActivityAliases,
     updateLesson,
     updateSpeakActivityQuestion,
-    deleteSpeakActivityQuestion
+    deleteSpeakActivityQuestion,
+    migrateLesson
 } from "../../../../../helper";
 import edit from '../../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../../assets/images/delete.svg';
 import styles from './SpeakLesson.module.css';
 import SpeakQuestionModal from './SpeakQuestionModal';
+import MigrateLessonModal from "../../../../../components/MigrateLessonModal/MigrateLessonModal";
 
 
 const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [lessonData, setLessonData] = useState(null);
     const [questions, setQuestions] = useState([]);
@@ -34,7 +36,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 setIsLoading(false);
             }
         }
-    }, [lesson]);
+    }, [isOpen, lesson]);
 
     const fetchLessonData = async () => {
         try {
@@ -429,6 +431,7 @@ const SpeakLesson = ({ category, course, activity }) => {
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [isSpeakQuestionModalOpen, setIsSpeakQuestionModalOpen] = useState(false);
     const [isEditSpeakLessonModalOpen, setIsEditSpeakLessonModalOpen] = useState(false);
+    const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
 
     const fetchLessons = async () => {
         try {
@@ -470,6 +473,28 @@ const SpeakLesson = ({ category, course, activity }) => {
     const closeEditSpeakLessonModal = () => {
         setSelectedLesson(null);
         setIsEditSpeakLessonModalOpen(false);
+    };
+
+    const openMigrateLessonModal = (lesson) => {
+        setSelectedLesson(lesson);
+        setIsMigrateLessonModalOpen(true);
+    };
+
+    const closeMigrateLessonModal = () => {
+        setSelectedLesson(null);
+        setIsMigrateLessonModalOpen(false);
+    };
+
+    const handleMigrateLesson = async (lesson, selectedCourseId) => {
+        const migrateResponse = await migrateLesson(lesson.LessonId, selectedCourseId);
+        if (migrateResponse.status !== 200) {
+            alert(migrateResponse.data.message);
+        } else {
+            console.log(migrateResponse.data);
+            alert("Lesson migrated successfully.");
+        }
+        closeMigrateLessonModal();
+        fetchLessons();
     };
 
     const handleDeleteLesson = async (lessonId) => {
@@ -514,6 +539,7 @@ const SpeakLesson = ({ category, course, activity }) => {
                             <th className={styles.table_heading}>Day Number</th>
                             <th className={styles.table_heading}>Questions</th>
                             <th className={styles.table_heading}>Status</th>
+                            <th className={styles.table_heading}>Migrate</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -533,14 +559,17 @@ const SpeakLesson = ({ category, course, activity }) => {
                                         {lesson.status || "Not Available"}
                                     </span>
                                 </td>
-                                <td style={{ width: "10%" }}>
+                                <td style={{ width: "6.66%" }}>
+                                    <button onClick={() => openMigrateLessonModal(lesson)}>Migrate</button>
+                                </td>
+                                <td style={{ width: "6.66%" }}>
                                     <img
                                         onClick={() => openEditSpeakLessonModal(lesson)}
                                         src={edit}
                                         alt="Edit"
                                     />
                                 </td>
-                                <td style={{ width: "10%" }}>
+                                <td style={{ width: "6.66%" }}>
                                     <img
                                         onClick={() => handleDeleteLesson(lesson.LessonId)}
                                         src={deleteIcon}
@@ -566,6 +595,14 @@ const SpeakLesson = ({ category, course, activity }) => {
                     lesson={selectedLesson}
                     onSave={fetchLessons}
                     activity={activity}
+                />
+            )}
+            {isMigrateLessonModalOpen && selectedLesson && (
+                <MigrateLessonModal
+                    isOpen={isMigrateLessonModalOpen}
+                    onClose={closeMigrateLessonModal}
+                    lesson={selectedLesson}
+                    onMigrate={handleMigrateLesson}
                 />
             )}
         </div>

@@ -7,14 +7,16 @@ import {
     getAllActivityAliases,
     updateLesson,
     updateDocumentFile,
+    migrateLesson
 } from "../../../../../helper";
 import edit from '../../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../../assets/images/delete.svg';
 import styles from './ReadLesson.module.css';
 import JoditEditor from 'jodit-react';
+import MigrateLessonModal from "../../../../../components/MigrateLessonModal/MigrateLessonModal";
 
 const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [lessonData, setLessonData] = useState(null);
     const [englishAudio, setEnglishAudio] = useState(null);
@@ -26,65 +28,41 @@ const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const editor = useRef(null);
 
     useEffect(() => {
-        if (lesson) {
+        const fetchAllData = async () => {
+            setIsLoading(true);
             try {
-                setIsLoading(true);
-                fetchAllData();
+                const lessonResponse = await getLessonById(lesson.LessonId);
+                if (lessonResponse.status === 200) {
+                    setLessonData(lessonResponse.data);
+                } else {
+                    alert(lessonResponse.data.message);
+                }
+
+                const coursesResponse = await getAllCourses();
+                if (coursesResponse.status === 200) {
+                    setCourses(coursesResponse.data);
+                } else {
+                    alert(coursesResponse.data.message);
+                }
+
+                const aliasesResponse = await getAllActivityAliases();
+                if (aliasesResponse.status === 200) {
+                    setActivityAliases(aliasesResponse.data);
+                } else {
+                    alert(aliasesResponse.data.message);
+                }
             } catch (error) {
                 alert(error);
             } finally {
                 setIsLoading(false);
             }
-        }
-    }, [lesson]);
+        };
 
-    const fetchLessonData = async () => {
-        try {
-            const lessonResponse = await getLessonById(lesson.LessonId);
-            if (lessonResponse.status === 200) {
-                setLessonData(lessonResponse.data);
-            } else {
-                alert(lessonResponse.data.message);
-            }
-        } catch (error) {
-            alert(error);
+        if (isOpen && lesson) {
+            fetchAllData();
         }
-    };
+    }, [isOpen, lesson]);
 
-    const fetchCourses = async () => {
-        try {
-            const response = await getAllCourses();
-            if (response.status === 200) {
-                setCourses(response.data);
-            } else {
-                alert(response.data.message);
-            }
-        } catch (error) {
-            alert(error);
-        }
-    };
-
-    const fetchActivityAliases = async () => {
-        try {
-            const response = await getAllActivityAliases();
-            if (response.status === 200) {
-                setActivityAliases(response.data);
-            } else {
-                alert(response.data.message);
-            }
-        } catch (error) {
-            alert(error);
-        }
-    };
-
-    const fetchAllData = async () => {
-        const promises = [
-            fetchCourses(),
-            fetchLessonData(),
-            fetchActivityAliases(),
-        ];
-        await Promise.all(promises);
-    };
 
     const handleCancel = () => {
         setLessonData(null);
@@ -419,6 +397,7 @@ const ReadLesson = ({ category, course }) => {
     const [lessons, setLessons] = useState([]);
     const [isEditReadLessonModalOpen, setIsEditReadLessonModalOpen] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState(null);
+    const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
 
     const fetchLessons = async () => {
         try {
@@ -456,6 +435,28 @@ const ReadLesson = ({ category, course }) => {
         return documentFiles.find(
             (file) => file.mediaType === mediaType && file.language === language
         );
+    };
+
+    const openMigrateLessonModal = (lesson) => {
+        setSelectedLesson(lesson);
+        setIsMigrateLessonModalOpen(true);
+    };
+
+    const closeMigrateLessonModal = () => {
+        setSelectedLesson(null);
+        setIsMigrateLessonModalOpen(false);
+    };
+
+    const handleMigrateLesson = async (lesson, selectedCourseId) => {
+        const migrateResponse = await migrateLesson(lesson.LessonId, selectedCourseId);
+        if (migrateResponse.status !== 200) {
+            alert(migrateResponse.data.message);
+        } else {
+            console.log(migrateResponse.data);
+            alert("Lesson migrated successfully.");
+        }
+        closeMigrateLessonModal();
+        fetchLessons();
     };
 
     const handleDeleteLesson = async (lesson) => {
@@ -500,6 +501,7 @@ const ReadLesson = ({ category, course }) => {
                             <th className={styles.table_heading}>Urdu Audio</th>
                             <th className={styles.table_heading}>Image</th>
                             <th className={styles.table_heading}>Status</th>
+                            <th className={styles.table_heading}>Migrate</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -552,14 +554,17 @@ const ReadLesson = ({ category, course }) => {
                                             {lesson.status || "Not Available"}
                                         </span>
                                     </td>
-                                    <td style={{ width: "10%" }}>
+                                    <td style={{ width: "6.66%" }}>
+                                        <button onClick={() => openMigrateLessonModal(lesson)}>Migrate</button>
+                                    </td>
+                                    <td style={{ width: "6.66%" }}>
                                         <img
                                             onClick={() => openEditReadLessonModal(lesson)}
                                             src={edit}
                                             alt="Edit"
                                         />
                                     </td>
-                                    <td style={{ width: "10%" }}>
+                                    <td style={{ width: "6.66%" }}>
                                         <img
                                             onClick={() => handleDeleteLesson(lesson)}
                                             src={deleteIcon}
@@ -577,6 +582,12 @@ const ReadLesson = ({ category, course }) => {
                 onClose={closeEditReadLessonModal}
                 lesson={selectedLesson}
                 onSave={fetchLessons}
+            />
+            <MigrateLessonModal
+                isOpen={isMigrateLessonModalOpen}
+                onClose={closeMigrateLessonModal}
+                lesson={selectedLesson}
+                onMigrate={handleMigrateLesson}
             />
         </div>
     );

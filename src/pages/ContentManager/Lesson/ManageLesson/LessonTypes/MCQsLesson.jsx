@@ -10,11 +10,13 @@ import {
     deleteMultipleChoiceQuestion,
     updateMultipleChoiceQuestionAnswer,
     deleteMultipleChoiceQuestionAnswer,
+    migrateLesson,
 } from "../../../../../helper";
 import edit from "../../../../../assets/images/edit.svg";
 import deleteIcon from "../../../../../assets/images/delete.svg";
 import styles from "./MCQsLesson.module.css";
 import MCQsQuestionModal from "./MCQsQuestionModal";
+import MigrateLessonModal from "../../../../../components/MigrateLessonModal/MigrateLessonModal";
 
 const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -35,7 +37,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                 setIsLoading(false);
             }
         }
-    }, [lesson]);
+    }, [isOpen, lesson]);
 
     const fetchLessonData = async () => {
         try {
@@ -546,6 +548,7 @@ const MCQsLesson = ({ category, course, activity }) => {
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [isMCQModalOpen, setIsMCQModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
 
     const fetchLessons = async () => {
         try {
@@ -587,6 +590,28 @@ const MCQsLesson = ({ category, course, activity }) => {
     const closeEditModal = () => {
         setSelectedLesson(null);
         setIsEditModalOpen(false);
+    };
+
+    const openMigrateLessonModal = (lesson) => {
+        setSelectedLesson(lesson);
+        setIsMigrateLessonModalOpen(true);
+    };
+
+    const closeMigrateLessonModal = () => {
+        setSelectedLesson(null);
+        setIsMigrateLessonModalOpen(false);
+    };
+
+    const handleMigrateLesson = async (lesson, selectedCourseId) => {
+        const migrateResponse = await migrateLesson(lesson.LessonId, selectedCourseId);
+        if (migrateResponse.status !== 200) {
+            alert(migrateResponse.data.message);
+        } else {
+            console.log(migrateResponse.data);
+            alert("Lesson migrated successfully.");
+        }
+        closeMigrateLessonModal();
+        fetchLessons();
     };
 
     const handleDeleteLesson = async (lessonId) => {
@@ -632,6 +657,7 @@ const MCQsLesson = ({ category, course, activity }) => {
                             <th className={styles.table_heading}>Day Number</th>
                             <th className={styles.table_heading}>Questions</th>
                             <th className={styles.table_heading}>Status</th>
+                            <th className={styles.table_heading}>Migrate</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -656,14 +682,17 @@ const MCQsLesson = ({ category, course, activity }) => {
                                         {lesson.status || "Not Available"}
                                     </span>
                                 </td>
-                                <td style={{ width: "10%" }}>
+                                <td style={{ width: "6.66%" }}>
+                                    <button onClick={() => openMigrateLessonModal(lesson)}>Migrate</button>
+                                </td>
+                                <td style={{ width: "6.66%" }}>
                                     <img
                                         onClick={() => openEditModal(lesson)}
                                         src={edit}
                                         alt="Edit"
                                     />
                                 </td>
-                                <td style={{ width: "10%" }}>
+                                <td style={{ width: "6.66%" }}>
                                     <img
                                         onClick={() => handleDeleteLesson(lesson.LessonId)}
                                         src={deleteIcon}
@@ -689,6 +718,14 @@ const MCQsLesson = ({ category, course, activity }) => {
                     lesson={selectedLesson}
                     onSave={fetchLessons}
                     activity={activity}
+                />
+            )}
+            {isMigrateLessonModalOpen && selectedLesson && (
+                <MigrateLessonModal
+                    isOpen={isMigrateLessonModalOpen}
+                    onClose={closeMigrateLessonModal}
+                    lesson={selectedLesson}
+                    onMigrate={handleMigrateLesson}
                 />
             )}
         </div>

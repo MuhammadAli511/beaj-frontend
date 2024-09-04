@@ -7,13 +7,15 @@ import {
     getAllActivityAliases,
     updateLesson,
     updateDocumentFile,
+    migrateLesson
 } from "../../../../../helper";
 import edit from "../../../../../assets/images/edit.svg";
 import deleteIcon from "../../../../../assets/images/delete.svg";
 import styles from "./WatchLesson.module.css";
+import MigrateLessonModal from "../../../../../components/MigrateLessonModal/MigrateLessonModal";
 
 const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [lessonData, setLessonData] = useState(null);
     const [video, setVideo] = useState(null);
@@ -21,65 +23,41 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const [activityAliases, setActivityAliases] = useState([]);
 
     useEffect(() => {
-        if (lesson) {
+        const fetchAllData = async () => {
+            setIsLoading(true);
             try {
-                setIsLoading(true);
-                fetchAllData();
+                const lessonResponse = await getLessonById(lesson.LessonId);
+                if (lessonResponse.status === 200) {
+                    setLessonData(lessonResponse.data);
+                } else {
+                    alert(lessonResponse.data.message);
+                }
+
+                const coursesResponse = await getAllCourses();
+                if (coursesResponse.status === 200) {
+                    setCourses(coursesResponse.data);
+                } else {
+                    alert(coursesResponse.data.message);
+                }
+
+                const aliasesResponse = await getAllActivityAliases();
+                if (aliasesResponse.status === 200) {
+                    setActivityAliases(aliasesResponse.data);
+                } else {
+                    alert(aliasesResponse.data.message);
+                }
             } catch (error) {
                 alert(error);
             } finally {
                 setIsLoading(false);
             }
-        }
-    }, [lesson]);
+        };
 
-    const fetchLessonData = async () => {
-        try {
-            const lessonResponse = await getLessonById(lesson.LessonId);
-            if (lessonResponse.status === 200) {
-                setLessonData(lessonResponse.data);
-            } else {
-                alert(lessonResponse.data.message);
-            }
-        } catch (error) {
-            alert(error);
+        if (isOpen && lesson) {
+            fetchAllData();
         }
-    };
+    }, [isOpen, lesson]);
 
-    const fetchCourses = async () => {
-        try {
-            const response = await getAllCourses();
-            if (response.status === 200) {
-                setCourses(response.data);
-            } else {
-                alert(response.data.message);
-            }
-        } catch (error) {
-            alert(error);
-        }
-    };
-
-    const fetchActivityAliases = async () => {
-        try {
-            const response = await getAllActivityAliases();
-            if (response.status === 200) {
-                setActivityAliases(response.data);
-            } else {
-                alert(response.data.message);
-            }
-        } catch (error) {
-            alert(error);
-        }
-    };
-
-    const fetchAllData = async () => {
-        const promises = [
-            fetchCourses(),
-            fetchLessonData(),
-            fetchActivityAliases(),
-        ];
-        await Promise.all(promises);
-    };
 
     const handleCancel = () => {
         setLessonData(null);
@@ -325,6 +303,7 @@ const WatchLesson = ({ category, course }) => {
     const [isEditWatchLessonModalOpen, setIsEditWatchLessonModalOpen] =
         useState(false);
     const [selectedLesson, setSelectedLesson] = useState(null);
+    const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
 
     const fetchLessons = async () => {
         try {
@@ -356,6 +335,28 @@ const WatchLesson = ({ category, course }) => {
     const closeEditWatchLessonModal = () => {
         setSelectedLesson(null);
         setIsEditWatchLessonModalOpen(false);
+    };
+
+    const openMigrateLessonModal = (lesson) => {
+        setSelectedLesson(lesson);
+        setIsMigrateLessonModalOpen(true);
+    };
+
+    const closeMigrateLessonModal = () => {
+        setSelectedLesson(null);
+        setIsMigrateLessonModalOpen(false);
+    };
+
+    const handleMigrateLesson = async (lesson, selectedCourseId) => {
+        const migrateResponse = await migrateLesson(lesson.LessonId, selectedCourseId);
+        if (migrateResponse.status !== 200) {
+            alert(migrateResponse.data.message);
+        } else {
+            console.log(migrateResponse.data);
+            alert("Lesson migrated successfully.");
+        }
+        closeMigrateLessonModal();
+        fetchLessons();
     };
 
     const handleDeleteLesson = async (lesson) => {
@@ -426,7 +427,9 @@ const WatchLesson = ({ category, course }) => {
                                         {lesson.status || "Not Available"}
                                     </span>
                                 </td>
-                                <td style={{ width: "6.66%" }}>Migrate</td>
+                                <td style={{ width: "6.66%" }}>
+                                    <button onClick={() => openMigrateLessonModal(lesson)}>Migrate</button>
+                                </td>
                                 <td style={{ width: "6.66%" }}>
                                     <img
                                         onClick={() => openEditWatchLessonModal(lesson)}
@@ -451,6 +454,12 @@ const WatchLesson = ({ category, course }) => {
                 onClose={closeEditWatchLessonModal}
                 lesson={selectedLesson}
                 onSave={fetchLessons}
+            />
+            <MigrateLessonModal
+                isOpen={isMigrateLessonModalOpen}
+                onClose={closeMigrateLessonModal}
+                lesson={selectedLesson}
+                onMigrate={handleMigrateLesson}
             />
         </div>
     );

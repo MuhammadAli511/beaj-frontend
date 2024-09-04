@@ -1,4 +1,5 @@
 const API_URL = process.env.REACT_APP_API_URL;
+const PROD_API_URL = "https://beaj-backend-prod.azurewebsites.net/api";
 
 // Function to get the stored JWT token
 const getToken = () => {
@@ -124,7 +125,7 @@ export const getAllCourses = async () => {
 
 // API call to get all courses from production
 export const getAllCoursesfromProduction = async () => {
-    const response = await fetch(`${API_URL}/course/getAll`, {
+    const response = await fetch(`${PROD_API_URL}/course/getAll`, {
         headers: getHeaders(),
     });
 
@@ -369,6 +370,17 @@ export const getLessonsByActivity = async (course, activity) => {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ course, activity }),
+    });
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// API call to migrate lesson
+export const migrateLesson = async (lessonId, courseId) => {
+    const response = await fetch(`${API_URL}/lesson/migrateLesson`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ lessonId, courseId }),
     });
     const data = await response.json();
     return { status: response.status, data };
