@@ -6,6 +6,7 @@ const MigrateLessonModal = ({ isOpen, onClose, lesson, onMigrate }) => {
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState("");
     const [isLoading, setIsLoading] = useState(true);
+    const [isMigrating, setIsMigrating] = useState(false);
 
     useEffect(() => {
         const fetchCoursesFromProduction = async () => {
@@ -29,13 +30,21 @@ const MigrateLessonModal = ({ isOpen, onClose, lesson, onMigrate }) => {
         }
     }, [isOpen]);
 
-    const handleMigrate = () => {
+    const handleMigrate = async () => {
         if (!selectedCourse) {
             alert("Please select a course to migrate.");
             return;
         }
 
-        onMigrate(lesson, selectedCourse);
+        setIsMigrating(true);
+
+        try {
+            await onMigrate(lesson, selectedCourse); // Assuming onMigrate returns a promise
+        } catch (error) {
+            alert("Migration failed.");
+        } finally {
+            setIsMigrating(false);
+        }
     };
 
     return (
@@ -70,9 +79,9 @@ const MigrateLessonModal = ({ isOpen, onClose, lesson, onMigrate }) => {
                             <button
                                 className={styles.submit_button}
                                 onClick={handleMigrate}
-                                disabled={isLoading}
+                                disabled={isLoading || isMigrating}
                             >
-                                Migrate
+                                {isMigrating ? <div className="loader"></div> : "Migrate"}
                             </button>
                             <button className={styles.cancel_button} onClick={onClose}>
                                 Cancel
