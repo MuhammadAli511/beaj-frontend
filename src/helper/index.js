@@ -102,11 +102,11 @@ export const deleteCategory = async (categoryId) => {
 
 // COURSE
 // API call to create a course
-export const createCourse = async (courseName, coursePrice, courseWeeks, courseCategoryId, courseStatus, sequenceNumber, courseDescription) => {
+export const createCourse = async (courseName, coursePrice, courseWeeks, courseCategoryId, status, sequenceNumber, courseDescription) => {
     const response = await fetch(`${API_URL}/course/create`, {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({ courseName, coursePrice, courseWeeks, courseCategoryId, courseStatus, sequenceNumber, courseDescription }),
+        body: JSON.stringify({ courseName, coursePrice, courseWeeks, courseCategoryId, status, sequenceNumber, courseDescription }),
     });
 
     const data = await response.json();

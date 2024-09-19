@@ -301,15 +301,40 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     };
 
     const removeAnswer = (questionIndex, answerIndex) => {
-        const updatedQuestions = questions.map((question, i) => {
-            if (i === questionIndex) {
-                const updatedAnswers = question.answers.filter((_, ai) => ai !== answerIndex);
-                return { ...question, answers: updatedAnswers, isChanged: true };
-            }
-            return question;
-        });
-        setQuestions(updatedQuestions);
+        const question = questions[questionIndex];
+        const answerToRemove = question.answers[answerIndex];
+
+        if (answerToRemove.id) {
+            deleteMultipleChoiceQuestionAnswer(answerToRemove.id)
+                .then(response => {
+                    if (response.status === 200) {
+                        const updatedAnswers = question.answers.filter((_, ai) => ai !== answerIndex);
+                        const updatedQuestions = questions.map((q, i) => {
+                            if (i === questionIndex) {
+                                return { ...q, answers: updatedAnswers, isChanged: true };
+                            }
+                            return q;
+                        });
+                        setQuestions(updatedQuestions);
+                    } else {
+                        alert(response.data.message);
+                    }
+                })
+                .catch(error => {
+                    alert(error);
+                });
+        } else {
+            const updatedAnswers = question.answers.filter((_, ai) => ai !== answerIndex);
+            const updatedQuestions = questions.map((q, i) => {
+                if (i === questionIndex) {
+                    return { ...q, answers: updatedAnswers, isChanged: true };
+                }
+                return q;
+            });
+            setQuestions(updatedQuestions);
+        }
     };
+
 
     const sortedCourses = () => {
         if (!lessonData) return courses;

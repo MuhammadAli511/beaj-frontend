@@ -27,11 +27,11 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                                 <td style={{ width: "50%" }}>
                                     {question.multipleChoiceQuestionAnswers.map((answer) => (
                                         <div key={answer.Id} className={styles.answer}>
-                                            {answer.AnswerText && <span>{answer.AnswerText}</span>}
-                                            {answer.AnswerImageUrl !== "null" && (
+                                            {answer.AnswerText && <span style={{ fontWeight: answer.IsCorrect ? "bold" : "normal" }}>{answer.AnswerText}</span>}
+                                            {answer.AnswerImageUrl !== "null" && answer.AnswerImageUrl !== null && (
                                                 <img src={answer.AnswerImageUrl} alt="Answer" className={styles.answerImage} />
                                             )}
-                                            {answer.AnswerAudioUrl !== "null" && (
+                                            {answer.AnswerAudioUrl !== "null" && answer.AnswerImageUrl !== null && (
                                                 <audio controls className={styles.answerAudio}>
                                                     <source src={answer.AnswerAudioUrl} type="audio/mp4" />
                                                 </audio>

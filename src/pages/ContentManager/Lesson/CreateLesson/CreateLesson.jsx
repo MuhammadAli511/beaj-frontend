@@ -401,6 +401,22 @@ const CreateLesson = () => {
             alert(error);
         } finally {
             setIsLoading(false);
+            setSequenceNumber('');
+            setActivityType('');
+            setLessonText('');
+            setDay('1');
+            setWeek('1');
+            setStatus('Active');
+            setImage(null);
+            setAudio(null);
+            setVideo(null);
+            setUrduAudio(null);
+            setQuestions([{ questionText: '', audio: '', answers: [{ answerText: '' }] }]);
+            setWsQuestions([{ questionText: '', video: '', answers: [{ answerText: '' }] }]);
+            setMcqs([{
+                questionType: 'text', questionText: '', questionAudio: null, questionImage: null,
+                answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false }))
+            }]);
         }
     }
 

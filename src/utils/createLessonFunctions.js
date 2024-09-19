@@ -166,6 +166,7 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
 
     const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
     const lessonId = response.data.lesson.LessonId;
+    let answerResponses = [];
 
     for (let i = 0; i < mcqs.length; i++) {
         const answerTextArray = mcqs[i].answers.map(answer => answer.answerText);
@@ -208,11 +209,12 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
             )
         );
 
-        if (answerResponses.every(response => response.status === 200) && questionResponse.status === 200) {
-            alert('Lesson created successfully');
-        } else {
-            alert('Error creating lesson');
-        }
+        answerResponses.push(answerResponses);
+    }
 
+    if (answerResponses.every(response => response.every(answer => answer.status === 200)) && response.status === 200) {
+        alert('Lesson created successfully');
+    } else {
+        alert('Error creating lesson');
     }
 }

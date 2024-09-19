@@ -226,22 +226,24 @@ const ManageCourseWeek = () => {
                     </thead>
                     <tbody>
                         {courseWeeks.map((courseWeek) => (
-                            <tr key={courseWeek.id}>
-                                <td className={styles.table_data}>{courseWeek.id}</td>
-                                <td className={styles.table_data}>{courseWeek.weekNumber}</td>
-                                <td className={styles.table_data}>{courseWeek.description}</td>
-                                <td className={styles.table_data}>{courseNames[courseWeek.courseId]}</td>
-                                <td className={styles.table_data}>
-                                    <div onClick={() => openEditModal(courseWeek)}>
-                                        <img src={edit} alt="edit" />
-                                    </div>
-                                </td>
-                                <td className={styles.table_data}>
-                                    <div onClick={() => handleDeleteCourseWeek(courseWeek.id)}>
-                                        <img src={deleteIcon} alt="delete" />
-                                    </div>
-                                </td>
-                            </tr>
+                            courseNames[courseWeek.courseId] && (
+                                <tr key={courseWeek.id}>
+                                    <td className={styles.table_data}>{courseWeek.id}</td>
+                                    <td className={styles.table_data}>{courseWeek.weekNumber}</td>
+                                    <td className={styles.table_data}>{courseWeek.description}</td>
+                                    <td className={styles.table_data}>{courseNames[courseWeek.courseId]}</td>
+                                    <td className={styles.table_data}>
+                                        <div onClick={() => openEditModal(courseWeek)}>
+                                            <img src={edit} alt="edit" />
+                                        </div>
+                                    </td>
+                                    <td className={styles.table_data}>
+                                        <div onClick={() => handleDeleteCourseWeek(courseWeek.id)}>
+                                            <img src={deleteIcon} alt="delete" />
+                                        </div>
+                                    </td>
+                                </tr>
+                            )
                         ))}
                     </tbody>
                 </table>
