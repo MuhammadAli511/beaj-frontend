@@ -15,15 +15,15 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                     <thead>
                         <tr>
                             <th className={styles.table_heading}>Question Number</th>
-                            {activity !== 'watchAndSpeak' && <th className={styles.table_heading}>Question</th>}
-                            {activity !== 'watchAndSpeak' && <th className={styles.table_heading}>Answer</th>}
+                            {activity !== 'watchAndSpeak' || 'conversationalBot' && <th className={styles.table_heading}>Question</th>}
+                            {activity !== 'watchAndSpeak' || 'conversationalBot' && <th className={styles.table_heading}>Answer</th>}
                             <th className={styles.table_heading}>{activity === 'watchAndSpeak' ? 'Video' : 'Audio'}</th>
                         </tr>
                     </thead>
                     <tbody className={styles.table_body}>
                         {sortedQuestions.map((question) => (
                             <tr key={question.id} className={styles.table_row}>
-                                {activity === 'watchAndSpeak' ? (
+                                {activity === 'watchAndSpeak' && (
                                     <>
                                         <td style={{ width: "5%" }}>{question.questionNumber}</td>
                                         <td style={{ width: "100%" }}>
@@ -32,20 +32,29 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                             </video>
                                         </td>
                                     </>
-
-                                ) : (
+                                )}
+                                {(activity === 'listenAndSpeak' || activity === 'preListenAndSpeak' || activity === 'postListenAndSpeak') && (
                                     <>
                                         <td style={{ width: "5%" }}>{question.questionNumber}</td>
                                         <td style={{ width: "20%" }}>{question.question}</td>
                                         <td style={{ width: "35%" }}>{question.answer.join(', ')}</td>
                                         <td style={{ width: "100%" }}>
                                             <audio controls>
-                                                <source src={question.mediaFile} type="audio/mp4" />
+                                                <source src={question.mediaFile} type="audio/mp3" />
                                             </audio>
                                         </td>
                                     </>
                                 )}
-
+                                {activity === 'conversationalBot' && (
+                                    <>
+                                        <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                        <td style={{ width: "100%" }}>
+                                            <audio controls>
+                                                <source src={question.mediaFile} type="audio/mp3" />
+                                            </audio>
+                                        </td>
+                                    </>
+                                )}
                             </tr>
                         ))}
                     </tbody>

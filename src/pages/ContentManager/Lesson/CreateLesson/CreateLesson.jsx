@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './CreateLesson.module.css';
 import { getAllCategories, getCoursesByCategoryId, getCourseById, getAllActivityAliases } from '../../../../helper';
 import JoditEditor from 'jodit-react';
-import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson } from '../../../../utils/createLessonFunctions';
+import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson, createConversationalBotLesson } from '../../../../utils/createLessonFunctions';
 
 const SelectField = ({ label, options, onChange, value, name, id }) => (
     <div className={styles.form_group}>
@@ -68,6 +68,7 @@ const CreateLesson = () => {
         }
     };
 
+
     // Watch
     const [video, setVideo] = useState(null);
 
@@ -80,6 +81,7 @@ const CreateLesson = () => {
         }
     };
 
+
     // Read
     const [urduAudio, setUrduAudio] = useState(null);
 
@@ -91,6 +93,7 @@ const CreateLesson = () => {
             alert('Please upload an MP3 audio not larger than 16MB.');
         }
     };
+
 
     // Watch and Speak
     const [wsQuestions, setWsQuestions] = useState([
@@ -148,6 +151,31 @@ const CreateLesson = () => {
         }
     };
 
+
+    // Conversational Bot
+    const [botQuestions, setBotQuestions] = useState([{ questionText: '' }]);
+
+    const handleBotQuestionChange = (index, event) => {
+        const newBotQuestions = [...botQuestions];
+        newBotQuestions[index][event.target.name] = event.target.value;
+        setBotQuestions(newBotQuestions);
+    };
+
+    const addBotQuestion = (event) => {
+        event.preventDefault();
+        setBotQuestions([...botQuestions, { questionText: '' }]);
+    };
+
+    const removeBotQuestion = (index, event) => {
+        event.preventDefault();
+        if (botQuestions.length > 1) {
+            const newBotQuestions = [...botQuestions];
+            newBotQuestions.splice(index, 1);
+            setBotQuestions(newBotQuestions);
+        }
+    };
+
+
     // Listen and Speak
     const [questions, setQuestions] = useState([
         { questionText: '', audio: '', answers: [{ answerText: '' }] }
@@ -203,6 +231,7 @@ const CreateLesson = () => {
             setQuestions(newQuestions);
         }
     };
+
 
     // MCQs
     const [mcqs, setMcqs] = useState([
@@ -396,6 +425,8 @@ const CreateLesson = () => {
                 await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status);
             } else if (activityType === 'watchAndSpeak') {
                 await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status);
+            } else if (activityType === 'conversationalBot') {
+                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
             }
         } catch (error) {
             alert(error);
@@ -417,6 +448,7 @@ const CreateLesson = () => {
                 questionType: 'text', questionText: '', questionAudio: null, questionImage: null,
                 answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false }))
             }]);
+            setBotQuestions([{ questionText: '' }]);
         }
     }
 
@@ -449,7 +481,8 @@ const CreateLesson = () => {
                         { value: 'preMCQs', label: 'Pre-test Part 2 (MCQs)' },
                         { value: 'postListenAndSpeak', label: 'Post-test Part 1 (Listen Speak)' },
                         { value: 'postMCQs', label: 'Post-test Part 2 (MCQs)' },
-                        { value: 'placementtest', label: 'Placement Test' }
+                        { value: 'placementtest', label: 'Placement Test' },
+                        { value: 'conversationalBot', label: 'Conversational Bot' }
                     ]} onChange={handleActivityTypeChange} value={activityType} name="activity_type" id="activity_type" />
                     <SelectField label="Status" options={[
                         { value: 'Active', label: 'Active' },
@@ -523,6 +556,25 @@ const CreateLesson = () => {
                             </div>
                         ))}
                         <button className={styles.add_button} onClick={(e) => addQuestion(e)}>Add Another Question</button>
+                    </>
+                )}
+                {activityType === 'conversationalBot' && (
+                    <>
+                        <div className={styles.input_row}>
+                            <div className={styles.form_group}>
+                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
+                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            </div>
+                        </div>
+                        {botQuestions.map((question, qIndex) => (
+                            <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.input_row}>
+                                    <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleBotQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
+                                    {botQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeBotQuestion(qIndex, e)}>Remove Question</button>}
+                                </div>
+                            </div>
+                        ))}
+                        <button className={styles.add_button} onClick={(e) => addBotQuestion(e)}>Add Another Question</button>
                     </>
                 )}
                 {activityType === 'watchAndSpeak' && (

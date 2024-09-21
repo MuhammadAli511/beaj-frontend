@@ -29,6 +29,7 @@ export const createAudioLesson = async (course, sequenceNumber, alias, activityT
     }
 };
 
+
 export const createVideoLesson = async (course, sequenceNumber, alias, activityType, video, lessonText, day, week, status) => {
     if (!video) {
         alert('Please upload an audio');
@@ -51,6 +52,7 @@ export const createVideoLesson = async (course, sequenceNumber, alias, activityT
         alert('Error creating lesson');
     }
 };
+
 
 export const createReadLesson = async (course, sequenceNumber, alias, activityType, image, audio, urduAudio, lessonText, day, week, status) => {
     if (!image) {
@@ -87,6 +89,7 @@ export const createReadLesson = async (course, sequenceNumber, alias, activityTy
     }
 };
 
+
 export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {
     if (!questions) {
         alert('Please upload questions');
@@ -118,7 +121,8 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
     } else {
         alert('Error creating lesson');
     }
-}
+};
+
 
 export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {
     if (!questions) {
@@ -151,7 +155,41 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
     } else {
         alert('Error creating lesson');
     }
-}
+};
+
+
+export const createConversationalBotLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {
+    if (!questions) {
+        alert('Please upload questions');
+        return;
+    }
+    if (!sequenceNumber) {
+        alert('Please enter a sequence number');
+        return;
+    }
+    const lessonType = "week";
+
+    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
+    const lessonId = response.data.lesson.LessonId;
+    const questionResponses = await Promise.all(
+        questions.map((question, index) =>
+            createSpeakActivityQuestion(
+                question.questionText,
+                null,
+                null,
+                lessonId,
+                (index + 1).toString()
+            )
+        )
+    );
+
+    if (questionResponses.every(response => response.status === 200) && response.status === 200) {
+        alert('Lesson created successfully');
+    } else {
+        alert('Error creating lesson');
+    }
+};
+
 
 export const createMCQLesson = async (course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status) => {
     if (!mcqs) {
@@ -217,4 +255,4 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
     } else {
         alert('Error creating lesson');
     }
-}
+};

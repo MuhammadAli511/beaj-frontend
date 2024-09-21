@@ -389,6 +389,18 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                             </>
                                         )}
 
+                                        {activity === 'conversationalBot' && (
+                                            <>
+                                                <label className={styles.answerEditLabel}>Question Text</label>
+                                                <input
+                                                    className={styles.edit_input_field}
+                                                    type="text"
+                                                    value={question.question || ""}
+                                                    onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
+                                                />
+                                            </>
+                                        )}
+
                                         <button
                                             className={styles.delete_button}
                                             onClick={() => handleDeleteQuestion(question.id)}
@@ -520,6 +532,7 @@ const SpeakLesson = ({ category, course, activity }) => {
         'listenAndSpeak': 'Listen & Speak',
         'postListenAndSpeak': 'Post Listen & Speak',
         'preListenAndSpeak': 'Pre Listen & Speak',
+        'conversationalBot': 'Conversational Bot'
     };
 
     return (
