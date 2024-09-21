@@ -15,9 +15,19 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                     <thead>
                         <tr>
                             <th className={styles.table_heading}>Question Number</th>
-                            {activity !== 'watchAndSpeak' || 'conversationalBot' && <th className={styles.table_heading}>Question</th>}
-                            {activity !== 'watchAndSpeak' || 'conversationalBot' && <th className={styles.table_heading}>Answer</th>}
-                            <th className={styles.table_heading}>{activity === 'watchAndSpeak' ? 'Video' : 'Audio'}</th>
+                            {activity === 'watchAndSpeak' && (
+                                <th className={styles.table_heading}>Video</th>
+                            )}
+                            {(activity === 'listenAndSpeak' || activity === 'preListenAndSpeak' || activity === 'postListenAndSpeak') && (
+                                <>
+                                    <th className={styles.table_heading}>Question</th>
+                                    <th className={styles.table_heading}>Answer</th>
+                                    <th className={styles.table_heading}>Audio</th>
+                                </>
+                            )}
+                            {activity === 'conversationalBot' && (
+                                <th className={styles.table_heading}>Audio</th>
+                            )}
                         </tr>
                     </thead>
                     <tbody className={styles.table_body}>

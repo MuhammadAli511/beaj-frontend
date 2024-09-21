@@ -8,6 +8,7 @@ import {
     updateLesson,
     updateSpeakActivityQuestion,
     deleteSpeakActivityQuestion,
+    createSpeakActivityQuestion,
     migrateLesson
 } from "../../../../../helper";
 import edit from '../../../../../assets/images/edit.svg';
@@ -80,12 +81,11 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
     };
 
     const fetchAllData = async () => {
-        const promises = [
+        await Promise.all([
             fetchCourses(),
             fetchLessonData(),
             fetchActivityAliases(),
-        ];
-        await Promise.all(promises);
+        ]);
     };
 
     const handleCancel = () => {
@@ -129,22 +129,39 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 return;
             }
 
-            // Filter and update only the questions that were changed
+            // Filter and handle changed questions
             const changedQuestions = questions.filter(question => question.isChanged);
 
             for (let question of changedQuestions) {
-                const updateResponse = await updateSpeakActivityQuestion(
-                    question.id,
-                    question.question,
-                    question.mediaFile,
-                    question.answer,
-                    lesson.LessonId,
-                    question.questionNumber
-                );
+                if (question.id) {
+                    // Update existing question
+                    const updateResponse = await updateSpeakActivityQuestion(
+                        question.id,
+                        question.question,
+                        question.mediaFile,
+                        question.answer,
+                        lesson.LessonId,
+                        question.questionNumber
+                    );
 
-                if (updateResponse.status !== 200) {
-                    alert(updateResponse.data.message);
-                    return;
+                    if (updateResponse.status !== 200) {
+                        alert(updateResponse.data.message);
+                        return;
+                    }
+                } else {
+                    // Create new question
+                    const createResponse = await createSpeakActivityQuestion(
+                        question.question,
+                        question.mediaFile,
+                        question.answer,
+                        lesson.LessonId,
+                        question.questionNumber
+                    );
+
+                    if (createResponse.status !== 200) {
+                        alert(createResponse.data.message);
+                        return;
+                    }
                 }
             }
 
@@ -213,6 +230,35 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 alert(error);
             }
         }
+    };
+
+    const addNewQuestion = () => {
+        let newQuestion = {
+            id: null,
+            questionNumber: questions.length + 1,
+            isChanged: true,
+        };
+        if (['listenAndSpeak', 'preListenAndSpeak', 'postListenAndSpeak'].includes(activity)) {
+            newQuestion = {
+                ...newQuestion,
+                question: '',
+                mediaFile: null,
+                answer: [''],
+            };
+        } else if (activity === 'watchAndSpeak') {
+            newQuestion = {
+                ...newQuestion,
+                question: '',
+                mediaFile: null,
+                answer: [''],
+            };
+        } else if (activity === 'conversationalBot') {
+            newQuestion = {
+                ...newQuestion,
+                question: '',
+            };
+        }
+        setQuestions([...questions, newQuestion]);
     };
 
     const sortedCourses = () => {
@@ -316,9 +362,8 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                     </select>
                                 </div>
 
-
                                 {questions.map((question, index) => (
-                                    <div key={question.id} className={styles.question_box}>
+                                    <div key={index} className={styles.question_box}>
                                         <label className={styles.answerEditLabel}>Question Number</label>
                                         <input
                                             className={styles.edit_input_field}
@@ -375,6 +420,36 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
 
                                         {activity === 'watchAndSpeak' && (
                                             <>
+                                                <label className={styles.answerEditLabel}>Question</label>
+                                                <input
+                                                    className={styles.edit_input_field}
+                                                    type="text"
+                                                    value={question.question || ""}
+                                                    onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
+                                                />
+                                                <label className={styles.answerEditLabel}>Answers</label>
+                                                {question.answer.map((ans, ansIndex) => (
+                                                    <div key={ansIndex} className={styles.answer_group}>
+                                                        <input
+                                                            className={styles.edit_input_field}
+                                                            type="text"
+                                                            value={ans}
+                                                            onChange={(e) => handleAnswerChange(index, ansIndex, e.target.value)}
+                                                        />
+                                                        <button
+                                                            className={styles.delete_button}
+                                                            onClick={() => removeAnswer(index, ansIndex)}
+                                                        >
+                                                            Remove Answer
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                <button
+                                                    className={styles.add_button}
+                                                    onClick={() => addNewAnswer(index)}
+                                                >
+                                                    Add New Answer
+                                                </button>
                                                 <label className={styles.answerEditLabel}>Upload Media File (Video)</label>
                                                 <input
                                                     type="file"
@@ -410,6 +485,12 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                     </div>
                                 ))}
 
+                                <button
+                                    className={styles.add_question_button}
+                                    onClick={addNewQuestion}
+                                >
+                                    Add New Question
+                                </button>
 
                                 <div className={styles.form_group_row}>
                                     <button
@@ -435,6 +516,8 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
         </div>
     );
 };
+
+
 
 
 const SpeakLesson = ({ category, course, activity }) => {
