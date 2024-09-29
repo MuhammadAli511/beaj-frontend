@@ -158,7 +158,7 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
 };
 
 
-export const createConversationalBotLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {
+export const createConversationalQuestionsBotLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {
     if (!questions) {
         alert('Please upload questions');
         return;

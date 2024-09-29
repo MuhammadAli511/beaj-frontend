@@ -308,6 +308,63 @@ export const deleteActivityAlias = async (aliasId) => {
 };
 
 
+// CONSTANT
+// API call to create a constant
+export const createConstant = async (key, constantValue, category) => {
+    const response = await fetch(`${API_URL}/waConstants/create`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ key, constantValue, category }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// API call to get all constants
+export const getAllConstants = async () => {
+    const response = await fetch(`${API_URL}/waConstants/getAll`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// API call to get a constant by ID
+export const getConstantById = async (constantName) => {
+    const response = await fetch(`${API_URL}/waConstants/getByKey/${constantName}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// API call to update a constant
+export const updateConstant = async (key, constantValue, category) => {
+    const response = await fetch(`${API_URL}/waConstants/update/${key}`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({ key, constantValue, category }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// API call to delete a constant
+export const deleteConstant = async (key) => {
+    const response = await fetch(`${API_URL}/waConstants/delete/${key}`, {
+        method: "DELETE",
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+
 // LESSON
 // API call to create a lesson
 export const createLesson = async (lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status) => {
@@ -712,6 +769,51 @@ export const createChatbotLog = async (userAudio, prompt) => {
 // API call to get chatbot stats
 export const getChatbotStats = async () => {
     const response = await fetch(`${API_URL}/wauser/getAllWaUsers`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+
+
+// METADATA
+// GET  api/waUserMetaData/getAll
+export const getAllMetadata = async () => {
+    const response = await fetch(`${API_URL}/waUserMetaData/getAll`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// GET api/waUserMetaData/getByPhoneNumber/:phoneNumber
+export const getMetadataByPhoneNumber = async (phoneNumber) => {
+    const response = await fetch(`${API_URL}/waUserMetaData/getByPhoneNumber/${phoneNumber}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+
+// ACTIVITY LOGS
+// GET  api/waUserActivityLogs/getAll
+export const getAllActivityLogs = async () => {
+    const response = await fetch(`${API_URL}/waUserActivityLogs/getAll`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// GET api/waUserActivityLogs/getByPhoneNumber/:phoneNumber
+export const getActivityLogsByPhoneNumber = async (phoneNumber) => {
+    const response = await fetch(`${API_URL}/waUserActivityLogs/getByPhoneNumber/${phoneNumber}`, {
         headers: getHeaders(),
     });
 

@@ -215,13 +215,22 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
         setQuestions(updatedQuestions);
     };
 
-    const handleDeleteQuestion = async (questionId) => {
+    const handleDeleteQuestion = async (questionId, index) => {
+        // If questionId is null, it means the question is new and hasn't been saved to the server yet
+        if (!questionId) {
+            // Remove the question locally without making an API call
+            const updatedQuestions = questions.filter((_, i) => i !== index);
+            setQuestions(updatedQuestions); // Update the state to remove the question from the UI
+            return;
+        }
+
         const isConfirmed = window.confirm("Are you sure you want to delete this question?");
         if (isConfirmed) {
             try {
                 const deleteResponse = await deleteSpeakActivityQuestion(questionId);
                 if (deleteResponse.status === 200) {
-                    setQuestions(questions.filter(q => q.id !== questionId));
+                    const updatedQuestions = questions.filter(q => q.id !== questionId);
+                    setQuestions(updatedQuestions); // Update the state after deletion
                     alert("Question deleted successfully");
                 } else {
                     alert(deleteResponse.data.message);
@@ -252,7 +261,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 mediaFile: null,
                 answer: [''],
             };
-        } else if (activity === 'conversationalBot') {
+        } else if (activity === 'conversationalQuestionsBot') {
             newQuestion = {
                 ...newQuestion,
                 question: '',
@@ -464,7 +473,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                             </>
                                         )}
 
-                                        {activity === 'conversationalBot' && (
+                                        {activity === 'conversationalQuestionsBot' && (
                                             <>
                                                 <label className={styles.answerEditLabel}>Question Text</label>
                                                 <input
@@ -478,7 +487,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
 
                                         <button
                                             className={styles.delete_button}
-                                            onClick={() => handleDeleteQuestion(question.id)}
+                                            onClick={() => handleDeleteQuestion(question.id, index)}
                                         >
                                             Delete Question
                                         </button>
@@ -615,7 +624,7 @@ const SpeakLesson = ({ category, course, activity }) => {
         'listenAndSpeak': 'Listen & Speak',
         'postListenAndSpeak': 'Post Listen & Speak',
         'preListenAndSpeak': 'Pre Listen & Speak',
-        'conversationalBot': 'Conversational Bot'
+        'conversationalQuestionsBot': 'Conversational Questions Bot'
     };
 
     return (

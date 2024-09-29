@@ -14,6 +14,7 @@ const Sidebar = () => {
         { name: "Content Manager", path: "/content-manager" },
         { name: "Chatbot Logs", path: "/chatbot-logs" },
         { name: "Chatbot Stats", path: "/chatbot-stats" },
+        { name: "Whatsapp Logs", path: "/whatsapp-logs" },
     ];
     const location = useLocation();
     return (

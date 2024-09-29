@@ -261,7 +261,7 @@ img {
 }
 
 .answer_group {
-  background-color: #4dd1e5;
+  border: solid 3px #4dd1e5;
   padding: 10px;
   border-radius: 10px;
 }

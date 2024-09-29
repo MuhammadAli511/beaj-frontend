@@ -29,7 +29,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                     <th className={styles.table_heading}>Audio</th>
                                 </>
                             )}
-                            {activity === 'conversationalBot' && (
+                            {activity === 'conversationalQuestionsBot' && (
                                 <th className={styles.table_heading}>Audio</th>
                             )}
                         </tr>
@@ -61,7 +61,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                         </td>
                                     </>
                                 )}
-                                {activity === 'conversationalBot' && (
+                                {activity === 'conversationalQuestionsBot' && (
                                     <>
                                         <td style={{ width: "5%" }}>{question.questionNumber}</td>
                                         <td style={{ width: "100%" }}>

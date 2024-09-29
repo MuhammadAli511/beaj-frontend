@@ -12,11 +12,11 @@ const Navbar = () => {
     return (
         <div className={styles.navbar}>
             <img className={styles.navbarLogo} src={navbar_logo} alt="logo" onClick={toggleSidebar} />
-            <div className={styles.menu_options}>
+            {/* <div className={styles.menu_options}>
                 <img className={styles.search} src={search} alt="search" />
                 <img className={styles.notification} src={notification} alt="notification" />
                 <GetUserImage />
-            </div>
+            </div> */}
         </div>
     );
 };
