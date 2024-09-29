@@ -32,6 +32,9 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                             {activity === 'conversationalQuestionsBot' && (
                                 <th className={styles.table_heading}>Audio</th>
                             )}
+                            {activity === 'conversationalMonologueBot' && (
+                                <th className={styles.table_heading}>Audio</th>
+                            )}
                         </tr>
                     </thead>
                     <tbody className={styles.table_body}>
@@ -62,6 +65,16 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                     </>
                                 )}
                                 {activity === 'conversationalQuestionsBot' && (
+                                    <>
+                                        <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                        <td style={{ width: "100%" }}>
+                                            <audio controls>
+                                                <source src={question.mediaFile} type="audio/mp3" />
+                                            </audio>
+                                        </td>
+                                    </>
+                                )}
+                                {activity === 'conversationalMonologueBot' && (
                                     <>
                                         <td style={{ width: "5%" }}>{question.questionNumber}</td>
                                         <td style={{ width: "100%" }}>

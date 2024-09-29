@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './CreateLesson.module.css';
 import { getAllCategories, getCoursesByCategoryId, getCourseById, getAllActivityAliases } from '../../../../helper';
 import JoditEditor from 'jodit-react';
-import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson, createConversationalQuestionsBotLesson } from '../../../../utils/createLessonFunctions';
+import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson, createConversationalBotLesson } from '../../../../utils/createLessonFunctions';
 
 const SelectField = ({ label, options, onChange, value, name, id }) => (
     <div className={styles.form_group}>
@@ -152,7 +152,7 @@ const CreateLesson = () => {
     };
 
 
-    // Conversational Questions Bot
+    // Conversational Bot
     const [botQuestions, setBotQuestions] = useState([{ questionText: '' }]);
 
     const handleBotQuestionChange = (index, event) => {
@@ -426,7 +426,9 @@ const CreateLesson = () => {
             } else if (activityType === 'watchAndSpeak') {
                 await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status);
             } else if (activityType === 'conversationalQuestionsBot') {
-                await createConversationalQuestionsBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
+                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
+            } else if (activityType === 'conversationalMonologueBot') {
+                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
             }
         } catch (error) {
             alert(error);
@@ -482,7 +484,8 @@ const CreateLesson = () => {
                         { value: 'postListenAndSpeak', label: 'Post-test Part 1 (Listen Speak)' },
                         { value: 'postMCQs', label: 'Post-test Part 2 (MCQs)' },
                         { value: 'placementtest', label: 'Placement Test' },
-                        { value: 'conversationalQuestionsBot', label: 'Conversational Questions Bot' }
+                        { value: 'conversationalQuestionsBot', label: 'Conversational Questions Bot' },
+                        { value: 'conversationalMonologueBot', label: 'Conversational Monologue Bot' }
                     ]} onChange={handleActivityTypeChange} value={activityType} name="activity_type" id="activity_type" />
                     <SelectField label="Status" options={[
                         { value: 'Active', label: 'Active' },
@@ -559,6 +562,25 @@ const CreateLesson = () => {
                     </>
                 )}
                 {activityType === 'conversationalQuestionsBot' && (
+                    <>
+                        <div className={styles.input_row}>
+                            <div className={styles.form_group}>
+                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
+                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            </div>
+                        </div>
+                        {botQuestions.map((question, qIndex) => (
+                            <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.input_row}>
+                                    <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleBotQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
+                                    {botQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeBotQuestion(qIndex, e)}>Remove Question</button>}
+                                </div>
+                            </div>
+                        ))}
+                        <button className={styles.add_button} onClick={(e) => addBotQuestion(e)}>Add Another Question</button>
+                    </>
+                )}
+                {activityType === 'conversationalMonologueBot' && (
                     <>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>

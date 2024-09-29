@@ -11,7 +11,7 @@ import MCQsLesson from './LessonTypes/MCQsLesson';
 const lessonTypes = [
     'Watch', 'Listen', 'Read', 'Listen & Speak', 'Watch & Speak',
     'MCQs', 'Pre Listen & Speak', 'Pre MCQs',
-    'Post Listen & Speak', 'Post MCQs', 'Placement Test', 'Conversational Questions Bot'
+    'Post Listen & Speak', 'Post MCQs', 'Placement Test', 'Conversational Questions Bot', 'Conversational Monologue Bot'
 ];
 
 const SelectField = ({ label, options, onChange, value, name, id }) => (
@@ -119,6 +119,8 @@ const ManageLesson = () => {
                 return <MCQsLesson category={category} course={course} activity='placementTest' />;
             case 'Conversational Questions Bot':
                 return <SpeakLesson category={category} course={course} activity='conversationalQuestionsBot' />;
+            case 'Conversational Monologue Bot':
+                return <SpeakLesson category={category} course={course} activity='conversationalMonologueBot' />;
             default:
                 return null;
         }
