@@ -58,7 +58,7 @@ const ManageAlias = () => {
         try {
             const response = await getAllActivityAliases();
             if (response.status === 200) {
-                setAliases(response.data);
+                setAliases(response.data.sort((a, b) => a.id - b.id));
             } else {
                 alert(response.data.message);
             }
