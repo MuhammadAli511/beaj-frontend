@@ -102,14 +102,18 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
     const lessonType = "week";
 
     const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
-    const answersArray = questions.map(question => question.answers.map(answer => answer.answerText));
     const lessonId = response.data.lesson.LessonId;
+
+    const answersArray = questions.map(question =>
+        question.answers.map(answer => `"${answer.answerText.replace(/"/g, '\\"')}"`)
+    );
+
     const questionResponses = await Promise.all(
         questions.map((question, index) =>
             createSpeakActivityQuestion(
                 question.questionText,
                 question.audio,
-                answersArray[index],
+                answersArray.join(","),
                 lessonId,
                 (index + 1).toString()
             )
@@ -136,14 +140,19 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
     const lessonType = "week";
 
     const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
-    const answersArray = questions.map(question => question.answers.map(answer => answer.answerText));
     const lessonId = response.data.lesson.LessonId;
+
+    // Wrap each answer in double quotes and escape double quotes inside the answers
+    const answersArray = questions.map(question =>
+        question.answers.map(answer => `"${answer.answerText.replace(/"/g, '\\"')}"`)
+    );
+
     const questionResponses = await Promise.all(
         questions.map((question, index) =>
             createSpeakActivityQuestion(
                 question.questionText,
                 question.video,
-                answersArray[index],
+                answersArray.join(","),
                 lessonId,
                 (index + 1).toString()
             )
@@ -156,6 +165,7 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
         alert('Error creating lesson');
     }
 };
+
 
 
 export const createConversationalBotLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {

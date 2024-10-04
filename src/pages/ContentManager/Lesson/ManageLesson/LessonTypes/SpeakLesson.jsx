@@ -133,13 +133,15 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
             const changedQuestions = questions.filter(question => question.isChanged);
 
             for (let question of changedQuestions) {
+                const formattedAnswers = question.answer.map(ans => `"${ans.replace(/"/g, '\\"')}"`);
                 if (question.id) {
                     // Update existing question
+                    console.log(formattedAnswers);
                     const updateResponse = await updateSpeakActivityQuestion(
                         question.id,
                         question.question,
                         question.mediaFile,
-                        question.answer,
+                        formattedAnswers.join(','),
                         lesson.LessonId,
                         question.questionNumber
                     );
@@ -153,7 +155,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                     const createResponse = await createSpeakActivityQuestion(
                         question.question,
                         question.mediaFile,
-                        question.answer,
+                        formattedAnswers.join(','),
                         lesson.LessonId,
                         question.questionNumber
                     );
