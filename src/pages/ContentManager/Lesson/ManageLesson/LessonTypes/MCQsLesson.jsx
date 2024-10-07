@@ -156,9 +156,10 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         alert(createQuestionResponse.data.message);
                         return;
                     }
+                    console.log("Create Question Response", createQuestionResponse);
 
                     // Handle answers for new question
-                    const questionId = createQuestionResponse.data.Id;
+                    const questionId = createQuestionResponse.data.mcq.Id;
                     for (let answer of question.answers) {
                         const createAnswerResponse = await createMultipleChoiceQuestionAnswer(
                             answer.answerText,
@@ -259,21 +260,33 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     };
 
     const addNewQuestion = () => {
-        setQuestions([
-            ...questions,
-            {
-                id: null,
-                questionType: "Text",
-                questionText: "",
-                questionImageUrl: null,
-                questionAudioUrl: null,
-                questionNumber: questions.length + 1,
-                optionsType: "Text",
-                answers: [{ text: "", isCorrect: false }],
-                isNew: true,
-            }
-        ]);
+        setQuestions((prevQuestions) => {
+            const newQuestionNumber = prevQuestions.length + 1;
+            return [
+                ...prevQuestions,
+                {
+                    id: null,
+                    questionType: "Text",
+                    questionText: "",
+                    questionImageUrl: null,
+                    questionAudioUrl: null,
+                    questionNumber: newQuestionNumber,
+                    optionsType: "Text",
+                    answers: [{
+                        id: null,
+                        answerText: "",
+                        answerImageUrl: null,
+                        answerAudioUrl: null,
+                        isCorrect: false,
+                        SequenceNumber: 1,
+                        isNew: true,
+                    }],
+                    isNew: true,
+                },
+            ];
+        });
     };
+
 
     const removeQuestion = (index) => {
         const questionToRemove = questions[index];
@@ -291,48 +304,59 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     };
 
     const addNewAnswer = (questionIndex) => {
-        const updatedQuestions = questions.map((question, i) => {
-            if (i === questionIndex) {
-                return { ...question, answers: [...question.answers, { text: "", isCorrect: false }], isChanged: true };
-            }
-            return question;
+        setQuestions((prevQuestions) => {
+            return prevQuestions.map((question, i) => {
+                if (i === questionIndex) {
+                    const newAnswer = {
+                        id: null,
+                        answerText: "",
+                        answerImageUrl: null,
+                        answerAudioUrl: null,
+                        isCorrect: false,
+                        SequenceNumber: question.answers.length + 1,
+                        isNew: true,
+                    };
+                    const updatedAnswers = [...question.answers, newAnswer];
+
+                    // Reassign SequenceNumbers
+                    const reassignedAnswers = updatedAnswers.map((answer, index) => ({
+                        ...answer,
+                        SequenceNumber: index + 1,
+                    }));
+
+                    return {
+                        ...question,
+                        answers: reassignedAnswers,
+                        isChanged: true,
+                    };
+                }
+                return question;
+            });
         });
-        setQuestions(updatedQuestions);
     };
 
     const removeAnswer = (questionIndex, answerIndex) => {
-        const question = questions[questionIndex];
-        const answerToRemove = question.answers[answerIndex];
-
-        if (answerToRemove.id) {
-            deleteMultipleChoiceQuestionAnswer(answerToRemove.id)
-                .then(response => {
-                    if (response.status === 200) {
-                        const updatedAnswers = question.answers.filter((_, ai) => ai !== answerIndex);
-                        const updatedQuestions = questions.map((q, i) => {
-                            if (i === questionIndex) {
-                                return { ...q, answers: updatedAnswers, isChanged: true };
-                            }
-                            return q;
-                        });
-                        setQuestions(updatedQuestions);
-                    } else {
-                        alert(response.data.message);
-                    }
-                })
-                .catch(error => {
-                    alert(error);
-                });
-        } else {
-            const updatedAnswers = question.answers.filter((_, ai) => ai !== answerIndex);
-            const updatedQuestions = questions.map((q, i) => {
+        setQuestions((prevQuestions) => {
+            return prevQuestions.map((question, i) => {
                 if (i === questionIndex) {
-                    return { ...q, answers: updatedAnswers, isChanged: true };
+                    const updatedAnswers = question.answers.filter((_, ai) => ai !== answerIndex);
+
+                    // Reassign SequenceNumbers
+                    const reassignedAnswers = updatedAnswers.map((answer, index) => ({
+                        ...answer,
+                        SequenceNumber: index + 1,
+                        isChanged: true,
+                    }));
+
+                    return {
+                        ...question,
+                        answers: reassignedAnswers,
+                        isChanged: true,
+                    };
                 }
-                return q;
+                return question;
             });
-            setQuestions(updatedQuestions);
-        }
+        });
     };
 
 
