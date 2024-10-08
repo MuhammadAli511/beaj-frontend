@@ -11,6 +11,7 @@ const WhatsappLogs = () => {
     const [activityLogs, setActivityLogs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedUserName, setSelectedUserName] = useState('');
+    const [hoveredLog, setHoveredLog] = useState(null); // For tooltip hover
 
     useEffect(() => {
         const fetchPhoneNumbers = async () => {
@@ -83,13 +84,13 @@ const WhatsappLogs = () => {
                                     <div
                                         key={log.id}
                                         className={
-                                            log.messageDirection == "outbound"
+                                            log.messageDirection === "outbound"
                                                 ? styles.message_outbound
                                                 : styles.message_inbound
                                         }
                                     >
                                         <div className={styles.message_content}>
-                                            {/* Check if the message is media or text */}
+                                            {/* Check if the message is media, text, or template */}
                                             {log.actionType === 'image' && (
                                                 <img src={log.messageContent} alt="User sent media" className={styles.media_message} />
                                             )}
@@ -106,10 +107,35 @@ const WhatsappLogs = () => {
                                                 </video>
                                             )}
                                             {log.actionType === 'text' && <p>{log.messageContent}</p>}
+                                            {log.actionType === 'template' && (
+                                                <div className={styles.template_message}>
+                                                    <p>{log.messageContent}</p>
+                                                </div>
+                                            )}
 
-                                            <span className={styles.message_timestamp}>
-                                                {new Date(log.timestamp).toLocaleString()}
-                                            </span>
+                                            {/* Timestamp */}
+                                            <div className={styles.message_footer}>
+                                                <div
+                                                    className={styles.info_icon}
+                                                    onMouseEnter={() => setHoveredLog(log)}
+                                                    onMouseLeave={() => setHoveredLog(null)}
+                                                >
+                                                    ℹ️
+                                                    {hoveredLog === log && (
+                                                        <div className={styles.tooltip}>
+                                                            <p><strong>Course ID:</strong> {log.courseId}</p>
+                                                            <p><strong>Lesson ID:</strong> {log.lessonId}</p>
+                                                            <p><strong>Week Number:</strong> {log.weekNumber}</p>
+                                                            <p><strong>Day Number:</strong> {log.dayNumber}</p>
+                                                            <p><strong>Activity Type:</strong> {log.activityType}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <span className={styles.message_timestamp}>
+                                                    {new Date(log.timestamp).toLocaleString()}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

@@ -54,17 +54,9 @@ export const createVideoLesson = async (course, sequenceNumber, alias, activityT
 };
 
 
-export const createReadLesson = async (course, sequenceNumber, alias, activityType, image, audio, urduAudio, lessonText, day, week, status) => {
-    if (!image) {
-        alert('Please upload an image');
-        return;
-    }
-    if (!audio) {
-        alert('Please upload an audio');
-        return;
-    }
-    if (!urduAudio) {
-        alert('Please upload an Urdu audio');
+export const createReadLesson = async (course, sequenceNumber, alias, activityType, video, lessonText, day, week, status) => {
+    if (!video) {
+        alert('Please upload an video');
         return;
     }
     if (!sequenceNumber) {
@@ -76,13 +68,9 @@ export const createReadLesson = async (course, sequenceNumber, alias, activityTy
     const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
     const lessonId = response.data.lesson.LessonId;
 
-    const [imageResponse, audioResponse, urduAudioResponse] = await Promise.all([
-        uploadDocumentFile(image, lessonId, "image", "image"),
-        uploadDocumentFile(audio, lessonId, "English", "audio"),
-        uploadDocumentFile(urduAudio, lessonId, "Urdu", "audio")
-    ]);
+    const videoResponse = await uploadDocumentFile(video, lessonId, "English", "video");
 
-    if (imageResponse.status === 200 && audioResponse.status === 200 && urduAudioResponse.status === 200 && response.status === 200) {
+    if (videoResponse.status === 200 && response.status === 200) {
         alert('Lesson created successfully');
     } else {
         alert('Error creating lesson');

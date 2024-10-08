@@ -82,19 +82,6 @@ const CreateLesson = () => {
     };
 
 
-    // Read
-    const [urduAudio, setUrduAudio] = useState(null);
-
-    const handleUrduAudioChange = (e) => {
-        const file = e.target.files[0];
-        if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
-            setUrduAudio(file);
-        } else {
-            alert('Please upload an MP3 audio not larger than 16MB.');
-        }
-    };
-
-
     // Watch and Speak
     const [wsQuestions, setWsQuestions] = useState([
         { questionText: '', video: '', answers: [{ answerText: '' }] }
@@ -418,7 +405,7 @@ const CreateLesson = () => {
             } else if (activityType === 'video') {
                 await createVideoLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status);
             } else if (activityType === 'read') {
-                await createReadLesson(course, sequenceNumber, alias, activityType, image, audio, urduAudio, lessonText, day, week, status);
+                await createReadLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status);
             } else if (activityType === 'listenAndSpeak' || activityType === 'preListenAndSpeak' || activityType === 'postListenAndSpeak') {
                 await createListenAndSpeakLesson(course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status);
             } else if (activityType === 'mcqs' || activityType === 'preMCQs' || activityType === 'postMCQs') {
@@ -443,7 +430,6 @@ const CreateLesson = () => {
             setImage(null);
             setAudio(null);
             setVideo(null);
-            setUrduAudio(null);
             setQuestions([{ questionText: '', audio: '', answers: [{ answerText: '' }] }]);
             setWsQuestions([{ questionText: '', video: '', answers: [{ answerText: '' }] }]);
             setMcqs([{
@@ -522,9 +508,7 @@ const CreateLesson = () => {
                 {activityType === 'read' && (
                     <>
                         <div className={styles.input_row}>
-                            <InputField label="Upload Image" type="file" onChange={handleImageChange} name="image" id="image" fileInput />
-                            <InputField label="Upload Audio" type="file" onChange={handleAudioChange} name="audio" id="audio" fileInput />
-                            <InputField label="Upload Urdu Audio" type="file" onChange={handleUrduAudioChange} name="urduAudio" id="urduAudio" fileInput />
+                            <InputField label="Upload Video" type="file" onChange={handleVideoChange} name="video" id="video" fileInput />
                         </div>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
