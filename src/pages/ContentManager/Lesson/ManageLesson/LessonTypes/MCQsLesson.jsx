@@ -195,7 +195,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
 
                     // Handle answers for updated question
                     for (let answer of question.answers) {
-                        if (answer.isNew) {
+                        if (answer.isNew && !answer.isDeleted) {
                             const createAnswerResponse = await createMultipleChoiceQuestionAnswer(
                                 answer.answerText,
                                 answer.file || null,
@@ -209,7 +209,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                 alert(createAnswerResponse.data.message);
                                 return;
                             }
-                        } else if (answer.isChanged) {
+                        } else if (answer.isChanged && !answer.isDeleted) {
                             const updateAnswerResponse = await updateMultipleChoiceQuestionAnswer(
                                 answer.id,
                                 answer.answerText,
@@ -222,6 +222,12 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
 
                             if (updateAnswerResponse.status !== 200) {
                                 alert(updateAnswerResponse.data.message);
+                                return;
+                            }
+                        } else if (!answer.isNew && answer.isDeleted) {
+                            const deleteAnswerResponse = await deleteMultipleChoiceQuestionAnswer(answer.id);
+                            if (deleteAnswerResponse.status !== 200) {
+                                alert(deleteAnswerResponse.data.message);
                                 return;
                             }
                         }
@@ -339,14 +345,17 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         setQuestions((prevQuestions) => {
             return prevQuestions.map((question, i) => {
                 if (i === questionIndex) {
-                    const updatedAnswers = question.answers.filter((_, ai) => ai !== answerIndex);
+                    const updatedAnswers = question.answers.map((answer, ai) =>
+                        ai === answerIndex ? { ...answer, isDeleted: true, isChanged: true } : answer
+                    );
 
-                    // Reassign SequenceNumbers
-                    const reassignedAnswers = updatedAnswers.map((answer, index) => ({
-                        ...answer,
-                        SequenceNumber: index + 1,
-                        isChanged: true,
-                    }));
+                    // Reassign SequenceNumbers for non-deleted answers
+                    const reassignedAnswers = updatedAnswers.map((answer, index) => {
+                        if (!answer.isDeleted) {
+                            return { ...answer, SequenceNumber: index + 1 };
+                        }
+                        return answer;
+                    });
 
                     return {
                         ...question,
@@ -358,6 +367,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
             });
         });
     };
+
+
 
 
     const sortedCourses = () => {
@@ -603,36 +614,38 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
 
                                         {renderQuestionInputs(question, qIndex)}
 
-                                        {question.answers.map((answer, aIndex) => (
-                                            <div key={aIndex} className={styles.answer_group}>
-                                                <div className={styles.input_row}>
-                                                    <label className={styles.label}>Answer</label>
-                                                    <input
-                                                        className={styles.input_field}
-                                                        type="text"
-                                                        value={answer.answerText}
-                                                        onChange={(e) => handleAnswerChange(qIndex, aIndex, "answerText", e.target.value)}
-                                                    />
+                                        {question.answers
+                                            .filter((answer) => !answer.isDeleted)
+                                            .map((answer, aIndex) => (
+                                                <div key={aIndex} className={styles.answer_group}>
+                                                    <div className={styles.input_row}>
+                                                        <label className={styles.label}>Answer</label>
+                                                        <input
+                                                            className={styles.input_field}
+                                                            type="text"
+                                                            value={answer.answerText}
+                                                            onChange={(e) => handleAnswerChange(qIndex, aIndex, "answerText", e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <div className={styles.input_row_correct}>
+                                                        <label className={styles.label}>Correct</label>
+                                                        <input
+                                                            className={styles.input_field}
+                                                            type="checkbox"
+                                                            checked={answer.isCorrect}
+                                                            onChange={(e) => handleAnswerChange(qIndex, aIndex, "isCorrect", e.target.checked)}
+                                                        />
+                                                        {question.answers.length > 1 && (
+                                                            <button
+                                                                className={styles.remove_button}
+                                                                onClick={() => removeAnswer(qIndex, aIndex)}
+                                                            >
+                                                                Remove Answer
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className={styles.input_row_correct}>
-                                                    <label className={styles.label}>Correct</label>
-                                                    <input
-                                                        className={styles.input_field}
-                                                        type="checkbox"
-                                                        checked={answer.isCorrect}
-                                                        onChange={(e) => handleAnswerChange(qIndex, aIndex, "isCorrect", e.target.checked)}
-                                                    />
-                                                    {question.answers.length > 1 && (
-                                                        <button
-                                                            className={styles.remove_button}
-                                                            onClick={() => removeAnswer(qIndex, aIndex)}
-                                                        >
-                                                            Remove Answer
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
+                                            ))}
                                         {question.answers.length < 4 && (
                                             <button className={styles.add_button} onClick={() => addNewAnswer(qIndex)}>Add Answer</button>
                                         )}
