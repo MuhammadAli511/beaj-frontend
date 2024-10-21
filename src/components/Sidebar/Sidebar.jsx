@@ -12,8 +12,9 @@ const Sidebar = () => {
     const menuItems = [
         { name: "Dashboard", path: "/dashboard" },
         { name: "Content Manager", path: "/content-manager" },
-        { name: "Chatbot Logs", path: "/chatbot-logs" },
+        { name: "Prompt Playground", path: "/prompt-playground" },
         { name: "Chatbot Stats", path: "/chatbot-stats" },
+        { name: "Purchase Course", path: "/purchase-course" },
         { name: "Whatsapp Logs", path: "/whatsapp-logs" },
     ];
     const location = useLocation();

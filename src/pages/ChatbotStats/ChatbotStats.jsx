@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar, Sidebar } from "../../components";
 import styles from './ChatbotStats.module.css';
-import { getChatbotStats } from "../../helper";
 import { useSidebar } from '../../components/SidebarContext';
 import CSVDownloader from 'react-csv-downloader';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -16,18 +15,6 @@ const ChatbotStats = () => {
     const totalCorrectAnswers = chatbotStats.reduce((acc, user) => acc + user.totalCorrect, 0);
     const totalWrongAnswers = chatbotStats.reduce((acc, user) => acc + user.totalWrong, 0);
     const totalLessonsCompleted = chatbotStats.reduce((acc, user) => acc + user.lessonsCompleted, 0);
-
-    useEffect(() => {
-        fetchChatbotStats();
-    }, []);
-
-    const fetchChatbotStats = () => {
-        getChatbotStats()
-            .then(response => {
-                setChatbotStats(response.data);
-            })
-            .catch(error => console.error('Error fetching chatbot stats:', error));
-    };
 
     const sortedStats = [...chatbotStats].sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key]) {
@@ -89,8 +76,10 @@ const ChatbotStats = () => {
             <Navbar />
             {isSidebarOpen && <Sidebar />}
             <div className={styles.content}>
-                <h1>Course Chatbot Stats</h1>
-                <div className={styles.stats_summary}>
+                <h1>Chatbot Stats</h1>
+                {/* Coming soon */}
+                <p>Coming soon...</p>
+                {/* <div className={styles.stats_summary}>
                     <p className={styles.stats_summary_text}>Total Users: {chatbotStats.length}</p>
                     <p className={styles.stats_summary_text}>Questions Attempted: {totalQuestionsAttempted}</p>
                     <p className={styles.stats_summary_text}>Correct Answers: {totalCorrectAnswers}</p>
@@ -157,7 +146,7 @@ const ChatbotStats = () => {
                             ))}
                         </tbody>
                     </table>
-                </div>
+                </div> */}
             </div>
         </div>
     );

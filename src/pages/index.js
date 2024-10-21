@@ -7,6 +7,7 @@ import BeajOperations from './BeajOperations/BeajOperations';
 import ChatbotLogs from './ChatbotLogs/ChatbotLogs';
 import ChatbotStats from './ChatbotStats/ChatbotStats';
 import WhatsappLogs from './WhatsappLogs/WhatsappLogs';
+import PurchaseCourse from './PurchaseCourse/PurchaseCourse';
 
 export {
     NotFound,
@@ -17,6 +18,7 @@ export {
     BeajOperations,
     ChatbotLogs,
     ChatbotStats,
-    WhatsappLogs
+    WhatsappLogs,
+    PurchaseCourse
 };
 

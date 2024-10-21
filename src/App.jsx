@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, HashRouter as Router, Routes } from "react-router-dom";
-import { NotFound, Login, Dashboard, ContentManager, UserData, BeajOperations, WhatsappLogs, ChatbotLogs, ChatbotStats } from "./pages";
+import { NotFound, Login, Dashboard, ContentManager, UserData, BeajOperations, WhatsappLogs, ChatbotLogs, ChatbotStats, PurchaseCourse } from "./pages";
 import { SidebarProvider } from './components/SidebarContext';
 
 function App() {
@@ -14,9 +14,10 @@ function App() {
           <Route path="/content-manager" element={<ContentManager />} />
           <Route path="/user-data" element={<UserData />} />
           <Route path="/beaj-operations" element={<BeajOperations />} />
-          <Route path="/chatbot-logs" element={<ChatbotLogs />} />
+          <Route path="/prompt-playground" element={<ChatbotLogs />} />
           <Route path="/chatbot-stats" element={<ChatbotStats />} />
           <Route path="/whatsapp-logs" element={<WhatsappLogs />} />
+          <Route path="/purchase-course" element={<PurchaseCourse />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </SidebarProvider>
