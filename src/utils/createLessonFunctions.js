@@ -92,20 +92,21 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
     const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
     const lessonId = response.data.lesson.LessonId;
 
-    const answersArray = questions.map(question =>
-        question.answers.map(answer => `"${answer.answerText.replace(/"/g, '\\"')}"`)
-    );
-
     const questionResponses = await Promise.all(
-        questions.map((question, index) =>
-            createSpeakActivityQuestion(
+        questions.map((question, index) => {
+            // Construct answersArray specific to the current question
+            const answersArray = question.answers
+                .map(answer => `"${answer.answerText.replace(/"/g, '\\"')}"`)
+                .join(",");
+
+            return createSpeakActivityQuestion(
                 question.questionText,
                 question.audio,
-                answersArray.join(","),
+                answersArray,
                 lessonId,
                 (index + 1).toString()
-            )
-        )
+            );
+        })
     );
 
     if (questionResponses.every(response => response.status === 200) && response.status === 200) {
@@ -130,21 +131,21 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
     const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
     const lessonId = response.data.lesson.LessonId;
 
-    // Wrap each answer in double quotes and escape double quotes inside the answers
-    const answersArray = questions.map(question =>
-        question.answers.map(answer => `"${answer.answerText.replace(/"/g, '\\"')}"`)
-    );
-
     const questionResponses = await Promise.all(
-        questions.map((question, index) =>
-            createSpeakActivityQuestion(
+        questions.map((question, index) => {
+            // Construct answersArray specific to the current question
+            const answersArray = question.answers
+                .map(answer => `"${answer.answerText.replace(/"/g, '\\"')}"`)
+                .join(",");
+
+            return createSpeakActivityQuestion(
                 question.questionText,
                 question.video,
-                answersArray.join(","),
+                answersArray,
                 lessonId,
                 (index + 1).toString()
-            )
-        )
+            );
+        })
     );
 
     if (questionResponses.every(response => response.status === 200) && response.status === 200) {
@@ -153,7 +154,6 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
         alert('Error creating lesson');
     }
 };
-
 
 
 export const createConversationalBotLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {

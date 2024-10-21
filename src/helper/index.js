@@ -311,10 +311,21 @@ export const deleteActivityAlias = async (aliasId) => {
 // CONSTANT
 // API call to create a constant
 export const createConstant = async (key, constantValue, category) => {
+    const formData = new FormData();
+    formData.append('key', key);
+    formData.append('category', category);
+    if (typeof constantValue === 'object') {
+        formData.append('file', constantValue);
+    } else {
+        formData.append('constantValue', constantValue);
+    }
+
     const response = await fetch(`${API_URL}/waConstants/create`, {
         method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ key, constantValue, category }),
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: formData,
     });
 
     const data = await response.json();
@@ -343,10 +354,22 @@ export const getConstantById = async (constantName) => {
 
 // API call to update a constant
 export const updateConstant = async (key, constantValue, category) => {
+    const formData = new FormData();
+
+    formData.append('key', key);
+    formData.append('category', category);
+    if (typeof constantValue === 'object') {
+        formData.append('file', constantValue);
+    } else {
+        formData.append('constantValue', constantValue);
+    }
+
     const response = await fetch(`${API_URL}/waConstants/update/${key}`, {
         method: "PUT",
-        headers: getHeaders(),
-        body: JSON.stringify({ key, constantValue, category }),
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: formData,
     });
 
     const data = await response.json();
@@ -736,10 +759,10 @@ export const deleteMultipleChoiceQuestionAnswer = async (multipleChoiceQuestionA
 };
 
 
-// CHATBOT
-// API call to get all chatbot logs
-export const getAllChatbotLogs = async () => {
-    const response = await fetch(`${API_URL}/chatbot/getallfeedback`, {
+// Audio Chat
+// API call to get all audio chats
+export const getAllAudioChatLogs = async () => {
+    const response = await fetch(`${API_URL}/audioChat/getallfeedback`, {
         headers: getHeaders(),
     });
 
@@ -748,13 +771,13 @@ export const getAllChatbotLogs = async () => {
 };
 
 // API call to create a chatbot log
-export const createChatbotLog = async (userAudio, prompt) => {
+export const createAudioChatLog = async (userAudio, prompt) => {
     const formData = new FormData();
     formData.append('file', userAudio);
     formData.append('prompt', prompt);
     console.log(formData);
 
-    const response = await fetch(`${API_URL}/chatbot/feedback`, {
+    const response = await fetch(`${API_URL}/audioChat/feedback`, {
         method: "POST",
         headers: {
             'Authorization': `Bearer ${getToken()}`
