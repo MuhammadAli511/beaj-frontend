@@ -145,6 +145,13 @@
   text-align: left;
 }
 
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+
 @media (max-width: 1000px) {
   .content {
     margin-left: 0;

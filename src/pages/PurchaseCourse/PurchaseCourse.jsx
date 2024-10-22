@@ -5,19 +5,22 @@ import {
     getAllMetadata,
     getMetadataByPhoneNumber,
     assignTargetGroup,
-    getAllCourses,
+    getAllCoursesByPhoneNumber,
     getPurchasedCoursesByPhoneNumber,
     getUnpurchasedCoursesByPhoneNumber,
     getCompletedCourses,
     purchaseCourse
 } from "../../helper";
 import { useSidebar } from '../../components/SidebarContext';
+import { TailSpin } from 'react-loader-spinner';
 
 const PurchaseCourse = () => {
     const { isSidebarOpen } = useSidebar();
     const [phoneNumbers, setPhoneNumbers] = useState([]);
     const [selectedPhoneNumber, setSelectedPhoneNumber] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loadingUsers, setLoadingUsers] = useState(false); // User list loading state
+    const [loadingUserDetails, setLoadingUserDetails] = useState(false); // User details loading state
+    const [loadingCourses, setLoadingCourses] = useState(false);
     const [selectedUserData, setSelectedUserData] = useState(null); // State to hold the selected user's metadata
     const [error, setError] = useState(null); // State to handle any errors
     const [targetGroup, setTargetGroup] = useState('');
@@ -27,6 +30,7 @@ const PurchaseCourse = () => {
     // Fetch user list on component mount
     useEffect(() => {
         const fetchPhoneNumbers = async () => {
+            setLoadingUsers(true);
             try {
                 const response = await getAllMetadata();
                 if (response.data && Array.isArray(response.data)) {
@@ -36,6 +40,8 @@ const PurchaseCourse = () => {
                 }
             } catch (error) {
                 console.error("Error fetching metadata:", error);
+            } finally {
+                setLoadingUsers(false);
             }
         };
         fetchPhoneNumbers();
@@ -45,7 +51,7 @@ const PurchaseCourse = () => {
     useEffect(() => {
         const fetchCourses = async () => {
             if (!selectedPhoneNumber) return; // Fetch only if a user is selected
-            setLoading(true);
+            setLoadingCourses(true);
             setError(null);
 
             try {
@@ -62,7 +68,7 @@ const PurchaseCourse = () => {
                         break;
                     case 'all':
                     default:
-                        response = await getAllCourses(); // Fetch all courses
+                        response = await getAllCoursesByPhoneNumber(selectedPhoneNumber); // Fetch all courses
                         break;
                 }
 
@@ -75,7 +81,7 @@ const PurchaseCourse = () => {
                 console.error("Error fetching courses:", error);
                 setError('Failed to fetch courses.');
             } finally {
-                setLoading(false);
+                setLoadingCourses(false);
             }
         };
 
@@ -84,7 +90,7 @@ const PurchaseCourse = () => {
 
     const handleUserClick = async (phoneNumber) => {
         setSelectedPhoneNumber(phoneNumber);
-        setLoading(true);
+        setLoadingUserDetails(true);
         setError(null); // Reset error state
         setSelectedUserData(null); // Clear previous data
 
@@ -101,7 +107,7 @@ const PurchaseCourse = () => {
             console.error("Error fetching user data:", error);
             setError("Failed to fetch user details");
         } finally {
-            setLoading(false);
+            setLoadingUserDetails(false);
         }
     };
 
@@ -117,7 +123,6 @@ const PurchaseCourse = () => {
 
             if (response.status === 200) {
                 alert('Target group assigned successfully.');
-
                 // Re-fetch the user data to reflect the updated target group
                 const updatedUserResponse = await getMetadataByPhoneNumber(selectedPhoneNumber);
                 if (updatedUserResponse.status === 200) {
@@ -136,7 +141,7 @@ const PurchaseCourse = () => {
 
     // Handle course purchase
     const handlePurchase = async (courseId) => {
-        setLoading(true);
+        setLoadingCourses(true);
         setError(null);
 
         try {
@@ -153,7 +158,7 @@ const PurchaseCourse = () => {
             console.error("Error purchasing course:", error);
             setError('Failed to purchase course.');
         } finally {
-            setLoading(false);
+            setLoadingCourses(false);
         }
     };
 
@@ -165,26 +170,34 @@ const PurchaseCourse = () => {
                 <div className={styles.logs_container}>
                     <div className={styles.phone_list}>
                         <h3 className={styles.heading_color}>Users</h3>
-                        <ul>
-                            {phoneNumbers.length > 0 ? (
-                                phoneNumbers.map((user) => (
-                                    <li
-                                        key={user.phoneNumber}
-                                        className={selectedPhoneNumber === user.phoneNumber ? styles.active : ''}
-                                        onClick={() => handleUserClick(user.phoneNumber)}
-                                    >
-                                        {user.name || user.phoneNumber}
-                                    </li>
-                                ))
-                            ) : (
-                                <p>No users found</p>
-                            )}
-                        </ul>
+                        {loadingUsers ? (
+                            <div className={styles.loader}>
+                                <TailSpin color="#51bbcc" height={50} width={50} />
+                            </div>
+                        ) : (
+                            <ul>
+                                {phoneNumbers.length > 0 ? (
+                                    phoneNumbers.map((user) => (
+                                        <li
+                                            key={user.phoneNumber}
+                                            className={selectedPhoneNumber === user.phoneNumber ? styles.active : ''}
+                                            onClick={() => handleUserClick(user.phoneNumber)}
+                                        >
+                                            {user.name || user.phoneNumber}
+                                        </li>
+                                    ))
+                                ) : (
+                                    <p>No users found</p>
+                                )}
+                            </ul>
+                        )}
                     </div>
                     <div className={styles.person_details_section}>
                         <div className={styles.person_container}>
-                            {loading ? (
-                                <p>Loading...</p>
+                            {loadingUserDetails ? (
+                                <div className={styles.loader}>
+                                    <TailSpin color="#51bbcc" height={50} width={50} />
+                                </div>
                             ) : error ? (
                                 <p className={styles.error_message}>{error}</p>
                             ) : selectedUserData ? (
@@ -194,7 +207,7 @@ const PurchaseCourse = () => {
                                     <p><strong>Name: </strong> {selectedUserData.name ? selectedUserData.name : "N/A"}</p>
                                     <p><strong>Phone Number: </strong> {selectedUserData.phoneNumber}</p>
                                     <p><strong>City, District: </strong> {selectedUserData.city ? selectedUserData.city : "N/A"}</p>
-                                    <p><strong>Scholarship: </strong> {selectedUserData.email} {selectedUserData.scholarship ? selectedUserData.scholarship : "N/A"}</p>
+                                    <p><strong>Scholarship: </strong> {selectedUserData.email} {selectedUserData.scholarshipvalue ? selectedUserData.scholarshipvalue : "N/A"}</p>
 
                                     <h2 className={styles.personal_details_heading}>Target Group</h2>
                                     {selectedUserData.targetGroup ? (
@@ -267,19 +280,21 @@ const PurchaseCourse = () => {
 
                                     {/* Course Listing */}
                                     <div className={styles.course_list}>
-                                        {loading ? (
-                                            <p>Loading...</p>
+                                        {loadingCourses ? (
+                                            <div className={styles.loader}>
+                                                <TailSpin color="#51bbcc" height={50} width={50} />
+                                            </div>
                                         ) : error ? (
                                             <p>{error}</p>
                                         ) : courses.length > 0 ? (
                                             courses.map((course) => (
-                                                <div key={course.id} className={styles.course_item}>
+                                                <div key={course.CourseId} className={styles.course_item}>
                                                     <h3>{course.CourseName}</h3>
-                                                    <p>Status: {course.status}</p>
+                                                    <p>Status: {course.user_status}</p>
                                                     {activeTab === 'unpurchased' && (
                                                         <button
                                                             className={styles.purchase_button}
-                                                            onClick={() => handlePurchase(course.id)}
+                                                            onClick={() => handlePurchase(course.CourseId)}
                                                         >
                                                             Purchase Course
                                                         </button>

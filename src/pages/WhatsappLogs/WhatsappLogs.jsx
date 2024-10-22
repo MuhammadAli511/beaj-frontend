@@ -3,18 +3,21 @@ import { Navbar, Sidebar } from "../../components";
 import styles from './WhatsappLogs.module.css';
 import { getAllMetadata, getActivityLogsByPhoneNumber } from "../../helper";
 import { useSidebar } from '../../components/SidebarContext';
+import { TailSpin } from 'react-loader-spinner';
 
 const WhatsappLogs = () => {
     const { isSidebarOpen } = useSidebar();
     const [phoneNumbers, setPhoneNumbers] = useState([]);
     const [selectedPhoneNumber, setSelectedPhoneNumber] = useState(null);
     const [activityLogs, setActivityLogs] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [usersLoading, setUsersLoading] = useState(false);
+    const [messagesLoading, setMessagesLoading] = useState(false);
     const [selectedUserName, setSelectedUserName] = useState('');
     const [hoveredLog, setHoveredLog] = useState(null); // For tooltip hover
 
     useEffect(() => {
         const fetchPhoneNumbers = async () => {
+            setUsersLoading(true);
             try {
                 const response = await getAllMetadata();
                 if (response.data && Array.isArray(response.data)) {
@@ -24,6 +27,8 @@ const WhatsappLogs = () => {
                 }
             } catch (error) {
                 console.error("Error fetching metadata:", error);
+            } finally {
+                setUsersLoading(false);
             }
         };
         fetchPhoneNumbers();
@@ -31,7 +36,7 @@ const WhatsappLogs = () => {
 
     useEffect(() => {
         if (selectedPhoneNumber) {
-            setLoading(true);
+            setMessagesLoading(true);
             const fetchLogs = async () => {
                 try {
                     const logs = await getActivityLogsByPhoneNumber(selectedPhoneNumber);
@@ -41,7 +46,7 @@ const WhatsappLogs = () => {
                 } catch (error) {
                     console.error("Error fetching activity logs:", error);
                 } finally {
-                    setLoading(false);
+                    setMessagesLoading(false);
                 }
             };
             fetchLogs();
@@ -56,28 +61,36 @@ const WhatsappLogs = () => {
                 <div className={styles.logs_container}>
                     <div className={styles.phone_list}>
                         <h3 className={styles.heading_color}>Contacts</h3>
-                        <ul>
-                            {phoneNumbers.length > 0 ? (
-                                phoneNumbers.map((user) => (
-                                    <li
-                                        key={user.phoneNumber}
-                                        className={selectedPhoneNumber === user.phoneNumber ? styles.active : ''}
-                                        onClick={() => setSelectedPhoneNumber(user.phoneNumber)}
-                                    >
-                                        {user.name || user.phoneNumber}
-                                    </li>
-                                ))
-                            ) : (
-                                <p>No contacts found</p>
-                            )}
-                        </ul>
+                        {usersLoading ? (
+                            <div className={styles.loader}>
+                                <TailSpin color="#51bbcc" height={50} width={50} />
+                            </div>
+                        ) : (
+                            <ul>
+                                {phoneNumbers.length > 0 ? (
+                                    phoneNumbers.map((user) => (
+                                        <li
+                                            key={user.phoneNumber}
+                                            className={selectedPhoneNumber === user.phoneNumber ? styles.active : ''}
+                                            onClick={() => setSelectedPhoneNumber(user.phoneNumber)}
+                                        >
+                                            {user.name || user.phoneNumber}
+                                        </li>
+                                    ))
+                                ) : (
+                                    <p>No contacts found</p>
+                                )}
+                            </ul>
+                        )}
                     </div>
 
                     {/* Right Panel for Activity Logs */}
                     <div className={styles.activity_logs}>
                         <h3>Messages with {selectedUserName || "Select a contact"}</h3>
-                        {loading ? (
-                            <p>Loading messages...</p>
+                        {messagesLoading ? (
+                            <div className={styles.loader}>
+                                <TailSpin color="#00BFFF" height={50} width={50} />
+                            </div>
                         ) : activityLogs.length > 0 ? (
                             <div className={styles.chat_container}>
                                 {activityLogs.map((log) => (

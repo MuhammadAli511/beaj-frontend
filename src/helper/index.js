@@ -343,8 +343,8 @@ export const getAllConstants = async () => {
 };
 
 // API call to get a constant by ID
-export const getConstantById = async (constantName) => {
-    const response = await fetch(`${API_URL}/waConstants/getByKey/${constantName}`, {
+export const getConstantById = async (key) => {
+    const response = await fetch(`${API_URL}/waConstants/getByKey/${key}`, {
         headers: getHeaders(),
     });
 
@@ -847,7 +847,15 @@ export const getActivityLogsByPhoneNumber = async (phoneNumber) => {
 
 
 // PURCHASED COURSES
-// GET api/
+// GET api/waPurchasedCourses/getAllCoursesByPhoneNumber
+export const getAllCoursesByPhoneNumber = async (phoneNumber) => {
+    const response = await fetch(`${API_URL}/waPurchasedCourses/getAllCoursesByPhoneNumber/${phoneNumber}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
 
 // GET api/waPurchasedCourses/getPurchasedCoursesByPhoneNumber
 export const getPurchasedCoursesByPhoneNumber = async (phoneNumber) => {
@@ -883,9 +891,21 @@ export const purchaseCourse = async (phoneNumber, courseId) => {
 
 
 // COMPLETED COURSES
-// GET api/completedCourses/getCompletedCourses
+// GET api/waPurchasedCourses/getCompletedCourses
 export const getCompletedCourses = async (phoneNumber) => {
-    const response = await fetch(`${API_URL}/completedCourses/getCompletedCourses/${phoneNumber}`, {
+    const response = await fetch(`${API_URL}/waPurchasedCourses/getCompletedCourses/${phoneNumber}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+
+// STATS
+// GET api/stats/dashboardCardsFunnel
+export const getDashboardCardsFunnel = async () => {
+    const response = await fetch(`${API_URL}/stats/dashboardCardsFunnel`, {
         headers: getHeaders(),
     });
 
