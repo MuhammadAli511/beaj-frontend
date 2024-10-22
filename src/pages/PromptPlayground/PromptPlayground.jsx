@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar, Sidebar } from "../../components";
-import styles from './ChatbotLogs.module.css';
+import styles from './PromptPlayground.module.css';
 import { getAllAudioChatLogs, createAudioChatLog } from "../../helper";
 import promptText from '../../constants/prompt';
 import { useSidebar } from '../../components/SidebarContext';
 
-const ChatbotLogs = () => {
+const PromptPlayground = () => {
     const { isSidebarOpen } = useSidebar();
     const [chatbotLogs, setChatbotLogs] = useState([]);
     const [audioFile, setAudioFile] = useState(null);
@@ -125,4 +125,4 @@ const ChatbotLogs = () => {
     );
 }
 
-export default ChatbotLogs;
+export default PromptPlayground;

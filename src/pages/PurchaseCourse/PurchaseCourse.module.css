@@ -49,6 +49,108 @@
   color: white;
 }
 
+.person_details_section {
+  width: 80%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #ddd;
+  background-color: #fefefe;
+}
+
+.person_container {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.personal_details_heading {
+  margin-top: 40px;
+  margin-bottom: 10px;
+}
+
+.target_group_section {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f1f3f4;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.target_group_section p {
+  margin-bottom: 10px;
+}
+
+.target_group_section select {
+  padding: 8px;
+  width: 200px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.target_group_section button {
+  padding: 8px 15px;
+  background-color: #51bbcc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.target_group_section button:hover {
+  background-color: #3ca0b3;
+}
+
+.course_list {
+  margin-top: 20px;
+}
+
+.course_item {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+}
+
+.purchase_button {
+  background-color: #51bbcc;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.purchase_button:hover {
+  background-color: #3ca0b3;
+}
+
+.tabs {
+  margin-top: 30px;
+}
+
+.tabs button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.tabs .active_tab {
+  background-color: #ddd;
+}
+
+.tabs button:hover {
+  background-color: #ddd;
+}
+
 @media (max-width: 1000px) {
   .content {
     margin-left: 0;

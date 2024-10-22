@@ -812,6 +812,17 @@ export const getMetadataByPhoneNumber = async (phoneNumber) => {
     return { status: response.status, data };
 };
 
+export const assignTargetGroup = async (phoneNumber, targetGroup) => {
+    const response = await fetch(`${API_URL}/waUserMetaData/assignTargetGroup`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ phoneNumber, targetGroup }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
 
 // ACTIVITY LOGS
 // GET  api/waUserActivityLogs/getAll
@@ -827,6 +838,54 @@ export const getAllActivityLogs = async () => {
 // GET api/waUserActivityLogs/getByPhoneNumber/:phoneNumber
 export const getActivityLogsByPhoneNumber = async (phoneNumber) => {
     const response = await fetch(`${API_URL}/waUserActivityLogs/getByPhoneNumber/${phoneNumber}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+
+// PURCHASED COURSES
+// GET api/
+
+// GET api/waPurchasedCourses/getPurchasedCoursesByPhoneNumber
+export const getPurchasedCoursesByPhoneNumber = async (phoneNumber) => {
+    const response = await fetch(`${API_URL}/waPurchasedCourses/getPurchasedCoursesByPhoneNumber/${phoneNumber}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// GET api/waPurchasedCourses/getUnpurchasedCoursesByPhoneNumber
+export const getUnpurchasedCoursesByPhoneNumber = async (phoneNumber) => {
+    const response = await fetch(`${API_URL}/waPurchasedCourses/getUnpurchasedCoursesByPhoneNumber/${phoneNumber}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+}
+
+// POST api/waPurchasedCourses/purchaseCourse
+export const purchaseCourse = async (phoneNumber, courseId) => {
+    const response = await fetch(`${API_URL}/waPurchasedCourses/purchaseCourse`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ phoneNumber, courseId }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+
+// COMPLETED COURSES
+// GET api/completedCourses/getCompletedCourses
+export const getCompletedCourses = async (phoneNumber) => {
+    const response = await fetch(`${API_URL}/completedCourses/getCompletedCourses/${phoneNumber}`, {
         headers: getHeaders(),
     });
 
