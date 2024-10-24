@@ -119,17 +119,27 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         try {
             setIsSaving(true);
 
+            const updatedLessonData = {
+                ...lessonData,
+                courseId: document.getElementById("course_id").value,
+                SequenceNumber: document.getElementById("SequenceNumber").value,
+                weekNumber: document.getElementById("weekNumber").value,
+                dayNumber: document.getElementById("dayNumber").value,
+                activityAlias: document.getElementById("activity_alias").value,
+                status: document.getElementById("status").value,
+            };
+
             // Save the updated lesson data
             const updateLessonResponse = await updateLesson(
-                lessonData.LessonId,
-                lessonData.lessonType,
-                lessonData.dayNumber,
-                lessonData.activity,
-                lessonData.activityAlias,
-                lessonData.weekNumber,
-                lessonData.text,
-                lessonData.courseId,
-                lessonData.SequenceNumber,
+                updatedLessonData.LessonId,
+                updatedLessonData.lessonType,
+                updatedLessonData.dayNumber,
+                updatedLessonData.activity,
+                updatedLessonData.activityAlias,
+                updatedLessonData.weekNumber,
+                updatedLessonData.text,
+                updatedLessonData.courseId,
+                updatedLessonData.SequenceNumber,
                 lessonData.status,
             );
 

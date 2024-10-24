@@ -135,8 +135,6 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
             for (let question of changedQuestions) {
                 const formattedAnswers = question.answer.map(ans => `"${ans.replace(/"/g, '\\"')}"`);
                 if (question.id) {
-                    // Update existing question
-                    console.log(formattedAnswers);
                     const updateResponse = await updateSpeakActivityQuestion(
                         question.id,
                         question.question,
