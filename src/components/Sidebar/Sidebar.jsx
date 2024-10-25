@@ -13,7 +13,7 @@ const Sidebar = () => {
         { name: "Dashboard", path: "/dashboard" },
         { name: "Content Manager", path: "/content-manager" },
         { name: "Prompt Playground", path: "/prompt-playground" },
-        { name: "Chatbot Stats", path: "/chatbot-stats" },
+        { name: "Users Data", path: "/users-data" },
         { name: "Purchase Course", path: "/purchase-course" },
         { name: "Whatsapp Logs", path: "/whatsapp-logs" },
     ];

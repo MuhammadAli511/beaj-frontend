@@ -5,7 +5,7 @@ import ContentManager from './ContentManager/ContentManager';
 import UserData from './UserData/UserData';
 import BeajOperations from './BeajOperations/BeajOperations';
 import PromptPlayground from './PromptPlayground/PromptPlayground';
-import ChatbotStats from './ChatbotStats/ChatbotStats';
+import UsersData from './UsersData/UsersData';
 import WhatsappLogs from './WhatsappLogs/WhatsappLogs';
 import PurchaseCourse from './PurchaseCourse/PurchaseCourse';
 
@@ -17,7 +17,7 @@ export {
     UserData,
     BeajOperations,
     PromptPlayground,
-    ChatbotStats,
+    UsersData,
     WhatsappLogs,
     PurchaseCourse
 };
