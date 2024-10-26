@@ -51,12 +51,15 @@ const Dashboard = () => {
         fetchFunnelStats();
     }, []);
 
-    // Safely handle the stats and avoid errors if a field is missing
     const formatPercentage = (percentage) => {
         if (isNaN(percentage) || percentage === null || percentage === undefined) {
             return "0%";
         }
-        return `${percentage}%`;
+        if (percentage < 0) {
+            return `+${Math.abs(percentage)}%`;
+        } else {
+            return `-${percentage}%`;
+        }
     };
 
     const stats = [
@@ -118,7 +121,7 @@ const Dashboard = () => {
                             <div key={index} className={styles.card}>
                                 <h3>{stat.label}</h3>
                                 <p className={styles.value}>{stat.value}</p>
-                                <p className={styles.percentage}>{stat.percentage} drop</p>
+                                <p className={styles.percentage}>{stat.percentage}</p>
                             </div>
                         ))
                     )}
