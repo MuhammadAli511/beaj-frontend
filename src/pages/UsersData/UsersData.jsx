@@ -9,6 +9,10 @@ const UsersData = () => {
     const { isSidebarOpen } = useSidebar();
     const [userData, setUserData] = useState([]);
 
+    const escapeCommas = (field) => {
+        return field && field.includes(",") ? `"${field}"` : field;
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -16,6 +20,10 @@ const UsersData = () => {
                 const formattedData = data.data.map(user => ({
                     ...user,
                     phoneNumber: user.phoneNumber ? `${user.phoneNumber}` : "",
+                    name: escapeCommas(user.name),
+                    city: escapeCommas(user.city),
+                    scholarshipvalue: user.scholarshipvalue ? `${user.scholarshipvalue}` : "",
+                    targetGroup: user.targetGroup ? `${user.targetGroup}` : "",
                     freeDemoStarted: user.freeDemoStarted ? new Date(user.freeDemoStarted).toLocaleString().replace(",", "") : "",
                     freeDemoEnded: user.freeDemoEnded ? new Date(user.freeDemoEnded).toLocaleString().replace(",", "") : "",
                     userClickedLink: user.userClickedLink ? new Date(user.userClickedLink).toLocaleString().replace(",", "") : "",
