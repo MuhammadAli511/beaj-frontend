@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './CreateCourse.module.css';
 import { getAllCategories, createCourse } from '../../../../helper';
-import JoditEditor from 'jodit-react';
 
 
 const CreateCourse = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [categories, setCategories] = useState([]);
-    const editor = useRef(null);
-    const [content, setContent] = useState('');
 
 
     useEffect(() => {
@@ -37,12 +34,12 @@ const CreateCourse = () => {
             const course_category = e.target.course_category.value;
             const course_status = course_price == '0' ? 'free' : 'paid';
             const sequence_number = e.target.sequence_number.value;
-            const course_description = content;
-            const response = await createCourse(course_name, course_price, course_weeks, course_category, course_status, sequence_number, course_description);
+            const course_description = '';
+            const course_start_date = e.target.course_start_date.value;
+            const response = await createCourse(course_name, course_price, course_weeks, course_category, course_status, sequence_number, course_description, course_start_date);
             if (response.status === 200) {
                 alert('Course created successfully');
                 e.target.reset();
-                setContent('');
             } else {
                 alert(response.data.message);
             }
@@ -88,14 +85,8 @@ const CreateCourse = () => {
                         </select>
                     </div>
                     <div className={styles.form_group}>
-                        <label className={styles.label} htmlFor="course_description">Course Description</label>
-                        <JoditEditor
-                            ref={editor}
-                            value={content}
-                            tabIndex={1}
-                            onBlur={newContent => setContent(newContent)}
-                            onChange={newContent => { setContent(newContent) }}
-                        />
+                        <label className={styles.label} htmlFor="course_start_date">Course Start Date</label>
+                        <input className={styles.input_field} type="date" id="course_start_date" name="course_start_date" />
                     </div>
                 </div>
 

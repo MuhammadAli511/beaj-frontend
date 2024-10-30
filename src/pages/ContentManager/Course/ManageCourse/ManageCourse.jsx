@@ -16,6 +16,7 @@ const EditCourseModal = ({ isOpen, onClose, course, onSave }) => {
     const [courseStatus, setCourseStatus] = useState(course ? course.status : '');
     const [sequenceNumber, setSequenceNumber] = useState(course ? course.SequenceNumber : 0);
     const [courseDescription, setCourseDescription] = useState(course ? course.CourseDescription : '');
+    const [courseStartDate, setCourseStartDate] = useState(course ? course.courseStartDate : '');
     const editor = useRef(null);
 
     useEffect(() => {
@@ -27,6 +28,7 @@ const EditCourseModal = ({ isOpen, onClose, course, onSave }) => {
             setCourseStatus(course.status);
             setSequenceNumber(course.SequenceNumber);
             setCourseDescription(course.CourseDescription);
+            setCourseStartDate(course.courseStartDate);
         }
     }, [course]);
 
@@ -53,7 +55,7 @@ const EditCourseModal = ({ isOpen, onClose, course, onSave }) => {
     }
 
     const handleSave = () => {
-        onSave(course.CourseId, courseName, coursePrice, courseWeeks, courseCategory, courseStatus, sequenceNumber, courseDescription);
+        onSave(course.CourseId, courseName, coursePrice, courseWeeks, courseCategory, courseStatus, sequenceNumber, courseDescription, courseStartDate);
         onClose();
     };
 
@@ -110,6 +112,13 @@ const EditCourseModal = ({ isOpen, onClose, course, onSave }) => {
                         />
                     </div>
                 </div>
+                <div className={styles.input_row}>
+                    <div className={styles.form_group}>
+                        {/* Start Dtae */}
+                        <label className={styles.label} htmlFor="courseStartDate">Course Start Date</label>
+                        <input className={styles.input_field} type="date" value={courseStartDate} onChange={e => setCourseStartDate(e.target.value)} id="courseStartDate" />
+                    </div>
+                </div>
                 <button className={styles.submit_button} onClick={handleSave}>Save Changes</button>
                 <button className={styles.cancel_button} onClick={handleCancel}>Cancel</button>
             </div>
@@ -149,6 +158,8 @@ const ManageCourse = () => {
             const response = await getAllCourses();
             if (response.status === 200) {
                 setCourses(response.data);
+                const filteredCourses = response.data.filter(course => categoryNames[course.CourseCategoryId] === "Chatbot Courses - Teachers");
+                setCourses(filteredCourses);
                 await fetchCategoryNames(response.data);
             } else {
                 alert(response.data.message);
@@ -192,10 +203,10 @@ const ManageCourse = () => {
         }
     };
 
-    const saveCourseChanges = async (courseId, course_name, course_price, course_weeks, course_category, course_status, sequence_number, course_description) => {
+    const saveCourseChanges = async (courseId, course_name, course_price, course_weeks, course_category, course_status, sequence_number, course_description, course_start_date) => {
         try {
             setIsLoading(true);
-            const response = await updateCourse(courseId, course_name, course_price, course_weeks, course_category, course_status, sequence_number, course_description);
+            const response = await updateCourse(courseId, course_name, course_price, course_weeks, course_category, course_status, sequence_number, course_description, course_start_date);
             if (response.status === 200) {
                 alert('Course updated successfully');
                 fetchCourses();
@@ -228,7 +239,7 @@ const ManageCourse = () => {
                             <th className={styles.table_heading}>Course Weeks</th>
                             <th className={styles.table_heading}>Course Category</th>
                             <th className={styles.table_heading}>Course Status</th>
-                            <th className={styles.table_heading}>Course Description</th>
+                            <th className={styles.table_heading}>Course Start Date</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
@@ -242,9 +253,7 @@ const ManageCourse = () => {
                                 <td>{course.CourseWeeks}</td>
                                 <td>{categoryNames[course.CourseCategoryId]}</td>
                                 <td>{course.status}</td>
-                                <td className={styles.description} >
-                                    <p className={styles.description_text} dangerouslySetInnerHTML={{ __html: course.CourseDescription }}></p>
-                                </td>
+                                <td>{course.courseStartDate ? new Date(course.courseStartDate).toLocaleDateString() : ''}</td>
                                 <td><img onClick={() => openEditModal(course)} className={styles.edit} src={edit} alt="edit" /></td>
                                 <td><img onClick={() => handleDeleteCourse(course.CourseId)} className={styles.delete} src={deleteIcon} alt="delete" /></td>
                             </tr>

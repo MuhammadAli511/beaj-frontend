@@ -102,11 +102,11 @@ export const deleteCategory = async (categoryId) => {
 
 // COURSE
 // API call to create a course
-export const createCourse = async (courseName, coursePrice, courseWeeks, courseCategoryId, status, sequenceNumber, courseDescription) => {
+export const createCourse = async (courseName, coursePrice, courseWeeks, courseCategoryId, status, sequenceNumber, courseDescription, courseStartDate) => {
     const response = await fetch(`${API_URL}/course/create`, {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({ courseName, coursePrice, courseWeeks, courseCategoryId, status, sequenceNumber, courseDescription }),
+        body: JSON.stringify({ courseName, coursePrice, courseWeeks, courseCategoryId, status, sequenceNumber, courseDescription, courseStartDate }),
     });
 
     const data = await response.json();
@@ -144,11 +144,11 @@ export const getCourseById = async (courseId) => {
 };
 
 // API call to update a course
-export const updateCourse = async (courseId, courseName, coursePrice, courseWeeks, courseCategoryId, courseStatus, sequenceNumber, courseDescription) => {
+export const updateCourse = async (courseId, courseName, coursePrice, courseWeeks, courseCategoryId, courseStatus, sequenceNumber, courseDescription, courseStartDate) => {
     const response = await fetch(`${API_URL}/course/update/${courseId}`, {
         method: "PUT",
         headers: getHeaders(),
-        body: JSON.stringify({ courseName, coursePrice, courseWeeks, courseCategoryId, courseStatus, sequenceNumber, courseDescription }),
+        body: JSON.stringify({ courseName, coursePrice, courseWeeks, courseCategoryId, courseStatus, sequenceNumber, courseDescription, courseStartDate }),
     });
 
     const data = await response.json();
