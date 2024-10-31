@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './ManageCourse.module.css';
 import edit from '../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../assets/images/delete.svg';
-import { updateCourse, deleteCourse, getAllCourses, getAllCategories } from '../../../../helper';
+import { updateCourse, deleteCourse, getAllCourses, getAllCategories, duplicateCourse } from '../../../../helper';
 import JoditEditor from 'jodit-react';
 
 
@@ -134,6 +134,7 @@ const ManageCourse = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [duplicationLoading, setDuplicationLoading] = useState({});
 
     const fetchCategoryNames = async () => {
         try {
@@ -157,10 +158,9 @@ const ManageCourse = () => {
         try {
             const response = await getAllCourses();
             if (response.status === 200) {
-                setCourses(response.data);
-                const filteredCourses = response.data.filter(course => categoryNames[course.CourseCategoryId] === "Chatbot Courses - Teachers");
+                // if coursecategoryid is 66 or 68
+                const filteredCourses = response.data.filter(course => course.CourseCategoryId === 66 || course.CourseCategoryId === 68);
                 setCourses(filteredCourses);
-                await fetchCategoryNames(response.data);
             } else {
                 alert(response.data.message);
             }
@@ -203,6 +203,25 @@ const ManageCourse = () => {
         }
     };
 
+    const handleDuplicateCourse = async (courseId) => {
+        if (window.confirm('Are you sure you want to duplicate this course?')) {
+            try {
+                setDuplicationLoading(prev => ({ ...prev, [courseId]: true }));
+                const response = await duplicateCourse(courseId);
+                if (response.status === 200) {
+                    alert('Course duplicated successfully');
+                    fetchCourses();
+                } else {
+                    alert(response.data.message);
+                }
+            } catch (error) {
+                alert(error);
+            } finally {
+                setDuplicationLoading(prev => ({ ...prev, [courseId]: false }));
+            }
+        }
+    };
+
     const saveCourseChanges = async (courseId, course_name, course_price, course_weeks, course_category, course_status, sequence_number, course_description, course_start_date) => {
         try {
             setIsLoading(true);
@@ -240,12 +259,13 @@ const ManageCourse = () => {
                             <th className={styles.table_heading}>Course Category</th>
                             <th className={styles.table_heading}>Course Status</th>
                             <th className={styles.table_heading}>Course Start Date</th>
+                            <th className={styles.table_heading}>Duplicate Course</th>
                             <th className={styles.table_heading}>Edit</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
                     </thead>
                     <tbody className={styles.table_body}>
-                        {courses.map((course, index) => (
+                        {courses.map((course) => (
                             <tr key={course.CourseId} className={styles.table_row}>
                                 <td className={styles.sequence_number}>{course.SequenceNumber}</td>
                                 <td>{course.CourseName}</td>
@@ -253,7 +273,16 @@ const ManageCourse = () => {
                                 <td>{course.CourseWeeks}</td>
                                 <td>{categoryNames[course.CourseCategoryId]}</td>
                                 <td>{course.status}</td>
-                                <td>{course.courseStartDate ? new Date(course.courseStartDate).toLocaleDateString() : ''}</td>
+                                <td>{course.courseStartDate ? new Date(course.courseStartDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</td>
+                                <td>
+                                    <button
+                                        className={styles.duplicateButton}
+                                        onClick={() => handleDuplicateCourse(course.CourseId)}
+                                        disabled={duplicationLoading[course.CourseId]}
+                                    >
+                                        {duplicationLoading[course.CourseId] ? <div className="loader"></div> : "Duplicate"}
+                                    </button>
+                                </td>
                                 <td><img onClick={() => openEditModal(course)} className={styles.edit} src={edit} alt="edit" /></td>
                                 <td><img onClick={() => handleDeleteCourse(course.CourseId)} className={styles.delete} src={deleteIcon} alt="delete" /></td>
                             </tr>

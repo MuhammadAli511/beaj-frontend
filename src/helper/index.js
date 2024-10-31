@@ -177,6 +177,18 @@ export const getCoursesByCategoryId = async (categoryId) => {
     return { status: response.status, data };
 };
 
+// API call to duplicate a course
+export const duplicateCourse = async (courseId) => {
+    const response = await fetch(`${API_URL}/course/duplicateCourse`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ courseId }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
 
 // COURSE WEEK
 // API call to create a course week
