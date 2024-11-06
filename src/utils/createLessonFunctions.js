@@ -169,23 +169,45 @@ export const createConversationalBotLesson = async (course, sequenceNumber, alia
 
     const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
     const lessonId = response.data.lesson.LessonId;
-    const questionResponses = await Promise.all(
-        questions.map((question, index) =>
-            createSpeakActivityQuestion(
-                question.questionText,
-                null,
-                null,
-                lessonId,
-                (index + 1).toString()
-            )
-        )
-    );
 
-    if (questionResponses.every(response => response.status === 200) && response.status === 200) {
-        alert('Lesson created successfully');
-    } else {
-        alert('Error creating lesson');
+    if (activityType == "conversationalQuestionsBot") {
+        const questionResponses = await Promise.all(
+            questions.map((question, index) =>
+                createSpeakActivityQuestion(
+                    question.questionText,
+                    null,
+                    null,
+                    lessonId,
+                    (index + 1).toString()
+                )
+            )
+        );
+
+        if (questionResponses.every(response => response.status === 200) && response.status === 200) {
+            alert('Lesson created successfully');
+        } else {
+            alert('Error creating lesson');
+        }
+    } else if (activityType == "conversationalMonologueBot") {
+        const questionResponses = await Promise.all(
+            questions.map((question, index) =>
+                createSpeakActivityQuestion(
+                    null,
+                    question.video,
+                    null,
+                    lessonId,
+                    (index + 1).toString()
+                )
+            )
+        );
+
+        if (questionResponses.every(response => response.status === 200) && response.status === 200) {
+            alert('Lesson created successfully');
+        } else {
+            alert('Error creating lesson');
+        }
     }
+
 };
 
 

@@ -139,7 +139,7 @@ const CreateLesson = () => {
     };
 
 
-    // Conversational Bot
+    // Conversational Questions Bot
     const [botQuestions, setBotQuestions] = useState([{ questionText: '' }]);
 
     const handleBotQuestionChange = (index, event) => {
@@ -159,6 +159,35 @@ const CreateLesson = () => {
             const newBotQuestions = [...botQuestions];
             newBotQuestions.splice(index, 1);
             setBotQuestions(newBotQuestions);
+        }
+    };
+
+
+    // Conversational Monologue Bot (will contain videos only)
+    const [monologueQuestions, setMonologueQuestions] = useState([{ video: '' }]);
+
+    const handleMonologueQuestionChange = (index, event) => {
+        const newMonologueQuestions = [...monologueQuestions];
+        const file = event.target.files[0];
+        if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
+            newMonologueQuestions[index][event.target.name] = file;
+        } else {
+            alert('Please upload an MP4 video not larger than 16MB.');
+        }
+        setMonologueQuestions(newMonologueQuestions);
+    };
+
+    const addMonologueQuestion = (event) => {
+        event.preventDefault();
+        setMonologueQuestions([...monologueQuestions, { video: '' }]);
+    };
+
+    const removeMonologueQuestion = (index, event) => {
+        event.preventDefault();
+        if (monologueQuestions.length > 1) {
+            const newMonologueQuestions = [...monologueQuestions];
+            newMonologueQuestions.splice(index, 1);
+            setMonologueQuestions(newMonologueQuestions);
         }
     };
 
@@ -415,7 +444,7 @@ const CreateLesson = () => {
             } else if (activityType === 'conversationalQuestionsBot') {
                 await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
             } else if (activityType === 'conversationalMonologueBot') {
-                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
+                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, monologueQuestions, lessonText, day, week, status);
             }
         } catch (error) {
             alert(error);
@@ -437,6 +466,7 @@ const CreateLesson = () => {
                 answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false }))
             }]);
             setBotQuestions([{ questionText: '' }]);
+            setMonologueQuestions([{ video: '' }]);
         }
     }
 
@@ -572,15 +602,15 @@ const CreateLesson = () => {
                                 <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
                             </div>
                         </div>
-                        {botQuestions.map((question, qIndex) => (
+                        {monologueQuestions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
-                                    <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleBotQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
-                                    {botQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeBotQuestion(qIndex, e)}>Remove Question</button>}
+                                    <InputField label={`Upload Video`} type="file" onChange={e => handleMonologueQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
+                                    {monologueQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeMonologueQuestion(qIndex, e)}>Remove Question</button>}
                                 </div>
                             </div>
                         ))}
-                        <button className={styles.add_button} onClick={(e) => addBotQuestion(e)}>Add Another Question</button>
+                        <button className={styles.add_button} onClick={(e) => addMonologueQuestion(e)}>Add Another Question</button>
                     </>
                 )}
                 {activityType === 'watchAndSpeak' && (

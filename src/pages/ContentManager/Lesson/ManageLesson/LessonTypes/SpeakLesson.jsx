@@ -487,8 +487,14 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
 
                                         {activity === 'conversationalMonologueBot' && (
                                             <>
-                                                <label className={styles.answerEditLabel}>Question Text</label>
-                                                <input className={styles.edit_input_field} type="text" value={question.question || ""} onChange={(e) => handleQuestionChange(index, 'question', e.target.value)} />
+                                                <label className={styles.answerEditLabel}>Question Video</label>
+                                                <input type="file" onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])} />
+                                                {question.mediaFile && (
+                                                    <div className={styles.mediaSection}>
+                                                        <label className={styles.answerEditLabel}>Current Video:</label>
+                                                        <video controls src={question.mediaFile} className={styles.videoSmall}></video>
+                                                    </div>
+                                                )}
                                             </>
                                         )}
 

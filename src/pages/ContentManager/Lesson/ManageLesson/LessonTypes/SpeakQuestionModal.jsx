@@ -33,7 +33,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                 <th className={styles.table_heading}>Audio</th>
                             )}
                             {activity === 'conversationalMonologueBot' && (
-                                <th className={styles.table_heading}>Audio</th>
+                                <th className={styles.table_heading}>Video</th>
                             )}
                         </tr>
                     </thead>
@@ -52,7 +52,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                         </td>
                                     </>
                                 )}
-                                {(activity === 'listenAndSpeak' || activity === 'preListenAndSpeak' || activity === 'postListenAndSpeak') && (
+                                {(activity == 'listenAndSpeak' || activity == 'preListenAndSpeak' || activity == 'postListenAndSpeak') && (
                                     <>
                                         <td style={{ width: "5%" }}>{question.questionNumber}</td>
                                         <td style={{ width: "20%" }}>{question.question}</td>
@@ -64,7 +64,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                         </td>
                                     </>
                                 )}
-                                {activity === 'conversationalQuestionsBot' && (
+                                {activity == 'conversationalQuestionsBot' && (
                                     <>
                                         <td style={{ width: "5%" }}>{question.questionNumber}</td>
                                         <td style={{ width: "100%" }}>
@@ -74,13 +74,13 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                         </td>
                                     </>
                                 )}
-                                {activity === 'conversationalMonologueBot' && (
+                                {activity == 'conversationalMonologueBot' && (
                                     <>
                                         <td style={{ width: "5%" }}>{question.questionNumber}</td>
                                         <td style={{ width: "100%" }}>
-                                            <audio controls>
-                                                <source src={question.mediaFile} type="audio/mp3" />
-                                            </audio>
+                                            <video controls className={styles.video}>
+                                                <source src={question.mediaFile} type="video/mp4" />
+                                            </video>
                                         </td>
                                     </>
                                 )}
