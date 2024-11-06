@@ -29,7 +29,6 @@ const UsersData = () => {
                     userClickedLink: user.userClickedLink ? new Date(user.userClickedLink).toLocaleString().replace(",", "") : "",
                     userRegistrationComplete: user.userRegistrationComplete ? new Date(user.userRegistrationComplete).toLocaleString().replace(",", "") : ""
                 }));
-                console.log("formattedData", formattedData);
                 setUserData(formattedData);
             } catch (error) {
                 console.error("Error fetching user data:", error);

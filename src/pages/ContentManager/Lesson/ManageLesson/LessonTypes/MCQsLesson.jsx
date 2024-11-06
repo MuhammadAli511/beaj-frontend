@@ -166,7 +166,6 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         alert(createQuestionResponse.data.message);
                         return;
                     }
-                    console.log("Create Question Response", createQuestionResponse);
 
                     // Handle answers for new question
                     const questionId = createQuestionResponse.data.mcq.Id;
@@ -754,7 +753,6 @@ const MCQsLesson = ({ category, course, activity }) => {
         if (migrateResponse.status !== 200) {
             alert(migrateResponse.data.message);
         } else {
-            console.log(migrateResponse.data);
             alert("Lesson migrated successfully.");
         }
         closeMigrateLessonModal();

@@ -1,105 +1,136 @@
 .content {
-    background-color: #F1F3F4;
-    overflow-y: auto;
-    margin-top: 20px;
+  background-color: #f1f3f4;
+  overflow-y: auto;
+  margin-top: 20px;
 }
 
 .form_group {
-    display: flex;
-    flex-direction: column;
-    margin-top: 20px;
-    width: 100%;
-    margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 .heading {
-    color: #000;
-    text-align: center;
-    font-family: 'Poppins', sans-serif;
-    font-size: 36px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
+  color: #000;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .input_row {
-    display: flex;
-    gap: 200px;
+  display: flex;
+  gap: 200px;
 }
 
 .label {
-    color: #000;
-    font-family: 'Poppins', sans-serif;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    margin-bottom: 2px;
+  color: #000;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 2px;
 }
 
 .input_field {
-    border: 1px solid #51BBCC;
-    background: #FFF;
-    border-radius: 10px;
-    height: 46px;
-    width: 100%;
-    outline: none;
-    padding-left: 10px;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
+  border: 1px solid #51bbcc;
+  background: #fff;
+  border-radius: 10px;
+  height: 46px;
+  width: 100%;
+  outline: none;
+  padding-left: 10px;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
-
 .tabs button {
-    padding: 10px;
-    margin: 5px;
-    background-color: #eaf7f9;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    border-radius: 8px;
-    border: 1px solid #c2e7ed;
-    flex: 1;
+  padding: 10px;
+  margin: 5px;
+  background-color: #eaf7f9;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid #c2e7ed;
+  flex: 1;
 }
 
 .tabs button.active {
-    background-color: #c2e7ed;
-    ;
-    color: black;
+  background-color: #c2e7ed;
+  color: black;
 }
 
 .tabs {
-    display: flex;
-    justify-content: flex-start;
+  display: flex;
+  justify-content: flex-start;
 }
 
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
 
+.table_heading {
+  text-align: left;
+  padding: 10px;
+  background-color: #f2f2f2;
+  border-bottom: 2px solid #000;
+}
+
+.table_body tr {
+  border-bottom: 1px solid #ccc;
+}
+
+.table_row td {
+  padding: 10px;
+  border-right: 1px solid #ccc;
+  vertical-align: top;
+}
+
+.table_row td:first-child {
+  border-left: 1px solid #ccc;
+}
+
+.table_heading {
+  text-align: left;
+  padding-bottom: 10px;
+}
+
+.table_body {
+  border-top: 1px solid #000;
+}
 
 @media (max-width: 1000px) {
-    .heading {
-        font-size: 24px;
-    }
+  .heading {
+    font-size: 24px;
+  }
 
-    .input_row {
-        flex-direction: column;
-        gap: 0px;
-    }
+  .input_row {
+    flex-direction: column;
+    gap: 0px;
+  }
 
-    .label {
-        font-size: 16px;
-    }
+  .label {
+    font-size: 16px;
+  }
 
-    .input_field {
-        width: 100%;
-    }
+  .input_field {
+    width: 100%;
+  }
 
-    .submit_button {
-        width: 100%;
-    }
+  .submit_button {
+    width: 100%;
+  }
 
-    .tabs {
-        overflow-x: auto;
-    }
+  .tabs {
+    overflow-x: auto;
+  }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ManageLesson.module.css';
-import { getAllCategories, getCoursesByCategoryId } from '../../../../helper';
+import { getAllCategories, getCoursesByCategoryId, getLessonsByCourse } from '../../../../helper';
 
 import WatchLesson from './LessonTypes/WatchLesson';
 import ListenLesson from './LessonTypes/ListenLesson';
@@ -9,7 +9,7 @@ import SpeakLesson from './LessonTypes/SpeakLesson';
 import MCQsLesson from './LessonTypes/MCQsLesson';
 
 const lessonTypes = [
-    'Watch', 'Listen', 'Read', 'Listen & Speak', 'Watch & Speak',
+    'All', 'Watch', 'Listen', 'Read', 'Listen & Speak', 'Watch & Speak',
     'MCQs', 'Pre Listen & Speak', 'Pre MCQs',
     'Post Listen & Speak', 'Post MCQs', 'Placement Test', 'Conversational Questions Bot', 'Conversational Monologue Bot'
 ];
@@ -31,7 +31,8 @@ const ManageLesson = () => {
     const [category, setCategory] = useState('');
     const [course, setCourse] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState('Watch');
+    const [activeTab, setActiveTab] = useState('All');
+    const [lessons, setLessons] = useState([]);
 
     useEffect(() => {
         const fetchCategoriesAndDefaultCourses = async () => {
@@ -93,8 +94,70 @@ const ManageLesson = () => {
         setCourse(e.target.value);
     };
 
+
+    useEffect(() => {
+        const fetchLessons = async () => {
+            setIsLoading(true);
+            try {
+                const lessonsResponse = await getLessonsByCourse(course);
+                if (lessonsResponse.status === 200) {
+                    const sortedLessons = lessonsResponse.data.sort((a, b) => {
+                        if (a.weekNumber !== b.weekNumber) {
+                            return a.weekNumber - b.weekNumber;
+                        }
+                        if (a.dayNumber !== b.dayNumber) {
+                            return a.dayNumber - b.dayNumber;
+                        }
+                        return a.SequenceNumber - b.SequenceNumber;
+                    });
+                    setLessons(sortedLessons);
+                } else {
+                    alert(lessonsResponse.data.message);
+                }
+            } catch (error) {
+                alert(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        if (course) {
+            fetchLessons();
+        }
+    }, [course]);
+
     const renderLessonContent = () => {
         switch (activeTab) {
+            case 'All':
+                return (
+                    <div>
+                        {/* Create a table */}
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th className={styles.table_heading}>Week</th>
+                                    <th className={styles.table_heading}>Day</th>
+                                    <th className={styles.table_heading}>Sequence Number</th>
+                                    <th className={styles.table_heading}>Activity</th>
+                                    <th className={styles.table_heading}>Activity Alias</th>
+                                    <th className={styles.table_heading}>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className={styles.table_body}>
+                                {lessons.map(lesson => (
+                                    <tr key={lesson.LessonId}>
+                                        <td>{lesson.weekNumber}</td>
+                                        <td>{lesson.dayNumber}</td>
+                                        <td>{lesson.SequenceNumber}</td>
+                                        <td>{lesson.activity}</td>
+                                        <td>{lesson.activityAlias}</td>
+                                        <td>{lesson.status}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                );
+
             case 'Watch':
                 return <WatchLesson category={category} course={course} />;
             case 'Listen':

@@ -608,7 +608,6 @@ const SpeakLesson = ({ category, course, activity }) => {
         if (migrateResponse.status !== 200) {
             alert(migrateResponse.data.message);
         } else {
-            console.log(migrateResponse.data);
             alert("Lesson migrated successfully.");
         }
         closeMigrateLessonModal();

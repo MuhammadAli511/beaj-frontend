@@ -478,6 +478,16 @@ export const migrateLesson = async (lessonId, courseId) => {
     return { status: response.status, data };
 };
 
+// API call to get all lessons by course
+export const getLessonsByCourse = async (courseId) => {
+    const response = await fetch(`${API_URL}/lesson/getByCourseId/${courseId}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
 
 // DOCUMENT FILES
 // API call to upload a document file
@@ -787,7 +797,6 @@ export const createAudioChatLog = async (userAudio, prompt) => {
     const formData = new FormData();
     formData.append('file', userAudio);
     formData.append('prompt', prompt);
-    console.log(formData);
 
     const response = await fetch(`${API_URL}/audioChat/feedback`, {
         method: "POST",
