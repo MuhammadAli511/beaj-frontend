@@ -433,6 +433,8 @@ const CreateLesson = () => {
                 await createAudioLesson(course, sequenceNumber, alias, activityType, image, audio, lessonText, day, week, status);
             } else if (activityType === 'video') {
                 await createVideoLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status);
+            } else if (activityType === 'videoEnd') {
+                await createVideoLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status);
             } else if (activityType === 'read') {
                 await createReadLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status);
             } else if (activityType === 'listenAndSpeak' || activityType === 'preListenAndSpeak' || activityType === 'postListenAndSpeak') {
@@ -491,6 +493,7 @@ const CreateLesson = () => {
                         { value: '-1', label: 'Select Activity Type' },
                         { value: 'audio', label: 'Listen' },
                         { value: 'video', label: 'Watch' },
+                        { value: 'videoEnd', label: 'Watch End' },
                         { value: 'read', label: 'Read' },
                         { value: 'listenAndSpeak', label: 'Listen and Speak' },
                         { value: 'watchAndSpeak', label: 'Watch and Speak' },
@@ -523,6 +526,19 @@ const CreateLesson = () => {
                     </>
                 )}
                 {activityType === 'video' && (
+                    <>
+                        <div className={styles.input_row}>
+                            <InputField label="Upload Video" type="file" onChange={handleVideoChange} name="video" id="video" fileInput />
+                        </div>
+                        <div className={styles.input_row}>
+                            <div className={styles.form_group}>
+                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
+                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            </div>
+                        </div>
+                    </>
+                )}
+                {activityType === 'videoEnd' && (
                     <>
                         <div className={styles.input_row}>
                             <InputField label="Upload Video" type="file" onChange={handleVideoChange} name="video" id="video" fileInput />

@@ -9,7 +9,7 @@ import SpeakLesson from './LessonTypes/SpeakLesson';
 import MCQsLesson from './LessonTypes/MCQsLesson';
 
 const lessonTypes = [
-    'All', 'Watch', 'Listen', 'Read', 'Listen & Speak', 'Watch & Speak',
+    'All', 'Watch', 'Watch End', 'Listen', 'Read', 'Listen & Speak', 'Watch & Speak',
     'MCQs', 'Pre Listen & Speak', 'Pre MCQs',
     'Post Listen & Speak', 'Post MCQs', 'Placement Test', 'Conversational Questions Bot', 'Conversational Monologue Bot'
 ];
@@ -159,7 +159,9 @@ const ManageLesson = () => {
                 );
 
             case 'Watch':
-                return <WatchLesson category={category} course={course} />;
+                return <WatchLesson category={category} course={course} activity='video' />;
+            case 'Watch End':
+                return <WatchLesson category={category} course={course} activity='videoEnd' />;
             case 'Listen':
                 return <ListenLesson category={category} course={course} />;
             case 'Read':

@@ -297,7 +297,7 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     );
 };
 
-const WatchLesson = ({ category, course }) => {
+const WatchLesson = ({ category, course, activityType }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [lessons, setLessons] = useState([]);
     const [isEditWatchLessonModalOpen, setIsEditWatchLessonModalOpen] =
@@ -309,7 +309,7 @@ const WatchLesson = ({ category, course }) => {
     const fetchLessons = async () => {
         try {
             setIsLoading(true);
-            const lessonsResponse = await getLessonsByActivity(course, "video");
+            const lessonsResponse = await getLessonsByActivity(course, activityType);
             if (lessonsResponse.status === 200) {
                 setLessons(lessonsResponse.data);
             } else {
