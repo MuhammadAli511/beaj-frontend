@@ -94,43 +94,42 @@ const ManageLesson = () => {
         setCourse(e.target.value);
     };
 
+    const fetchLessons = async (activityType) => {
+        setIsLoading(true);
+        try {
+            const lessonsResponse = await getLessonsByCourse(course, activityType);
+            if (lessonsResponse.status === 200) {
+                const sortedLessons = lessonsResponse.data.sort((a, b) => {
+                    if (a.weekNumber !== b.weekNumber) {
+                        return a.weekNumber - b.weekNumber;
+                    }
+                    if (a.dayNumber !== b.dayNumber) {
+                        return a.dayNumber - b.dayNumber;
+                    }
+                    return a.SequenceNumber - b.SequenceNumber;
+                });
+                setLessons(sortedLessons);
+            } else {
+                alert(lessonsResponse.data.message);
+            }
+        } catch (error) {
+            alert(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchLessons = async () => {
-            setIsLoading(true);
-            try {
-                const lessonsResponse = await getLessonsByCourse(course);
-                if (lessonsResponse.status === 200) {
-                    const sortedLessons = lessonsResponse.data.sort((a, b) => {
-                        if (a.weekNumber !== b.weekNumber) {
-                            return a.weekNumber - b.weekNumber;
-                        }
-                        if (a.dayNumber !== b.dayNumber) {
-                            return a.dayNumber - b.dayNumber;
-                        }
-                        return a.SequenceNumber - b.SequenceNumber;
-                    });
-                    setLessons(sortedLessons);
-                } else {
-                    alert(lessonsResponse.data.message);
-                }
-            } catch (error) {
-                alert(error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
         if (course) {
-            fetchLessons();
+            fetchLessons(activeTab === 'All' ? '' : activeTab.toLowerCase());
         }
-    }, [course]);
+    }, [course, activeTab]);
 
     const renderLessonContent = () => {
         switch (activeTab) {
             case 'All':
                 return (
                     <div>
-                        {/* Create a table */}
                         <table className={styles.table}>
                             <thead>
                                 <tr>
@@ -157,7 +156,6 @@ const ManageLesson = () => {
                         </table>
                     </div>
                 );
-
             case 'Watch':
                 return <WatchLesson category={category} course={course} activity='video' />;
             case 'Watch End':
@@ -205,11 +203,11 @@ const ManageLesson = () => {
                         onClick={() => setActiveTab(type)}
                     >
                         {type}
-                    </button >
+                    </button>
                 ))}
-            </div >
+            </div>
             {!isLoading && renderLessonContent()}
-        </div >
+        </div>
     );
 };
 
