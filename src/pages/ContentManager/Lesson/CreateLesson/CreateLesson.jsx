@@ -447,6 +447,8 @@ const CreateLesson = () => {
                 await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
             } else if (activityType === 'conversationalMonologueBot') {
                 await createConversationalBotLesson(course, sequenceNumber, alias, activityType, monologueQuestions, lessonText, day, week, status);
+            } else if (activityType === 'conversationalAgencyBot') {
+                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
             }
         } catch (error) {
             alert(error);
@@ -498,13 +500,9 @@ const CreateLesson = () => {
                         { value: 'listenAndSpeak', label: 'Listen and Speak' },
                         { value: 'watchAndSpeak', label: 'Watch and Speak' },
                         { value: 'mcqs', label: 'MCQs' },
-                        { value: 'preListenAndSpeak', label: 'Pre-test Part 1 (Listen Speak)' },
-                        { value: 'preMCQs', label: 'Pre-test Part 2 (MCQs)' },
-                        { value: 'postListenAndSpeak', label: 'Post-test Part 1 (Listen Speak)' },
-                        { value: 'postMCQs', label: 'Post-test Part 2 (MCQs)' },
-                        { value: 'placementtest', label: 'Placement Test' },
                         { value: 'conversationalQuestionsBot', label: 'Conversational Questions Bot' },
-                        { value: 'conversationalMonologueBot', label: 'Conversational Monologue Bot' }
+                        { value: 'conversationalMonologueBot', label: 'Conversational Monologue Bot' },
+                        { value: 'conversationalAgencyBot', label: 'Conversational Agency Bot' },
                     ]} onChange={handleActivityTypeChange} value={activityType} name="activity_type" id="activity_type" />
                     <SelectField label="Status" options={[
                         { value: 'Active', label: 'Active' },
@@ -627,6 +625,25 @@ const CreateLesson = () => {
                             </div>
                         ))}
                         <button className={styles.add_button} onClick={(e) => addMonologueQuestion(e)}>Add Another Question</button>
+                    </>
+                )}
+                {activityType === 'conversationalAgencyBot' && (
+                    <>
+                        <div className={styles.input_row}>
+                            <div className={styles.form_group}>
+                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
+                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            </div>
+                        </div>
+                        {botQuestions.map((question, qIndex) => (
+                            <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.input_row}>
+                                    <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleBotQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
+                                    {botQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeBotQuestion(qIndex, e)}>Remove Question</button>}
+                                </div>
+                            </div>
+                        ))}
+                        <button className={styles.add_button} onClick={(e) => addBotQuestion(e)}>Add Another Question</button>
                     </>
                 )}
                 {activityType === 'watchAndSpeak' && (

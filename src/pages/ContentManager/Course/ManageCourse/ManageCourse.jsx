@@ -158,8 +158,7 @@ const ManageCourse = () => {
         try {
             const response = await getAllCourses();
             if (response.status === 200) {
-                // if coursecategoryid is 66 or 68
-                const filteredCourses = response.data.filter(course => course.CourseCategoryId === 66 || course.CourseCategoryId === 68);
+                const filteredCourses = response.data.filter(course => course.CourseCategoryId === 66 || course.CourseCategoryId === 70);
                 setCourses(filteredCourses);
             } else {
                 alert(response.data.message);
