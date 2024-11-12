@@ -155,7 +155,8 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                         question.mediaFile,
                         formattedAnswers.join(','),
                         lesson.LessonId,
-                        question.questionNumber
+                        question.questionNumber,
+                        updatedLessonData.activity
                     );
 
                     if (createResponse.status !== 200) {
@@ -498,6 +499,13 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                             </>
                                         )}
 
+                                        {activity === 'conversationalAgencyBot' && (
+                                            <>
+                                                <label className={styles.answerEditLabel}>Question Text</label>
+                                                <input className={styles.edit_input_field} type="text" value={question.question || ""} onChange={(e) => handleQuestionChange(index, 'question', e.target.value)} />
+                                            </>
+                                        )}
+
                                         <button
                                             className={styles.delete_button}
                                             onClick={() => handleDeleteQuestion(question.id, index)}
@@ -637,7 +645,8 @@ const SpeakLesson = ({ category, course, activity }) => {
         'postListenAndSpeak': 'Post Listen & Speak',
         'preListenAndSpeak': 'Pre Listen & Speak',
         'conversationalQuestionsBot': 'Conversational Questions Bot',
-        'conversationalMonologueBot': 'Conversational Monologue Bot'
+        'conversationalMonologueBot': 'Conversational Monologue Bot',
+        'conversationalAgencyBot': 'Conversational Agency Bot',
     };
 
     return (

@@ -553,13 +553,14 @@ export const updateDocumentFile = async (documentFileId, file, lessonId, languag
 
 // SPEAK ACTIVITY QUESTIONS
 // API call to create a speak activity question
-export const createSpeakActivityQuestion = async (question, file, answer, lessonId, questionNumber) => {
+export const createSpeakActivityQuestion = async (question, file, answer, lessonId, questionNumber, activityType) => {
     const formData = new FormData();
     formData.append('question', question);
     formData.append('file', file);
     formData.append('answer', answer);
     formData.append('lessonId', lessonId);
     formData.append('questionNumber', questionNumber);
+    formData.append('activityType', activityType);
 
     const response = await fetch(`${API_URL}/speakActivityQuestion/create`, {
         method: "POST",

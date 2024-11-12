@@ -23,7 +23,11 @@ const InputField = ({ label, type, onChange, value, name, id, fileInput = false,
         </div>) : (
         <div className={styles.form_group}>
             <label className={styles.label} htmlFor={id}>{label}</label>
-            <input className={styles.input_field} type={type} onChange={onChange} value={value} name={name} id={id} checked={checked} />
+            {type == 'textarea' ? (
+                <textarea className={styles.input_field} onChange={onChange} value={value} name={name} id={id} />
+            ) : (
+                <input className={styles.input_field} type={type} onChange={onChange} value={value} name={name} id={id} checked={checked} />
+            )}
         </div>
     )
 );
@@ -638,7 +642,7 @@ const CreateLesson = () => {
                         {botQuestions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
-                                    <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleBotQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
+                                    <InputField label={`Question ${qIndex + 1}`} type="textarea" onChange={e => handleBotQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
                                     {botQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeBotQuestion(qIndex, e)}>Remove Question</button>}
                                 </div>
                             </div>

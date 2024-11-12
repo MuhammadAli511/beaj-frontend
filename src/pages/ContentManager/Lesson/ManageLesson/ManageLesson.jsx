@@ -9,9 +9,8 @@ import SpeakLesson from './LessonTypes/SpeakLesson';
 import MCQsLesson from './LessonTypes/MCQsLesson';
 
 const lessonTypes = [
-    'All', 'Watch', 'Watch End', 'Listen', 'Read', 'Listen & Speak', 'Watch & Speak',
-    'MCQs', 'Pre Listen & Speak', 'Pre MCQs',
-    'Post Listen & Speak', 'Post MCQs', 'Placement Test', 'Conversational Questions Bot', 'Conversational Monologue Bot'
+    'All', 'Watch', 'Watch End', 'Read', 'Listen & Speak', 'Watch & Speak',
+    'MCQs', 'Conversational Questions Bot', 'Conversational Monologue Bot', 'Conversational Agency Bot'
 ];
 
 const SelectField = ({ label, options, onChange, value, name, id }) => (
@@ -160,30 +159,20 @@ const ManageLesson = () => {
                 return <WatchLesson category={category} course={course} activity='video' />;
             case 'Watch End':
                 return <WatchLesson category={category} course={course} activity='videoEnd' />;
-            case 'Listen':
-                return <ListenLesson category={category} course={course} />;
             case 'Read':
                 return <ReadLesson category={category} course={course} />;
             case 'Listen & Speak':
                 return <SpeakLesson category={category} course={course} activity='listenAndSpeak' />;
-            case 'Pre Listen & Speak':
-                return <SpeakLesson category={category} course={course} activity='preListenAndSpeak' />;
-            case 'Post Listen & Speak':
-                return <SpeakLesson category={category} course={course} activity='postListenAndSpeak' />;
             case 'Watch & Speak':
                 return <SpeakLesson category={category} course={course} activity='watchAndSpeak' />;
             case 'MCQs':
                 return <MCQsLesson category={category} course={course} activity='mcqs' />;
-            case 'Pre MCQs':
-                return <MCQsLesson category={category} course={course} activity='preMCQs' />;
-            case 'Post MCQs':
-                return <MCQsLesson category={category} course={course} activity='postMCQs' />;
-            case 'Placement Test':
-                return <MCQsLesson category={category} course={course} activity='placementTest' />;
             case 'Conversational Questions Bot':
                 return <SpeakLesson category={category} course={course} activity='conversationalQuestionsBot' />;
             case 'Conversational Monologue Bot':
                 return <SpeakLesson category={category} course={course} activity='conversationalMonologueBot' />;
+            case 'Conversational Agency Bot':
+                return <SpeakLesson category={category} course={course} activity='conversationalAgencyBot' />;
             default:
                 return null;
         }

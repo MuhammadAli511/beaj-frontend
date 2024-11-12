@@ -104,7 +104,8 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
                 question.audio,
                 answersArray,
                 lessonId,
-                (index + 1).toString()
+                (index + 1).toString(),
+                activityType
             );
         })
     );
@@ -143,7 +144,8 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
                 question.video,
                 answersArray,
                 lessonId,
-                (index + 1).toString()
+                (index + 1).toString(),
+                activityType
             );
         })
     );
@@ -178,7 +180,8 @@ export const createConversationalBotLesson = async (course, sequenceNumber, alia
                     null,
                     null,
                     lessonId,
-                    (index + 1).toString()
+                    (index + 1).toString(),
+                    activityType
                 )
             )
         );
@@ -196,7 +199,27 @@ export const createConversationalBotLesson = async (course, sequenceNumber, alia
                     question.video,
                     null,
                     lessonId,
-                    (index + 1).toString()
+                    (index + 1).toString(),
+                    activityType
+                )
+            )
+        );
+
+        if (questionResponses.every(response => response.status === 200) && response.status === 200) {
+            alert('Lesson created successfully');
+        } else {
+            alert('Error creating lesson');
+        }
+    } else if (activityType == "conversationalAgencyBot") {
+        const questionResponses = await Promise.all(
+            questions.map((question, index) =>
+                createSpeakActivityQuestion(
+                    question.questionText,
+                    null,
+                    null,
+                    lessonId,
+                    (index + 1).toString(),
+                    activityType
                 )
             )
         );
