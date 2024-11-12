@@ -3,7 +3,6 @@ import styles from './ManageLesson.module.css';
 import { getAllCategories, getCoursesByCategoryId, getLessonsByCourse } from '../../../../helper';
 
 import WatchLesson from './LessonTypes/WatchLesson';
-import ListenLesson from './LessonTypes/ListenLesson';
 import ReadLesson from './LessonTypes/ReadLesson';
 import SpeakLesson from './LessonTypes/SpeakLesson';
 import MCQsLesson from './LessonTypes/MCQsLesson';
