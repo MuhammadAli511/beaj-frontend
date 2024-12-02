@@ -88,11 +88,14 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
 
     const fetchActivityAliases = async () => {
         try {
-            const response = await getAllActivityAliases();
-            if (response.status === 200) {
-                setActivityAliases(response.data);
+            const aliasesResponse = await getAllActivityAliases();
+            if (aliasesResponse.status === 200) {
+                const filteredAliases = aliasesResponse.data
+                    .filter(a => a.Alias.includes('*'))
+                    .sort((a, b) => a.Alias.localeCompare(b.Alias));
+                setActivityAliases(filteredAliases);
             } else {
-                alert(response.data.message);
+                alert(aliasesResponse.data.message);
             }
         } catch (error) {
             alert(error);
@@ -797,9 +800,9 @@ const MCQsLesson = ({ category, course, activity }) => {
                     <thead>
                         <tr>
                             <th className={styles.table_heading}>Lesson Id</th>
-                            <th className={styles.table_heading}>Sequence Number</th>
                             <th className={styles.table_heading}>Week Number</th>
                             <th className={styles.table_heading}>Day Number</th>
+                            <th className={styles.table_heading}>Sequence Number</th>
                             <th className={styles.table_heading}>Questions</th>
                             <th className={styles.table_heading}>Status</th>
                             {isDevEnvironment && <th className={styles.table_heading}>Migrate</th>}
@@ -811,9 +814,9 @@ const MCQsLesson = ({ category, course, activity }) => {
                         {lessons.map((lesson) => (
                             <tr key={lesson.LessonId} className={styles.table_row}>
                                 <td style={{ width: "15%" }}>{lesson.LessonId}</td>
-                                <td style={{ width: "15%" }}>{lesson.SequenceNumber}</td>
                                 <td style={{ width: "15%" }}>{lesson.weekNumber}</td>
                                 <td style={{ width: "15%" }}>{lesson.dayNumber}</td>
+                                <td style={{ width: "15%" }}>{lesson.SequenceNumber}</td>
                                 <td style={{ width: "15%" }}>
                                     <button
                                         className={styles.submit_button}

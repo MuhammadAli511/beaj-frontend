@@ -143,7 +143,25 @@ const ManageCourseWeek = () => {
             const response = await getAllCourseWeeks();
             if (response.status === 200) {
                 setCourseWeeks(response.data);
+
+                // First fetch course names
                 await fetchCourseNames();
+
+                // Then sort the course weeks
+                const sortedWeeks = [...response.data].sort((a, b) => {
+                    // First compare by course name
+                    const courseNameA = courseNames[a.courseId] || '';
+                    const courseNameB = courseNames[b.courseId] || '';
+
+                    if (courseNameA !== courseNameB) {
+                        return courseNameA.localeCompare(courseNameB);
+                    }
+
+                    // If course names are same, sort by week number
+                    return a.weekNumber - b.weekNumber;
+                });
+
+                setCourseWeeks(sortedWeeks);
             } else {
                 alert(response.data.message);
             }
@@ -156,6 +174,23 @@ const ManageCourseWeek = () => {
     useEffect(() => {
         fetchCourseWeeks();
     }, []);
+
+    useEffect(() => {
+        if (courseWeeks.length > 0 && Object.keys(courseNames).length > 0) {
+            const sortedWeeks = [...courseWeeks].sort((a, b) => {
+                const courseNameA = courseNames[a.courseId] || '';
+                const courseNameB = courseNames[b.courseId] || '';
+
+                if (courseNameA !== courseNameB) {
+                    return courseNameA.localeCompare(courseNameB);
+                }
+
+                return a.weekNumber - b.weekNumber;
+            });
+
+            setCourseWeeks(sortedWeeks);
+        }
+    }, [courseNames, courseWeeks]);
 
     const openEditModal = (course) => {
         setSelectedCourseWeek(course);
@@ -216,34 +251,28 @@ const ManageCourseWeek = () => {
                 <table className={styles.table}>
                     <thead className={styles.heading_row}>
                         <tr>
-                            <th className={styles.table_heading}>Id</th>
-                            <th className={styles.table_heading}>Week Number</th>
-                            <th className={styles.table_heading}>Description</th>
-                            <th className={styles.table_heading}>Course Name</th>
-                            <th className={styles.table_heading}>Edit</th>
-                            <th className={styles.table_heading}>Delete</th>
+                            <th className={`${styles.table_heading} ${styles.sequence_number}`} style={{ width: '10%' }}>Sequence Number</th>
+                            <th className={`${styles.table_heading} ${styles.week_name}`} style={{ width: '20%' }}>Week Number</th>
+                            <th className={`${styles.table_heading} ${styles.description}`} style={{ width: '32%' }}>Description</th>
+                            <th className={`${styles.table_heading} ${styles.course_name}`} style={{ width: '32%' }}>Course Name</th>
+                            <th className={`${styles.table_heading} ${styles.action_column}`} style={{ width: '3%' }}>Edit</th>
+                            <th className={`${styles.table_heading} ${styles.action_column}`} style={{ width: '3%' }}>Delete</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {courseWeeks.map((courseWeek) => (
-                            courseNames[courseWeek.courseId] && (
-                                <tr key={courseWeek.id}>
-                                    <td className={styles.table_data}>{courseWeek.id}</td>
-                                    <td className={styles.table_data}>{courseWeek.weekNumber}</td>
-                                    <td className={styles.table_data}>{courseWeek.description}</td>
-                                    <td className={styles.table_data}>{courseNames[courseWeek.courseId]}</td>
-                                    <td className={styles.table_data}>
-                                        <div onClick={() => openEditModal(courseWeek)}>
-                                            <img src={edit} alt="edit" />
-                                        </div>
-                                    </td>
-                                    <td className={styles.table_data}>
-                                        <div onClick={() => handleDeleteCourseWeek(courseWeek.id)}>
-                                            <img src={deleteIcon} alt="delete" />
-                                        </div>
-                                    </td>
-                                </tr>
-                            )
+                    <tbody className={styles.table_body}>
+                        {courseWeeks.map((week) => (
+                            <tr key={week.CourseWeekId} className={styles.table_row}>
+                                <td style={{ width: '10%' }}>{week.id}</td>
+                                <td style={{ width: '20%' }}>{week.weekNumber}</td>
+                                <td style={{ width: '44%' }}>{week.description}</td>
+                                <td style={{ width: '40%' }}>{courseNames[week.courseId]}</td>
+                                <td style={{ width: '3%' }}>
+                                    <img onClick={() => openEditModal(week)} className={styles.edit} src={edit} alt="edit" />
+                                </td>
+                                <td style={{ width: '3%' }}>
+                                    <img onClick={() => handleDeleteCourseWeek(week.CourseWeekId)} className={styles.delete} src={deleteIcon} alt="delete" />
+                                </td>
+                            </tr>
                         ))}
                     </tbody>
                 </table>

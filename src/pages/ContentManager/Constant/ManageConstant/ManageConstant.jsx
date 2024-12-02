@@ -146,28 +146,26 @@ const ManageConstant = () => {
                 <table className={styles.table}>
                     <thead className={styles.heading_row}>
                         <tr>
-                            <th className={styles.table_heading}>Id</th>
-                            <th className={styles.table_heading}>Key</th>
-                            <th className={styles.table_heading}>Value</th>
-                            <th className={styles.table_heading}>Category</th>
+                            <th className={`${styles.table_heading} ${styles.constant_id}`} style={{ width: '10%' }}>Id</th>
+                            <th className={`${styles.table_heading} ${styles.constant_key}`} style={{ width: '25%' }}>Key</th>
+                            <th className={`${styles.table_heading} ${styles.constant_value}`} style={{ width: '32%' }}>Value</th>
+                            <th className={`${styles.table_heading} ${styles.constant_category}`} style={{ width: '27%' }}>Category</th>
+                            <th className={`${styles.table_heading} ${styles.action_column}`} style={{ width: '3%' }}>Edit</th>
+                            <th className={`${styles.table_heading} ${styles.action_column}`} style={{ width: '3%' }}>Delete</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className={styles.table_body}>
                         {constants.map((constant) => (
-                            <tr key={constant.id}>
-                                <td className={styles.table_data}>{constant.id}</td>
-                                <td className={styles.table_data}>{constant.key}</td>
-                                <td className={styles.table_data}>{constant.constantValue}</td>
-                                <td className={styles.table_data}>{constant.category}</td>
-                                <td className={styles.table_data}>
-                                    <div onClick={() => openEditModal(constant)}>
-                                        <img src={edit} alt="edit" />
-                                    </div>
+                            <tr key={constant.id} className={styles.table_row}>
+                                <td style={{ width: '10%' }}>{constant.id}</td>
+                                <td style={{ width: '25%' }}>{constant.key}</td>
+                                <td style={{ width: '32%' }}>{constant.constantValue}</td>
+                                <td style={{ width: '27%' }}>{constant.category}</td>
+                                <td style={{ width: '3%' }}>
+                                    <img onClick={() => openEditModal(constant)} className={styles.edit} src={edit} alt="edit" />
                                 </td>
-                                <td className={styles.table_data}>
-                                    <div onClick={() => handleDeleteConstant(constant.id)}>
-                                        <img src={deleteIcon} alt="delete" />
-                                    </div>
+                                <td style={{ width: '3%' }}>
+                                    <img onClick={() => handleDeleteConstant(constant.id)} className={styles.delete} src={deleteIcon} alt="delete" />
                                 </td>
                             </tr>
                         ))}

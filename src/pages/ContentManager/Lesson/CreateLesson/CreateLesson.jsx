@@ -324,7 +324,10 @@ const CreateLesson = () => {
                     getAllActivityAliases()
                 ]);
                 if (categoriesResponse.status === 200 && aliasesResponse.status === 200) {
-                    setActivityAliases(aliasesResponse.data);
+                    const filteredAliases = aliasesResponse.data
+                        .filter(a => a.Alias.includes('*'))
+                        .sort((a, b) => a.Alias.localeCompare(b.Alias));
+                    setActivityAliases(filteredAliases);
                     const firstAlias = aliasesResponse.data[0].Alias;
                     setAlias(firstAlias);
                     const categoriesData = categoriesResponse.data;

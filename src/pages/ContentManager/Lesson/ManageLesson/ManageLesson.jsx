@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ManageLesson.module.css';
-import { getAllCategories, getCoursesByCategoryId, getLessonsByCourse } from '../../../../helper';
+import { getAllCategories, getCoursesByCategoryId, getLessonsByCourse, migrateLesson } from '../../../../helper';
 
 import WatchLesson from './LessonTypes/WatchLesson';
 import ReadLesson from './LessonTypes/ReadLesson';
 import SpeakLesson from './LessonTypes/SpeakLesson';
 import MCQsLesson from './LessonTypes/MCQsLesson';
+import MigrateLessonModal from '../../../../components/MigrateLessonModal/MigrateLessonModal';
 
 const lessonTypes = [
     'All', 'Watch', 'Watch End', 'Read', 'Listen & Speak', 'Watch & Speak',
@@ -31,6 +32,15 @@ const ManageLesson = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('All');
     const [lessons, setLessons] = useState([]);
+    const [selectedLesson, setSelectedLesson] = useState(null);
+    const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
+    const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT == "DEV";
+    console.log(process.env.REACT_APP_ENVIRONMENT);
+    console.log(isDevEnvironment);
+    const [weeks, setWeeks] = useState([]);
+    const [days, setDays] = useState([]);
+    const [selectedWeek, setSelectedWeek] = useState('all');
+    const [selectedDay, setSelectedDay] = useState('all');
 
     useEffect(() => {
         const fetchCategoriesAndDefaultCourses = async () => {
@@ -92,6 +102,17 @@ const ManageLesson = () => {
         setCourse(e.target.value);
     };
 
+    const generateWeeks = (lessons) => {
+        const uniqueWeeks = [...new Set(lessons.map(lesson => lesson.weekNumber))];
+        return uniqueWeeks.sort((a, b) => a - b);
+    };
+
+    const generateDays = (lessons, weekNumber) => {
+        const weekLessons = lessons.filter(lesson => lesson.weekNumber === parseInt(weekNumber));
+        const uniqueDays = [...new Set(weekLessons.map(lesson => lesson.dayNumber))];
+        return uniqueDays.sort((a, b) => a - b);
+    };
+
     const fetchLessons = async (activityType) => {
         setIsLoading(true);
         try {
@@ -106,7 +127,12 @@ const ManageLesson = () => {
                     }
                     return a.SequenceNumber - b.SequenceNumber;
                 });
+
                 setLessons(sortedLessons);
+                const weekNumbers = generateWeeks(sortedLessons);
+                setWeeks(weekNumbers);
+                setSelectedWeek('all');
+                setSelectedDay('all');
             } else {
                 alert(lessonsResponse.data.message);
             }
@@ -123,6 +149,65 @@ const ManageLesson = () => {
         }
     }, [course, activeTab]);
 
+    const openMigrateLessonModal = (lesson) => {
+        setSelectedLesson(lesson);
+        setIsMigrateLessonModalOpen(true);
+    };
+
+    const closeMigrateLessonModal = () => {
+        setSelectedLesson(null);
+        setIsMigrateLessonModalOpen(false);
+    };
+
+    const handleMigrateLesson = async (lesson, selectedCourseId) => {
+        try {
+            const migrateResponse = await migrateLesson(lesson.LessonId, selectedCourseId);
+            if (migrateResponse.status !== 200) {
+                alert(migrateResponse.data.message);
+            } else {
+                alert("Lesson migrated successfully.");
+                fetchLessons(activeTab === 'All' ? '' : activeTab.toLowerCase());
+            }
+        } catch (error) {
+            alert(error);
+        }
+        closeMigrateLessonModal();
+    };
+
+    const handleWeekChange = (e) => {
+        const weekNumber = e.target.value;
+        setSelectedWeek(weekNumber);
+        setSelectedDay('all');
+
+        if (weekNumber === 'all') {
+            // Get all unique days across all weeks
+            const allDays = [...new Set(lessons.map(lesson => lesson.dayNumber))];
+            setDays(allDays.sort((a, b) => a - b));
+        } else {
+            // Get days for specific week
+            const dayNumbers = generateDays(lessons, weekNumber);
+            setDays(dayNumbers);
+        }
+    };
+
+    const handleDayChange = (e) => {
+        setSelectedDay(e.target.value);
+    };
+
+    const getFilteredLessons = () => {
+        let filtered = [...lessons];
+
+        if (selectedWeek !== 'all') {
+            filtered = filtered.filter(lesson => lesson.weekNumber === parseInt(selectedWeek));
+        }
+
+        if (selectedDay !== 'all') {
+            filtered = filtered.filter(lesson => lesson.dayNumber === parseInt(selectedDay));
+        }
+
+        return filtered;
+    };
+
     const renderLessonContent = () => {
         switch (activeTab) {
             case 'All':
@@ -131,23 +216,40 @@ const ManageLesson = () => {
                         <table className={styles.table}>
                             <thead>
                                 <tr>
+                                    <th className={styles.table_heading}>Lesson Id</th>
                                     <th className={styles.table_heading}>Week</th>
                                     <th className={styles.table_heading}>Day</th>
                                     <th className={styles.table_heading}>Sequence Number</th>
                                     <th className={styles.table_heading}>Activity</th>
                                     <th className={styles.table_heading}>Activity Alias</th>
                                     <th className={styles.table_heading}>Status</th>
+                                    {isDevEnvironment && <th className={styles.table_heading}>Migrate</th>}
                                 </tr>
                             </thead>
                             <tbody className={styles.table_body}>
-                                {lessons.map(lesson => (
+                                {getFilteredLessons().map(lesson => (
                                     <tr key={lesson.LessonId}>
+                                        <td>{lesson.LessonId}</td>
                                         <td>{lesson.weekNumber}</td>
                                         <td>{lesson.dayNumber}</td>
                                         <td>{lesson.SequenceNumber}</td>
                                         <td>{lesson.activity}</td>
                                         <td>{lesson.activityAlias}</td>
-                                        <td>{lesson.status}</td>
+                                        <td style={{ width: "10%" }}>
+                                            <span className={lesson.status === "Active" ? styles.active : styles.inactive}>
+                                                {lesson.status || "Not Available"}
+                                            </span>
+                                        </td>
+                                        {isDevEnvironment && (
+                                            <td style={{ width: "10%" }}>
+                                                <button
+                                                    className={styles.migrate_button}
+                                                    onClick={() => openMigrateLessonModal(lesson)}
+                                                >
+                                                    Migrate
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>
@@ -180,9 +282,61 @@ const ManageLesson = () => {
     return (
         <div className={styles.content}>
             <div className={styles.input_row}>
-                <SelectField label="Select Category" options={categories.map(category => ({ value: category.CourseCategoryId, label: category.CourseCategoryName }))} onChange={handleCategoryChange} value={category} name="category" id="category" />
-                <SelectField label="Select Course" options={courses.map(course => ({ value: course.CourseId, label: course.CourseName }))} onChange={handleCourseChange} value={course} name="course" id="course" />
+                <SelectField
+                    label="Select Category"
+                    options={categories.map(category => ({
+                        value: category.CourseCategoryId,
+                        label: category.CourseCategoryName
+                    }))}
+                    onChange={handleCategoryChange}
+                    value={category}
+                    name="category"
+                    id="category"
+                />
+                <SelectField
+                    label="Select Course"
+                    options={courses.map(course => ({
+                        value: course.CourseId,
+                        label: course.CourseName
+                    }))}
+                    onChange={handleCourseChange}
+                    value={course}
+                    name="course"
+                    id="course"
+                />
             </div>
+            {activeTab === 'All' && (
+                <div className={styles.input_row}>
+                    <SelectField
+                        label="Select Week"
+                        options={[
+                            { value: 'all', label: 'All Weeks' },
+                            ...weeks.map(week => ({
+                                value: week,
+                                label: `Week ${week}`
+                            }))
+                        ]}
+                        onChange={handleWeekChange}
+                        value={selectedWeek}
+                        name="week"
+                        id="week"
+                    />
+                    <SelectField
+                        label="Select Day"
+                        options={[
+                            { value: 'all', label: 'All Days' },
+                            ...days.map(day => ({
+                                value: day,
+                                label: `Day ${day}`
+                            }))
+                        ]}
+                        onChange={handleDayChange}
+                        value={selectedDay}
+                        name="day"
+                        id="day"
+                    />
+                </div>
+            )}
             <div className={styles.tabs}>
                 {lessonTypes.map((type) => (
                     <button
@@ -195,6 +349,12 @@ const ManageLesson = () => {
                 ))}
             </div>
             {!isLoading && renderLessonContent()}
+            <MigrateLessonModal
+                isOpen={isMigrateLessonModalOpen}
+                onClose={closeMigrateLessonModal}
+                lesson={selectedLesson}
+                onMigrate={handleMigrateLesson}
+            />
         </div>
     );
 };

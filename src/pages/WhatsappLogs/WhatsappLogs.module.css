@@ -153,6 +153,25 @@
   height: 100px;
 }
 
+.search_input {
+  width: 100%;
+  margin: 15px 0px;
+  padding: 12px 15px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  display: block;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.search_input:focus {
+  outline: none;
+  border-color: #51bbcc;
+  box-shadow: 0 0 0 3px rgba(81, 187, 204, 0.3);
+  transform: scale(1.01);
+}
+
 @media (max-width: 1000px) {
   .content {
     margin-left: 0;

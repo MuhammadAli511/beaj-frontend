@@ -17,29 +17,51 @@
 
 .table {
   width: 100%;
+  border-collapse: collapse;
 }
 
 .table_heading {
   text-align: left;
   padding-bottom: 10px;
+  border-bottom: 2px solid #000;
 }
 
-.table_body {
-  border-top: 1px solid #000;
-}
-
-.category_number {
-  width: 10%;
+.table_body tr {
+  border-bottom: 1px solid #ccc;
 }
 
 .table_row td {
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding: 10px;
+  border-right: 1px solid #ccc;
+  vertical-align: top;
+  border: 1px solid #ccc;
+}
+
+.constant_id {
+  width: 10%;
+}
+
+.constant_key {
+  width: 25%;
+}
+
+.constant_value {
+  width: 32%;
+}
+
+.constant_category {
+  width: 27%;
+}
+
+.action_column {
+  width: 3%;
+  text-align: center;
 }
 
 .edit,
 .delete {
   cursor: pointer;
+  padding: 5px;
 }
 
 /* Modal */

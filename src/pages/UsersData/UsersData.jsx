@@ -22,7 +22,6 @@ const UsersData = () => {
                     phoneNumber: user.phoneNumber ? `${user.phoneNumber}` : "",
                     name: escapeCommas(user.name),
                     city: escapeCommas(user.city),
-                    scholarshipvalue: user.scholarshipvalue ? `${user.scholarshipvalue}` : "",
                     targetGroup: user.targetGroup ? `${user.targetGroup}` : "",
                     freeDemoStarted: user.freeDemoStarted ? new Date(user.freeDemoStarted).toLocaleString().replace(",", "") : "",
                     freeDemoEnded: user.freeDemoEnded ? new Date(user.freeDemoEnded).toLocaleString().replace(",", "") : "",
@@ -50,7 +49,6 @@ const UsersData = () => {
                             { id: 'phoneNumber', displayName: 'Phone Number' },
                             { id: 'name', displayName: 'Name' },
                             { id: 'city', displayName: 'City' },
-                            { id: 'scholarshipvalue', displayName: 'Scholarship Value' },
                             { id: 'targetGroup', displayName: 'Target Group' },
                             { id: 'freeDemoStarted', displayName: 'Free Demo Started' },
                             { id: 'freeDemoEnded', displayName: 'Free Demo Ended' },
@@ -69,7 +67,6 @@ const UsersData = () => {
                                 <th className={styles.table_heading}>Phone Number</th>
                                 <th className={styles.table_heading}>Name</th>
                                 <th className={styles.table_heading}>City</th>
-                                <th className={styles.table_heading}>Scholarship Value</th>
                                 <th className={styles.table_heading}>Target Group</th>
                                 <th className={styles.table_heading}>Free Demo Started</th>
                                 <th className={styles.table_heading}>Free Demo Ended</th>
@@ -83,7 +80,6 @@ const UsersData = () => {
                                     <td>{user.phoneNumber || ""}</td>
                                     <td>{user.name || ""}</td>
                                     <td>{user.city || ""}</td>
-                                    <td>{user.scholarshipvalue || ""}</td>
                                     <td>{user.targetGroup || ""}</td>
                                     <td>{user.freeDemoStarted || ""}</td>
                                     <td>{user.freeDemoEnded || ""}</td>

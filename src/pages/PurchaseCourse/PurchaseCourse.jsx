@@ -26,6 +26,7 @@ const PurchaseCourse = () => {
     const [targetGroup, setTargetGroup] = useState('');
     const [courses, setCourses] = useState([]);
     const [activeTab, setActiveTab] = useState('all'); // Track the active tab
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Fetch user list on component mount
     useEffect(() => {
@@ -34,7 +35,8 @@ const PurchaseCourse = () => {
             try {
                 const response = await getAllMetadata();
                 if (response.data && Array.isArray(response.data)) {
-                    setPhoneNumbers(response.data);
+                    const filteredUsers = response.data.filter(user => user.name !== null);
+                    setPhoneNumbers(filteredUsers);
                 } else {
                     console.error("Expected an array in response.data, got:", response);
                 }
@@ -162,6 +164,11 @@ const PurchaseCourse = () => {
         }
     };
 
+    const filteredPhoneNumbers = phoneNumbers.filter(user =>
+        (user.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        user.phoneNumber.includes(searchQuery)
+    );
+
     return (
         <div className={styles.main_page}>
             <Navbar />
@@ -170,14 +177,21 @@ const PurchaseCourse = () => {
                 <div className={styles.logs_container}>
                     <div className={styles.phone_list}>
                         <h3 className={styles.heading_color}>Users</h3>
+                        <input
+                            type="text"
+                            placeholder="Search by name or phone..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className={styles.search_input}
+                        />
                         {loadingUsers ? (
                             <div className={styles.loader}>
                                 <TailSpin color="#51bbcc" height={50} width={50} />
                             </div>
                         ) : (
                             <ul>
-                                {phoneNumbers.length > 0 ? (
-                                    phoneNumbers.map((user) => (
+                                {filteredPhoneNumbers.length > 0 ? (
+                                    filteredPhoneNumbers.map((user) => (
                                         <li
                                             key={user.phoneNumber}
                                             className={selectedPhoneNumber === user.phoneNumber ? styles.active : ''}
@@ -207,7 +221,6 @@ const PurchaseCourse = () => {
                                     <p><strong>Name: </strong> {selectedUserData.name ? selectedUserData.name : "N/A"}</p>
                                     <p><strong>Phone Number: </strong> {selectedUserData.phoneNumber}</p>
                                     <p><strong>City, District: </strong> {selectedUserData.city ? selectedUserData.city : "N/A"}</p>
-                                    <p><strong>Scholarship: </strong> {selectedUserData.email} {selectedUserData.scholarshipvalue ? selectedUserData.scholarshipvalue : "N/A"}</p>
 
                                     <h2 className={styles.personal_details_heading}>Target Group</h2>
                                     {selectedUserData.targetGroup ? (

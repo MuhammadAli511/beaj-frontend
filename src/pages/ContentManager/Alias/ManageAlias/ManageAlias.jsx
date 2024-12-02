@@ -134,26 +134,22 @@ const ManageAlias = () => {
                 <table className={styles.table}>
                     <thead className={styles.heading_row}>
                         <tr>
-                            <th className={styles.table_heading}>Id</th>
-                            <th className={styles.table_heading}>Alias Name</th>
-                            <th className={styles.table_heading}>Edit</th>
-                            <th className={styles.table_heading}>Delete</th>
+                            <th className={`${styles.table_heading} ${styles.alias_id}`} style={{ width: '10%' }}>Id</th>
+                            <th className={`${styles.table_heading} ${styles.alias_name}`} style={{ width: '84%' }}>Alias Name</th>
+                            <th className={`${styles.table_heading} ${styles.action_column}`} style={{ width: '3%' }}>Edit</th>
+                            <th className={`${styles.table_heading} ${styles.action_column}`} style={{ width: '3%' }}>Delete</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className={styles.table_body}>
                         {aliases.map((alias) => (
-                            <tr key={alias.id}>
-                                <td className={styles.table_data}>{alias.id}</td>
-                                <td className={styles.table_data}>{alias.Alias}</td>
-                                <td className={styles.table_data}>
-                                    <div onClick={() => openEditModal(alias)}>
-                                        <img src={edit} alt="edit" />
-                                    </div>
+                            <tr key={alias.id} className={styles.table_row}>
+                                <td style={{ width: '10%' }}>{alias.id}</td>
+                                <td style={{ width: '84%' }}>{alias.Alias}</td>
+                                <td style={{ width: '3%' }}>
+                                    <img onClick={() => openEditModal(alias)} className={styles.edit} src={edit} alt="edit" />
                                 </td>
-                                <td className={styles.table_data}>
-                                    <div onClick={() => handleDeleteAlias(alias.id)}>
-                                        <img src={deleteIcon} alt="delete" />
-                                    </div>
+                                <td style={{ width: '3%' }}>
+                                    <img onClick={() => handleDeleteAlias(alias.id)} className={styles.delete} src={deleteIcon} alt="delete" />
                                 </td>
                             </tr>
                         ))}

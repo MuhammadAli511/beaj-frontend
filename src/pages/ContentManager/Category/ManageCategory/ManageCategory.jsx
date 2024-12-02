@@ -171,19 +171,19 @@ const ManageCategory = () => {
                 <table className={styles.table}>
                     <thead className={styles.heading_row}>
                         <tr>
-                            <th className={styles.table_heading}>Sequence Number</th>
-                            <th className={styles.table_heading}>Category Name</th>
-                            <th className={styles.table_heading}>Edit</th>
-                            <th className={styles.table_heading}>Delete</th>
+                            <th className={`${styles.table_heading} ${styles.category_number}`} style={{ width: '10%' }}>Sequence Number</th>
+                            <th className={`${styles.table_heading} ${styles.category_name}`} style={{ width: '84%' }}>Category Name</th>
+                            <th className={`${styles.table_heading} ${styles.action_column}`} style={{ width: '3%' }}>Edit</th>
+                            <th className={`${styles.table_heading} ${styles.action_column}`} style={{ width: '3%' }}>Delete</th>
                         </tr>
                     </thead>
                     <tbody className={styles.table_body}>
                         {categories.map((category, index) => (
                             <tr key={category.CourseCategoryId} className={styles.table_row}>
-                                <td className={styles.category_number}>{category.CategorySequenceNum}</td>
-                                <td className={styles.category_name}>{category.CourseCategoryName}</td>
-                                <td><img onClick={() => openEditModal(category)} className={styles.edit} src={edit} alt="edit" /></td>
-                                <td><img onClick={() => handleDeleteCategory(category.CourseCategoryId)} className={styles.delete} src={deleteIcon} alt="delete" /></td>
+                                <td style={{ width: '10%' }} className={styles.category_number}>{category.CategorySequenceNum}</td>
+                                <td style={{ width: '84%' }} className={styles.category_name}>{category.CourseCategoryName}</td>
+                                <td style={{ width: '3%' }}><img onClick={() => openEditModal(category)} className={styles.edit} src={edit} alt="edit" /></td>
+                                <td style={{ width: '3%' }}><img onClick={() => handleDeleteCategory(category.CourseCategoryId)} className={styles.delete} src={deleteIcon} alt="delete" /></td>
                             </tr>
                         ))}
                     </tbody>

@@ -218,15 +218,15 @@ img {
 
 .migrate_button {
   padding: 5px 10px;
-  cursor: pointer;
+  background-color: #51bbcc;
+  color: white;
   border: none;
-  border-radius: 5px;
-  background-color: #d4de00;
-  color: #000000;
-  font-family: "Poppins", sans-serif;
+  border-radius: 4px;
+  cursor: pointer;
   font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-  align-self: center;
+  transition: background-color 0.2s ease;
+}
+
+.migrate_button:hover {
+  background-color: #3d8f9d;
 }
