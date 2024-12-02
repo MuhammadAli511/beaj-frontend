@@ -42,9 +42,7 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
 
                 const aliasesResponse = await getAllActivityAliases();
                 if (aliasesResponse.status === 200) {
-                    const filteredAliases = aliasesResponse.data
-                        .filter(a => a.Alias.includes('*'))
-                        .sort((a, b) => a.Alias.localeCompare(b.Alias));
+                    const filteredAliases = aliasesResponse.data.sort((a, b) => a.Alias.localeCompare(b.Alias));
                     setActivityAliases(filteredAliases);
                 } else {
                     alert(aliasesResponse.data.message);
