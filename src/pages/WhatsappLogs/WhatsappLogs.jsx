@@ -120,6 +120,9 @@ const WhatsappLogs = () => {
                                             {log.actionType === 'image' && (
                                                 <img src={log.messageContent} alt="User sent media" className={styles.media_message} />
                                             )}
+                                            {log.actionType === 'sticker' && (
+                                                <img src={log.messageContent} alt="User sent media" className={styles.media_message} />
+                                            )}
                                             {log.actionType === 'audio' && (
                                                 <audio controls>
                                                     <source src={log.messageContent} type="audio/mpeg" />
