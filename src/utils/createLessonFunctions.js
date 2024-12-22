@@ -195,7 +195,7 @@ export const createConversationalBotLesson = async (course, sequenceNumber, alia
         const questionResponses = await Promise.all(
             questions.map((question, index) =>
                 createSpeakActivityQuestion(
-                    null,
+                    question.questionText,
                     question.video,
                     null,
                     lessonId,

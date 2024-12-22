@@ -168,22 +168,26 @@ const CreateLesson = () => {
 
 
     // Conversational Monologue Bot (will contain videos only)
-    const [monologueQuestions, setMonologueQuestions] = useState([{ video: '' }]);
+    const [monologueQuestions, setMonologueQuestions] = useState([{questionText: '', video: '' }]);
 
     const handleMonologueQuestionChange = (index, event) => {
         const newMonologueQuestions = [...monologueQuestions];
-        const file = event.target.files[0];
-        if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
-            newMonologueQuestions[index][event.target.name] = file;
+        if (event.target.type === 'file') {
+            const file = event.target.files[0];
+            if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
+                newMonologueQuestions[index][event.target.name] = file;
+            } else {
+                alert('Please upload an MP4 video not larger than 16MB.');
+            }
         } else {
-            alert('Please upload an MP4 video not larger than 16MB.');
+            newMonologueQuestions[index][event.target.name] = event.target.value;
         }
         setMonologueQuestions(newMonologueQuestions);
     };
 
     const addMonologueQuestion = (event) => {
         event.preventDefault();
-        setMonologueQuestions([...monologueQuestions, { video: '' }]);
+        setMonologueQuestions([...monologueQuestions, { questionText: '', video: '' }]);
     };
 
     const removeMonologueQuestion = (index, event) => {
@@ -624,6 +628,7 @@ const CreateLesson = () => {
                         {monologueQuestions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
+                                    <InputField label={`Question Text`} type="text" onChange={e => handleMonologueQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
                                     <InputField label={`Upload Video`} type="file" onChange={e => handleMonologueQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
                                     {monologueQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeMonologueQuestion(qIndex, e)}>Remove Question</button>}
                                 </div>

@@ -33,7 +33,10 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                 <th className={styles.table_heading}>Audio</th>
                             )}
                             {activity === 'conversationalMonologueBot' && (
-                                <th className={styles.table_heading}>Video</th>
+                                <>
+                                    <th className={styles.table_heading}>Question Text</th>
+                                    <th className={styles.table_heading}>Video</th>
+                                </>
                             )}
                             {activity === 'conversationalAgencyBot' && (
                                 <th className={styles.table_heading}>Prompt</th>
@@ -80,6 +83,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                 {activity == 'conversationalMonologueBot' && (
                                     <>
                                         <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                        <td style={{ width: "50%" }}>{question.question}</td>
                                         <td style={{ width: "100%" }}>
                                             <video controls className={styles.video}>
                                                 <source src={question.mediaFile} type="video/mp4" />
