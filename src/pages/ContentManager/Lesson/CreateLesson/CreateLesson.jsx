@@ -452,6 +452,10 @@ const CreateLesson = () => {
                 await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status);
             } else if (activityType === 'watchAndSpeak') {
                 await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status);
+            } else if (activityType === 'watchAndAudio') {
+                await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status);
+            } else if (activityType === 'watchAndImage') {
+                await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status);
             } else if (activityType === 'conversationalQuestionsBot') {
                 await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
             } else if (activityType === 'conversationalMonologueBot') {
@@ -508,6 +512,8 @@ const CreateLesson = () => {
                         { value: 'read', label: 'Read' },
                         { value: 'listenAndSpeak', label: 'Listen and Speak' },
                         { value: 'watchAndSpeak', label: 'Watch and Speak' },
+                        { value: 'watchAndAudio', label: 'Watch and Audio' },
+                        { value: 'watchAndImage', label: 'Watch and Image' },
                         { value: 'mcqs', label: 'MCQs' },
                         { value: 'conversationalQuestionsBot', label: 'Conversational Questions Bot' },
                         { value: 'conversationalMonologueBot', label: 'Conversational Monologue Bot' },
@@ -678,6 +684,44 @@ const CreateLesson = () => {
                                     </div>
                                 ))}
                                 <button className={styles.add_button} onClick={(e) => addWsAnswer(qIndex, e)}>Add Another Answer</button>
+                            </div>
+                        ))}
+                        <button className={styles.add_button} onClick={(e) => addWsQuestion(e)}>Add Another Question</button>
+                    </>
+                )}
+                {activityType === 'watchAndAudio' && (
+                    <>
+                        <div className={styles.input_row}>
+                            <div className={styles.form_group}>
+                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
+                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            </div>
+                        </div>
+                        {wsQuestions.map((question, qIndex) => (
+                            <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.input_row}>
+                                    <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
+                                    {wsQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>Remove Question</button>}
+                                </div>
+                            </div>
+                        ))}
+                        <button className={styles.add_button} onClick={(e) => addWsQuestion(e)}>Add Another Question</button>
+                    </>
+                )}
+                {activityType === 'watchAndImage' && (
+                    <>
+                        <div className={styles.input_row}>
+                            <div className={styles.form_group}>
+                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
+                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            </div>
+                        </div>
+                        {wsQuestions.map((question, qIndex) => (
+                            <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.input_row}>
+                                    <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
+                                    {wsQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>Remove Question</button>}
+                                </div>
                             </div>
                         ))}
                         <button className={styles.add_button} onClick={(e) => addWsQuestion(e)}>Add Another Question</button>

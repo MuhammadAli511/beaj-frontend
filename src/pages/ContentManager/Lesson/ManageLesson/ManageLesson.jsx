@@ -9,7 +9,7 @@ import MCQsLesson from './LessonTypes/MCQsLesson';
 import MigrateLessonModal from '../../../../components/MigrateLessonModal/MigrateLessonModal';
 
 const lessonTypes = [
-    'All', 'Watch', 'Watch End', 'Read', 'Listen & Speak', 'Watch & Speak',
+    'All', 'Watch', 'Watch End', 'Read', 'Listen & Speak', 'Watch & Speak', 'Watch & Audio', 'Watch & Image',
     'MCQs', 'Conversational Questions Bot', 'Conversational Monologue Bot', 'Conversational Agency Bot'
 ];
 
@@ -266,6 +266,10 @@ const ManageLesson = () => {
                 return <SpeakLesson category={category} course={course} activity='listenAndSpeak' />;
             case 'Watch & Speak':
                 return <SpeakLesson category={category} course={course} activity='watchAndSpeak' />;
+            case 'Watch & Audio':
+                return <SpeakLesson category={category} course={course} activity='watchAndAudio' />;
+            case 'Watch & Image':
+                return <SpeakLesson category={category} course={course} activity='watchAndImage' />;
             case 'MCQs':
                 return <MCQsLesson category={category} course={course} activity='mcqs' />;
             case 'Conversational Questions Bot':

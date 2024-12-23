@@ -22,6 +22,16 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                     <th className={styles.table_heading}>Video</th>
                                 </>
                             )}
+                            {activity === 'watchAndAudio' && (
+                                <>
+                                    <th className={styles.table_heading}>Video</th>
+                                </>
+                            )}
+                            {activity === 'watchAndImage' && (
+                                <>
+                                    <th className={styles.table_heading}>Video</th>
+                                </>
+                            )}
                             {(activity === 'listenAndSpeak' || activity === 'preListenAndSpeak' || activity === 'postListenAndSpeak') && (
                                 <>
                                     <th className={styles.table_heading}>Question</th>
@@ -51,6 +61,26 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                         <td style={{ width: "5%" }}>{question.questionNumber}</td>
                                         <td style={{ width: "20%" }}>{question.question}</td>
                                         <td style={{ width: "35%" }}>{question.answer.join(', ')}</td>
+                                        <td style={{ width: "100%" }}>
+                                            <video controls className={styles.video}>
+                                                <source src={question.mediaFile} type="video/mp4" />
+                                            </video>
+                                        </td>
+                                    </>
+                                )}
+                                {activity === 'watchAndAudio' && (
+                                    <>
+                                        <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                        <td style={{ width: "100%" }}>
+                                            <video controls className={styles.video}>
+                                                <source src={question.mediaFile} type="video/mp4" />
+                                            </video>
+                                        </td>
+                                    </>
+                                )}
+                                {activity === 'watchAndImage' && (
+                                    <>
+                                        <td style={{ width: "5%" }}>{question.questionNumber}</td>
                                         <td style={{ width: "100%" }}>
                                             <video controls className={styles.video}>
                                                 <source src={question.mediaFile} type="video/mp4" />

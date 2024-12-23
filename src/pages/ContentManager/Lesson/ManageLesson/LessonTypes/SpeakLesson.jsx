@@ -263,6 +263,20 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 mediaFile: null,
                 answer: [''],
             };
+        } else if (activity === 'watchAndAudio') {
+            newQuestion = {
+                ...newQuestion,
+                question: '',
+                mediaFile: null,
+                answer: [''],
+            };
+        } else if (activity === 'watchAndImage') {
+            newQuestion = {
+                ...newQuestion,
+                question: '',
+                mediaFile: null,
+                answer: [''],
+            };
         } else if (activity === 'conversationalQuestionsBot') {
             newQuestion = {
                 ...newQuestion,
@@ -480,6 +494,38 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                             </>
                                         )}
 
+                                        {activity === 'watchAndAudio' && (
+                                            <>
+                                                <label className={styles.answerEditLabel}>Upload Media File (Video)</label>
+                                                <input
+                                                    type="file"
+                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])}
+                                                />
+                                                {question.mediaFile && (
+                                                    <div className={styles.mediaSection}>
+                                                        <label className={styles.answerEditLabel}>Current Media File (Video):</label>
+                                                        <video controls src={question.mediaFile} className={styles.videoSmall}></video>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+
+                                        {activity === 'watchAndImage' && (
+                                            <>
+                                                <label className={styles.answerEditLabel}>Upload Media File (Video)</label>
+                                                <input
+                                                    type="file"
+                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])}
+                                                />
+                                                {question.mediaFile && (
+                                                    <div className={styles.mediaSection}>
+                                                        <label className={styles.answerEditLabel}>Current Media File (Video):</label>
+                                                        <video controls src={question.mediaFile} className={styles.videoSmall}></video>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+
                                         {activity === 'conversationalQuestionsBot' && (
                                             <>
                                                 <label className={styles.answerEditLabel}>Question Text</label>
@@ -643,6 +689,8 @@ const SpeakLesson = ({ category, course, activity }) => {
     };
 
     const activityMapper = {
+        'watchAndAudio': 'Watch & Audio',
+        'watchAndImage': 'Watch & Image',
         'watchAndSpeak': 'Watch & Speak',
         'listenAndSpeak': 'Listen & Speak',
         'postListenAndSpeak': 'Post Listen & Speak',

@@ -135,9 +135,12 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
     const questionResponses = await Promise.all(
         questions.map((question, index) => {
             // Construct answersArray specific to the current question
-            const answersArray = question.answers
-                .map(answer => `"${answer.answerText.replace(/"/g, '\\"')}"`)
-                .join(",");
+            let answersArray = null;
+            if (activityType == 'watchAndSpeak') {
+                answersArray = question.answers
+                    .map(answer => `"${answer.answerText.replace(/"/g, '\\"')}"`)
+                    .join(",");
+            }
 
             return createSpeakActivityQuestion(
                 question.questionText,
