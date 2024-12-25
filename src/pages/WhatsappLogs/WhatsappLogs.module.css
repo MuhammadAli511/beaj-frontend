@@ -62,8 +62,12 @@
 .chat_container {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  height: calc(100vh - 150px);
   overflow-y: auto;
-  max-height: 80vh;
+  scroll-behavior: smooth;
+  position: relative;
 }
 
 .message_inbound,
@@ -184,4 +188,20 @@
   .table_heading {
     font-size: 14px;
   }
+}
+
+.loading_more {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 1;
+}
+
+.load_trigger {
+  height: 20px;
+  width: 100%;
+  position: relative;
 }

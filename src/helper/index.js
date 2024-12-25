@@ -858,8 +858,8 @@ export const getAllActivityLogs = async () => {
 };
 
 // GET api/waUserActivityLogs/getByPhoneNumber/:phoneNumber
-export const getActivityLogsByPhoneNumber = async (phoneNumber) => {
-    const response = await fetch(`${API_URL}/waUserActivityLogs/getByPhoneNumber/${phoneNumber}`, {
+export const getActivityLogsByPhoneNumber = async (phoneNumber, page = 1, pageSize = 15) => {
+    const response = await fetch(`${API_URL}/waUserActivityLogs/getByPhoneNumber/${phoneNumber}?page=${page}&pageSize=${pageSize}`, {
         headers: getHeaders(),
     });
 
