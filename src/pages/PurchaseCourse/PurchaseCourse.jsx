@@ -225,25 +225,25 @@ const PurchaseCourse = () => {
                                     <h2 className={styles.personal_details_heading}>Target Group</h2>
                                     {selectedUserData.targetGroup ? (
                                         <div>
-                                            <p><strong>Assigned Target Group: </strong> {selectedUserData.targetGroup}</p>
-                                            {selectedUserData.targetGroup === 'Control' ? (
-                                                <div className={styles.target_group_section}>
-                                                    <p>You can change the target group because it is set to "Control".</p>
-                                                    <select
-                                                        value={targetGroup}
-                                                        onChange={(e) => setTargetGroup(e.target.value)}
-                                                    >
-                                                        <option value="">Select Target Group</option>
-                                                        <option value="T1">T1</option>
-                                                        <option value="T2">T2</option>
-                                                    </select>
-                                                    <button onClick={handleAssignTargetGroup}>
-                                                        Assign Target Group
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <p>You cannot change the target group because it is set to "{selectedUserData.targetGroup}".</p>
-                                            )}
+                                            <p><strong>Current Target Group: </strong> {selectedUserData.targetGroup}</p>
+                                            <div className={styles.target_group_section}>
+                                                <select
+                                                    value={targetGroup}
+                                                    onChange={(e) => setTargetGroup(e.target.value)}
+                                                >
+                                                    <option value="">Select Target Group</option>
+                                                    <option value="None">None</option>
+                                                    <option value="T1">T1</option>
+                                                    <option value="T2">T2</option>
+                                                    <option value="Control">Control</option>
+                                                </select>
+                                                <button 
+                                                    onClick={handleAssignTargetGroup}
+                                                    disabled={!targetGroup} // Disable button if no target group selected
+                                                >
+                                                    Change Target Group
+                                                </button>
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className={styles.target_group_section}>
@@ -253,11 +253,15 @@ const PurchaseCourse = () => {
                                                 onChange={(e) => setTargetGroup(e.target.value)}
                                             >
                                                 <option value="">Select Target Group</option>
+                                                <option value="None">None</option>
                                                 <option value="T1">T1</option>
                                                 <option value="T2">T2</option>
                                                 <option value="Control">Control</option>
                                             </select>
-                                            <button onClick={handleAssignTargetGroup}>
+                                            <button 
+                                                onClick={handleAssignTargetGroup}
+                                                disabled={!targetGroup} // Disable button if no target group selected
+                                            >
                                                 Assign Target Group
                                             </button>
                                         </div>
