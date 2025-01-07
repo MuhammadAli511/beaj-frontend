@@ -5,23 +5,33 @@ import greater_arrow from '../../assets/images/greater_arrow.svg';
 
 const Sidebar = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const role = localStorage.getItem('role'); // Get the role from localStorage
+
     const handleLogout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('email');
         navigate("/");
     };
+
+    // Define menu items with role-based visibility
     const menuItems = [
-        { name: "Dashboard", path: "/dashboard" },
-        { name: "Content Manager", path: "/content-manager" },
-        { name: "Prompt Playground", path: "/prompt-playground" },
-        { name: "Users Data", path: "/users-data" },
-        { name: "Purchase Course", path: "/purchase-course" },
-        { name: "Whatsapp Logs", path: "/whatsapp-logs" },
+        { name: "Dashboard", path: "/dashboard", roles: ["facilitator", "admin"] },
+        { name: "Content Manager", path: "/content-manager", roles: ["admin"] },
+        { name: "Prompt Playground", path: "/prompt-playground", roles: ["admin"] },
+        { name: "Users Data", path: "/users-data", roles: ["admin"] },
+        { name: "Purchase Course", path: "/purchase-course", roles: ["facilitator", "admin"] },
+        { name: "Whatsapp Logs", path: "/whatsapp-logs", roles: ["facilitator", "admin"] },
     ];
-    const location = useLocation();
+
+    // Filter menu items based on the user's role
+    const filteredMenuItems = menuItems.filter(item => item.roles.includes(role));
+
     return (
         <div className={styles.sidebar}>
             <ul className={styles.menu}>
-                {menuItems.map((item, index) => (
+                {filteredMenuItems.map((item, index) => (
                     <li key={index} className={location.pathname.includes(item.path) ? styles.active : styles.not_active}>
                         <Link to={item.path} className={styles.menu_item}>
                             <p className={location.pathname.includes(item.path) ? styles.active : styles.not_active}>{item.name}</p>
@@ -30,9 +40,9 @@ const Sidebar = () => {
                     </li>
                 ))}
             </ul>
-            <div onClick={() => handleLogout()} className={styles.logout}>Logout</div>
+            <div onClick={handleLogout} className={styles.logout}>Logout</div>
         </div>
-    )
-}
+    );
+};
 
 export default Sidebar;

@@ -29,6 +29,12 @@ const Login = () => {
             const response = await loginBeajEmployee({ email, password });
             if (response.status === 200) {
                 localStorage.setItem('token', response.data.token);
+                localStorage.setItem('email', email);
+                if (email == "info@beaj.org") {
+                    localStorage.setItem('role', "facilitator");
+                } else {
+                    localStorage.setItem('role', "admin");
+                }
                 await new Promise(resolve => setTimeout(resolve, 500));
                 navigate("/dashboard");
             } else {
