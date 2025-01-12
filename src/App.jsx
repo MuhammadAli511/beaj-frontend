@@ -1,11 +1,20 @@
-import React from 'react';
+import React from "react";
 import { Route, HashRouter as Router, Routes } from "react-router-dom";
-import { NotFound, Login, Dashboard, ContentManager, BeajOperations, WhatsappLogs, PromptPlayground, UsersData, PurchaseCourse } from "./pages";
-import { SidebarProvider } from './components/SidebarContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import {
+  NotFound,
+  Login,
+  Dashboard,
+  ContentManager,
+  WhatsappLogs,
+  PromptPlayground,
+  UsersData,
+  PurchaseCourse,
+  AddUsers,
+} from "./pages";
+import { SidebarProvider } from "./components/SidebarContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-
   return (
     <Router>
       <SidebarProvider>
@@ -17,7 +26,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute allowedRoles={['facilitator', 'admin']}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -25,7 +34,7 @@ function App() {
           <Route
             path="/whatsapp-logs"
             element={
-              <ProtectedRoute allowedRoles={['facilitator', 'admin']}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
                 <WhatsappLogs />
               </ProtectedRoute>
             }
@@ -33,7 +42,7 @@ function App() {
           <Route
             path="/purchase-course"
             element={
-              <ProtectedRoute allowedRoles={['facilitator', 'admin']}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
                 <PurchaseCourse />
               </ProtectedRoute>
             }
@@ -43,23 +52,23 @@ function App() {
           <Route
             path="/content-manager"
             element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <ContentManager />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/beaj-operations"
+            path="/add-users"
             element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <BeajOperations />
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AddUsers />
               </ProtectedRoute>
             }
           />
           <Route
             path="/prompt-playground"
             element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <PromptPlayground />
               </ProtectedRoute>
             }
@@ -67,7 +76,7 @@ function App() {
           <Route
             path="/users-data"
             element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <UsersData />
               </ProtectedRoute>
             }

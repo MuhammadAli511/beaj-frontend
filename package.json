@@ -9,6 +9,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "jodit-react": "^4.1.2",
+    "papaparse": "^5.5.1",
     "path": "^0.12.7",
     "react": "^18.3.1",
     "react-csv-downloader": "^3.1.0",

@@ -19,6 +19,7 @@ const Sidebar = () => {
     const menuItems = [
         { name: "Dashboard", path: "/dashboard", roles: ["facilitator", "admin"] },
         { name: "Content Manager", path: "/content-manager", roles: ["admin"] },
+        { name: "Add Users", path: "/add-users", roles: ["admin"] },
         { name: "Prompt Playground", path: "/prompt-playground", roles: ["admin"] },
         { name: "Users Data", path: "/users-data", roles: ["admin"] },
         { name: "Purchase Course", path: "/purchase-course", roles: ["facilitator", "admin"] },

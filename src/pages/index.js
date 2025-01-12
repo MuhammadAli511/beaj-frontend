@@ -2,7 +2,7 @@ import NotFound from './NotFound';
 import Login from './Auth/Login';
 import Dashboard from './Dashboard/Dashboard';
 import ContentManager from './ContentManager/ContentManager';
-import BeajOperations from './BeajOperations/BeajOperations';
+import AddUsers from './AddUsers/AddUsers';
 import PromptPlayground from './PromptPlayground/PromptPlayground';
 import UsersData from './UsersData/UsersData';
 import WhatsappLogs from './WhatsappLogs/WhatsappLogs';
@@ -13,7 +13,7 @@ export {
     Login,
     Dashboard,
     ContentManager,
-    BeajOperations,
+    AddUsers,
     PromptPlayground,
     UsersData,
     WhatsappLogs,

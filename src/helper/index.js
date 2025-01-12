@@ -934,3 +934,17 @@ export const getDashboardCardsFunnel = async () => {
     const data = await response.json();
     return { status: response.status, data };
 };
+
+
+// ADD USERS
+// POST api/chatbot/upload-user-data
+export const uploadUserData = async (users) => {
+    const response = await fetch(`${API_URL}/chatbot/upload-user-data`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ users }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};

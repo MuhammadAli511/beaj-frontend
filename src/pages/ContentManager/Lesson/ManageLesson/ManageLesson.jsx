@@ -35,8 +35,6 @@ const ManageLesson = () => {
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
     const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT == "DEV";
-    console.log(process.env.REACT_APP_ENVIRONMENT);
-    console.log(isDevEnvironment);
     const [weeks, setWeeks] = useState([]);
     const [days, setDays] = useState([]);
     const [selectedWeek, setSelectedWeek] = useState('all');
