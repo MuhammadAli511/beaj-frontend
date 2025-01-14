@@ -935,6 +935,18 @@ export const getDashboardCardsFunnel = async () => {
     return { status: response.status, data };
 };
 
+// POST api/stats/lastActiveUsers
+export const getLastActiveUsers = async (days, cohorts) => {
+    const response = await fetch(`${API_URL}/stats/lastActiveUsers`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ days, cohorts }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
 
 // ADD USERS
 // POST api/chatbot/upload-user-data

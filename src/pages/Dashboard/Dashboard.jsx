@@ -64,32 +64,32 @@ const Dashboard = () => {
 
     const stats = [
         {
-            label: "Link clicked",
+            label: "Link Clicked",
             value: funnelStats?.linkClicked?.count ?? 0,
             percentage: formatPercentage(funnelStats?.linkClicked?.percentage),
         },
         {
-            label: "Started trial",
+            label: "Trial Started",
             value: funnelStats?.freeDemoStarted?.count ?? 0,
             percentage: formatPercentage(funnelStats?.freeDemoStarted?.percentage),
         },
         {
-            label: "Completed trial",
+            label: "Trial Completed",
             value: funnelStats?.freeDemoEnded?.count ?? 0,
             percentage: formatPercentage(funnelStats?.freeDemoEnded?.percentage),
         },
         {
-            label: "Registered",
+            label: "Registration Completed",
             value: funnelStats?.registeredUsers?.count ?? 0,
             percentage: formatPercentage(funnelStats?.registeredUsers?.percentage),
         },
         {
-            label: "Selected",
+            label: "Target Group Assigned",
             value: funnelStats?.selectedUsers?.count ?? 0,
             percentage: formatPercentage(funnelStats?.selectedUsers?.percentage),
         },
         {
-            label: "Paid",
+            label: "Course Assigned",
             value: funnelStats?.purchasedUsers?.count ?? 0,
             percentage: formatPercentage(funnelStats?.purchasedUsers?.percentage),
         },

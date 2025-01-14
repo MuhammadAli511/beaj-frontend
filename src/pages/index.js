@@ -7,6 +7,7 @@ import PromptPlayground from './PromptPlayground/PromptPlayground';
 import UsersData from './UsersData/UsersData';
 import WhatsappLogs from './WhatsappLogs/WhatsappLogs';
 import PurchaseCourse from './PurchaseCourse/PurchaseCourse';
+import LastActiveUsers from './LastActiveUsers/LastActiveUsers';
 
 export {
     NotFound,
@@ -17,6 +18,7 @@ export {
     PromptPlayground,
     UsersData,
     WhatsappLogs,
-    PurchaseCourse
+    PurchaseCourse,
+    LastActiveUsers
 };
 

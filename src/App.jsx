@@ -10,6 +10,7 @@ import {
   UsersData,
   PurchaseCourse,
   AddUsers,
+  LastActiveUsers
 } from "./pages";
 import { SidebarProvider } from "./components/SidebarContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -47,7 +48,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/last-active-users"
+            element={
+              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
+                <LastActiveUsers />
+              </ProtectedRoute>
+            }
+          />
           {/* Admin Routes */}
           <Route
             path="/content-manager"
