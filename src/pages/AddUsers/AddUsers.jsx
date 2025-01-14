@@ -16,6 +16,36 @@ const AddUsers = () => {
     const expectedHeaders = ['uid', 's0_name', 'gender', 'phone_number', 'schoolname', 'school_role', 'Target.Group', 'cohort_assignment'];
     const requiredFields = ['uid', 's0_name', 'gender', 'phone_number', 'school_role', 'Target.Group', 'cohort_assignment'];
 
+    const formatPhoneNumber = (phone) => {
+        if (!phone) return null;
+        
+        // Remove any non-digit characters except '+'
+        let cleaned = phone.toString().trim().replace(/[^\d+]/g, '');
+        
+        // Handle different formats
+        if (cleaned.startsWith('+92')) {
+            // Format 1: Already starts with +92
+            cleaned = cleaned;
+        } else if (cleaned.startsWith('03')) {
+            // Format 2: Starts with 03
+            cleaned = '+92' + cleaned.substring(1);
+        } else if (cleaned.startsWith('92')) {
+            // Format 3: Starts with 92
+            cleaned = '+' + cleaned;
+        } else {
+            // Invalid format
+            return null;
+        }
+
+        // Check if the number has exactly 12 digits (not counting the '+')
+        const digitsOnly = cleaned.replace(/[^\d]/g, '');
+        if (digitsOnly.length !== 12) {
+            return null;
+        }
+
+        return cleaned;
+    };
+
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
         setError('');
@@ -48,6 +78,7 @@ const AddUsers = () => {
 
                     let invalidRows = [];
                     let emptyRows = 0;
+                    let invalidPhoneNumbers = 0;
                     const uidMap = new Map(); // Map to track UIDs and their row numbers
 
                     // First pass: identify duplicate UIDs
@@ -94,6 +125,17 @@ const AddUsers = () => {
                                 return false;
                             }
 
+                            // Validate phone number
+                            const formattedPhone = formatPhoneNumber(row.phone_number);
+                            if (!formattedPhone) {
+                                invalidRows.push({
+                                    rowNumber: index + 1,
+                                    reason: `Invalid phone number format: ${row.phone_number}`
+                                });
+                                invalidPhoneNumbers++;
+                                return false;
+                            }
+
                             // Check required fields only if row isn't completely empty
                             const hasRequiredFields = requiredFields.every(field => row[field] && row[field].trim() !== '');
                             
@@ -110,7 +152,7 @@ const AddUsers = () => {
                             uid: row.uid.toString().trim(),
                             s0_name: row.s0_name.trim(),
                             gender: row.gender.trim(),
-                            phone_number: row.phone_number.toString().trim(),
+                            phone_number: formatPhoneNumber(row.phone_number),
                             schoolname: (row.schoolname || '').trim(),
                             school_role: row.school_role.trim(),
                             "Target.Group": row["Target.Group"].trim(),
@@ -130,7 +172,8 @@ const AddUsers = () => {
                         invalidRows: invalidRows,
                         skippedRows: totalRows - validData.length,
                         emptyRows,
-                        duplicateUids: duplicateUids.size
+                        duplicateUids: duplicateUids.size,
+                        invalidPhoneNumbers
                     });
 
                     if (invalidRows.length > 0) {
@@ -209,6 +252,11 @@ const AddUsers = () => {
                             {stats.duplicateUids > 0 && (
                                 <li className={styles.warning}>
                                     Users with duplicate UIDs: {stats.duplicateUids}
+                                </li>
+                            )}
+                            {stats.invalidPhoneNumbers > 0 && (
+                                <li className={styles.warning}>
+                                    Invalid phone numbers: {stats.invalidPhoneNumbers}
                                 </li>
                             )}
                             {stats.invalidRows.length > 0 && (
