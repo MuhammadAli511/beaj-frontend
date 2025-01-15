@@ -31,7 +31,7 @@ const Sidebar = () => {
         Users: [
             { name: "Add Users", path: "/add-users", roles: ["admin"] },
             { name: "Users Data", path: "/users-data", roles: ["admin"] },
-            { name: "Last Active Users", path: "/last-active-users", roles: ["admin"] },
+            { name: "Last Active Users", path: "/last-active-users", roles: ["facilitator", "admin"] },
             { name: "Whatsapp Logs", path: "/whatsapp-logs", roles: ["facilitator", "admin"] },
             { name: "Purchase Course", path: "/purchase-course", roles: ["facilitator", "admin"] },
         ],
@@ -55,15 +55,15 @@ const Sidebar = () => {
             <ul className={styles.menu}>
                 {Object.entries(filteredMenuSections).map(([section, items]) => (
                     <React.Fragment key={section}>
-                        <li 
-                            className={styles.section_header} 
+                        <li
+                            className={styles.section_header}
                             onClick={() => toggleSection(section)}
                         >
                             <div className={styles.section_header_content}>
                                 <span>{section}</span>
-                                <img 
-                                    src={greater_arrow} 
-                                    alt="toggle" 
+                                <img
+                                    src={greater_arrow}
+                                    alt="toggle"
                                     className={`${styles.toggle_arrow} ${collapsedSections[section] ? styles.collapsed : ''}`}
                                 />
                             </div>
