@@ -8,6 +8,7 @@ import UsersData from './UsersData/UsersData';
 import WhatsappLogs from './WhatsappLogs/WhatsappLogs';
 import PurchaseCourse from './PurchaseCourse/PurchaseCourse';
 import LastActiveUsers from './LastActiveUsers/LastActiveUsers';
+import UserFeedback from './UserFeedback/UserFeedback';
 
 export {
     NotFound,
@@ -19,6 +20,7 @@ export {
     UsersData,
     WhatsappLogs,
     PurchaseCourse,
-    LastActiveUsers
+    LastActiveUsers,
+    UserFeedback
 };
 

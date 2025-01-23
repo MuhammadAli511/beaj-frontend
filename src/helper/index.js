@@ -960,3 +960,15 @@ export const uploadUserData = async (users) => {
     const data = await response.json();
     return { status: response.status, data };
 };
+
+
+// FEEDBACK
+// GET api/waFeedback/getAll
+export const getAllFeedback = async () => {
+    const response = await fetch(`${API_URL}/waFeedback/getAll`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};

@@ -10,7 +10,8 @@ import {
   UsersData,
   PurchaseCourse,
   AddUsers,
-  LastActiveUsers
+  LastActiveUsers,
+  UserFeedback
 } from "./pages";
 import { SidebarProvider } from "./components/SidebarContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -62,6 +63,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <ContentManager />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user-feedback"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <UserFeedback />
               </ProtectedRoute>
             }
           />
