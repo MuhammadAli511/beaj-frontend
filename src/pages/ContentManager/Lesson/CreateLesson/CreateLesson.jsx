@@ -4,6 +4,16 @@ import { getAllCategories, getCoursesByCategoryId, getCourseById, getAllActivity
 import JoditEditor from 'jodit-react';
 import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson, createConversationalBotLesson } from '../../../../utils/createLessonFunctions';
 
+const hideCourses = [
+    "Free Trial",
+    "Level 1 - T1 - November 11, 2024",
+    "Level 1 - T2 - November 11, 2024",
+    "Level 2 - T1 - December 23, 2024",
+    "Level 2 - T2 - December 23, 2024",
+    "FAST COURSE TESTING",
+    "Level 3 Testing"
+]
+
 const SelectField = ({ label, options, onChange, value, name, id }) => (
     <div className={styles.form_group}>
         <label className={styles.label} htmlFor={id}>{label}</label>
@@ -48,7 +58,7 @@ const CreateLesson = () => {
     const [week, setWeek] = useState('1');
     const [status, setStatus] = useState('Active');
     const editor = useRef(null);
-
+    const [showAllCourses, setShowAllCourses] = useState(false);
 
     // Listen
     const [image, setImage] = useState(null);
@@ -72,7 +82,6 @@ const CreateLesson = () => {
         }
     };
 
-
     // Watch
     const [video, setVideo] = useState(null);
 
@@ -84,7 +93,6 @@ const CreateLesson = () => {
             alert('Please upload an MP4 video not larger than 16MB.');
         }
     };
-
 
     // Watch and Speak
     const [wsQuestions, setWsQuestions] = useState([
@@ -142,7 +150,6 @@ const CreateLesson = () => {
         }
     };
 
-
     // Conversational Questions Bot
     const [botQuestions, setBotQuestions] = useState([{ questionText: '' }]);
 
@@ -165,7 +172,6 @@ const CreateLesson = () => {
             setBotQuestions(newBotQuestions);
         }
     };
-
 
     // Conversational Monologue Bot (will contain videos only)
     const [monologueQuestions, setMonologueQuestions] = useState([{questionText: '', video: '' }]);
@@ -198,7 +204,6 @@ const CreateLesson = () => {
             setMonologueQuestions(newMonologueQuestions);
         }
     };
-
 
     // Listen and Speak
     const [questions, setQuestions] = useState([
@@ -255,7 +260,6 @@ const CreateLesson = () => {
             setQuestions(newQuestions);
         }
     };
-
 
     // MCQs
     const [mcqs, setMcqs] = useState([
@@ -434,6 +438,10 @@ const CreateLesson = () => {
         setStatus(e.target.value);
     };
 
+    const handleShowAllCoursesChange = (e) => {
+        setShowAllCourses(e.target.checked);
+    };
+
     const handleCreateLesson = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -493,7 +501,33 @@ const CreateLesson = () => {
             <form onSubmit={handleCreateLesson} className={styles.form}>
                 <div className={styles.input_row}>
                     <SelectField label="Select Category" options={categories.map(category => ({ value: category.CourseCategoryId, label: category.CourseCategoryName }))} onChange={handleCategoryChange} value={category} name="category" id="category" />
-                    <SelectField label="Select Course" options={courses.map(course => ({ value: course.CourseId, label: course.CourseName }))} onChange={handleCourseChange} value={course} name="course" id="course" />
+                    <div className={styles.form_group}>
+                        <SelectField 
+                            label="Select Course" 
+                            options={courses
+                                .filter(course => showAllCourses || !hideCourses.includes(course.CourseName))
+                                .map(course => ({ 
+                                    value: course.CourseId, 
+                                    label: course.CourseName.includes("Level 3 - T1 - January 27, 2025") || 
+                                           course.CourseName.includes("Level 3 - T2 - January 27, 2025") 
+                                        ? `(Pilot) ${course.CourseName}` 
+                                        : `(Rollout) ${course.CourseName}` 
+                                }))} 
+                            onChange={handleCourseChange} 
+                            value={course} 
+                            name="course" 
+                            id="course" 
+                        />
+                        <div className={styles.show_all_courses}>
+                            <input
+                                type="checkbox"
+                                id="showAllCourses"
+                                checked={showAllCourses}
+                                onChange={handleShowAllCoursesChange}
+                            />
+                            <label htmlFor="showAllCourses">Show All Courses</label>
+                        </div>
+                    </div>
                 </div>
                 <div className={styles.input_row}>
                     <InputField label="Lesson Sequence Number" type="text" value={sequenceNumber} onChange={handleSequenceNumberChange} name="lesson_sequence" id="lesson_sequence" />
