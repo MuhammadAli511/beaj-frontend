@@ -972,3 +972,24 @@ export const getAllFeedback = async () => {
     const data = await response.json();
     return { status: response.status, data };
 };
+
+// QUESTION RESPONSES
+// GET api/waQuestionResponses/getAll
+export const getAllQuestionResponses = async () => {
+    const response = await fetch(`${API_URL}/waQuestionResponses/getAll`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// GET api/waQuestionResponses/getByActivityType/:activityType
+export const getQuestionResponsesByActivityType = async (activityType) => {
+    const response = await fetch(`${API_URL}/waQuestionResponses/getByActivityType/${activityType}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};

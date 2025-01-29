@@ -9,6 +9,7 @@ import WhatsappLogs from './WhatsappLogs/WhatsappLogs';
 import PurchaseCourse from './PurchaseCourse/PurchaseCourse';
 import LastActiveUsers from './LastActiveUsers/LastActiveUsers';
 import UserFeedback from './UserFeedback/UserFeedback';
+import UserResponses from './UserResponses/UserResponses';
 
 export {
     NotFound,
@@ -21,6 +22,7 @@ export {
     WhatsappLogs,
     PurchaseCourse,
     LastActiveUsers,
-    UserFeedback
+    UserFeedback,
+    UserResponses
 };
 
