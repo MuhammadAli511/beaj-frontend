@@ -595,13 +595,14 @@ export const getSpeakActivityQuestionById = async (speakActivityQuestionId) => {
 };
 
 // API call to update a speak activity question
-export const updateSpeakActivityQuestion = async (speakActivityQuestionId, question, file, answer, lessonId, questionNumber) => {
+export const updateSpeakActivityQuestion = async (speakActivityQuestionId, question, file, answer, lessonId, questionNumber, activityType) => {
     const formData = new FormData();
     formData.append('question', question);
     formData.append('file', file);
     formData.append('answer', answer);
     formData.append('lessonId', lessonId);
     formData.append('questionNumber', questionNumber);
+    formData.append('activityType', activityType);
 
     const response = await fetch(`${API_URL}/speakActivityQuestion/update/${speakActivityQuestionId}`, {
         method: "PUT",

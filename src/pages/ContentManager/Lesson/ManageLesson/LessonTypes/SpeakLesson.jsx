@@ -142,7 +142,8 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                         question.mediaFile,
                         formattedAnswers.join(','),
                         lesson.LessonId,
-                        question.questionNumber
+                        question.questionNumber,
+                        updatedLessonData.activity
                     );
 
                     if (updateResponse.status !== 200) {
