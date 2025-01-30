@@ -50,7 +50,7 @@ const UserResponses = () => {
     useEffect(() => {
         const fetchResponses = async () => {
             if (!selectedActivityType) return;
-            
+
             setIsLoading(true);
             try {
                 const responsesResponse = await getQuestionResponsesByActivityType(selectedActivityType.value);
@@ -238,6 +238,7 @@ const UserResponses = () => {
                                     <th className={styles.table_heading}>Num</th>
                                     <th className={styles.table_heading}>Question</th>
                                     <th className={styles.table_heading}>User Audio</th>
+                                    <th className={styles.table_heading}>User Transcript</th>
                                     {!isMonologueActivity() && (
                                         <th className={styles.table_heading}>Bot Audio</th>
                                     )}
@@ -264,6 +265,7 @@ const UserResponses = () => {
                                         <td>
                                             <audio src={response.submittedUserAudio} controls />
                                         </td>
+                                        <td>{response.submittedAnswerText}</td>
                                         {!isMonologueActivity() && (
                                             <td>
                                                 <audio src={response.submittedFeedbackAudio} controls />
