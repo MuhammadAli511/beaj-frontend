@@ -19,14 +19,13 @@ const UserResponses = () => {
     const [selectedDay, setSelectedDay] = useState(null);
     const [selectedActivityType, setSelectedActivityType] = useState(null);
 
+    // Initial data fetch
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const [responsesResponse, coursesResponse] = await Promise.all([
-                    getQuestionResponsesByActivityType('conversationalAgencyBot'),
-                    getAllCourses()
-                ]);
+                // Get courses data
+                const coursesResponse = await getAllCourses();
 
                 // Create course mapping
                 const courseMap = {};
@@ -35,16 +34,9 @@ const UserResponses = () => {
                 });
                 setCourses(courseMap);
 
-                // Set responses
-                setUserResponses(responsesResponse.data);
+                // Set default activity type
+                setSelectedActivityType(activityTypeOptions[0]);
 
-                // Set default values
-                if (responsesResponse.data.length > 0) {
-                    const firstResponse = responsesResponse.data[0];
-                    setSelectedWeek({ value: firstResponse.weekNumber, label: `Week ${firstResponse.weekNumber}` });
-                    setSelectedDay({ value: firstResponse.dayNumber, label: `Day ${firstResponse.dayNumber}` });
-                    setSelectedCourse({ value: firstResponse.courseId, label: courseMap[firstResponse.courseId] });
-                }
             } catch (error) {
                 console.error("Error fetching data:", error);
             } finally {
@@ -53,6 +45,33 @@ const UserResponses = () => {
         };
         fetchData();
     }, []);
+
+    // Fetch responses when activity type changes
+    useEffect(() => {
+        const fetchResponses = async () => {
+            if (!selectedActivityType) return;
+            
+            setIsLoading(true);
+            try {
+                const responsesResponse = await getQuestionResponsesByActivityType(selectedActivityType.value);
+                setUserResponses(responsesResponse.data);
+
+                // Set default values if there are responses
+                if (responsesResponse.data.length > 0) {
+                    const firstResponse = responsesResponse.data[0];
+                    setSelectedWeek({ value: firstResponse.weekNumber, label: `Week ${firstResponse.weekNumber}` });
+                    setSelectedDay({ value: firstResponse.dayNumber, label: `Day ${firstResponse.dayNumber}` });
+                    setSelectedCourse({ value: firstResponse.courseId, label: courses[firstResponse.courseId] });
+                }
+            } catch (error) {
+                console.error("Error fetching responses:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchResponses();
+    }, [selectedActivityType, courses]);
 
     // Format timestamp to a readable date
     const formatDate = (timestamp) => {
@@ -72,11 +91,11 @@ const UserResponses = () => {
 
     const activityTypeOptions = [
         { value: 'conversationalAgencyBot', label: 'Conversational Agency Bot' },
+        { value: 'conversationalQuestionsBot', label: 'Conversational Questions Bot' },
+        { value: 'conversationalMonologueBot', label: 'Conversational Monologue Bot' },
         // { value: 'listenAndSpeak', label: 'Listen & Speak' },
         // { value: 'watchAndSpeak', label: 'Watch & Speak' },
         // { value: 'mcqs', label: 'MCQs' },
-        // { value: 'conversationalQuestionsBot', label: 'Conversational Questions Bot' },
-        // { value: 'conversationalMonologueBot', label: 'Conversational Monologue Bot' },
     ];
 
     // Exclude Courses
@@ -125,6 +144,11 @@ const UserResponses = () => {
         return a.questionNumber - b.questionNumber;
     });
 
+    // Add helper function to determine if activity is monologue
+    const isMonologueActivity = () => {
+        return selectedActivityType?.value === 'conversationalMonologueBot';
+    };
+
     return (
         <div className={styles.main_page}>
             <Navbar />
@@ -171,7 +195,7 @@ const UserResponses = () => {
                         <Select
                             className={styles.select}
                             options={activityTypeOptions}
-                            value={activityTypeOptions[0]}
+                            value={selectedActivityType}
                             onChange={setSelectedActivityType}
                             isClearable={false}
                             placeholder="Select Activity Type"
@@ -214,7 +238,9 @@ const UserResponses = () => {
                                     <th className={styles.table_heading}>Num</th>
                                     <th className={styles.table_heading}>Question</th>
                                     <th className={styles.table_heading}>User Audio</th>
-                                    <th className={styles.table_heading}>Bot Audio</th>
+                                    {!isMonologueActivity() && (
+                                        <th className={styles.table_heading}>Bot Audio</th>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody className={styles.table_body}>
@@ -227,7 +253,9 @@ const UserResponses = () => {
                                         <td>{response.dayNumber}</td>
                                         <td>{response.questionNumber}</td>
                                         <td>
-                                            {response.mediaFile ? (
+                                            {isMonologueActivity() ? (
+                                                <video style={{ width: '300px', height: '200px' }} src={response.mediaFile} controls />
+                                            ) : response.mediaFile ? (
                                                 <audio src={response.mediaFile} controls />
                                             ) : (
                                                 response.question
@@ -236,9 +264,11 @@ const UserResponses = () => {
                                         <td>
                                             <audio src={response.submittedUserAudio} controls />
                                         </td>
-                                        <td>
-                                            <audio src={response.submittedFeedbackAudio} controls />
-                                        </td>
+                                        {!isMonologueActivity() && (
+                                            <td>
+                                                <audio src={response.submittedFeedbackAudio} controls />
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>
