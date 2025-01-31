@@ -120,16 +120,6 @@ const UserResponses = () => {
 
     // Filter the responses data
     const filteredResponses = userResponses.filter(response => {
-        // Add console logs to debug
-        if (selectedCourse) {
-            console.log('Selected Course:', selectedCourse);
-            console.log('Response:', {
-                courseId: response.courseId,
-                courseName: response.courseName,
-                response: response
-            });
-        }
-
         // Phone number or name search
         const searchMatch = (response.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (response.name && response.name.toLowerCase().includes(searchQuery.toLowerCase())));
