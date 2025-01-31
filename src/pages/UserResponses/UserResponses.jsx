@@ -19,6 +19,10 @@ const UserResponses = () => {
     const [selectedDay, setSelectedDay] = useState(null);
     const [selectedActivityType, setSelectedActivityType] = useState(null);
 
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const responsesPerPage = 15;
+
     // Initial data fetch
     useEffect(() => {
         const fetchData = async () => {
@@ -61,7 +65,7 @@ const UserResponses = () => {
                     const firstResponse = responsesResponse.data[0];
                     setSelectedWeek({ value: firstResponse.weekNumber, label: `Week ${firstResponse.weekNumber}` });
                     setSelectedDay({ value: firstResponse.dayNumber, label: `Day ${firstResponse.dayNumber}` });
-                    setSelectedCourse({ value: firstResponse.courseId, label: courses[firstResponse.courseId] });
+                    setSelectedCourse({ value: Number(firstResponse.courseId), label: courses[firstResponse.courseId] });
                 }
             } catch (error) {
                 console.error("Error fetching responses:", error);
@@ -72,6 +76,11 @@ const UserResponses = () => {
 
         fetchResponses();
     }, [selectedActivityType, courses]);
+
+    // Add this useEffect after other useEffects
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, selectedWeek, selectedDay, selectedActivityType, selectedCourse]);
 
     // Format timestamp to a readable date
     const formatDate = (timestamp) => {
@@ -102,13 +111,25 @@ const UserResponses = () => {
     const excludeCourses = ['Level 1 - Kids', 'Free Trial', 'FAST COURSE TESTING', 'Level 3 Testing'];
 
     // Add courseOptions
-    const courseOptions = Object.entries(courses).filter(([id, name]) => !excludeCourses.includes(name)).map(([id, name]) => ({
-        value: id,
-        label: name
-    }));
+    const courseOptions = Object.entries(courses)
+        .filter(([id, name]) => !excludeCourses.includes(name))
+        .map(([id, name]) => ({
+            value: Number(id),
+            label: name
+        }));
 
     // Filter the responses data
     const filteredResponses = userResponses.filter(response => {
+        // Add console logs to debug
+        if (selectedCourse) {
+            console.log('Selected Course:', selectedCourse);
+            console.log('Response:', {
+                courseId: response.courseId,
+                courseName: response.courseName,
+                response: response
+            });
+        }
+
         // Phone number or name search
         const searchMatch = (response.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (response.name && response.name.toLowerCase().includes(searchQuery.toLowerCase())));
@@ -123,8 +144,9 @@ const UserResponses = () => {
         const activityMatch = !selectedActivityType ||
             response.activityType === selectedActivityType.value;
 
-        // Course filter
-        const courseMatch = !selectedCourse || response.courseId === selectedCourse.value;
+        // Course filter - both values should now be numbers
+        const courseMatch = !selectedCourse || 
+            Number(response.courseId) === selectedCourse.value;
 
         return searchMatch && weekMatch && dayMatch && activityMatch && courseMatch;
     }).sort((a, b) => {
@@ -147,6 +169,84 @@ const UserResponses = () => {
     // Add helper function to determine if activity is monologue
     const isMonologueActivity = () => {
         return selectedActivityType?.value === 'conversationalMonologueBot';
+    };
+
+    // Get current responses
+    const indexOfLastResponse = currentPage * responsesPerPage;
+    const indexOfFirstResponse = indexOfLastResponse - responsesPerPage;
+    const currentResponses = filteredResponses.slice(indexOfFirstResponse, indexOfLastResponse);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(filteredResponses.length / responsesPerPage);
+
+    // Add pagination controls component
+    const Pagination = () => {
+        // Generate array of page numbers to show
+        const getPageNumbers = () => {
+            const pageNumbers = [];
+            const maxPagesToShow = 5; // Show up to 5 page numbers at a time
+            
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+            
+            // Adjust startPage if we're near the end
+            if (totalPages - startPage < maxPagesToShow) {
+                startPage = Math.max(1, totalPages - maxPagesToShow + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                pageNumbers.push(i);
+            }
+            
+            return pageNumbers;
+        };
+
+        return (
+            <div className={styles.pagination}>
+                {/* First page button */}
+                <button 
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className={styles.pagination_button}
+                >
+                    1
+                </button>
+
+                {/* Show ellipsis if there are earlier pages */}
+                {getPageNumbers()[0] > 2 && <span>...</span>}
+
+                {/* Page numbers */}
+                {getPageNumbers().map(number => (
+                    number !== 1 && number !== totalPages && (
+                        <button
+                            key={number}
+                            onClick={() => setCurrentPage(number)}
+                            className={`${styles.pagination_button} ${currentPage === number ? styles.active : ''}`}
+                        >
+                            {number}
+                        </button>
+                    )
+                ))}
+
+                {/* Show ellipsis if there are more pages */}
+                {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && <span>...</span>}
+
+                {/* Last page button */}
+                {totalPages > 1 && (
+                    <button 
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        className={styles.pagination_button}
+                    >
+                        {totalPages}
+                    </button>
+                )}
+
+                <span className={styles.page_info}>
+                    ({filteredResponses.length} total responses)
+                </span>
+            </div>
+        );
     };
 
     return (
@@ -227,54 +327,57 @@ const UserResponses = () => {
                             />
                         </div>
                     ) : (
-                        <table className={styles.table}>
-                            <thead className={styles.heading_row}>
-                                <tr>
-                                    <th className={styles.table_heading}>Phone</th>
-                                    <th className={styles.table_heading}>Name</th>
-                                    <th className={styles.table_heading}>Course Name</th>
-                                    <th className={styles.table_heading}>Week</th>
-                                    <th className={styles.table_heading}>Day</th>
-                                    <th className={styles.table_heading}>Num</th>
-                                    <th className={styles.table_heading}>Question</th>
-                                    <th className={styles.table_heading}>User Audio</th>
-                                    <th className={styles.table_heading}>User Transcript</th>
-                                    {!isMonologueActivity() && (
-                                        <th className={styles.table_heading}>Bot Audio</th>
-                                    )}
-                                </tr>
-                            </thead>
-                            <tbody className={styles.table_body}>
-                                {filteredResponses.map((response) => (
-                                    <tr key={response.id}>
-                                        <td>{response.phoneNumber}</td>
-                                        <td>{response.name}</td>
-                                        <td>{response.courseName}</td>
-                                        <td>{response.weekNumber}</td>
-                                        <td>{response.dayNumber}</td>
-                                        <td>{response.questionNumber}</td>
-                                        <td>
-                                            {isMonologueActivity() ? (
-                                                <video style={{ width: '300px', height: '200px' }} src={response.mediaFile} controls />
-                                            ) : response.mediaFile ? (
-                                                <audio src={response.mediaFile} controls />
-                                            ) : (
-                                                response.question
-                                            )}
-                                        </td>
-                                        <td>
-                                            <audio src={response.submittedUserAudio} controls />
-                                        </td>
-                                        <td>{response.submittedAnswerText}</td>
+                        <>
+                            <table className={styles.table}>
+                                <thead className={styles.heading_row}>
+                                    <tr>
+                                        <th className={styles.table_heading}>Phone</th>
+                                        <th className={styles.table_heading}>Name</th>
+                                        <th className={styles.table_heading}>Course Name</th>
+                                        <th className={styles.table_heading}>Week</th>
+                                        <th className={styles.table_heading}>Day</th>
+                                        <th className={styles.table_heading}>Num</th>
+                                        <th className={styles.table_heading}>Question</th>
+                                        <th className={styles.table_heading}>User Audio</th>
+                                        <th className={styles.table_heading}>User Transcript</th>
                                         {!isMonologueActivity() && (
-                                            <td>
-                                                <audio src={response.submittedFeedbackAudio} controls />
-                                            </td>
+                                            <th className={styles.table_heading}>Bot Audio</th>
                                         )}
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className={styles.table_body}>
+                                    {currentResponses.map((response) => (
+                                        <tr key={response.id}>
+                                            <td>{response.phoneNumber}</td>
+                                            <td>{response.name}</td>
+                                            <td>{response.courseName}</td>
+                                            <td>{response.weekNumber}</td>
+                                            <td>{response.dayNumber}</td>
+                                            <td>{response.questionNumber}</td>
+                                            <td>
+                                                {isMonologueActivity() ? (
+                                                    <video style={{ width: '300px', height: '200px' }} src={response.mediaFile} controls />
+                                                ) : response.mediaFile ? (
+                                                    <audio src={response.mediaFile} controls />
+                                                ) : (
+                                                    response.question
+                                                )}
+                                            </td>
+                                            <td>
+                                                <audio src={response.submittedUserAudio} controls />
+                                            </td>
+                                            <td>{response.submittedAnswerText}</td>
+                                            {!isMonologueActivity() && (
+                                                <td>
+                                                    <audio src={response.submittedFeedbackAudio} controls />
+                                                </td>
+                                            )}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            <Pagination />
+                        </>
                     )}
                 </div>
             </div>

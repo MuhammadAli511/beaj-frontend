@@ -145,3 +145,46 @@ td {
   border-color: #51bbcc;
   box-shadow: 0 0 0 1px #51bbcc;
 }
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 1rem;
+}
+
+.pagination_button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    min-width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination_button:disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+.pagination_button:hover:not(:disabled) {
+    background-color: #f0f0f0;
+}
+
+.pagination_button.active {
+    background-color: #51BBCC;
+    color: white;
+    border-color: #51BBCC;
+}
+
+.page_info {
+    font-size: 0.9rem;
+    color: #666;
+    margin-left: 1rem;
+}
