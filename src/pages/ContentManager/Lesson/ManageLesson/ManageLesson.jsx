@@ -297,10 +297,18 @@ const ManageLesson = () => {
                 />
                 <SelectField
                     label="Select Course"
-                    options={courses.map(course => ({
-                        value: course.CourseId,
-                        label: course.CourseName
-                    }))}
+                    options={courses
+                        .map(course => ({
+                            value: course.CourseId,
+                            label: course.CourseName.includes("Level 3 - T1 - January 27, 2025") ||
+                                course.CourseName.includes("Level 3 - T2 - January 27, 2025") ||
+                                course.CourseName.includes("Level 1 - T1 - November 11, 2024") ||
+                                course.CourseName.includes("Level 1 - T2 - November 11, 2024") ||
+                                course.CourseName.includes("Level 2 - T1 - December 23, 2024") ||
+                                course.CourseName.includes("Level 2 - T2 - December 23, 2024")
+                                ? `(Pilot) ${course.CourseName}`
+                                : `(Rollout) ${course.CourseName}`
+                        }))}
                     onChange={handleCourseChange}
                     value={course}
                     name="course"

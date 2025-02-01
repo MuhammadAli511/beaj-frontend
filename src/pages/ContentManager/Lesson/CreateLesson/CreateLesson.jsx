@@ -174,7 +174,7 @@ const CreateLesson = () => {
     };
 
     // Conversational Monologue Bot (will contain videos only)
-    const [monologueQuestions, setMonologueQuestions] = useState([{questionText: '', video: '' }]);
+    const [monologueQuestions, setMonologueQuestions] = useState([{ questionText: '', video: '' }]);
 
     const handleMonologueQuestionChange = (index, event) => {
         const newMonologueQuestions = [...monologueQuestions];
@@ -502,21 +502,21 @@ const CreateLesson = () => {
                 <div className={styles.input_row}>
                     <SelectField label="Select Category" options={categories.map(category => ({ value: category.CourseCategoryId, label: category.CourseCategoryName }))} onChange={handleCategoryChange} value={category} name="category" id="category" />
                     <div className={styles.form_group}>
-                        <SelectField 
-                            label="Select Course" 
+                        <SelectField
+                            label="Select Course"
                             options={courses
                                 .filter(course => showAllCourses || !hideCourses.includes(course.CourseName))
-                                .map(course => ({ 
-                                    value: course.CourseId, 
-                                    label: course.CourseName.includes("Level 3 - T1 - January 27, 2025") || 
-                                           course.CourseName.includes("Level 3 - T2 - January 27, 2025") 
-                                        ? `(Pilot) ${course.CourseName}` 
-                                        : `(Rollout) ${course.CourseName}` 
-                                }))} 
-                            onChange={handleCourseChange} 
-                            value={course} 
-                            name="course" 
-                            id="course" 
+                                .map(course => ({
+                                    value: course.CourseId,
+                                    label: course.CourseName.includes("Level 3 - T1 - January 27, 2025") ||
+                                        course.CourseName.includes("Level 3 - T2 - January 27, 2025")
+                                        ? `(Pilot) ${course.CourseName}`
+                                        : `(Rollout) ${course.CourseName}`
+                                }))}
+                            onChange={handleCourseChange}
+                            value={course}
+                            name="course"
+                            id="course"
                         />
                         <div className={styles.show_all_courses}>
                             <input
