@@ -13,6 +13,7 @@ const UserResponses = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [courses, setCourses] = useState({});
     const [selectedCourse, setSelectedCourse] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null);
 
     // Filters
     const [selectedWeek, setSelectedWeek] = useState(null);
@@ -135,7 +136,7 @@ const UserResponses = () => {
             response.activityType === selectedActivityType.value;
 
         // Course filter - both values should now be numbers
-        const courseMatch = !selectedCourse || 
+        const courseMatch = !selectedCourse ||
             Number(response.courseId) === selectedCourse.value;
 
         return searchMatch && weekMatch && dayMatch && activityMatch && courseMatch;
@@ -175,10 +176,10 @@ const UserResponses = () => {
         const getPageNumbers = () => {
             const pageNumbers = [];
             const maxPagesToShow = 5; // Show up to 5 page numbers at a time
-            
+
             let startPage = Math.max(1, currentPage - 2);
             let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-            
+
             // Adjust startPage if we're near the end
             if (totalPages - startPage < maxPagesToShow) {
                 startPage = Math.max(1, totalPages - maxPagesToShow + 1);
@@ -187,14 +188,14 @@ const UserResponses = () => {
             for (let i = startPage; i <= endPage; i++) {
                 pageNumbers.push(i);
             }
-            
+
             return pageNumbers;
         };
 
         return (
             <div className={styles.pagination}>
                 {/* First page button */}
-                <button 
+                <button
                     onClick={() => setCurrentPage(1)}
                     disabled={currentPage === 1}
                     className={styles.pagination_button}
@@ -223,7 +224,7 @@ const UserResponses = () => {
 
                 {/* Last page button */}
                 {totalPages > 1 && (
-                    <button 
+                    <button
                         onClick={() => setCurrentPage(totalPages)}
                         disabled={currentPage === totalPages}
                         className={styles.pagination_button}
@@ -237,6 +238,16 @@ const UserResponses = () => {
                 </span>
             </div>
         );
+    };
+
+    // Add this function to handle image click
+    const handleImageClick = (imageUrl) => {
+        setSelectedImage(imageUrl);
+    };
+
+    // Add this function to close the modal
+    const handleCloseModal = () => {
+        setSelectedImage(null);
     };
 
     return (
@@ -330,8 +341,9 @@ const UserResponses = () => {
                                         <th className={styles.table_heading}>Question</th>
                                         <th className={styles.table_heading}>User Audio</th>
                                         <th className={styles.table_heading}>User Transcript</th>
-                                        {!isMonologueActivity() && (
-                                            <th className={styles.table_heading}>Bot Audio</th>
+                                        <th className={styles.table_heading}>Bot Audio</th>
+                                        {isMonologueActivity() && (
+                                            <th className={styles.table_heading}>Bot Image</th>
                                         )}
                                     </tr>
                                 </thead>
@@ -357,9 +369,25 @@ const UserResponses = () => {
                                                 <audio src={response.submittedUserAudio} controls />
                                             </td>
                                             <td>{response.submittedAnswerText}</td>
-                                            {!isMonologueActivity() && (
+                                            <td>
+                                                <audio src={response.submittedFeedbackAudio} controls />
+                                            </td>
+                                            {isMonologueActivity() && (
                                                 <td>
-                                                    <audio src={response.submittedFeedbackAudio} controls />
+                                                    <div 
+                                                        className={styles.image_container} 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleImageClick(response.submittedFeedbackText);
+                                                        }}
+                                                    >
+                                                        <img 
+                                                            style={{ width: '250px', height: '250px', cursor: 'pointer' }} 
+                                                            src={response.submittedFeedbackText} 
+                                                            alt="Bot Image" 
+                                                        />
+                                                        <div className={styles.image_overlay}>View</div>
+                                                    </div>
                                                 </td>
                                             )}
                                         </tr>
@@ -371,6 +399,22 @@ const UserResponses = () => {
                     )}
                 </div>
             </div>
+            {selectedImage && (
+                <div 
+                    className={styles.modal} 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleCloseModal();
+                    }}
+                >
+                    <div 
+                        className={styles.modal_content}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <img src={selectedImage} alt="Enlarged Bot Image" />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
