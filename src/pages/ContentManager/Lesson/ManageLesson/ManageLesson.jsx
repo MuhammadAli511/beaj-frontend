@@ -298,6 +298,22 @@ const ManageLesson = () => {
                 <SelectField
                     label="Select Course"
                     options={courses
+                        .sort((a, b) => {
+                            // Extract level numbers if they exist
+                            const levelA = a.CourseName.match(/Level (\d+)/);
+                            const levelB = b.CourseName.match(/Level (\d+)/);
+                            
+                            // If both have levels, sort by level number
+                            if (levelA && levelB) {
+                                return parseInt(levelA[1]) - parseInt(levelB[1]);
+                            }
+                            // If only A has level, it comes first
+                            if (levelA) return -1;
+                            // If only B has level, it comes first
+                            if (levelB) return 1;
+                            // If neither has level, maintain original order
+                            return 0;
+                        })
                         .map(course => ({
                             value: course.CourseId,
                             label: course.CourseName.includes("Level 3 - T1 - January 27, 2025") ||
