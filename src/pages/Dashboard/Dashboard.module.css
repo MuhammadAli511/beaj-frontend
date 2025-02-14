@@ -111,10 +111,36 @@
 }
 
 .chartsContainer {
-  margin-top: 30px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 40px;
+  padding: 20px;
+}
+
+.topChartsRow {
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 40px;
+  height: 500px;
+}
+
+.pieChartContainer {
+  flex: 0 0 300px;
+  position: relative;
+}
+
+.barChartContainer {
+  flex: 1;
+  min-width: 600px;
+  position: relative;
+}
+
+.activityChartContainer {
+  width: 100%;
+  height: 400px;
+  position: relative;
+  margin-top: 20px;
 }
 
 .chart {
@@ -128,4 +154,20 @@
   margin-bottom: 20px;
   text-align: center;
   color: #333;
+}
+
+.feedbackSection {
+  margin-top: 30px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.feedbackSection h2 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 24px;
+  padding-left: 20px;
 }
