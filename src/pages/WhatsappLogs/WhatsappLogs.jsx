@@ -28,6 +28,42 @@ const WhatsappLogs = () => {
     // Refs
     const chatContainerRef = useRef(null);
 
+    const processMessageContent = (content) => {
+        // Handle null or undefined content
+        if (!content) return { url: '', caption: '' };
+        
+        // If content is an array, use first element as URL and second as caption
+        if (Array.isArray(content)) {
+            return {
+                url: content[0] || '',
+                caption: content[1] || ''
+            };
+        }
+        
+        // If it's a string, handle the comma case
+        if (typeof content === 'string') {
+            // Remove trailing comma if it exists
+            const trimmedContent = content.endsWith(',') ? content.slice(0, -1) : content;
+            
+            // Split by comma if it exists
+            const parts = trimmedContent.split(',');
+            if (parts.length > 1) {
+                return {
+                    url: parts[0].trim(),
+                    caption: parts[1].trim()
+                };
+            }
+            
+            return {
+                url: trimmedContent,
+                caption: ''
+            };
+        }
+        
+        // For any other type, return empty values
+        return { url: '', caption: '' };
+    };
+
     useEffect(() => {
         const fetchPhoneNumbers = async () => {
             setUsersLoading(true);
@@ -213,15 +249,25 @@ const WhatsappLogs = () => {
                                         <div className={styles.message_content}>
                                             {/* Check if the message is media, text, or template */}
                                             {log.actionType === 'image' && (
-                                                <img
-                                                    src={log.messageContent}
-                                                    alt="User sent media"
-                                                    className={styles.media_message}
-                                                />
+                                                <div className={styles.media_container}>
+                                                    {(() => {
+                                                        const { url, caption } = processMessageContent(log.messageContent);
+                                                        return (
+                                                            <>
+                                                                <img
+                                                                    src={url}
+                                                                    alt={caption || "User sent media"}
+                                                                    className={styles.media_message}
+                                                                />
+                                                                {caption && <p className={styles.media_caption}>{caption}</p>}
+                                                            </>
+                                                        );
+                                                    })()}
+                                                </div>
                                             )}
                                             {log.actionType === 'sticker' && (
                                                 <img
-                                                    src={log.messageContent}
+                                                    src={processMessageContent(log.messageContent).url}
                                                     alt="User sent sticker"
                                                     className={styles.media_message}
                                                 />
@@ -229,23 +275,33 @@ const WhatsappLogs = () => {
                                             {log.actionType === 'audio' && (
                                                 <audio controls>
                                                     <source
-                                                        src={log.messageContent}
+                                                        src={processMessageContent(log.messageContent).url}
                                                         type="audio/mpeg"
                                                     />
                                                     Your browser does not support the audio element.
                                                 </audio>
                                             )}
                                             {log.actionType === 'video' && (
-                                                <video controls className={styles.media_message}>
-                                                    <source
-                                                        src={log.messageContent}
-                                                        type="video/mp4"
-                                                    />
-                                                    Your browser does not support the video element.
-                                                </video>
+                                                <div className={styles.media_container}>
+                                                    {(() => {
+                                                        const { url, caption } = processMessageContent(log.messageContent);
+                                                        return (
+                                                            <>
+                                                                <video controls className={styles.media_message}>
+                                                                    <source
+                                                                        src={url}
+                                                                        type="video/mp4"
+                                                                    />
+                                                                    Your browser does not support the video element.
+                                                                </video>
+                                                                {caption && <p className={styles.media_caption}>{caption}</p>}
+                                                            </>
+                                                        );
+                                                    })()}
+                                                </div>
                                             )}
                                             {log.actionType === 'text' && (
-                                                <p>{log.messageContent}</p>
+                                                <p>{processMessageContent(log.messageContent).url}</p>
                                             )}
                                             {log.actionType === 'template' && (
                                                 <div className={styles.template_message}>
