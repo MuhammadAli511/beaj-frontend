@@ -31,8 +31,8 @@ const Sidebar = () => {
         Users: [
             { name: "Add Users", path: "/add-users", roles: ["admin"] },
             { name: "Users Data", path: "/users-data", roles: ["admin"] },
-            { name: "User Feedback", path: "/user-feedback", roles: ["admin"] },
-            { name: "User Responses", path: "/user-responses", roles: ["admin"] },
+            { name: "User Feedback", path: "/user-feedback", roles: ["facilitator", "admin"] },
+            { name: "User Responses", path: "/user-responses", roles: ["facilitator", "admin"] },
             { name: "Last Active Users", path: "/last-active-users", roles: ["facilitator", "admin"] },
             { name: "Whatsapp Logs", path: "/whatsapp-logs", roles: ["facilitator", "admin"] },
             { name: "Purchase Course", path: "/purchase-course", roles: ["facilitator", "admin"] },

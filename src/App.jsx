@@ -70,7 +70,7 @@ function App() {
           <Route
             path="/user-feedback"
             element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
                 <UserFeedback />
               </ProtectedRoute>
             }
@@ -78,7 +78,7 @@ function App() {
           <Route
             path="/user-responses"
             element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
                 <UserResponses />
               </ProtectedRoute>
             }
