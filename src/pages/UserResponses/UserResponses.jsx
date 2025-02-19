@@ -332,6 +332,7 @@ const UserResponses = () => {
                             <table className={styles.table}>
                                 <thead className={styles.heading_row}>
                                     <tr>
+                                        <th className={styles.table_heading}>ID</th>
                                         <th className={styles.table_heading}>Phone</th>
                                         <th className={styles.table_heading}>Name</th>
                                         <th className={styles.table_heading}>Course Name</th>
@@ -350,6 +351,7 @@ const UserResponses = () => {
                                 <tbody className={styles.table_body}>
                                     {currentResponses.map((response) => (
                                         <tr key={response.id}>
+                                            <td>{response.id}</td>
                                             <td>{response.phoneNumber}</td>
                                             <td>{response.name}</td>
                                             <td>{response.courseName}</td>
@@ -374,17 +376,17 @@ const UserResponses = () => {
                                             </td>
                                             {isMonologueActivity() && (
                                                 <td>
-                                                    <div 
-                                                        className={styles.image_container} 
+                                                    <div
+                                                        className={styles.image_container}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             handleImageClick(response.submittedFeedbackText);
                                                         }}
                                                     >
-                                                        <img 
-                                                            style={{ width: '250px', height: '250px', cursor: 'pointer' }} 
-                                                            src={response.submittedFeedbackText} 
-                                                            alt="Bot Image" 
+                                                        <img
+                                                            style={{ width: '250px', height: '250px', cursor: 'pointer' }}
+                                                            src={response.submittedFeedbackText}
+                                                            alt="Bot Image"
                                                         />
                                                         <div className={styles.image_overlay}>View</div>
                                                     </div>
@@ -400,14 +402,14 @@ const UserResponses = () => {
                 </div>
             </div>
             {selectedImage && (
-                <div 
-                    className={styles.modal} 
+                <div
+                    className={styles.modal}
                     onClick={(e) => {
                         e.stopPropagation();
                         handleCloseModal();
                     }}
                 >
-                    <div 
+                    <div
                         className={styles.modal_content}
                         onClick={(e) => e.stopPropagation()}
                     >
