@@ -24,22 +24,30 @@ const AddUsers = () => {
         
         // Handle different formats
         if (cleaned.startsWith('+92')) {
-            // Format 1: Already starts with +92
+            // Format 1: Already starts with +92 (Pakistan)
+            cleaned = cleaned;
+        } else if (cleaned.startsWith('+1')) {
+            // Format for USA numbers
             cleaned = cleaned;
         } else if (cleaned.startsWith('03')) {
-            // Format 2: Starts with 03
+            // Format 2: Starts with 03 (Pakistan)
             cleaned = '+92' + cleaned.substring(1);
         } else if (cleaned.startsWith('92')) {
-            // Format 3: Starts with 92
+            // Format 3: Starts with 92 (Pakistan)
+            cleaned = '+' + cleaned;
+        } else if (cleaned.startsWith('1')) {
+            // Format for USA numbers without +
             cleaned = '+' + cleaned;
         } else {
             // Invalid format
             return null;
         }
 
-        // Check if the number has exactly 12 digits (not counting the '+')
+        // Check if the number has the correct number of digits
         const digitsOnly = cleaned.replace(/[^\d]/g, '');
-        if (digitsOnly.length !== 12) {
+        if (cleaned.startsWith('+92') && digitsOnly.length !== 12) {
+            return null;
+        } else if (cleaned.startsWith('+1') && digitsOnly.length !== 11) {
             return null;
         }
 
