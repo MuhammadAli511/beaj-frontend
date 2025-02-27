@@ -298,32 +298,34 @@ const ManageLesson = () => {
                 <SelectField
                     label="Select Course"
                     options={courses
+                        .filter(course => !course.CourseName.includes('2024'))
                         .sort((a, b) => {
                             // Extract level numbers if they exist
                             const levelA = a.CourseName.match(/Level (\d+)/);
                             const levelB = b.CourseName.match(/Level (\d+)/);
                             
-                            // If both have levels, sort by level number
+                            // If both have levels, sort by level number first
                             if (levelA && levelB) {
-                                return parseInt(levelA[1]) - parseInt(levelB[1]);
+                                const levelDiff = parseInt(levelA[1]) - parseInt(levelB[1]);
+                                if (levelDiff !== 0) return levelDiff;
+                                
+                                // For same level, sort T1 before T2
+                                const isT1A = a.CourseName.includes('T1');
+                                const isT1B = b.CourseName.includes('T1');
+                                if (isT1A && !isT1B) return -1;
+                                if (!isT1A && isT1B) return 1;
                             }
+                            
                             // If only A has level, it comes first
                             if (levelA) return -1;
-                            // If only B has level, it comes first
+                            // If only B has level, it comes first 
                             if (levelB) return 1;
                             // If neither has level, maintain original order
                             return 0;
                         })
                         .map(course => ({
                             value: course.CourseId,
-                            label: course.CourseName.includes("Level 3 - T1 - January 27, 2025") ||
-                                course.CourseName.includes("Level 3 - T2 - January 27, 2025") ||
-                                course.CourseName.includes("Level 1 - T1 - November 11, 2024") ||
-                                course.CourseName.includes("Level 1 - T2 - November 11, 2024") ||
-                                course.CourseName.includes("Level 2 - T1 - December 23, 2024") ||
-                                course.CourseName.includes("Level 2 - T2 - December 23, 2024")
-                                ? `(Pilot) ${course.CourseName}`
-                                : `(Rollout) ${course.CourseName}`
+                            label: course.CourseName
                         }))}
                     onChange={handleCourseChange}
                     value={course}

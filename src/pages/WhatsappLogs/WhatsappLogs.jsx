@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Navbar, Sidebar } from "../../components";
 import styles from './WhatsappLogs.module.css';
-import { getAllMetadata, getActivityLogsByPhoneNumber } from "../../helper";
+import { getAllMetadata, getActivityLogsByPhoneNumber, getLastActiveUsers } from "../../helper";
 import { useSidebar } from '../../components/SidebarContext';
 import { TailSpin } from 'react-loader-spinner';
+import Select from 'react-select';
 
 const PAGE_SIZE = 15;
+const INACTIVE_DAYS_THRESHOLD = 3;
 
 const WhatsappLogs = () => {
     const { isSidebarOpen } = useSidebar();
@@ -24,9 +26,29 @@ const WhatsappLogs = () => {
     const [selectedUserName, setSelectedUserName] = useState('');
     const [hoveredLog, setHoveredLog] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCohorts, setSelectedCohorts] = useState(['All']);
+    const [inactivityData, setInactivityData] = useState({});
 
     // Refs
     const chatContainerRef = useRef(null);
+
+    // Cohort options
+    const cohortOptions = [
+        { value: 'All', label: 'All' },
+        { value: 'Pilot', label: 'Pilot' },
+        ...Array.from({ length: 60 }, (_, i) => ({
+            value: `Cohort ${i + 1}`,
+            label: `Cohort ${i + 1}`
+        }))
+    ];
+
+    const handleCohortsChange = (selectedOptions) => {
+        if (selectedOptions.some(option => option.value === 'All')) {
+            setSelectedCohorts(['All']);
+        } else {
+            setSelectedCohorts(selectedOptions.map(option => option.value));
+        }
+    };
 
     const processMessageContent = (content) => {
         // Handle null or undefined content
@@ -65,24 +87,40 @@ const WhatsappLogs = () => {
     };
 
     useEffect(() => {
-        const fetchPhoneNumbers = async () => {
+        const fetchData = async () => {
             setUsersLoading(true);
             try {
-                const response = await getAllMetadata();
-                if (response.data && Array.isArray(response.data)) {
-                    setPhoneNumbers(response.data);
-                } else {
-                    console.error("Expected an array in response.data, got:", response);
+                const [metadataResponse, inactivityResponse] = await Promise.all([
+                    getAllMetadata(),
+                    getLastActiveUsers(30, ['All']) // Get inactivity data for all users up to 30 days
+                ]);
+
+                if (metadataResponse.data && Array.isArray(metadataResponse.data)) {
+                    // Create a map of phone numbers to inactivity data
+                    const inactivityMap = {};
+                    inactivityResponse.data.forEach(user => {
+                        inactivityMap[user.phoneNumber] = {
+                            lastMessageTimestamp: user.lastMessageTimestamp,
+                            inactiveDays: user.inactiveDays
+                        };
+                    });
+                    setInactivityData(inactivityMap);
+
+                    // Combine metadata with inactivity data
+                    const usersWithActivity = metadataResponse.data.map(user => ({
+                        ...user,
+                        ...inactivityMap[user.phoneNumber]
+                    }));
+                    setPhoneNumbers(usersWithActivity);
                 }
             } catch (error) {
-                console.error("Error fetching metadata:", error);
+                console.error("Error fetching data:", error);
             } finally {
                 setUsersLoading(false);
             }
         };
-        fetchPhoneNumbers();
+        fetchData();
     }, []);
-
 
     const fetchLogs = async (phoneNumber, currentPage) => {
         try {
@@ -137,7 +175,6 @@ const WhatsappLogs = () => {
         initializeLogs();
     }, [selectedPhoneNumber, phoneNumbers]);
 
-
     const handleScroll = async () => {
         if (!chatContainerRef.current) return;
         const { scrollTop } = chatContainerRef.current;
@@ -170,7 +207,12 @@ const WhatsappLogs = () => {
     const filteredPhoneNumbers = phoneNumbers.filter((user) => {
         const name = user.name?.toLowerCase() || '';
         const phone = user.phoneNumber || '';
-        return name.includes(searchQuery.toLowerCase()) || phone.includes(searchQuery);
+        const userCohort = user.cohort || '';
+        
+        const matchesSearch = name.includes(searchQuery.toLowerCase()) || phone.includes(searchQuery);
+        const matchesCohort = selectedCohorts.includes('All') || selectedCohorts.includes(userCohort);
+        
+        return matchesSearch && matchesCohort;
     });
 
     return (
@@ -183,13 +225,26 @@ const WhatsappLogs = () => {
                     {/* Left panel for Contacts */}
                     <div className={styles.phone_list}>
                         <h3 className={styles.heading_color}>Contacts</h3>
-                        <input
-                            type="text"
-                            placeholder="Search by name or phone..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className={styles.search_input}
-                        />
+                        <div className={styles.filters}>
+                            <input
+                                type="text"
+                                placeholder="Search by name or phone..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className={styles.search_input}
+                            />
+                            <div className={styles.cohort_filter}>
+                                <Select
+                                    className={styles.select}
+                                    options={cohortOptions}
+                                    isMulti
+                                    defaultValue={[cohortOptions[0]]}
+                                    onChange={handleCohortsChange}
+                                    placeholder="Select cohorts..."
+                                    isSearchable={true}
+                                />
+                            </div>
+                        </div>
                         {usersLoading ? (
                             <div className={styles.loader}>
                                 <TailSpin color="#51bbcc" height={50} width={50} />
@@ -200,14 +255,19 @@ const WhatsappLogs = () => {
                                     filteredPhoneNumbers.map((user) => (
                                         <li
                                             key={user.phoneNumber}
-                                            className={
+                                            className={`${
                                                 selectedPhoneNumber === user.phoneNumber
                                                     ? styles.active
                                                     : ''
-                                            }
+                                            } ${styles.user_item}`}
                                             onClick={() => setSelectedPhoneNumber(user.phoneNumber)}
                                         >
-                                            {user.name || user.phoneNumber}
+                                            <div className={styles.user_info}>
+                                                <span>{user.name || user.phoneNumber}</span>
+                                                {user.inactiveDays >= INACTIVE_DAYS_THRESHOLD && (
+                                                    <span className={styles.inactive_dot} title={`Inactive for ${user.inactiveDays} days`} />
+                                                )}
+                                            </div>
                                         </li>
                                     ))
                                 ) : (

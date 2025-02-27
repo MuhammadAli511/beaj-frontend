@@ -39,6 +39,9 @@
   margin-bottom: 5px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
 }
 
 .phone_list li:hover {
@@ -48,6 +51,11 @@
 .phone_list .active {
   background-color: #51bbcc;
   color: white;
+}
+
+.phone_list li:hover .inactive_dot,
+.phone_list .active .inactive_dot {
+  background-color: #ff4444;
 }
 
 .activity_logs {
@@ -204,4 +212,72 @@
   height: 20px;
   width: 100%;
   position: relative;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.search_input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cohort_filter {
+  width: 100%;
+}
+
+/* Override react-select styles to match the theme */
+.select {
+  font-size: 14px;
+}
+
+.select :global(.react-select__control) {
+  border-color: #ddd;
+  min-height: 38px;
+}
+
+.select :global(.react-select__control--is-focused) {
+  border-color: #51bbcc;
+  box-shadow: 0 0 0 1px #51bbcc;
+}
+
+.select :global(.react-select__option--is-selected) {
+  background-color: #51bbcc;
+}
+
+.select :global(.react-select__option--is-focused) {
+  background-color: rgba(81, 187, 204, 0.1);
+}
+
+.user_item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.user_info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.inactive_dot {
+  width: 8px;
+  height: 8px;
+  background-color: #ff4444;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  margin-left: 8px;
 }
