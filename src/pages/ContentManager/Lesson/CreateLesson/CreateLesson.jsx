@@ -4,16 +4,6 @@ import { getAllCategories, getCoursesByCategoryId, getCourseById, getAllActivity
 import JoditEditor from 'jodit-react';
 import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson, createConversationalBotLesson, createSpeakingPracticeLesson } from '../../../../utils/createLessonFunctions';
 
-const hideCourses = [
-    "Free Trial",
-    "Level 1 - T1 - November 11, 2024",
-    "Level 1 - T2 - November 11, 2024",
-    "Level 2 - T1 - December 23, 2024",
-    "Level 2 - T2 - December 23, 2024",
-    "FAST COURSE TESTING",
-    "Level 3 Testing"
-]
-
 const SelectField = ({ label, options, onChange, value, name, id }) => (
     <div className={styles.form_group}>
         <label className={styles.label} htmlFor={id}>{label}</label>
@@ -542,7 +532,11 @@ const CreateLesson = () => {
                         <SelectField
                             label="Select Course"
                             options={courses
-                                .filter(course => !course.CourseName.includes('2024'))
+                                .filter(course =>
+                                    !course.CourseName.includes('2024') &&
+                                    !course.CourseName.includes('Level 3 - T1 - January 27, 2025') &&
+                                    !course.CourseName.includes('Level 3 - T2 - January 27, 2025')
+                                )
                                 .sort((a, b) => {
                                     // Extract level numbers if they exist
                                     const levelA = a.CourseName.match(/Level (\d+)/);
