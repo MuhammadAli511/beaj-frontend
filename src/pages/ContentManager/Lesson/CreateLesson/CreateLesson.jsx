@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './CreateLesson.module.css';
 import { getAllCategories, getCoursesByCategoryId, getCourseById, getAllActivityAliases } from '../../../../helper';
 import JoditEditor from 'jodit-react';
-import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson, createConversationalBotLesson } from '../../../../utils/createLessonFunctions';
+import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson, createConversationalBotLesson, createSpeakingPracticeLesson } from '../../../../utils/createLessonFunctions';
 
 const hideCourses = [
     "Free Trial",
@@ -202,6 +202,41 @@ const CreateLesson = () => {
             const newMonologueQuestions = [...monologueQuestions];
             newMonologueQuestions.splice(index, 1);
             setMonologueQuestions(newMonologueQuestions);
+        }
+    };
+
+
+    // Speaking Practice Questions
+    const [speakingPracticeQuestions, setSpeakingPracticeQuestions] = useState([
+        { audio: '' }
+    ]);
+
+    const handleSpeakingPracticeQuestionChange = (index, event) => {
+        const newQuestions = [...speakingPracticeQuestions];
+        if (event.target.type === 'file') {
+            const file = event.target.files[0];
+            if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+                newQuestions[index][event.target.name] = file;
+            } else {
+                alert('Please upload an MP3 audio not larger than 16MB.');
+            }
+        } else {
+            newQuestions[index][event.target.name] = event.target.value;
+        }
+        setSpeakingPracticeQuestions(newQuestions);
+    };
+
+    const addSpeakingPracticeQuestion = (event) => {
+        event.preventDefault();
+        setSpeakingPracticeQuestions([...speakingPracticeQuestions, { audio: '' }]);
+    };
+
+    const removeSpeakingPracticeQuestion = (index, event) => {
+        event.preventDefault();
+        if (speakingPracticeQuestions.length > 1) {
+            const newSpeakingPracticeQuestions = [...speakingPracticeQuestions];
+            newSpeakingPracticeQuestions.splice(index, 1);
+            setSpeakingPracticeQuestions(newSpeakingPracticeQuestions);
         }
     };
 
@@ -470,6 +505,8 @@ const CreateLesson = () => {
                 await createConversationalBotLesson(course, sequenceNumber, alias, activityType, monologueQuestions, lessonText, day, week, status);
             } else if (activityType === 'conversationalAgencyBot') {
                 await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
+            } else if (activityType === 'speakingPractice') {
+                await createSpeakingPracticeLesson(course, sequenceNumber, alias, activityType, speakingPracticeQuestions, lessonText, day, week, status);
             }
         } catch (error) {
             alert(error);
@@ -573,6 +610,7 @@ const CreateLesson = () => {
                         { value: 'conversationalQuestionsBot', label: 'Conversational Questions Bot' },
                         { value: 'conversationalMonologueBot', label: 'Conversational Monologue Bot' },
                         { value: 'conversationalAgencyBot', label: 'Conversational Agency Bot' },
+                        { value: 'speakingPractice', label: 'Speaking Practice' },
                     ]} onChange={handleActivityTypeChange} value={activityType} name="activity_type" id="activity_type" />
                     <SelectField label="Status" options={[
                         { value: 'Active', label: 'Active' },
@@ -696,6 +734,25 @@ const CreateLesson = () => {
                             </div>
                         ))}
                         <button className={styles.add_button} onClick={(e) => addMonologueQuestion(e)}>Add Another Question</button>
+                    </>
+                )}
+                {activityType === 'speakingPractice' && (
+                    <>
+                        <div className={styles.input_row}>
+                            <div className={styles.form_group}>
+                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
+                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            </div>
+                        </div>
+                        {speakingPracticeQuestions.map((question, qIndex) => (
+                            <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.input_row}>
+                                    <InputField label={`Question ${qIndex + 1}`} type="file" onChange={e => handleSpeakingPracticeQuestionChange(qIndex, e)} name="audio" id={`audio-${qIndex}`} fileInput />
+                                    {speakingPracticeQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeSpeakingPracticeQuestion(qIndex, e)}>Remove Question</button>}
+                                </div>
+                            </div>
+                        ))}
+                        <button className={styles.add_button} onClick={(e) => addSpeakingPracticeQuestion(e)}>Add Another Question</button>
                     </>
                 )}
                 {activityType === 'conversationalAgencyBot' && (

@@ -288,6 +288,11 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 ...newQuestion,
                 question: '',
             };
+        } else if (activity === 'speakingPractice') {
+            newQuestion = {
+                ...newQuestion,
+                audio: '',
+            };
         }
         setQuestions([...questions, newQuestion]);
     };
@@ -556,6 +561,19 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                             </>
                                         )}
 
+                                        {activity === 'speakingPractice' && (
+                                            <>
+                                                <label className={styles.answerEditLabel}>Question Audio</label>
+                                                <input type="file" onChange={(e) => handleQuestionChange(index, 'audio', e.target.files[0])} />
+                                                {question.audio && (
+                                                    <div className={styles.mediaSection}>
+                                                        <label className={styles.answerEditLabel}>Current Audio:</label>
+                                                        <audio controls src={question.audio} className={styles.audio}></audio>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+
                                         <button
                                             className={styles.delete_button}
                                             onClick={() => handleDeleteQuestion(question.id, index)}
@@ -699,6 +717,7 @@ const SpeakLesson = ({ category, course, activity }) => {
         'conversationalQuestionsBot': 'Conversational Questions Bot',
         'conversationalMonologueBot': 'Conversational Monologue Bot',
         'conversationalAgencyBot': 'Conversational Agency Bot',
+        'speakingPractice': 'Speaking Practice',
     };
 
     return (

@@ -10,7 +10,7 @@ import MigrateLessonModal from '../../../../components/MigrateLessonModal/Migrat
 
 const lessonTypes = [
     'All', 'Watch', 'Watch End', 'Read', 'Listen & Speak', 'Watch & Speak', 'Watch & Audio', 'Watch & Image',
-    'MCQs', 'Conversational Questions Bot', 'Conversational Monologue Bot', 'Conversational Agency Bot'
+    'MCQs', 'Conversational Questions Bot', 'Conversational Monologue Bot', 'Conversational Agency Bot', 'Speaking Practice'
 ];
 
 const SelectField = ({ label, options, onChange, value, name, id }) => (
@@ -276,6 +276,8 @@ const ManageLesson = () => {
                 return <SpeakLesson category={category} course={course} activity='conversationalMonologueBot' />;
             case 'Conversational Agency Bot':
                 return <SpeakLesson category={category} course={course} activity='conversationalAgencyBot' />;
+            case 'Speaking Practice':
+                return <SpeakLesson category={category} course={course} activity='speakingPractice' />;
             default:
                 return null;
         }

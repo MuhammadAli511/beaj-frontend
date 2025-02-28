@@ -74,6 +74,7 @@ const UserFeedback = () => {
         { value: 'conversationalQuestionsBot', label: 'Conversational Questions Bot' },
         { value: 'conversationalMonologueBot', label: 'Conversational Monologue Bot' },
         { value: 'conversationalAgencyBot', label: 'Conversational Agency Bot' },
+        { value: 'speakingPractice', label: 'Speaking Practice' },
     ];
 
     // Filter the feedback data
