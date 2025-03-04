@@ -868,6 +868,16 @@ export const getActivityLogsByPhoneNumber = async (phoneNumber, page = 1, pageSi
     return { status: response.status, data };
 };
 
+// GET api/waUserActivityLogs/getLastMessageTime
+export const getLastMessageTime = async () => {
+    const response = await fetch(`${API_URL}/waUserActivityLogs/getLastMessageTime`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
 
 // PURCHASED COURSES
 // GET api/waPurchasedCourses/getAllCoursesByPhoneNumber

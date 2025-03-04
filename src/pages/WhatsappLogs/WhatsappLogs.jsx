@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Navbar, Sidebar } from "../../components";
 import styles from './WhatsappLogs.module.css';
-import { getAllMetadata, getActivityLogsByPhoneNumber, getLastActiveUsers } from "../../helper";
+import { getAllMetadata, getActivityLogsByPhoneNumber, getLastMessageTime } from "../../helper";
 import { useSidebar } from '../../components/SidebarContext';
 import { TailSpin } from 'react-loader-spinner';
 import Select from 'react-select';
@@ -90,26 +90,32 @@ const WhatsappLogs = () => {
         const fetchData = async () => {
             setUsersLoading(true);
             try {
-                const [metadataResponse, inactivityResponse] = await Promise.all([
+                const [metadataResponse, lastMessageTimeResponse] = await Promise.all([
                     getAllMetadata(),
-                    getLastActiveUsers(30, ['All']) // Get inactivity data for all users up to 30 days
+                    getLastMessageTime() // Get last message time data for all users
                 ]);
 
                 if (metadataResponse.data && Array.isArray(metadataResponse.data)) {
-                    // Create a map of phone numbers to inactivity data
-                    const inactivityMap = {};
-                    inactivityResponse.data.forEach(user => {
-                        inactivityMap[user.phoneNumber] = {
-                            lastMessageTimestamp: user.lastMessageTimestamp,
-                            inactiveDays: user.inactiveDays
+                    // Create a map of phone numbers to last message time data
+                    const lastMessageTimeMap = {};
+                    lastMessageTimeResponse.data.forEach(user => {
+                        const timestamp = user.timestamp;
+                        const now = new Date();
+                        const lastMessageDate = new Date(timestamp);
+                        const diffTime = Math.abs(now - lastMessageDate);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        lastMessageTimeMap[user.phoneNumber] = {
+                            lastMessageTimestamp: timestamp,
+                            inactiveDays: diffDays
                         };
                     });
-                    setInactivityData(inactivityMap);
+                    setInactivityData(lastMessageTimeMap);
 
-                    // Combine metadata with inactivity data
+                    // Combine metadata with last message time data
                     const usersWithActivity = metadataResponse.data.map(user => ({
                         ...user,
-                        ...inactivityMap[user.phoneNumber]
+                        ...lastMessageTimeMap[user.phoneNumber]
                     }));
                     setPhoneNumbers(usersWithActivity);
                 }
