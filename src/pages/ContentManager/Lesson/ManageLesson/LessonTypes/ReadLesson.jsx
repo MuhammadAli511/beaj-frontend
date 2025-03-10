@@ -12,7 +12,6 @@ import {
 import edit from '../../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../../assets/images/delete.svg';
 import styles from './ReadLesson.module.css';
-import JoditEditor from 'jodit-react';
 import MigrateLessonModal from "../../../../../components/MigrateLessonModal/MigrateLessonModal";
 
 const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
@@ -159,8 +158,8 @@ const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         );
     };
 
-    const handleTextEditorChange = (newText) => {
-        setLessonText(newText);
+    const handleTextEditorChange = (e) => {
+        setLessonText(e.target.value);
     };
 
     return (
@@ -274,7 +273,7 @@ const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                 </div>
                                 <div className={styles.form_group}>
                                     <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                    <JoditEditor ref={editor} value={lessonData.text} onChange={handleTextEditorChange} />
+                                    <textarea defaultValue={lessonData.text} className={styles.text_area} onChange={handleTextEditorChange} />
                                 </div>
                                 <div className={styles.form_group}>
                                     <label className={styles.label}>Video</label>

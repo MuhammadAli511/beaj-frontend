@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './CreateLesson.module.css';
 import { getAllCategories, getCoursesByCategoryId, getCourseById, getAllActivityAliases } from '../../../../helper';
-import JoditEditor from 'jodit-react';
 import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson, createConversationalBotLesson, createSpeakingPracticeLesson } from '../../../../utils/createLessonFunctions';
 
 const SelectField = ({ label, options, onChange, value, name, id }) => (
@@ -24,7 +23,7 @@ const InputField = ({ label, type, onChange, value, name, id, fileInput = false,
         <div className={styles.form_group}>
             <label className={styles.label} htmlFor={id}>{label}</label>
             {type == 'textarea' ? (
-                <textarea className={styles.input_field} onChange={onChange} value={value} name={name} id={id} />
+                <textarea className={styles.text_area} onChange={onChange} value={value} name={name} id={id} />
             ) : (
                 <input className={styles.input_field} type={type} onChange={onChange} value={value} name={name} id={id} checked={checked} />
             )}
@@ -447,8 +446,8 @@ const CreateLesson = () => {
         setActivityType(e.target.value);
     };
 
-    const handleTextEditorChange = (newText) => {
-        setLessonText(newText);
+    const handleTextEditorChange = (e) => {
+        setLessonText(e.target.value);
     };
 
     const handleDayChange = (e) => {
@@ -619,8 +618,7 @@ const CreateLesson = () => {
                         </div>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                                <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                     </>
@@ -632,8 +630,7 @@ const CreateLesson = () => {
                         </div>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                                <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                     </>
@@ -645,8 +642,7 @@ const CreateLesson = () => {
                         </div>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                                <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                     </>
@@ -658,8 +654,7 @@ const CreateLesson = () => {
                         </div>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                     </>
@@ -668,8 +663,7 @@ const CreateLesson = () => {
                     <>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                         {questions.map((question, qIndex) => (
@@ -695,8 +689,7 @@ const CreateLesson = () => {
                     <>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                         {botQuestions.map((question, qIndex) => (
@@ -714,8 +707,7 @@ const CreateLesson = () => {
                     <>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                         {monologueQuestions.map((question, qIndex) => (
@@ -734,8 +726,7 @@ const CreateLesson = () => {
                     <>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                         {speakingPracticeQuestions.map((question, qIndex) => (
@@ -753,8 +744,7 @@ const CreateLesson = () => {
                     <>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                         {botQuestions.map((question, qIndex) => (
@@ -772,8 +762,7 @@ const CreateLesson = () => {
                     <>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                         {wsQuestions.map((question, qIndex) => (
@@ -799,8 +788,7 @@ const CreateLesson = () => {
                     <>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                         {wsQuestions.map((question, qIndex) => (
@@ -818,8 +806,7 @@ const CreateLesson = () => {
                     <>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
-                                <label className={styles.label} htmlFor="lesson_text">Lesson Text</label>
-                                <JoditEditor ref={editor} value={lessonText} onChange={handleTextEditorChange} />
+                            <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
                         {wsQuestions.map((question, qIndex) => (

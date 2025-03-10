@@ -166,6 +166,22 @@ img {
   line-height: normal;
 }
 
+.text_area{
+  border: 1px solid #51BBCC;
+  background: #FFF;
+  border-radius: 10px;
+  height: 46px;
+  width: 100%;
+  outline: none;
+  padding-left: 10px;
+  padding-top: 10px;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  min-height: 200px;
+}
+
 .image_preview {
   margin-top: 10px;
 }

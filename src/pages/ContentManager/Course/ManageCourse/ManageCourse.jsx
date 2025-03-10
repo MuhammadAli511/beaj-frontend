@@ -3,8 +3,6 @@ import styles from './ManageCourse.module.css';
 import edit from '../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../assets/images/delete.svg';
 import { updateCourse, deleteCourse, getAllCourses, getAllCategories, duplicateCourse } from '../../../../helper';
-import JoditEditor from 'jodit-react';
-
 
 
 const EditCourseModal = ({ isOpen, onClose, course, onSave }) => {
@@ -103,13 +101,7 @@ const EditCourseModal = ({ isOpen, onClose, course, onSave }) => {
                     </div>
                     <div className={styles.form_group}>
                         <label className={styles.label} htmlFor="courseDescription">Course Description</label>
-                        <JoditEditor
-                            ref={editor}
-                            value={courseDescription}
-                            tabIndex={1}
-                            onBlur={newContent => setCourseDescription(newContent)}
-                            onChange={newContent => setCourseDescription(newContent)}
-                        />
+                        <textarea value={courseDescription} onChange={e => setCourseDescription(e.target.value)} />
                     </div>
                 </div>
                 <div className={styles.input_row}>
