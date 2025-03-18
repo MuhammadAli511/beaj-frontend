@@ -55,6 +55,41 @@ const LastActiveUsers = () => {
         }
     };
 
+    const downloadCSV = () => {
+        if (userData.length === 0) return;
+        
+        // Define headers
+        const headers = ['User ID', 'Phone Number', 'Name', 'Target Group', 'Cohort', 'Last Message Time', 'Inactive Days'];
+        
+        // Map data to CSV rows
+        const dataRows = userData.map(user => [
+            user.userId || '',
+            user.phoneNumber || '',
+            user.name || '',
+            user.targetGroup || '',
+            user.cohort || '',
+            user.lastMessageTimestamp || '',
+            user.inactiveDays
+        ]);
+        
+        // Combine headers and data
+        const csvContent = [
+            headers.join(','),
+            ...dataRows.map(row => row.join(','))
+        ].join('\n');
+        
+        // Create download link
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `last_active_users_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className={styles.main_page}>
             <Navbar />
@@ -89,6 +124,13 @@ const LastActiveUsers = () => {
                         <span className={styles.stat_label}>Total Users</span>
                         <span className={styles.stat_value}>{userData.length}</span>
                     </div>
+                    <button 
+                        className={styles.download_button}
+                        onClick={downloadCSV}
+                        disabled={userData.length === 0 || isLoading}
+                    >
+                        Download CSV
+                    </button>
                 </div>
                 <div className={styles.table_container}>
                     {isLoading ? (
