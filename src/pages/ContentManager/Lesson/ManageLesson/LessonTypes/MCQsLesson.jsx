@@ -308,11 +308,11 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         customAnswerFeedbackImage: "",
                     }],
                     isNew: true,
+                    showCustomFeedback: false,
                 },
             ];
         });
     };
-
 
     const removeQuestion = (index) => {
         const questionToRemove = questions[index];
@@ -388,9 +388,6 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         });
     };
 
-
-
-
     const sortedCourses = () => {
         if (!lessonData) return courses;
         return [...courses].sort((a, b) =>
@@ -441,41 +438,6 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         )}
                     </div>
                 );
-            // case "Audio":
-            //     return (
-            //         <div className={styles.form_group}>
-            //             <label className={styles.label}>Upload Question Audio</label>
-            //             <input
-            //                 className={styles.input_field}
-            //                 type="file"
-            //                 onChange={(e) => handleQuestionChange(qIndex, "questionAudioUrl", e.target.files[0])}
-            //             />
-            //             {question.questionAudioUrl && (
-            //                 <audio controls src={question.questionAudioUrl} className={styles.audio} />
-            //             )}
-            //         </div>
-            //     );
-            // case "Text+Audio":
-            //     return (
-            //         <div className={styles.form_group}>
-            //             <label className={styles.label}>Question Text</label>
-            //             <input
-            //                 className={styles.input_field}
-            //                 type="text"
-            //                 value={question.questionText}
-            //                 onChange={(e) => handleQuestionChange(qIndex, "questionText", e.target.value)}
-            //             />
-            //             <label className={styles.label}>Upload Question Audio</label>
-            //             <input
-            //                 className={styles.input_field}
-            //                 type="file"
-            //                 onChange={(e) => handleQuestionChange(qIndex, "questionAudioUrl", e.target.files[0])}
-            //             />
-            //             {question.questionAudioUrl && (
-            //                 <audio controls src={question.questionAudioUrl} className={styles.audio} />
-            //             )}
-            //         </div>
-            //     );
             case "Text+Image":
                 return (
                     <div className={styles.form_group}>
@@ -507,7 +469,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                             onChange={(e) => handleQuestionChange(qIndex, "questionVideoUrl", e.target.files[0])}
                         />
                         {question.questionVideoUrl && (
-                            <video src={question.questionVideoUrl} alt="Question" className={styles.video} />
+                            <video src={question.questionVideoUrl} controls className={styles.video} />
                         )}
                     </div>
                 );
@@ -528,7 +490,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                             onChange={(e) => handleQuestionChange(qIndex, "questionVideoUrl", e.target.files[0])}
                         />
                         {question.questionVideoUrl && (
-                            <video src={question.questionVideoUrl} alt="Question" className={styles.video} />
+                            <video src={question.questionVideoUrl} controls className={styles.video} />
                         )}
                     </div>
                 );
@@ -616,71 +578,144 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                 {/* Edit Questions */}
                                 {questions.map((question, qIndex) => (
                                     <div key={qIndex} className={styles.question_box}>
-                                        <div className={styles.input_row}>
-                                            <label className={styles.label}>Question Num</label>
-                                            <input
-                                                className={styles.input_field}
-                                                type="number"
-                                                value={question.questionNumber}
-                                                onChange={(e) => handleQuestionChange(qIndex, "questionNumber", e.target.value)}
-                                            />
+                                        <div className={styles.question_header}>
+                                            <h3 className={styles.question_title}>Question {question.questionNumber}</h3>
+                                            <button className={styles.remove_button} onClick={() => removeQuestion(qIndex)}>Remove Question</button>
                                         </div>
-                                        <div className={styles.input_row}>
-                                            <label className={styles.label}>Question Type</label>
-                                            <select
-                                                className={styles.input_field}
-                                                value={question.questionType}
-                                                onChange={(e) => handleQuestionChange(qIndex, "questionType", e.target.value)}
-                                            >
-                                                <option value="Text">Text</option>
-                                                <option value="Image">Image</option>
-                                                <option value="Audio">Audio</option>
-                                                <option value="Text+Audio">Text + Audio</option>
-                                                <option value="Text+Image">Text + Image</option>
-                                                <option value="Image+Audio">Image + Audio</option>
-                                            </select>
-
-                                        </div>
-
-                                        <button className={styles.remove_button} onClick={() => removeQuestion(qIndex)}>Remove Question</button>
-
-                                        {renderQuestionInputs(question, qIndex)}
-
-                                        {question.answers
-                                            .filter((answer) => !answer.isDeleted)
-                                            .map((answer, aIndex) => (
-                                                <div key={aIndex} className={styles.answer_group}>
-                                                    <div className={styles.input_row}>
-                                                        <label className={styles.label}>Answer</label>
-                                                        <input
-                                                            className={styles.input_field}
-                                                            type="text"
-                                                            value={answer.answerText}
-                                                            onChange={(e) => handleAnswerChange(qIndex, aIndex, "answerText", e.target.value)}
+                                        
+                                        <div className={styles.question_section}>
+                                            <div className={styles.input_row}>
+                                                <label className={styles.label}>Question Number</label>
+                                                <input
+                                                    className={styles.input_field}
+                                                    type="number"
+                                                    value={question.questionNumber}
+                                                    onChange={(e) => handleQuestionChange(qIndex, "questionNumber", e.target.value)}
+                                                />
+                                            </div>
+                                            
+                                            <div className={styles.input_row}>
+                                                <label className={styles.label}>Question Type</label>
+                                                <select
+                                                    className={styles.input_field}
+                                                    value={question.questionType}
+                                                    onChange={(e) => handleQuestionChange(qIndex, "questionType", e.target.value)}
+                                                >
+                                                    <option value="Text">Text</option>
+                                                    <option value="Image">Image</option>
+                                                    <option value="Video">Video</option>
+                                                    <option value="Text+Image">Text + Image</option>
+                                                    <option value="Text+Video">Text + Video</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div className={styles.question_content}>
+                                                {renderQuestionInputs(question, qIndex)}
+                                            </div>
+                                            
+                                            <div className={styles.custom_feedback_toggle}>
+                                                <div className={styles.checkbox_wrapper}>
+                                                    <div className={styles.custom_checkbox_container}>
+                                                        <input 
+                                                            className={styles.custom_checkbox} 
+                                                            type="checkbox" 
+                                                            checked={question.showCustomFeedback || false}
+                                                            onChange={(e) => handleQuestionChange(qIndex, "showCustomFeedback", e.target.checked)}
+                                                            id={`showCustomFeedback-${qIndex}`}
                                                         />
-                                                    </div>
-                                                    <div className={styles.input_row_correct}>
-                                                        <label className={styles.label}>Correct</label>
-                                                        <input
-                                                            className={styles.input_field}
-                                                            type="checkbox"
-                                                            checked={answer.isCorrect}
-                                                            onChange={(e) => handleAnswerChange(qIndex, aIndex, "isCorrect", e.target.checked)}
-                                                        />
-                                                        {question.answers.length > 1 && (
-                                                            <button
-                                                                className={styles.remove_button}
-                                                                onClick={() => removeAnswer(qIndex, aIndex)}
-                                                            >
-                                                                Remove Answer
-                                                            </button>
-                                                        )}
+                                                        <label className={styles.checkbox_label} htmlFor={`showCustomFeedback-${qIndex}`}>
+                                                            <span className={styles.checkmark}></span>
+                                                            <span className={styles.label_text}>Enable Custom Feedback</span>
+                                                        </label>
                                                     </div>
                                                 </div>
-                                            ))}
-                                        {question.answers.length < 4 && (
-                                            <button className={styles.add_button} onClick={() => addNewAnswer(qIndex)}>Add Answer</button>
-                                        )}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className={styles.answers_section}>
+                                            <h4 className={styles.answers_title}>Answer Options</h4>
+                                            
+                                            <div className={styles.answers_container}>
+                                                {question.answers
+                                                    .filter((answer) => !answer.isDeleted)
+                                                    .map((answer, aIndex) => (
+                                                        <div key={aIndex} className={styles.answer_box}>
+                                                            <div className={styles.answer_header}>
+                                                                <span className={styles.answer_number}>Answer {aIndex + 1}</span>
+                                                                
+                                                                <div className={styles.correct_checkbox}>
+                                                                    <div className={styles.checkbox_wrapper}>
+                                                                        <div className={styles.custom_checkbox_container}>
+                                                                            <input 
+                                                                                className={styles.custom_checkbox} 
+                                                                                type="checkbox" 
+                                                                                checked={answer.isCorrect}
+                                                                                onChange={(e) => handleAnswerChange(qIndex, aIndex, "isCorrect", e.target.checked)}
+                                                                                id={`isCorrect-${qIndex}-${aIndex}`}
+                                                                            />
+                                                                            <label className={styles.checkbox_label} htmlFor={`isCorrect-${qIndex}-${aIndex}`}>
+                                                                                <span className={styles.checkmark}></span>
+                                                                                <span className={styles.label_text}>Correct</span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    {question.answers.length > 1 && (
+                                                                        <button
+                                                                            className={styles.remove_button}
+                                                                            onClick={() => removeAnswer(qIndex, aIndex)}
+                                                                        >
+                                                                            Remove Answer
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div className={styles.answer_content}>
+                                                                <div className={styles.input_row}>
+                                                                    <label className={styles.label}>Answer Text</label>
+                                                                    <input
+                                                                        className={styles.input_field}
+                                                                        type="text"
+                                                                        value={answer.answerText}
+                                                                        onChange={(e) => handleAnswerChange(qIndex, aIndex, "answerText", e.target.value)}
+                                                                    />
+                                                                </div>
+                                                                
+                                                                {question.showCustomFeedback && (
+                                                                    <div className={styles.feedback_section}>
+                                                                        <h5 className={styles.feedback_title}>Custom Feedback</h5>
+                                                                        <div className={styles.input_row}>
+                                                                            <label className={styles.label}>Feedback Text</label>
+                                                                            <input
+                                                                                className={styles.input_field}
+                                                                                type="text"
+                                                                                value={answer.customAnswerFeedbackText || ""}
+                                                                                onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackText", e.target.value)}
+                                                                            />
+                                                                        </div>
+                                                                        <div className={styles.input_row}>
+                                                                            <label className={styles.label}>Feedback Image</label>
+                                                                            <input
+                                                                                className={styles.input_field}
+                                                                                type="file"
+                                                                                onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackImage", e.target.files[0])}
+                                                                            />
+                                                                            {answer.customAnswerFeedbackImage && (
+                                                                                <img src={answer.customAnswerFeedbackImage} alt="Feedback" className={styles.image} />
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                            
+                                            {question.answers.length < 4 && (
+                                                <button className={styles.add_button} onClick={() => addNewAnswer(qIndex)}>Add Answer</button>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                                 <button className={styles.add_button} onClick={addNewQuestion}>Add New Question</button>
@@ -805,7 +840,6 @@ const MCQsLesson = ({ category, course, activity }) => {
         'preMCQs': 'Pre Multiple Choice Questions',
         'placementTest': 'Placement Test',
     };
-
 
     return (
         <div>
