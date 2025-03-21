@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './ManageCourse.module.css';
 import edit from '../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../assets/images/delete.svg';
@@ -15,7 +15,6 @@ const EditCourseModal = ({ isOpen, onClose, course, onSave }) => {
     const [sequenceNumber, setSequenceNumber] = useState(course ? course.SequenceNumber : 0);
     const [courseDescription, setCourseDescription] = useState(course ? course.CourseDescription : '');
     const [courseStartDate, setCourseStartDate] = useState(course ? course.courseStartDate : '');
-    const editor = useRef(null);
 
     useEffect(() => {
         if (course) {

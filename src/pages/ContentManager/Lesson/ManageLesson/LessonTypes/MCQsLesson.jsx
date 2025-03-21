@@ -52,6 +52,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     questionText: question.dataValues.QuestionText || "",
                     questionImageUrl: question.dataValues.QuestionImageUrl,
                     questionAudioUrl: question.dataValues.QuestionAudioUrl,
+                    questionVideoUrl: question.dataValues.QuestionVideoUrl,
                     questionNumber: question.dataValues.QuestionNumber,
                     optionsType: question.dataValues.OptionsType,
                     answers: question.multipleChoiceQuestionAnswers.map((answer) => ({
@@ -61,6 +62,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         answerAudioUrl: answer.AnswerAudioUrl,
                         isCorrect: answer.IsCorrect,
                         SequenceNumber: answer.SequenceNumber,
+                        customAnswerFeedbackText: answer.CustomAnswerFeedbackText || "",
+                        customAnswerFeedbackImage: answer.CustomAnswerFeedbackImage || "",
                     })),
                 }));
                 setLessonData(lessonResponse.data);
@@ -156,11 +159,12 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     const createQuestionResponse = await createMultipleChoiceQuestion(
                         question.file || null,
                         question.image || null,
+                        question.video || null,
                         question.questionType,
                         question.questionText,
                         question.questionNumber,
                         lessonData.LessonId,
-                        question.optionsType
+                        question.optionsType,
                     );
 
                     if (createQuestionResponse.status !== 200) {
@@ -191,11 +195,12 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         question.id,
                         question.file || null,
                         question.image || null,
+                        question.video || null,
                         question.questionType,
                         question.questionText,
                         question.questionNumber,
                         lessonData.LessonId,
-                        question.optionsType
+                        question.optionsType,
                     );
 
                     if (updateQuestionResponse.status !== 200) {
@@ -212,7 +217,9 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                 answer.image || null,
                                 answer.isCorrect,
                                 question.id,
-                                answer.SequenceNumber
+                                answer.SequenceNumber,
+                                answer.customAnswerFeedbackText || null,
+                                answer.customAnswerFeedbackImage || null
                             );
 
                             if (createAnswerResponse.status !== 200) {
@@ -286,6 +293,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     questionText: "",
                     questionImageUrl: null,
                     questionAudioUrl: null,
+                    questionVideoUrl: null,
                     questionNumber: newQuestionNumber,
                     optionsType: "Text",
                     answers: [{
@@ -296,6 +304,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         isCorrect: false,
                         SequenceNumber: 1,
                         isNew: true,
+                        customAnswerFeedbackText: "",
+                        customAnswerFeedbackImage: "",
                     }],
                     isNew: true,
                 },
@@ -431,41 +441,41 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         )}
                     </div>
                 );
-            case "Audio":
-                return (
-                    <div className={styles.form_group}>
-                        <label className={styles.label}>Upload Question Audio</label>
-                        <input
-                            className={styles.input_field}
-                            type="file"
-                            onChange={(e) => handleQuestionChange(qIndex, "questionAudioUrl", e.target.files[0])}
-                        />
-                        {question.questionAudioUrl && (
-                            <audio controls src={question.questionAudioUrl} className={styles.audio} />
-                        )}
-                    </div>
-                );
-            case "Text+Audio":
-                return (
-                    <div className={styles.form_group}>
-                        <label className={styles.label}>Question Text</label>
-                        <input
-                            className={styles.input_field}
-                            type="text"
-                            value={question.questionText}
-                            onChange={(e) => handleQuestionChange(qIndex, "questionText", e.target.value)}
-                        />
-                        <label className={styles.label}>Upload Question Audio</label>
-                        <input
-                            className={styles.input_field}
-                            type="file"
-                            onChange={(e) => handleQuestionChange(qIndex, "questionAudioUrl", e.target.files[0])}
-                        />
-                        {question.questionAudioUrl && (
-                            <audio controls src={question.questionAudioUrl} className={styles.audio} />
-                        )}
-                    </div>
-                );
+            // case "Audio":
+            //     return (
+            //         <div className={styles.form_group}>
+            //             <label className={styles.label}>Upload Question Audio</label>
+            //             <input
+            //                 className={styles.input_field}
+            //                 type="file"
+            //                 onChange={(e) => handleQuestionChange(qIndex, "questionAudioUrl", e.target.files[0])}
+            //             />
+            //             {question.questionAudioUrl && (
+            //                 <audio controls src={question.questionAudioUrl} className={styles.audio} />
+            //             )}
+            //         </div>
+            //     );
+            // case "Text+Audio":
+            //     return (
+            //         <div className={styles.form_group}>
+            //             <label className={styles.label}>Question Text</label>
+            //             <input
+            //                 className={styles.input_field}
+            //                 type="text"
+            //                 value={question.questionText}
+            //                 onChange={(e) => handleQuestionChange(qIndex, "questionText", e.target.value)}
+            //             />
+            //             <label className={styles.label}>Upload Question Audio</label>
+            //             <input
+            //                 className={styles.input_field}
+            //                 type="file"
+            //                 onChange={(e) => handleQuestionChange(qIndex, "questionAudioUrl", e.target.files[0])}
+            //             />
+            //             {question.questionAudioUrl && (
+            //                 <audio controls src={question.questionAudioUrl} className={styles.audio} />
+            //             )}
+            //         </div>
+            //     );
             case "Text+Image":
                 return (
                     <div className={styles.form_group}>
@@ -487,26 +497,38 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         )}
                     </div>
                 );
-            case "Image+Audio":
+            case "Video":
                 return (
                     <div className={styles.form_group}>
-                        <label className={styles.label}>Upload Question Image</label>
+                        <label className={styles.label}>Upload Question Video</label>
                         <input
                             className={styles.input_field}
                             type="file"
-                            onChange={(e) => handleQuestionChange(qIndex, "questionImageUrl", e.target.files[0])}
+                            onChange={(e) => handleQuestionChange(qIndex, "questionVideoUrl", e.target.files[0])}
                         />
-                        {question.questionImageUrl && (
-                            <img src={question.questionImageUrl} alt="Question" className={styles.image} />
+                        {question.questionVideoUrl && (
+                            <video src={question.questionVideoUrl} alt="Question" className={styles.video} />
                         )}
-                        <label className={styles.label}>Upload Question Audio</label>
+                    </div>
+                );
+            case "Text+Video":
+                return (
+                    <div className={styles.form_group}>
+                        <label className={styles.label}>Question Text</label>
+                        <input
+                            className={styles.input_field}
+                            type="text"
+                            value={question.questionText}
+                            onChange={(e) => handleQuestionChange(qIndex, "questionText", e.target.value)}
+                        />
+                        <label className={styles.label}>Upload Question Video</label>
                         <input
                             className={styles.input_field}
                             type="file"
-                            onChange={(e) => handleQuestionChange(qIndex, "questionAudioUrl", e.target.files[0])}
+                            onChange={(e) => handleQuestionChange(qIndex, "questionVideoUrl", e.target.files[0])}
                         />
-                        {question.questionAudioUrl && (
-                            <audio controls src={question.questionAudioUrl} className={styles.audio} />
+                        {question.questionVideoUrl && (
+                            <video src={question.questionVideoUrl} alt="Question" className={styles.video} />
                         )}
                     </div>
                 );

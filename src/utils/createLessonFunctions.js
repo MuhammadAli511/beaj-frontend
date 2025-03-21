@@ -295,6 +295,7 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
         const isCorrectArray = mcqs[i].answers.map(answer => answer.isCorrect);
         const questionAudio = mcqs[i].questionAudio;
         const questionImage = mcqs[i].questionImage;
+        const questionVideo = mcqs[i].questionVideo;
         const questionType = mcqs[i].questionType;
         const questionNumber = (i + 1).toString();
 
@@ -306,6 +307,7 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
         const questionResponse = await createMultipleChoiceQuestion(
             questionAudio,
             questionImage,
+            questionVideo,
             questionType,
             questionText,
             questionNumber,

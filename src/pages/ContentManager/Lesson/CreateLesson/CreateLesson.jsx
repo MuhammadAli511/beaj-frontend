@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './CreateLesson.module.css';
 import { getAllCategories, getCoursesByCategoryId, getCourseById, getAllActivityAliases } from '../../../../helper';
 import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson, createConversationalBotLesson, createSpeakingPracticeLesson } from '../../../../utils/createLessonFunctions';
@@ -46,7 +46,6 @@ const CreateLesson = () => {
     const [day, setDay] = useState('1');
     const [week, setWeek] = useState('1');
     const [status, setStatus] = useState('Active');
-    const editor = useRef(null);
     const [showAllCourses, setShowAllCourses] = useState(false);
 
     // Listen
@@ -288,8 +287,8 @@ const CreateLesson = () => {
     // MCQs
     const [mcqs, setMcqs] = useState([
         {
-            questionType: 'text', questionText: '', questionAudio: null, questionImage: null,
-            answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false }))
+            questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
+            answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false, customAnswerFeedbackText: '', customAnswerFeedbackImage: '' }))
         }
     ]);
 
@@ -298,7 +297,8 @@ const CreateLesson = () => {
         if (event.target.type === 'file') {
             const file = event.target.files[0];
             if ((event.target.name === 'questionImage' && file && file.type === 'image/jpeg' && file.size <= 4 * 1024 * 1024) ||
-                (event.target.name === 'questionAudio' && file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024)) {
+                (event.target.name === 'questionAudio' && file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) ||
+                (event.target.name === 'questionVideo' && file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024)) {
                 newMcqs[index][event.target.name] = file;
             } else {
                 alert('Please upload a valid file with correct format and size.');
@@ -334,8 +334,8 @@ const CreateLesson = () => {
     const addMCQQuestion = (event) => {
         event.preventDefault();
         setMcqs([...mcqs, {
-            questionType: 'text', questionText: '', questionAudio: null, questionImage: null,
-            answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false }))
+            questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
+            answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false, customAnswerFeedbackText: '', customAnswerFeedbackImage: '' }))
         }]);
     };
 
@@ -513,8 +513,8 @@ const CreateLesson = () => {
             setQuestions([{ questionText: '', audio: '', answers: [{ answerText: '' }] }]);
             setWsQuestions([{ questionText: '', video: '', answers: [{ answerText: '' }] }]);
             setMcqs([{
-                questionType: 'text', questionText: '', questionAudio: null, questionImage: null,
-                answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false }))
+                questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
+                answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false, customAnswerFeedbackText: '', customAnswerFeedbackImage: '' }))
             }]);
             setBotQuestions([{ questionText: '' }]);
             setMonologueQuestions([{ video: '' }]);
@@ -829,10 +829,9 @@ const CreateLesson = () => {
                                         { value: '-1', label: 'Select Question Type' },
                                         { value: 'Text', label: 'Text' },
                                         { value: 'Image', label: 'Image' },
-                                        { value: 'Audio', label: 'Audio' },
-                                        { value: 'Text+Audio', label: 'Text + Audio' },
                                         { value: 'Text+Image', label: 'Text + Image' },
-                                        { value: 'Image+Audio', label: 'Image + Audio' },
+                                        { value: 'Video', label: 'Video' },
+                                        { value: 'Text+Video', label: 'Text + Video' },
                                     ]} onChange={(e) => handleMCQQuestionChange(qIndex, e)} value={mcq.questionType} name="questionType" id={`questionType-${qIndex}`} />
                                     {mcq.questionType.includes('Text') && (
                                         <InputField label={`Question Text`} type="text" onChange={(e) => handleMCQQuestionChange(qIndex, e)} value={mcq.questionText} name="questionText" id={`questionText-${qIndex}`} />
@@ -851,10 +850,9 @@ const CreateLesson = () => {
                                             { value: '-1', label: 'Select Answer Type' },
                                             { value: 'Text', label: 'Text' },
                                             { value: 'Image', label: 'Image' },
-                                            { value: 'Audio', label: 'Audio' },
-                                            { value: 'Text+Audio', label: 'Text + Audio' },
                                             { value: 'Text+Image', label: 'Text + Image' },
-                                            { value: 'Image+Audio', label: 'Image + Audio' },
+                                            { value: 'Video', label: 'Video' },
+                                            { value: 'Text+Video', label: 'Text + Video' },
                                         ]} onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} value={answer.answerType} name="answerType" id={`answerType-${qIndex}-${aIndex}`} />
                                         {answer.answerType.includes('Text') && (
                                             <InputField label={`Answer Text`} type="text" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} value={answer.answerText} name="answerText" id={`answerText-${qIndex}-${aIndex}`} />
@@ -864,6 +862,9 @@ const CreateLesson = () => {
                                         )}
                                         {answer.answerType.includes('Audio') && (
                                             <InputField label={`Upload Answer Audio`} type="file" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} name="answerAudio" id={`answerAudio-${qIndex}-${aIndex}`} fileInput />
+                                        )}
+                                        {answer.answerType.includes('Video') && (
+                                            <InputField label={`Upload Answer Video`} type="file" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} name="answerVideo" id={`answerVideo-${qIndex}-${aIndex}`} fileInput />
                                         )}
                                         <InputField label={`Correct`} type="checkbox" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} checked={answer.isCorrect} name="isCorrect" id={`isCorrect-${qIndex}-${aIndex}`} />
                                     </div>

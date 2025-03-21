@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './CreateCourse.module.css';
 import { getAllCategories, createCourse } from '../../../../helper';
 

@@ -630,10 +630,11 @@ export const deleteSpeakActivityQuestion = async (speakActivityQuestionId) => {
 
 // Multiple Choice Question
 // API call to create a Multiple Choice Question
-export const createMultipleChoiceQuestion = async (file, image, questionType, questionText, questionNumber, lessonId, optionsType) => {
+export const createMultipleChoiceQuestion = async (file, image, video, questionType, questionText, questionNumber, lessonId, optionsType) => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('image', image);
+    formData.append('video', video);
     formData.append('questionType', questionType);
     formData.append('questionText', questionText);
     formData.append('questionNumber', questionNumber);
@@ -673,10 +674,11 @@ export const getMultipleChoiceQuestionById = async (multipleChoiceQuestionId) =>
 };
 
 // API call to update a Multiple Choice Question
-export const updateMultipleChoiceQuestion = async (multipleChoiceQuestionId, file, image, questionType, questionText, questionNumber, lessonId, optionsType) => {
+export const updateMultipleChoiceQuestion = async (multipleChoiceQuestionId, file, image, video, questionType, questionText, questionNumber, lessonId, optionsType) => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('image', image);
+    formData.append('video', video);
     formData.append('questionType', questionType);
     formData.append('questionText', questionText);
     formData.append('questionNumber', questionNumber);
@@ -709,7 +711,7 @@ export const deleteMultipleChoiceQuestion = async (multipleChoiceQuestionId) => 
 
 // Multiple Choice Question Answers
 // API call to create a Multiple Choice Question Answer
-export const createMultipleChoiceQuestionAnswer = async (answerText, file, image, isCorrect, multipleChoiceQuestionId, sequenceNumber) => {
+export const createMultipleChoiceQuestionAnswer = async (answerText, file, image, isCorrect, multipleChoiceQuestionId, sequenceNumber, customAnswerFeedbackText, customAnswerFeedbackImage) => {
     const formData = new FormData();
     formData.append('answerText', answerText);
     formData.append('file', file);
@@ -717,6 +719,8 @@ export const createMultipleChoiceQuestionAnswer = async (answerText, file, image
     formData.append('isCorrect', isCorrect);
     formData.append('multipleChoiceQuestionId', multipleChoiceQuestionId);
     formData.append('sequenceNumber', sequenceNumber);
+    formData.append('customAnswerFeedbackText', customAnswerFeedbackText);
+    formData.append('customAnswerFeedbackImage', customAnswerFeedbackImage);
     const response = await fetch(`${API_URL}/multipleChoiceQuestionAnswer/create`, {
         method: "POST",
         headers: {
@@ -750,7 +754,7 @@ export const getMultipleChoiceQuestionAnswerById = async (multipleChoiceQuestion
 };
 
 // API call to update a Multiple Choice Question Answer
-export const updateMultipleChoiceQuestionAnswer = async (multipleChoiceQuestionAnswerId, answerText, file, image, isCorrect, multipleChoiceQuestionId, sequenceNumber) => {
+export const updateMultipleChoiceQuestionAnswer = async (multipleChoiceQuestionAnswerId, answerText, file, image, isCorrect, multipleChoiceQuestionId, sequenceNumber, customAnswerFeedbackText, customAnswerFeedbackImage) => {
     const formData = new FormData();
     formData.append('answerText', answerText);
     formData.append('file', file);
@@ -758,7 +762,8 @@ export const updateMultipleChoiceQuestionAnswer = async (multipleChoiceQuestionA
     formData.append('isCorrect', isCorrect);
     formData.append('multipleChoiceQuestionId', multipleChoiceQuestionId);
     formData.append('sequenceNumber', sequenceNumber);
-
+    formData.append('customAnswerFeedbackText', customAnswerFeedbackText);
+    formData.append('customAnswerFeedbackImage', customAnswerFeedbackImage);
     const response = await fetch(`${API_URL}/multipleChoiceQuestionAnswer/update/${multipleChoiceQuestionAnswerId}`, {
         method: "PUT",
         headers: {

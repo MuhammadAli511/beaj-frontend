@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     getLessonsByActivity,
     getLessonById,
@@ -22,7 +22,6 @@ const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const [courses, setCourses] = useState([]);
     const [activityAliases, setActivityAliases] = useState([]);
     const [lessonText, setLessonText] = useState('');
-    const editor = useRef(null);
 
     useEffect(() => {
         const fetchAllData = async () => {

@@ -28,28 +28,51 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                 <table className={styles.table}>
                     <thead>
                         <tr>
-                            <th className={styles.table_heading}>Question Number</th>
+                            <th className={styles.table_heading}>No.</th>
                             <th className={styles.table_heading}>Question</th>
+                            <th className={styles.table_heading}>Question Image</th>
+                            <th className={styles.table_heading}>Question Video</th>
                             <th className={styles.table_heading}>Options</th>
+                            <th className={styles.table_heading}>Custom Answer Feedback</th>
                         </tr>
                     </thead>
                     <tbody className={styles.table_body}>
                         {sortedQuestions.map((question) => (
                             <tr key={question.dataValues.Id} className={styles.table_row}>
                                 <td style={{ width: "5%" }}>{question.dataValues.QuestionNumber}</td>
-                                <td style={{ width: "45%" }}>{question.dataValues.QuestionText}</td>
-                                <td style={{ width: "50%" }}>
+                                <td style={{ width: "20%" }}>{question.dataValues.QuestionText}</td>
+                                {question.dataValues.QuestionImageUrl && (
+                                    <td style={{ width: "20%", maxWidth: "200px" }}>
+                                        <div style={{ width: "100%", textAlign: "center" }}>
+                                            <img src={question.dataValues.QuestionImageUrl} alt="Question" className={styles.questionImage} />
+                                        </div>
+                                    </td>
+                                )}
+                                {question.dataValues.QuestionVideoUrl && (
+                                    <td style={{ width: "20%", maxWidth: "200px" }}>
+                                        <div style={{ width: "100%", textAlign: "center" }}>
+                                            <video src={question.dataValues.QuestionVideoUrl} alt="Question" className={styles.questionVideo} />
+                                        </div>
+                                    </td>
+                                )}
+                                <td style={{ width: "20%" }}>
                                     {question.multipleChoiceQuestionAnswers.map((answer) => (
                                         <div key={answer.Id} className={styles.answer}>
                                             {answer.AnswerText && <span style={{ fontWeight: answer.IsCorrect ? "bold" : "normal" }}>{answer.AnswerText}</span>}
-                                            {answer.AnswerImageUrl !== "null" && answer.AnswerImageUrl !== null && (
-                                                <img src={answer.AnswerImageUrl} alt="Answer" className={styles.answerImage} />
-                                            )}
-                                            {answer.AnswerAudioUrl !== "null" && answer.AnswerImageUrl !== null && (
-                                                <audio controls className={styles.answerAudio}>
-                                                    <source src={answer.AnswerAudioUrl} type="audio/mp4" />
-                                                </audio>
-                                            )}
+                                        </div>
+                                    ))}
+                                </td>
+                                <td style={{ width: "15%" }}>
+                                    {question.multipleChoiceQuestionAnswers.map((answer) => (
+                                        <div key={answer.Id} className={styles.answer}>
+                                            {answer.CustomAnswerFeedbackText && <span>{answer.CustomAnswerFeedbackText}</span>}
+                                        </div>
+                                    ))}
+                                </td>
+                                <td style={{ width: "15%" }}>
+                                    {question.multipleChoiceQuestionAnswers.map((answer) => (
+                                        <div key={answer.Id} className={styles.answer}>
+                                            {answer.CustomAnswerFeedbackImage && <img src={answer.CustomAnswerFeedbackImage} alt="Custom Answer Feedback" className={styles.answerImage} />}
                                         </div>
                                     ))}
                                 </td>
