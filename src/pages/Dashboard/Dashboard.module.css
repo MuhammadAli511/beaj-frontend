@@ -9,7 +9,7 @@
 
 .content {
   margin-left: 265px;
-  padding: 20px;
+  padding: 25px;
   flex-grow: 1;
   background: #f1f3f4;
   height: 100%;
@@ -21,16 +21,26 @@
   justify-content: flex-end;
   align-items: center;
   padding-bottom: 20px;
+  background-color: #fff;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
 }
 
 .botStatusHeading {
   margin-right: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #444;
 }
 
 .botStatus {
   display: flex;
   align-items: center;
   font-size: 16px;
+  font-weight: 500;
+  color: #333;
 }
 
 .greenDot,
@@ -38,16 +48,18 @@
   height: 10px;
   width: 10px;
   border-radius: 50%;
-  margin-right: 5px;
-  animation: blink 1s infinite;
+  margin-right: 8px;
+  animation: blink 1.5s infinite;
 }
 
 .greenDot {
-  background-color: green;
+  background-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
 }
 
 .redDot {
-  background-color: red;
+  background-color: #f44336;
+  box-shadow: 0 0 5px rgba(244, 67, 54, 0.5);
 }
 
 @keyframes blink {
@@ -64,76 +76,124 @@
 
 .statsCards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
-  padding: 10px;
+  padding: 0;
+  margin-bottom: 30px;
 }
 
 .card {
   background: #fff;
-  padding: 20px;
+  padding: 25px 20px;
   text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 150px;
+  min-height: 160px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 .card h3 {
   margin: 0;
   font-size: 16px;
-  line-height: 1.2;
-  height: 40px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+  min-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .value {
-  font-size: 28px;
-  font-weight: bold;
-  margin: 10px 0;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 15px 0;
+  color: #333;
 }
 
 .percentage {
-  color: #888;
+  color: #666;
   margin: 0;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .loader {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100px;
+  height: 150px;
   margin: 0 auto;
+}
+
+.error {
+  text-align: center;
+  color: #f44336;
+  font-size: 16px;
+  margin: 20px 0;
+}
+
+.feedbackSection {
+  margin-top: 30px;
+  padding: 25px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  width: 100%;
+}
+
+.feedbackSection h2 {
+  margin-bottom: 25px;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  padding-left: 5px;
+  border-left: 4px solid #51bbcc;
+  padding-left: 15px;
 }
 
 .chartsContainer {
   display: flex;
   flex-direction: column;
   gap: 40px;
-  padding: 20px;
+  padding: 10px;
 }
 
 .topChartsRow {
   display: flex;
   justify-content: flex-start;
   align-items: stretch;
-  gap: 40px;
+  gap: 30px;
   height: 500px;
+  flex-wrap: wrap;
 }
 
 .pieChartContainer {
   flex: 0 0 300px;
   position: relative;
+  min-width: 300px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .barChartContainer {
   flex: 1;
   min-width: 600px;
   position: relative;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .activityChartContainer {
@@ -141,33 +201,63 @@
   height: 400px;
   position: relative;
   margin-top: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .chart {
   background: #fff;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .chart h3 {
   margin-bottom: 20px;
   text-align: center;
   color: #333;
+  font-weight: 600;
 }
 
-.feedbackSection {
-  margin-top: 30px;
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  width: 100%;
+@media (max-width: 1200px) {
+  .topChartsRow {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .pieChartContainer,
+  .barChartContainer {
+    min-width: 100%;
+    margin-bottom: 20px;
+    height: 400px;
+  }
 }
 
-.feedbackSection h2 {
-  margin-bottom: 20px;
-  color: #333;
-  font-size: 24px;
-  padding-left: 20px;
+@media (max-width: 1000px) {
+  .content {
+    margin-left: 0;
+    padding: 15px;
+  }
+  
+  .statsCards {
+    grid-template-columns: 1fr;
+  }
+  
+  .feedbackSection {
+    padding: 15px;
+  }
+  
+  .feedbackSection h2 {
+    font-size: 20px;
+  }
+  
+  .card {
+    min-height: 140px;
+  }
+  
+  .value {
+    font-size: 28px;
+  }
 }

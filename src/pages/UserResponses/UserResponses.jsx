@@ -122,7 +122,8 @@ const UserResponses = () => {
     // Filter the responses data
     const filteredResponses = userResponses.filter(response => {
         // Phone number or name search
-        const searchMatch = (response.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        const searchMatch = (!searchQuery || 
+            (response.phoneNumber && response.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
             (response.name && response.name.toLowerCase().includes(searchQuery.toLowerCase())));
 
         // Week filter
@@ -142,8 +143,10 @@ const UserResponses = () => {
         return searchMatch && weekMatch && dayMatch && activityMatch && courseMatch;
     }).sort((a, b) => {
         // Sort by phone number first
-        const phoneComparison = a.phoneNumber.localeCompare(b.phoneNumber);
-        if (phoneComparison !== 0) return phoneComparison;
+        if (a.phoneNumber && b.phoneNumber) {
+            const phoneComparison = a.phoneNumber.localeCompare(b.phoneNumber);
+            if (phoneComparison !== 0) return phoneComparison;
+        }
 
         // Then by week
         const weekComparison = a.weekNumber - b.weekNumber;
@@ -349,10 +352,10 @@ const UserResponses = () => {
                                     </tr>
                                 </thead>
                                 <tbody className={styles.table_body}>
-                                    {currentResponses.map((response) => (
-                                        <tr key={response.id}>
-                                            <td>{response.id}</td>
-                                            <td>{response.phoneNumber}</td>
+                                    {currentResponses.map((response, index) => (
+                                        <tr key={response.id || index}>
+                                            <td>{response.id || 'N/A'}</td>
+                                            <td>{response.phoneNumber || 'N/A'}</td>
                                             <td>{response.name}</td>
                                             <td>{response.courseName}</td>
                                             <td>{response.weekNumber}</td>
@@ -360,7 +363,7 @@ const UserResponses = () => {
                                             <td>{response.questionNumber}</td>
                                             <td>
                                                 {isMonologueActivity() ? (
-                                                    <video style={{ width: '300px', height: '200px' }} src={response.mediaFile} controls />
+                                                    <></>
                                                 ) : response.mediaFile ? (
                                                     <audio src={response.mediaFile} controls />
                                                 ) : (

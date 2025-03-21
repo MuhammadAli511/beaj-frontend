@@ -6,79 +6,121 @@
 }
 
 .content {
-  margin-left: 240px;
-  padding: 20px;
+  margin-left: 265px;
+  padding: 25px;
   flex-grow: 1;
   background: #f1f3f4;
   height: 100%;
   overflow-y: auto;
 }
 
+.content h1 {
+  color: #333;
+  font-size: 28px;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
 .stats_summary {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin: 20px 0;
 }
 
 .table_container {
   overflow-x: auto;
-  margin-top: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 20px;
 }
 
 .table {
   width: 100%;
-  min-width: 600px;
-  border-collapse: collapse;
+  min-width: 1200px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.heading_row {
+  background-color: #f8f9fa;
 }
 
 .table_heading {
   text-align: left;
-  padding-bottom: 10px;
-  padding-right: 10px;
-  background-color: #f2f2f2;
-  border-bottom: 2px solid #000;
+  padding: 15px 20px;
+  color: #444;
+  font-weight: 600;
+  font-size: 14px;
+  border-bottom: 2px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
 }
 
-tr {
-  border-bottom: 1px solid #ccc;
-  padding-top: 20px;
+.table_body tr {
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s ease;
 }
 
-td {
-  padding-top: 10px;
-  padding-bottom: 10px;
-  padding-left: 5px;
-  border-right: 1px solid #ccc;
-  vertical-align: top;
+.table_body tr:hover {
+  background-color: #f8f9fa;
 }
+
+.table_body td {
+  padding: 12px 20px;
+  border-right: none;
+  border-bottom: 1px solid #eee;
+  color: #444;
+  font-size: 14px;
+}
+
 .download_button {
-  background-color: #c4ce00;
-  color: black;
+  background-color: #d4de00;
+  color: #333;
   border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 16px;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.2s ease;
   text-decoration: none;
+  display: inline-block;
 }
 
 .download_button:hover {
-  background-color: #b3c100;
+  background-color: #c4ce00;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.empty_message {
+  text-align: center;
+  padding: 30px;
+  color: #666;
+  font-size: 16px;
 }
 
 @media (max-width: 1000px) {
   .content {
     margin-left: 0;
-    padding: 10px;
+    padding: 15px;
   }
-
-  .table,
-  .table_row,
-  .table_cell,
-  .table_heading {
-    font-size: 14px;
+  
+  .table_container {
+    border-radius: 8px;
+    padding: 15px;
+  }
+  
+  .content h1 {
+    font-size: 24px;
+  }
+  
+  .download_button {
+    padding: 10px 15px;
+    font-size: 13px;
   }
 }
