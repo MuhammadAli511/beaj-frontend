@@ -21,11 +21,32 @@ const InputField = ({ label, type, onChange, value, name, id, fileInput = false,
             <input type={type} onChange={onChange} name={name} id={id} />
         </div>) : (
         <div className={styles.form_group}>
-            <label className={styles.label} htmlFor={id}>{label}</label>
-            {type == 'textarea' ? (
-                <textarea className={styles.text_area} onChange={onChange} value={value} name={name} id={id} />
+            {type === 'checkbox' ? (
+                <div className={styles.checkbox_wrapper}>
+                    <div className={styles.custom_checkbox_container}>
+                        <input 
+                            className={styles.custom_checkbox} 
+                            type={type} 
+                            onChange={onChange} 
+                            checked={checked} 
+                            name={name} 
+                            id={id}
+                        />
+                        <label className={styles.checkbox_label} htmlFor={id}>
+                            <span className={styles.checkmark}></span>
+                            <span className={styles.label_text}>{label}</span>
+                        </label>
+                    </div>
+                </div>
             ) : (
-                <input className={styles.input_field} type={type} onChange={onChange} value={value} name={name} id={id} checked={checked} />
+                <>
+                    <label className={styles.label} htmlFor={id}>{label}</label>
+                    {type === 'textarea' ? (
+                        <textarea className={styles.text_area} onChange={onChange} value={value} name={name} id={id} />
+                    ) : (
+                        <input className={styles.input_field} type={type} onChange={onChange} value={value} name={name} id={id} checked={checked} />
+                    )}
+                </>
             )}
         </div>
     )
@@ -288,7 +309,16 @@ const CreateLesson = () => {
     const [mcqs, setMcqs] = useState([
         {
             questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
-            answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false, customAnswerFeedbackText: '', customAnswerFeedbackImage: '' }))
+            showCustomFeedback: false,
+            answers: Array(3).fill().map(() => ({ 
+                answerType: 'text', 
+                answerText: '', 
+                answerAudio: null, 
+                answerImage: null, 
+                isCorrect: false,
+                customFeedbackText: '',
+                customFeedbackImage: null
+            }))
         }
     ]);
 
@@ -303,6 +333,8 @@ const CreateLesson = () => {
             } else {
                 alert('Please upload a valid file with correct format and size.');
             }
+        } else if (event.target.type === 'checkbox' && event.target.name === 'showCustomFeedback') {
+            newMcqs[index].showCustomFeedback = event.target.checked;
         } else {
             newMcqs[index][event.target.name] = event.target.value;
         }
@@ -314,7 +346,8 @@ const CreateLesson = () => {
         if (event.target.type === 'file') {
             const file = event.target.files[0];
             if ((event.target.name === 'answerImage' && file && file.type === 'image/jpeg' && file.size <= 4 * 1024 * 1024) ||
-                (event.target.name === 'answerAudio' && file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024)) {
+                (event.target.name === 'answerAudio' && file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) ||
+                (event.target.name === 'customFeedbackImage' && file && file.type === 'image/jpeg' && file.size <= 4 * 1024 * 1024)) {
                 newMcqs[qIndex].answers[aIndex][event.target.name] = file;
             } else {
                 alert('Please upload a valid file with correct format and size.');
@@ -335,7 +368,16 @@ const CreateLesson = () => {
         event.preventDefault();
         setMcqs([...mcqs, {
             questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
-            answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false, customAnswerFeedbackText: '', customAnswerFeedbackImage: '' }))
+            showCustomFeedback: false,
+            answers: Array(3).fill().map(() => ({ 
+                answerType: 'text', 
+                answerText: '', 
+                answerAudio: null, 
+                answerImage: null, 
+                isCorrect: false,
+                customFeedbackText: '',
+                customFeedbackImage: null
+            }))
         }]);
     };
 
@@ -514,7 +556,16 @@ const CreateLesson = () => {
             setWsQuestions([{ questionText: '', video: '', answers: [{ answerText: '' }] }]);
             setMcqs([{
                 questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
-                answers: Array(4).fill().map(() => ({ answerType: 'text', answerText: '', answerAudio: null, answerImage: null, isCorrect: false, customAnswerFeedbackText: '', customAnswerFeedbackImage: '' }))
+                showCustomFeedback: false,
+                answers: Array(3).fill().map(() => ({ 
+                    answerType: 'text', 
+                    answerText: '', 
+                    answerAudio: null, 
+                    answerImage: null, 
+                    isCorrect: false,
+                    customFeedbackText: '',
+                    customFeedbackImage: null
+                }))
             }]);
             setBotQuestions([{ questionText: '' }]);
             setMonologueQuestions([{ video: '' }]);
@@ -569,14 +620,20 @@ const CreateLesson = () => {
                             name="course"
                             id="course"
                         />
-                        <div className={styles.show_all_courses}>
-                            <input
-                                type="checkbox"
-                                id="showAllCourses"
-                                checked={showAllCourses}
-                                onChange={handleShowAllCoursesChange}
-                            />
-                            <label htmlFor="showAllCourses">Show All Courses</label>
+                        <div className={styles.checkbox_wrapper}>
+                            <div className={styles.custom_checkbox_container}>
+                                <input
+                                    className={styles.custom_checkbox}
+                                    type="checkbox"
+                                    id="showAllCourses"
+                                    checked={showAllCourses}
+                                    onChange={handleShowAllCoursesChange}
+                                />
+                                <label className={styles.checkbox_label} htmlFor="showAllCourses">
+                                    <span className={styles.checkmark}></span>
+                                    <span className={styles.label_text}>Show All Courses</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -824,51 +881,83 @@ const CreateLesson = () => {
                     <>
                         {mcqs.map((mcq, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
-                                <div className={styles.input_row}>
-                                    <SelectField label={`Question Type`} options={[
-                                        { value: '-1', label: 'Select Question Type' },
-                                        { value: 'Text', label: 'Text' },
-                                        { value: 'Image', label: 'Image' },
-                                        { value: 'Text+Image', label: 'Text + Image' },
-                                        { value: 'Video', label: 'Video' },
-                                        { value: 'Text+Video', label: 'Text + Video' },
-                                    ]} onChange={(e) => handleMCQQuestionChange(qIndex, e)} value={mcq.questionType} name="questionType" id={`questionType-${qIndex}`} />
-                                    {mcq.questionType.includes('Text') && (
-                                        <InputField label={`Question Text`} type="text" onChange={(e) => handleMCQQuestionChange(qIndex, e)} value={mcq.questionText} name="questionText" id={`questionText-${qIndex}`} />
-                                    )}
-                                    {mcq.questionType.includes('Image') && (
-                                        <InputField label={`Upload Question Image`} type="file" onChange={(e) => handleMCQQuestionChange(qIndex, e)} name="questionImage" id={`questionImage-${qIndex}`} fileInput />
-                                    )}
-                                    {mcq.questionType.includes('Audio') && (
-                                        <InputField label={`Upload Question Audio`} type="file" onChange={(e) => handleMCQQuestionChange(qIndex, e)} name="questionAudio" id={`questionAudio-${qIndex}`} fileInput />
-                                    )}
+                                <div className={styles.question_header}>
+                                    <h3 className={styles.question_title}>Question {qIndex + 1}</h3>
                                     {mcqs.length > 1 && <button className={styles.remove_button} onClick={(e) => removeMCQQuestion(qIndex, e)}>Remove Question</button>}
                                 </div>
-                                {mcq.answers.map((answer, aIndex) => (
-                                    <div key={aIndex} className={styles.input_row}>
-                                        <SelectField label={`Answer Type`} options={[
-                                            { value: '-1', label: 'Select Answer Type' },
+                                
+                                <div className={styles.question_section}>
+                                    <div className={styles.input_row}>
+                                        <SelectField label={`Question Type`} options={[
+                                            { value: '-1', label: 'Select Question Type' },
                                             { value: 'Text', label: 'Text' },
                                             { value: 'Image', label: 'Image' },
                                             { value: 'Text+Image', label: 'Text + Image' },
                                             { value: 'Video', label: 'Video' },
                                             { value: 'Text+Video', label: 'Text + Video' },
-                                        ]} onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} value={answer.answerType} name="answerType" id={`answerType-${qIndex}-${aIndex}`} />
-                                        {answer.answerType.includes('Text') && (
-                                            <InputField label={`Answer Text`} type="text" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} value={answer.answerText} name="answerText" id={`answerText-${qIndex}-${aIndex}`} />
-                                        )}
-                                        {answer.answerType.includes('Image') && (
-                                            <InputField label={`Upload Answer Image`} type="file" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} name="answerImage" id={`answerImage-${qIndex}-${aIndex}`} fileInput />
-                                        )}
-                                        {answer.answerType.includes('Audio') && (
-                                            <InputField label={`Upload Answer Audio`} type="file" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} name="answerAudio" id={`answerAudio-${qIndex}-${aIndex}`} fileInput />
-                                        )}
-                                        {answer.answerType.includes('Video') && (
-                                            <InputField label={`Upload Answer Video`} type="file" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} name="answerVideo" id={`answerVideo-${qIndex}-${aIndex}`} fileInput />
-                                        )}
-                                        <InputField label={`Correct`} type="checkbox" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} checked={answer.isCorrect} name="isCorrect" id={`isCorrect-${qIndex}-${aIndex}`} />
+                                        ]} onChange={(e) => handleMCQQuestionChange(qIndex, e)} value={mcq.questionType} name="questionType" id={`questionType-${qIndex}`} />
                                     </div>
-                                ))}
+                                    
+                                    <div className={styles.question_content}>
+                                        {mcq.questionType.includes('Text') && (
+                                            <InputField label={`Question Text`} type="text" onChange={(e) => handleMCQQuestionChange(qIndex, e)} value={mcq.questionText} name="questionText" id={`questionText-${qIndex}`} />
+                                        )}
+                                        
+                                        <div className={styles.media_inputs}>
+                                            {mcq.questionType.includes('Image') && (
+                                                <InputField label={`Upload Question Image`} type="file" onChange={(e) => handleMCQQuestionChange(qIndex, e)} name="questionImage" id={`questionImage-${qIndex}`} fileInput />
+                                            )}
+                                            {mcq.questionType.includes('Audio') && (
+                                                <InputField label={`Upload Question Audio`} type="file" onChange={(e) => handleMCQQuestionChange(qIndex, e)} name="questionAudio" id={`questionAudio-${qIndex}`} fileInput />
+                                            )}
+                                            {mcq.questionType.includes('Video') && (
+                                                <InputField label={`Upload Question Video`} type="file" onChange={(e) => handleMCQQuestionChange(qIndex, e)} name="questionVideo" id={`questionVideo-${qIndex}`} fileInput />
+                                            )}
+                                        </div>
+                                        
+                                        <div className={styles.custom_feedback_toggle}>
+                                            <InputField label={`Enable Custom Feedback`} type="checkbox" onChange={(e) => handleMCQQuestionChange(qIndex, e)} checked={mcq.showCustomFeedback} name="showCustomFeedback" id={`showCustomFeedback-${qIndex}`} />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className={styles.answers_section}>
+                                    <h4 className={styles.answers_title}>Answer Options</h4>
+                                    
+                                    <div className={styles.answers_container}>
+                                        {mcq.answers.map((answer, aIndex) => (
+                                            <div key={aIndex} className={styles.answer_box}>
+                                                <div className={styles.answer_header}>
+                                                    <span className={styles.answer_number}>Answer {aIndex + 1}</span>
+                                                    <div className={styles.correct_checkbox}>
+                                                        <InputField label={`Correct`} type="checkbox" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} checked={answer.isCorrect} name="isCorrect" id={`isCorrect-${qIndex}-${aIndex}`} />
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className={styles.answer_content}>
+                                                    <div className={styles.answer_type_row}>
+                                                        <SelectField label={`Answer Type`} options={[
+                                                            { value: '-1', label: 'Select Answer Type' },
+                                                            { value: 'Text', label: 'Text' }
+                                                        ]} onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} value={answer.answerType} name="answerType" id={`answerType-${qIndex}-${aIndex}`} />
+                                                    </div>
+                                                    
+                                                    {answer.answerType.includes('Text') && (
+                                                        <InputField label={`Answer Text`} type="text" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} value={answer.answerText} name="answerText" id={`answerText-${qIndex}-${aIndex}`} />
+                                                    )}
+                                                    
+                                                    {mcq.showCustomFeedback && (
+                                                        <div className={styles.feedback_section}>
+                                                            <h5 className={styles.feedback_title}>Custom Feedback</h5>
+                                                            <InputField label={`Feedback Text`} type="text" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} value={answer.customFeedbackText} name="customFeedbackText" id={`customFeedbackText-${qIndex}-${aIndex}`} />
+                                                            <InputField label={`Feedback Image`} type="file" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} name="customFeedbackImage" id={`customFeedbackImage-${qIndex}-${aIndex}`} fileInput />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         ))}
                         <button className={styles.add_button} onClick={(e) => addMCQQuestion(e)}>Add Another Question</button>
