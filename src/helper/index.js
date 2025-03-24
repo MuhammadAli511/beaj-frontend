@@ -711,7 +711,7 @@ export const deleteMultipleChoiceQuestion = async (multipleChoiceQuestionId) => 
 
 // Multiple Choice Question Answers
 // API call to create a Multiple Choice Question Answer
-export const createMultipleChoiceQuestionAnswer = async (answerText, file, image, isCorrect, multipleChoiceQuestionId, sequenceNumber, customAnswerFeedbackText, customAnswerFeedbackImage) => {
+export const createMultipleChoiceQuestionAnswer = async (answerText, file, image, isCorrect, multipleChoiceQuestionId, sequenceNumber, customAnswerFeedbackText, customAnswerFeedbackImage, customAnswerFeedbackAudio) => {
     const formData = new FormData();
     formData.append('answerText', answerText);
     formData.append('file', file);
@@ -721,6 +721,7 @@ export const createMultipleChoiceQuestionAnswer = async (answerText, file, image
     formData.append('sequenceNumber', sequenceNumber);
     formData.append('customAnswerFeedbackText', customAnswerFeedbackText);
     formData.append('customAnswerFeedbackImage', customAnswerFeedbackImage);
+    formData.append('customAnswerFeedbackAudio', customAnswerFeedbackAudio);
     const response = await fetch(`${API_URL}/multipleChoiceQuestionAnswer/create`, {
         method: "POST",
         headers: {
@@ -754,7 +755,7 @@ export const getMultipleChoiceQuestionAnswerById = async (multipleChoiceQuestion
 };
 
 // API call to update a Multiple Choice Question Answer
-export const updateMultipleChoiceQuestionAnswer = async (multipleChoiceQuestionAnswerId, answerText, file, image, isCorrect, multipleChoiceQuestionId, sequenceNumber, customAnswerFeedbackText, customAnswerFeedbackImage) => {
+export const updateMultipleChoiceQuestionAnswer = async (multipleChoiceQuestionAnswerId, answerText, file, image, isCorrect, multipleChoiceQuestionId, sequenceNumber, customAnswerFeedbackText, customAnswerFeedbackImage, customAnswerFeedbackAudio) => {
     const formData = new FormData();
     formData.append('answerText', answerText);
     formData.append('file', file);
@@ -764,6 +765,7 @@ export const updateMultipleChoiceQuestionAnswer = async (multipleChoiceQuestionA
     formData.append('sequenceNumber', sequenceNumber);
     formData.append('customAnswerFeedbackText', customAnswerFeedbackText);
     formData.append('customAnswerFeedbackImage', customAnswerFeedbackImage);
+    formData.append('customAnswerFeedbackAudio', customAnswerFeedbackAudio);
     const response = await fetch(`${API_URL}/multipleChoiceQuestionAnswer/update/${multipleChoiceQuestionAnswerId}`, {
         method: "PUT",
         headers: {

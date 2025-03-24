@@ -64,6 +64,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         SequenceNumber: answer.SequenceNumber,
                         customAnswerFeedbackText: answer.CustomAnswerFeedbackText || "",
                         customAnswerFeedbackImage: answer.CustomAnswerFeedbackImage || "",
+                        customAnswerFeedbackAudio: answer.CustomAnswerFeedbackAudio || "",
                     })),
                 }));
                 setLessonData(lessonResponse.data);
@@ -219,7 +220,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                 question.id,
                                 answer.SequenceNumber,
                                 answer.customAnswerFeedbackText || null,
-                                answer.customAnswerFeedbackImage || null
+                                answer.customAnswerFeedbackImage || null,
+                                answer.customAnswerFeedbackAudio || null
                             );
 
                             if (createAnswerResponse.status !== 200) {
@@ -234,7 +236,10 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                 answer.image || null,
                                 answer.isCorrect,
                                 question.id,
-                                answer.SequenceNumber
+                                answer.SequenceNumber,
+                                answer.customAnswerFeedbackText || null,
+                                answer.customAnswerFeedbackImage || null,
+                                answer.customAnswerFeedbackAudio || null
                             );
 
                             if (updateAnswerResponse.status !== 200) {
@@ -306,6 +311,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         isNew: true,
                         customAnswerFeedbackText: "",
                         customAnswerFeedbackImage: "",
+                        customAnswerFeedbackAudio: "",
                     }],
                     isNew: true,
                     showCustomFeedback: false,
@@ -703,6 +709,17 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                                             />
                                                                             {answer.customAnswerFeedbackImage && (
                                                                                 <img src={answer.customAnswerFeedbackImage} alt="Feedback" className={styles.image} />
+                                                                            )}
+                                                                        </div>
+                                                                        <div className={styles.input_row}>
+                                                                            <label className={styles.label}>Feedback Audio</label>
+                                                                            <input
+                                                                                className={styles.input_field}
+                                                                                type="file"
+                                                                                onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackAudio", e.target.files[0])}
+                                                                            />
+                                                                            {answer.customAnswerFeedbackAudio && (
+                                                                                <audio src={answer.customAnswerFeedbackAudio} controls className={styles.audio} />
                                                                             )}
                                                                         </div>
                                                                     </div>

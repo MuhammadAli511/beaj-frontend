@@ -76,6 +76,13 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                                         </div>
                                     ))}
                                 </td>
+                                <td style={{ width: "15%" }}>
+                                    {question.multipleChoiceQuestionAnswers.map((answer) => (
+                                        <div key={answer.Id} className={styles.answer}>
+                                            {answer.CustomAnswerFeedbackAudio && <audio src={answer.CustomAnswerFeedbackAudio} controls className={styles.audio} />}
+                                        </div>
+                                    ))}
+                                </td>
                             </tr>
                         ))}
                     </tbody>
