@@ -441,15 +441,20 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                 >
                                                     Add New Answer
                                                 </button>
-                                                <label className={styles.answerEditLabel}>Upload Media File</label>
+                                                <label className={styles.answerEditLabel}>Upload Media File (Audio/Video)</label>
                                                 <input
                                                     type="file"
+                                                    accept="audio/mp3,video/mp4"
                                                     onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])}
                                                 />
                                                 {question.mediaFile && (
                                                     <div className={styles.mediaSection}>
                                                         <label className={styles.answerEditLabel}>Current Media File:</label>
-                                                        <audio controls src={question.mediaFile} className={styles.audio}></audio>
+                                                        {question.mediaFile && typeof question.mediaFile === 'string' && question.mediaFile.endsWith('.mp4') ? (
+                                                            <video controls src={question.mediaFile} className={styles.videoSmall}></video>
+                                                        ) : (
+                                                            <audio controls src={question.mediaFile} className={styles.audio}></audio>
+                                                        )}
                                                     </div>
                                                 )}
                                             </>
