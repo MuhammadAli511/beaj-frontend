@@ -258,10 +258,20 @@ const CreateLesson = () => {
         const newQuestions = [...questions];
         if (event.target.type === 'file') {
             const file = event.target.files[0];
-            if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
-                newQuestions[index][event.target.name] = file;
+            const mediaType = newQuestions[index].mediaType;
+            
+            if (mediaType === 'video') {
+                if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
+                    newQuestions[index][event.target.name] = file;
+                } else {
+                    alert('Please upload an MP4 video not larger than 16MB.');
+                }
             } else {
-                alert('Please upload an MP3 audio not larger than 16MB.');
+                if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+                    newQuestions[index][event.target.name] = file;
+                } else {
+                    alert('Please upload an MP3 audio not larger than 16MB.');
+                }
             }
         } else {
             newQuestions[index][event.target.name] = event.target.value;
