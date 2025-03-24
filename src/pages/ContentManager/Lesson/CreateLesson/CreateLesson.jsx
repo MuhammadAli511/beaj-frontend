@@ -251,7 +251,7 @@ const CreateLesson = () => {
 
     // Listen and Speak
     const [questions, setQuestions] = useState([
-        { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: '' }
+        { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }
     ]);
 
     const handleQuestionChange = (index, event) => {
@@ -294,7 +294,7 @@ const CreateLesson = () => {
 
     const addQuestion = (event) => {
         event.preventDefault();
-        setQuestions([...questions, { questionText: '', audio: '', answers: [{ answerText: '' }] }]);
+        setQuestions([...questions, { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }]);
     };
 
     const removeQuestion = (index, event) => {
@@ -562,7 +562,7 @@ const CreateLesson = () => {
             setImage(null);
             setAudio(null);
             setVideo(null);
-            setQuestions([{ questionText: '', audio: '', answers: [{ answerText: '' }] }]);
+            setQuestions([{ questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }]);
             setWsQuestions([{ questionText: '', video: '', answers: [{ answerText: '' }] }]);
             setMcqs([{
                 questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
@@ -779,10 +779,10 @@ const CreateLesson = () => {
                                         {question.answers.length > 1 && <button className={styles.remove_button} onClick={(e) => removeAnswer(qIndex, aIndex, e)}>Remove Answer</button>}
                                     </div>
                                 ))}
-                                <button className={styles.add_button} onClick={(e) => addAnswer(qIndex, e)}>Add Another Answer</button>
+                                <button className={`${styles.add_button} ${styles.add_answer_button}`} onClick={(e) => addAnswer(qIndex, e)}>Add Another Answer</button>
                             </div>
                         ))}
-                        <button className={styles.add_button} onClick={(e) => addQuestion(e)}>Add Another Question</button>
+                        <button className={`${styles.add_button} ${styles.add_question_button}`} onClick={(e) => addQuestion(e)}>Add Another Question</button>
                     </>
                 )}
                 {activityType === 'conversationalQuestionsBot' && (
