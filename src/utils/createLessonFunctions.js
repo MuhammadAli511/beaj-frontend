@@ -101,7 +101,7 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
 
             return createSpeakActivityQuestion(
                 question.questionText,
-                question.audio,
+                question.media,
                 answersArray,
                 lessonId,
                 (index + 1).toString(),

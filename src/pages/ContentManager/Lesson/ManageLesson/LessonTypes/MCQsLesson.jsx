@@ -853,8 +853,6 @@ const MCQsLesson = ({ category, course, activity }) => {
 
     const activityMapper = {
         'mcqs': 'Multiple Choice Questions',
-        'postMCQs': 'Post Multiple Choice Questions',
-        'preMCQs': 'Pre Multiple Choice Questions',
         'placementTest': 'Placement Test',
     };
 

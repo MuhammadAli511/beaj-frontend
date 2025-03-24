@@ -250,12 +250,13 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
             questionNumber: questions.length + 1,
             isChanged: true,
         };
-        if (['listenAndSpeak', 'preListenAndSpeak', 'postListenAndSpeak'].includes(activity)) {
+        if (['listenAndSpeak'].includes(activity)) {
             newQuestion = {
                 ...newQuestion,
                 question: '',
                 mediaFile: null,
                 answer: [''],
+                mediaType: '',
             };
         } else if (activity === 'watchAndSpeak') {
             newQuestion = {
@@ -408,7 +409,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                             onChange={(e) => handleQuestionChange(index, 'questionNumber', e.target.value)}
                                         />
 
-                                        {['listenAndSpeak', 'preListenAndSpeak', 'postListenAndSpeak'].includes(activity) && (
+                                        {['listenAndSpeak'].includes(activity) && (
                                             <>
                                                 <label className={styles.answerEditLabel}>Question</label>
                                                 <input
@@ -712,8 +713,6 @@ const SpeakLesson = ({ category, course, activity }) => {
         'watchAndImage': 'Watch & Image',
         'watchAndSpeak': 'Watch & Speak',
         'listenAndSpeak': 'Listen & Speak',
-        'postListenAndSpeak': 'Post Listen & Speak',
-        'preListenAndSpeak': 'Pre Listen & Speak',
         'conversationalQuestionsBot': 'Conversational Questions Bot',
         'conversationalMonologueBot': 'Conversational Monologue Bot',
         'conversationalAgencyBot': 'Conversational Agency Bot',

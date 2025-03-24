@@ -251,7 +251,7 @@ const CreateLesson = () => {
 
     // Listen and Speak
     const [questions, setQuestions] = useState([
-        { questionText: '', audio: '', answers: [{ answerText: '' }] }
+        { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: '' }
     ]);
 
     const handleQuestionChange = (index, event) => {
@@ -520,9 +520,9 @@ const CreateLesson = () => {
                 await createVideoLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status);
             } else if (activityType === 'read') {
                 await createReadLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status);
-            } else if (activityType === 'listenAndSpeak' || activityType === 'preListenAndSpeak' || activityType === 'postListenAndSpeak') {
+            } else if (activityType === 'listenAndSpeak') {
                 await createListenAndSpeakLesson(course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status);
-            } else if (activityType === 'mcqs' || activityType === 'preMCQs' || activityType === 'postMCQs') {
+            } else if (activityType === 'mcqs') {
                 await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status);
             } else if (activityType === 'watchAndSpeak') {
                 await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status);
@@ -716,7 +716,7 @@ const CreateLesson = () => {
                         </div>
                     </>
                 )}
-                {(activityType === 'listenAndSpeak' || activityType === 'preListenAndSpeak' || activityType === 'postListenAndSpeak') && (
+                {(activityType === 'listenAndSpeak') && (
                     <>
                         <div className={styles.input_row}>
                             <div className={styles.form_group}>
@@ -727,7 +727,40 @@ const CreateLesson = () => {
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
                                     <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
-                                    <InputField label="Upload Audio" type="file" onChange={e => handleQuestionChange(qIndex, e)} name="audio" id={`audio-${qIndex}`} fileInput />
+                                    
+                                    <div className={styles.media_toggle_container}>
+                                        <div className={styles.toggle_buttons}>
+                                            <button 
+                                                type="button"
+                                                className={`${styles.toggle_button} ${question.mediaType === 'audio' ? styles.active : ''}`}
+                                                onClick={() => {
+                                                    const newQuestions = [...questions];
+                                                    newQuestions[qIndex].mediaType = 'audio';
+                                                    setQuestions(newQuestions);
+                                                }}
+                                            >
+                                                Audio
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                className={`${styles.toggle_button} ${question.mediaType === 'video' ? styles.active : ''}`}
+                                                onClick={() => {
+                                                    const newQuestions = [...questions];
+                                                    newQuestions[qIndex].mediaType = 'video';
+                                                    setQuestions(newQuestions);
+                                                }}
+                                            >
+                                                Video
+                                            </button>
+                                        </div>
+                                        
+                                        {question.mediaType === 'audio' ? (
+                                            <InputField label="Upload Audio" type="file" onChange={e => handleQuestionChange(qIndex, e)} name="media" id={`media-${qIndex}`} fileInput />
+                                        ) : (
+                                            <InputField label="Upload Video" type="file" onChange={e => handleQuestionChange(qIndex, e)} name="media" id={`media-${qIndex}`} fileInput />
+                                        )}
+                                    </div>
+                                    
                                     {questions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeQuestion(qIndex, e)}>Remove Question</button>}
                                 </div>
                                 {question.answers.map((answer, aIndex) => (
@@ -877,7 +910,7 @@ const CreateLesson = () => {
                         <button className={styles.add_button} onClick={(e) => addWsQuestion(e)}>Add Another Question</button>
                     </>
                 )}
-                {(activityType === 'mcqs' || activityType === 'preMCQs' || activityType === 'postMCQs') && (
+                {(activityType === 'mcqs') && (
                     <>
                         {mcqs.map((mcq, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>

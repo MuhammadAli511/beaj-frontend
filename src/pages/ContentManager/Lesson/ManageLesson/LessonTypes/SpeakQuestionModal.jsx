@@ -46,11 +46,11 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                     <th className={styles.table_heading}>Video</th>
                                 </>
                             )}
-                            {(activity === 'listenAndSpeak' || activity === 'preListenAndSpeak' || activity === 'postListenAndSpeak') && (
+                            {(activity === 'listenAndSpeak') && (
                                 <>
                                     <th className={styles.table_heading}>Question</th>
                                     <th className={styles.table_heading}>Answer</th>
-                                    <th className={styles.table_heading}>Audio</th>
+                                    <th className={styles.table_heading}>Media</th>
                                 </>
                             )}
                             {activity === 'conversationalQuestionsBot' && (
@@ -108,15 +108,21 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                         </td>
                                     </>
                                 )}
-                                {(activity == 'listenAndSpeak' || activity == 'preListenAndSpeak' || activity == 'postListenAndSpeak') && (
+                                {(activity == 'listenAndSpeak') && (
                                     <>
                                         <td style={{ width: "5%" }}>{question.questionNumber}</td>
                                         <td style={{ width: "20%" }}>{question.question}</td>
                                         <td style={{ width: "35%" }}>{question.answer.join(', ')}</td>
                                         <td style={{ width: "100%" }}>
-                                            <audio controls>
-                                                <source src={question.mediaFile} type="audio/mp3" />
-                                            </audio>
+                                            {question.mediaFile && question.mediaFile.endsWith('.mp4') ? (
+                                                <video controls className={styles.video}>
+                                                    <source src={question.mediaFile} type="video/mp4" />
+                                                </video>
+                                            ) : (
+                                                <audio controls>
+                                                    <source src={question.mediaFile} type="audio/mp3" />
+                                                </audio>
+                                            )}
                                         </td>
                                     </>
                                 )}
