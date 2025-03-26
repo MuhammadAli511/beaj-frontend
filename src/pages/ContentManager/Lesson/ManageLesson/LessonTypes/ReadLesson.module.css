@@ -100,10 +100,6 @@ img {
   transition: transform 0.2s ease;
 }
 
-img:hover {
-  transform: scale(1.1);
-}
-
 /* Modal */
 .modal {
   position: fixed;

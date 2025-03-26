@@ -88,9 +88,6 @@ img {
   transition: transform 0.2s ease;
 }
 
-img:hover {
-  transform: scale(1.1);
-}
 
 .modal {
   position: fixed;
