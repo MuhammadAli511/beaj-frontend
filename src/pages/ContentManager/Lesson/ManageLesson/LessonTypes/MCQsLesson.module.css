@@ -68,10 +68,6 @@ img {
   transition: transform 0.2s ease;
 }
 
-img:hover {
-  transform: scale(1.1);
-}
-
 .submit_button {
   background-color: #51bbcc;
   color: white;
@@ -523,4 +519,25 @@ img:hover {
 .radio_label span {
     font-size: 14px;
     color: #495057;
+}
+
+.image_preview, .audio_preview {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.image_preview img {
+    max-width: 100%;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 10px auto;
+    display: block;
+}
+
+.audio_preview audio {
+    width: 100%;
+    margin: 10px 0;
 }

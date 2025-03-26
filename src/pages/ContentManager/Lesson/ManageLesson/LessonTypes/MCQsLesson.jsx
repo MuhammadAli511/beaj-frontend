@@ -819,8 +819,32 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                                                 <input
                                                                                     className={styles.input_field}
                                                                                     type="file"
-                                                                                    onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackImage", e.target.files[0])}
+                                                                                    onChange={(e) => {
+                                                                                        if (e.target.files && e.target.files[0]) {
+                                                                                            const file = e.target.files[0];
+                                                                                            handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackImage", file);
+                                                                                            // Create a preview URL for the selected file
+                                                                                            handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackImagePreview", URL.createObjectURL(file));
+                                                                                        }
+                                                                                    }}
                                                                                 />
+                                                                                <div className={styles.image_preview}>
+                                                                                    {answer.customAnswerFeedbackImagePreview ? (
+                                                                                        // Show preview of newly selected file
+                                                                                        <img 
+                                                                                            src={answer.customAnswerFeedbackImagePreview} 
+                                                                                            alt="Feedback Preview" 
+                                                                                            className={styles.image} 
+                                                                                        />
+                                                                                    ) : answer.customAnswerFeedbackImage ? (
+                                                                                        // Show existing image from database
+                                                                                        <img 
+                                                                                            src={answer.customAnswerFeedbackImage} 
+                                                                                            alt="Feedback" 
+                                                                                            className={styles.image} 
+                                                                                        />
+                                                                                    ) : null}
+                                                                                </div>
                                                                             </div>
                                                                         )}
                                                                         
@@ -831,8 +855,30 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                                                 <input
                                                                                     className={styles.input_field}
                                                                                     type="file"
-                                                                                    onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackAudio", e.target.files[0])}
+                                                                                    onChange={(e) => {
+                                                                                        if (e.target.files && e.target.files[0]) {
+                                                                                            const file = e.target.files[0];
+                                                                                            handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackAudio", file);
+                                                                                            // Create a preview URL for the selected file
+                                                                                            handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackAudioPreview", URL.createObjectURL(file));
+                                                                                        }
+                                                                                    }}
                                                                                 />
+                                                                                <div className={styles.audio_preview}>
+                                                                                    {answer.customAnswerFeedbackAudioPreview ? (
+                                                                                        // Show preview of newly selected file
+                                                                                        <audio 
+                                                                                            src={answer.customAnswerFeedbackAudioPreview} 
+                                                                                            controls
+                                                                                        />
+                                                                                    ) : answer.customAnswerFeedbackAudio ? (
+                                                                                        // Show existing audio from database
+                                                                                        <audio 
+                                                                                            src={answer.customAnswerFeedbackAudio} 
+                                                                                            controls
+                                                                                        />
+                                                                                    ) : null}
+                                                                                </div>
                                                                             </div>
                                                                         )}
                                                                     </div>
