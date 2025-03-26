@@ -46,36 +46,69 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
             const lessonResponse = await getLessonById(lesson.LessonId);
             if (lessonResponse.status === 200) {
                 const fetchedQuestions = lessonResponse.data.multipleChoiceQuestions || [];
-                const mappedQuestions = fetchedQuestions.map((question) => ({
-                    id: question.dataValues.Id,
-                    questionType: question.dataValues.QuestionType,
-                    questionText: question.dataValues.QuestionText || "",
-                    questionImageUrl: question.dataValues.QuestionImageUrl,
-                    questionAudioUrl: question.dataValues.QuestionAudioUrl,
-                    questionVideoUrl: question.dataValues.QuestionVideoUrl,
-                    questionNumber: question.dataValues.QuestionNumber,
-                    optionsType: question.dataValues.OptionsType,
-                    customFeedbackType: question.dataValues.CustomFeedbackType || "text",
-                    showCustomFeedback: Boolean(
-                      question.dataValues.CustomFeedbackType || 
-                      question.multipleChoiceQuestionAnswers.some(a => 
-                        a.CustomAnswerFeedbackText || 
-                        a.CustomAnswerFeedbackImage || 
-                        a.CustomAnswerFeedbackAudio
-                      )
-                    ),
-                    answers: question.multipleChoiceQuestionAnswers.map((answer) => ({
-                        id: answer.Id,
-                        answerText: answer.AnswerText || "",
-                        answerImageUrl: answer.AnswerImageUrl,
-                        answerAudioUrl: answer.AnswerAudioUrl,
-                        isCorrect: answer.IsCorrect,
-                        SequenceNumber: answer.SequenceNumber,
-                        customAnswerFeedbackText: answer.CustomAnswerFeedbackText || "",
-                        customAnswerFeedbackImage: answer.CustomAnswerFeedbackImage || "",
-                        customAnswerFeedbackAudio: answer.CustomAnswerFeedbackAudio || "",
-                    })),
-                }));
+                const mappedQuestions = fetchedQuestions.map((question) => {
+                    // Determine the feedback type based on existing data
+                    let determinedFeedbackType = question.dataValues.CustomFeedbackType || "text";
+                    
+                    // If no explicit type is stored, determine based on actual data
+                    if (!question.dataValues.CustomFeedbackType) {
+                        // Check each answer to find any with feedback
+                        let hasTextFeedback = false;
+                        let hasImageFeedback = false;
+                        let hasAudioFeedback = false;
+                        
+                        // Loop through all answers to find any with feedback
+                        question.multipleChoiceQuestionAnswers.forEach(answer => {
+                            if (answer.CustomAnswerFeedbackText) hasTextFeedback = true;
+                            if (answer.CustomAnswerFeedbackImage) hasImageFeedback = true;
+                            if (answer.CustomAnswerFeedbackAudio) hasAudioFeedback = true;
+                        });
+                        
+                        // Determine the most comprehensive feedback type
+                        if (hasTextFeedback && hasImageFeedback) {
+                            determinedFeedbackType = "text+image";
+                        } else if (hasTextFeedback && hasAudioFeedback) {
+                            determinedFeedbackType = "text+audio";
+                        } else if (hasTextFeedback) {
+                            determinedFeedbackType = "text";
+                        } else if (hasImageFeedback) {
+                            determinedFeedbackType = "image";
+                        } else if (hasAudioFeedback) {
+                            determinedFeedbackType = "audio";
+                        }
+                    }
+                    
+                    return {
+                        id: question.dataValues.Id,
+                        questionType: question.dataValues.QuestionType,
+                        questionText: question.dataValues.QuestionText || "",
+                        questionImageUrl: question.dataValues.QuestionImageUrl,
+                        questionAudioUrl: question.dataValues.QuestionAudioUrl,
+                        questionVideoUrl: question.dataValues.QuestionVideoUrl,
+                        questionNumber: question.dataValues.QuestionNumber,
+                        optionsType: question.dataValues.OptionsType,
+                        customFeedbackType: determinedFeedbackType,
+                        showCustomFeedback: Boolean(
+                          question.dataValues.CustomFeedbackType || 
+                          question.multipleChoiceQuestionAnswers.some(a => 
+                            a.CustomAnswerFeedbackText || 
+                            a.CustomAnswerFeedbackImage || 
+                            a.CustomAnswerFeedbackAudio
+                          )
+                        ),
+                        answers: question.multipleChoiceQuestionAnswers.map((answer) => ({
+                            id: answer.Id,
+                            answerText: answer.AnswerText || "",
+                            answerImageUrl: answer.AnswerImageUrl,
+                            answerAudioUrl: answer.AnswerAudioUrl,
+                            isCorrect: answer.IsCorrect,
+                            SequenceNumber: answer.SequenceNumber,
+                            customAnswerFeedbackText: answer.CustomAnswerFeedbackText || "",
+                            customAnswerFeedbackImage: answer.CustomAnswerFeedbackImage || "",
+                            customAnswerFeedbackAudio: answer.CustomAnswerFeedbackAudio || "",
+                        })),
+                    };
+                });
                 setLessonData(lessonResponse.data);
                 setQuestions(mappedQuestions.sort((a, b) => a.questionNumber - b.questionNumber));
             } else {
@@ -192,7 +225,10 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                             answer.image || null,
                             answer.isCorrect,
                             questionId,
-                            answer.SequenceNumber
+                            answer.SequenceNumber,
+                            question.showCustomFeedback ? (question.customFeedbackType.includes("text") ? (answer.customAnswerFeedbackText || "") : null) : null,
+                            question.showCustomFeedback ? (question.customFeedbackType.includes("image") ? (answer.customAnswerFeedbackImage || null) : null) : null,
+                            question.showCustomFeedback ? (question.customFeedbackType.includes("audio") ? (answer.customAnswerFeedbackAudio || null) : null) : null
                         );
 
                         if (createAnswerResponse.status !== 200) {
@@ -230,9 +266,9 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                 answer.isCorrect,
                                 question.id,
                                 answer.SequenceNumber,
-                                answer.customAnswerFeedbackText || null,
-                                answer.customAnswerFeedbackImage || null,
-                                answer.customAnswerFeedbackAudio || null
+                                question.showCustomFeedback ? (question.customFeedbackType.includes("text") ? (answer.customAnswerFeedbackText || "") : null) : null,
+                                question.showCustomFeedback ? (question.customFeedbackType.includes("image") ? (answer.customAnswerFeedbackImage || null) : null) : null,
+                                question.showCustomFeedback ? (question.customFeedbackType.includes("audio") ? (answer.customAnswerFeedbackAudio || null) : null) : null
                             );
 
                             if (createAnswerResponse.status !== 200) {
@@ -248,9 +284,9 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                 answer.isCorrect,
                                 question.id,
                                 answer.SequenceNumber,
-                                answer.customAnswerFeedbackText || null,
-                                answer.customAnswerFeedbackImage || null,
-                                answer.customAnswerFeedbackAudio || null
+                                question.showCustomFeedback ? (question.customFeedbackType.includes("text") ? (answer.customAnswerFeedbackText || "") : null) : null,
+                                question.showCustomFeedback ? (question.customFeedbackType.includes("image") ? (answer.customAnswerFeedbackImage || null) : null) : null,
+                                question.showCustomFeedback ? (question.customFeedbackType.includes("audio") ? (answer.customAnswerFeedbackAudio || null) : null) : null
                             );
 
                             if (updateAnswerResponse.status !== 200) {
@@ -785,9 +821,6 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                                                     type="file"
                                                                                     onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackImage", e.target.files[0])}
                                                                                 />
-                                                                                {answer.customAnswerFeedbackImage && (
-                                                                                    <img src={answer.customAnswerFeedbackImage} alt="Feedback" className={styles.image} />
-                                                                                )}
                                                                             </div>
                                                                         )}
                                                                         
@@ -800,9 +833,6 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                                                     type="file"
                                                                                     onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackAudio", e.target.files[0])}
                                                                                 />
-                                                                                {answer.customAnswerFeedbackAudio && (
-                                                                                    <audio src={answer.customAnswerFeedbackAudio} controls className={styles.audio} />
-                                                                                )}
                                                                             </div>
                                                                         )}
                                                                     </div>

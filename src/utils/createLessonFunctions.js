@@ -293,6 +293,9 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
         const answerAudioArray = mcqs[i].answers.map(answer => answer.audio);
         const answerImageArray = mcqs[i].answers.map(answer => answer.image);
         const isCorrectArray = mcqs[i].answers.map(answer => answer.isCorrect);
+        const customFeedbackTextArray = mcqs[i].answers.map(answer => answer.customFeedbackText);
+        const customFeedbackImageArray = mcqs[i].answers.map(answer => answer.customFeedbackImage);
+        const customFeedbackAudioArray = mcqs[i].answers.map(answer => answer.customFeedbackAudio);
         const questionAudio = mcqs[i].questionAudio;
         const questionImage = mcqs[i].questionImage;
         const questionVideo = mcqs[i].questionVideo;
@@ -325,7 +328,10 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
                     answerImageArray[index],
                     isCorrectArray[index],
                     questionId,
-                    (index + 1).toString()
+                    (index + 1).toString(),
+                    customFeedbackTextArray[index],
+                    customFeedbackImageArray[index],
+                    customFeedbackAudioArray[index]
                 )
             )
         );
