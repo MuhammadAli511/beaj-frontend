@@ -46,7 +46,10 @@ const ManageLesson = () => {
             try {
                 const categoriesResponse = await getAllCategories();
                 if (categoriesResponse.status === 200) {
-                    const categoriesData = categoriesResponse.data;
+                    // Filter categories to only include those with "Chatbot" in their name
+                    const categoriesData = categoriesResponse.data.filter(category => 
+                        category.CourseCategoryName.includes("Chatbot")
+                    );
                     setCategories(categoriesData);
                     if (categoriesData.length > 0) {
                         const firstCategoryId = categoriesData[0].CourseCategoryId;
@@ -288,10 +291,11 @@ const ManageLesson = () => {
             <div className={styles.input_row}>
                 <SelectField
                     label="Select Category"
-                    options={categories.map(category => ({
-                        value: category.CourseCategoryId,
-                        label: category.CourseCategoryName
-                    }))}
+                    options={categories
+                        .map(category => ({
+                            value: category.CourseCategoryId,
+                            label: category.CourseCategoryName
+                        }))}
                     onChange={handleCategoryChange}
                     value={category}
                     name="category"

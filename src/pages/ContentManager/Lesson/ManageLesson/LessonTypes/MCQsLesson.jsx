@@ -55,6 +55,15 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     questionVideoUrl: question.dataValues.QuestionVideoUrl,
                     questionNumber: question.dataValues.QuestionNumber,
                     optionsType: question.dataValues.OptionsType,
+                    customFeedbackType: question.dataValues.CustomFeedbackType || "text",
+                    showCustomFeedback: Boolean(
+                      question.dataValues.CustomFeedbackType || 
+                      question.multipleChoiceQuestionAnswers.some(a => 
+                        a.CustomAnswerFeedbackText || 
+                        a.CustomAnswerFeedbackImage || 
+                        a.CustomAnswerFeedbackAudio
+                      )
+                    ),
                     answers: question.multipleChoiceQuestionAnswers.map((answer) => ({
                         id: answer.Id,
                         answerText: answer.AnswerText || "",
@@ -166,6 +175,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         question.questionNumber,
                         lessonData.LessonId,
                         question.optionsType,
+                        question.customFeedbackType,
                     );
 
                     if (createQuestionResponse.status !== 200) {
@@ -202,6 +212,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         question.questionNumber,
                         lessonData.LessonId,
                         question.optionsType,
+                        question.customFeedbackType,
                     );
 
                     if (updateQuestionResponse.status !== 200) {
@@ -315,6 +326,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     }],
                     isNew: true,
                     showCustomFeedback: false,
+                    customFeedbackType: "text",
                 },
             ];
         });
@@ -636,6 +648,64 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {question.showCustomFeedback && (
+                                                <div className={styles.feedback_type_selector}>
+                                                    <h5 className={styles.feedback_type_title}>Select Feedback Type</h5>
+                                                    <div className={styles.radio_group}>
+                                                        <label className={styles.radio_label}>
+                                                            <input
+                                                                type="radio"
+                                                                name={`feedbackType-${qIndex}`}
+                                                                value="text"
+                                                                checked={question.customFeedbackType === "text"}
+                                                                onChange={() => handleQuestionChange(qIndex, "customFeedbackType", "text")}
+                                                            />
+                                                            <span>Only Text</span>
+                                                        </label>
+                                                        <label className={styles.radio_label}>
+                                                            <input
+                                                                type="radio"
+                                                                name={`feedbackType-${qIndex}`}
+                                                                value="image"
+                                                                checked={question.customFeedbackType === "image"}
+                                                                onChange={() => handleQuestionChange(qIndex, "customFeedbackType", "image")}
+                                                            />
+                                                            <span>Only Image</span>
+                                                        </label>
+                                                        <label className={styles.radio_label}>
+                                                            <input
+                                                                type="radio"
+                                                                name={`feedbackType-${qIndex}`}
+                                                                value="audio"
+                                                                checked={question.customFeedbackType === "audio"}
+                                                                onChange={() => handleQuestionChange(qIndex, "customFeedbackType", "audio")}
+                                                            />
+                                                            <span>Only Audio</span>
+                                                        </label>
+                                                        <label className={styles.radio_label}>
+                                                            <input
+                                                                type="radio"
+                                                                name={`feedbackType-${qIndex}`}
+                                                                value="text+image"
+                                                                checked={question.customFeedbackType === "text+image"}
+                                                                onChange={() => handleQuestionChange(qIndex, "customFeedbackType", "text+image")}
+                                                            />
+                                                            <span>Text + Image</span>
+                                                        </label>
+                                                        <label className={styles.radio_label}>
+                                                            <input
+                                                                type="radio"
+                                                                name={`feedbackType-${qIndex}`}
+                                                                value="text+audio"
+                                                                checked={question.customFeedbackType === "text+audio"}
+                                                                onChange={() => handleQuestionChange(qIndex, "customFeedbackType", "text+audio")}
+                                                            />
+                                                            <span>Text + Audio</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                         
                                         <div className={styles.answers_section}>
@@ -691,37 +761,50 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                                 {question.showCustomFeedback && (
                                                                     <div className={styles.feedback_section}>
                                                                         <h5 className={styles.feedback_title}>Custom Feedback</h5>
-                                                                        <div className={styles.input_row}>
-                                                                            <label className={styles.label}>Feedback Text</label>
-                                                                            <input
-                                                                                className={styles.input_field}
-                                                                                type="text"
-                                                                                value={answer.customAnswerFeedbackText || ""}
-                                                                                onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackText", e.target.value)}
-                                                                            />
-                                                                        </div>
-                                                                        <div className={styles.input_row}>
-                                                                            <label className={styles.label}>Feedback Image</label>
-                                                                            <input
-                                                                                className={styles.input_field}
-                                                                                type="file"
-                                                                                onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackImage", e.target.files[0])}
-                                                                            />
-                                                                            {answer.customAnswerFeedbackImage && (
-                                                                                <img src={answer.customAnswerFeedbackImage} alt="Feedback" className={styles.image} />
-                                                                            )}
-                                                                        </div>
-                                                                        <div className={styles.input_row}>
-                                                                            <label className={styles.label}>Feedback Audio</label>
-                                                                            <input
-                                                                                className={styles.input_field}
-                                                                                type="file"
-                                                                                onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackAudio", e.target.files[0])}
-                                                                            />
-                                                                            {answer.customAnswerFeedbackAudio && (
-                                                                                <audio src={answer.customAnswerFeedbackAudio} controls className={styles.audio} />
-                                                                            )}
-                                                                        </div>
+                                                                        
+                                                                        {(question.customFeedbackType === "text" || 
+                                                                          question.customFeedbackType === "text+image" || 
+                                                                          question.customFeedbackType === "text+audio") && (
+                                                                            <div className={styles.input_row}>
+                                                                                <label className={styles.label}>Feedback Text</label>
+                                                                                <input
+                                                                                    className={styles.input_field}
+                                                                                    type="text"
+                                                                                    value={answer.customAnswerFeedbackText || ""}
+                                                                                    onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackText", e.target.value)}
+                                                                                />
+                                                                            </div>
+                                                                        )}
+                                                                        
+                                                                        {(question.customFeedbackType === "image" || 
+                                                                          question.customFeedbackType === "text+image") && (
+                                                                            <div className={styles.input_row}>
+                                                                                <label className={styles.label}>Feedback Image</label>
+                                                                                <input
+                                                                                    className={styles.input_field}
+                                                                                    type="file"
+                                                                                    onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackImage", e.target.files[0])}
+                                                                                />
+                                                                                {answer.customAnswerFeedbackImage && (
+                                                                                    <img src={answer.customAnswerFeedbackImage} alt="Feedback" className={styles.image} />
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                        
+                                                                        {(question.customFeedbackType === "audio" || 
+                                                                          question.customFeedbackType === "text+audio") && (
+                                                                            <div className={styles.input_row}>
+                                                                                <label className={styles.label}>Feedback Audio</label>
+                                                                                <input
+                                                                                    className={styles.input_field}
+                                                                                    type="file"
+                                                                                    onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackAudio", e.target.files[0])}
+                                                                                />
+                                                                                {answer.customAnswerFeedbackAudio && (
+                                                                                    <audio src={answer.customAnswerFeedbackAudio} controls className={styles.audio} />
+                                                                                )}
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                 )}
                                                             </div>

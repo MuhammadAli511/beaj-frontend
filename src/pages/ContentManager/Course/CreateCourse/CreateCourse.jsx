@@ -13,7 +13,11 @@ const CreateCourse = () => {
             try {
                 const response = await getAllCategories();
                 if (response.status === 200) {
-                    setCategories(response.data);
+                    // Filter categories to only include those with "Chatbot" in their name
+                    const filteredCategories = response.data.filter(category => 
+                        category.CourseCategoryName.includes("Chatbot")
+                    );
+                    setCategories(filteredCategories);
                 } else {
                     alert(response.data.message);
                 }
@@ -79,9 +83,11 @@ const CreateCourse = () => {
                     <div className={styles.form_group}>
                         <label className={styles.label} htmlFor="course_category">Select Category</label>
                         <select className={styles.input_field} name="course_category" id="course_category">
-                            {categories.map(category => (
-                                <option key={category.CourseCategoryId} value={category.CourseCategoryId}>{category.CourseCategoryName}</option>
-                            ))}
+                            {categories
+                                .map(category => (
+                                    <option key={category.CourseCategoryId} value={category.CourseCategoryId}>{category.CourseCategoryName}</option>
+                                ))
+                            }
                         </select>
                     </div>
                     <div className={styles.form_group}>

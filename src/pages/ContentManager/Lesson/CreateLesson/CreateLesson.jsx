@@ -320,6 +320,7 @@ const CreateLesson = () => {
         {
             questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
             showCustomFeedback: false,
+            customFeedbackType: 'text',
             answers: Array(3).fill().map(() => ({ 
                 answerType: 'text', 
                 answerText: '', 
@@ -327,7 +328,8 @@ const CreateLesson = () => {
                 answerImage: null, 
                 isCorrect: false,
                 customFeedbackText: '',
-                customFeedbackImage: null
+                customFeedbackImage: null,
+                customFeedbackAudio: null
             }))
         }
     ]);
@@ -345,6 +347,8 @@ const CreateLesson = () => {
             }
         } else if (event.target.type === 'checkbox' && event.target.name === 'showCustomFeedback') {
             newMcqs[index].showCustomFeedback = event.target.checked;
+        } else if (event.target.name === 'customFeedbackType') {
+            newMcqs[index].customFeedbackType = event.target.value;
         } else {
             newMcqs[index][event.target.name] = event.target.value;
         }
@@ -379,6 +383,7 @@ const CreateLesson = () => {
         setMcqs([...mcqs, {
             questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
             showCustomFeedback: false,
+            customFeedbackType: 'text',
             answers: Array(3).fill().map(() => ({ 
                 answerType: 'text', 
                 answerText: '', 
@@ -386,7 +391,8 @@ const CreateLesson = () => {
                 answerImage: null, 
                 isCorrect: false,
                 customFeedbackText: '',
-                customFeedbackImage: null
+                customFeedbackImage: null,
+                customFeedbackAudio: null
             }))
         }]);
     };
@@ -412,7 +418,9 @@ const CreateLesson = () => {
                     setActivityAliases(filteredAliases);
                     const firstAlias = aliasesResponse.data[0].Alias;
                     setAlias(firstAlias);
-                    const categoriesData = categoriesResponse.data;
+                    const categoriesData = categoriesResponse.data.filter(category => 
+                        category.CourseCategoryName.includes("Chatbot")
+                    );
                     setCategories(categoriesData);
                     if (categoriesData.length > 0) {
                         const firstCategoryId = categoriesData[0].CourseCategoryId;
@@ -567,6 +575,7 @@ const CreateLesson = () => {
             setMcqs([{
                 questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
                 showCustomFeedback: false,
+                customFeedbackType: 'text',
                 answers: Array(3).fill().map(() => ({ 
                     answerType: 'text', 
                     answerText: '', 
@@ -574,7 +583,8 @@ const CreateLesson = () => {
                     answerImage: null, 
                     isCorrect: false,
                     customFeedbackText: '',
-                    customFeedbackImage: null
+                    customFeedbackImage: null,
+                    customFeedbackAudio: null
                 }))
             }]);
             setBotQuestions([{ questionText: '' }]);
@@ -587,7 +597,18 @@ const CreateLesson = () => {
             <h1 className={styles.heading}>Fill out your lesson details</h1>
             <form onSubmit={handleCreateLesson} className={styles.form}>
                 <div className={styles.input_row}>
-                    <SelectField label="Select Category" options={categories.map(category => ({ value: category.CourseCategoryId, label: category.CourseCategoryName }))} onChange={handleCategoryChange} value={category} name="category" id="category" />
+                    <SelectField 
+                        label="Select Category" 
+                        options={categories
+                            .map(category => ({ 
+                                value: category.CourseCategoryId, 
+                                label: category.CourseCategoryName 
+                            }))} 
+                        onChange={handleCategoryChange} 
+                        value={category} 
+                        name="category" 
+                        id="category" 
+                    />
                     <div className={styles.form_group}>
                         <SelectField
                             label="Select Course"
@@ -961,6 +982,64 @@ const CreateLesson = () => {
                                         <div className={styles.custom_feedback_toggle}>
                                             <InputField label={`Enable Custom Feedback`} type="checkbox" onChange={(e) => handleMCQQuestionChange(qIndex, e)} checked={mcq.showCustomFeedback} name="showCustomFeedback" id={`showCustomFeedback-${qIndex}`} />
                                         </div>
+                                        
+                                        {mcq.showCustomFeedback && (
+                                            <div className={styles.feedback_type_selector}>
+                                                <h5 className={styles.feedback_type_title}>Select Feedback Type</h5>
+                                                <div className={styles.radio_group}>
+                                                    <label className={styles.radio_label}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`customFeedbackType-${qIndex}`}
+                                                            value="text"
+                                                            checked={mcq.customFeedbackType === "text"}
+                                                            onChange={(e) => handleMCQQuestionChange(qIndex, {target: {name: "customFeedbackType", value: e.target.value}})}
+                                                        />
+                                                        <span>Only Text</span>
+                                                    </label>
+                                                    <label className={styles.radio_label}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`customFeedbackType-${qIndex}`}
+                                                            value="image"
+                                                            checked={mcq.customFeedbackType === "image"}
+                                                            onChange={(e) => handleMCQQuestionChange(qIndex, {target: {name: "customFeedbackType", value: e.target.value}})}
+                                                        />
+                                                        <span>Only Image</span>
+                                                    </label>
+                                                    <label className={styles.radio_label}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`customFeedbackType-${qIndex}`}
+                                                            value="audio"
+                                                            checked={mcq.customFeedbackType === "audio"}
+                                                            onChange={(e) => handleMCQQuestionChange(qIndex, {target: {name: "customFeedbackType", value: e.target.value}})}
+                                                        />
+                                                        <span>Only Audio</span>
+                                                    </label>
+                                                    <label className={styles.radio_label}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`customFeedbackType-${qIndex}`}
+                                                            value="text+image"
+                                                            checked={mcq.customFeedbackType === "text+image"}
+                                                            onChange={(e) => handleMCQQuestionChange(qIndex, {target: {name: "customFeedbackType", value: e.target.value}})}
+                                                        />
+                                                        <span>Text + Image</span>
+                                                    </label>
+                                                    <label className={styles.radio_label}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`customFeedbackType-${qIndex}`}
+                                                            value="text+audio"
+                                                            checked={mcq.customFeedbackType === "text+audio"}
+                                                            onChange={(e) => handleMCQQuestionChange(qIndex, {target: {name: "customFeedbackType", value: e.target.value}})}
+                                                        />
+                                                        <span>Text + Audio</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 
@@ -992,8 +1071,43 @@ const CreateLesson = () => {
                                                     {mcq.showCustomFeedback && (
                                                         <div className={styles.feedback_section}>
                                                             <h5 className={styles.feedback_title}>Custom Feedback</h5>
-                                                            <InputField label={`Feedback Text`} type="text" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} value={answer.customFeedbackText} name="customFeedbackText" id={`customFeedbackText-${qIndex}-${aIndex}`} />
-                                                            <InputField label={`Feedback Image`} type="file" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} name="customFeedbackImage" id={`customFeedbackImage-${qIndex}-${aIndex}`} fileInput />
+                                                            
+                                                            {(mcq.customFeedbackType === "text" || 
+                                                              mcq.customFeedbackType === "text+image" || 
+                                                              mcq.customFeedbackType === "text+audio") && (
+                                                                <InputField 
+                                                                    label={`Feedback Text`} 
+                                                                    type="text" 
+                                                                    onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} 
+                                                                    value={answer.customFeedbackText} 
+                                                                    name="customFeedbackText" 
+                                                                    id={`customFeedbackText-${qIndex}-${aIndex}`} 
+                                                                />
+                                                            )}
+                                                            
+                                                            {(mcq.customFeedbackType === "image" || 
+                                                              mcq.customFeedbackType === "text+image") && (
+                                                                <InputField 
+                                                                    label={`Feedback Image`} 
+                                                                    type="file" 
+                                                                    onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} 
+                                                                    name="customFeedbackImage" 
+                                                                    id={`customFeedbackImage-${qIndex}-${aIndex}`} 
+                                                                    fileInput 
+                                                                />
+                                                            )}
+                                                            
+                                                            {(mcq.customFeedbackType === "audio" || 
+                                                              mcq.customFeedbackType === "text+audio") && (
+                                                                <InputField 
+                                                                    label={`Feedback Audio`} 
+                                                                    type="file" 
+                                                                    onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} 
+                                                                    name="customFeedbackAudio" 
+                                                                    id={`customFeedbackAudio-${qIndex}-${aIndex}`} 
+                                                                    fileInput 
+                                                                />
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
