@@ -315,9 +315,62 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     };
 
     const handleQuestionChange = (index, field, value) => {
-        const updatedQuestions = questions.map((question, i) =>
-            i === index ? { ...question, [field]: value, isChanged: true } : question
-        );
+        const updatedQuestions = questions.map((question, i) => {
+            if (i === index) {
+                const updatedQuestion = { ...question, [field]: value, isChanged: true };
+                
+                // When changing question type, clear irrelevant media fields
+                if (field === "questionType") {
+                    // Clear video fields if switching to a type that doesn't use video
+                    if (!value.includes("Video")) {
+                        updatedQuestion.questionVideoFile = null;
+                        updatedQuestion.questionVideoPreview = null;
+                        updatedQuestion.questionVideoUrl = null;
+                    }
+                    
+                    // Clear image fields if switching to a type that doesn't use image
+                    if (!value.includes("Image")) {
+                        updatedQuestion.questionImageFile = null;
+                        updatedQuestion.questionImagePreview = null;
+                        updatedQuestion.questionImageUrl = null;
+                    }
+                }
+                
+                // Handle custom feedback type changes
+                if (field === "customFeedbackType") {
+                    // Reset answers feedback fields based on the new feedback type
+                    const updatedAnswers = updatedQuestion.answers.map(answer => {
+                        const updatedAnswer = { ...answer, isChanged: true };
+                        
+                        // Clear text feedback if not using text
+                        if (!value.includes("text")) {
+                            updatedAnswer.customAnswerFeedbackText = null;
+                        }
+                        
+                        // Clear image feedback if not using image
+                        if (!value.includes("image")) {
+                            updatedAnswer.customAnswerFeedbackImage = null;
+                            updatedAnswer.customAnswerFeedbackImagePreview = null;
+                            updatedAnswer.customAnswerFeedbackImageFilename = null;
+                        }
+                        
+                        // Clear audio feedback if not using audio
+                        if (!value.includes("audio")) {
+                            updatedAnswer.customAnswerFeedbackAudio = null;
+                            updatedAnswer.customAnswerFeedbackAudioPreview = null;
+                            updatedAnswer.customAnswerFeedbackAudioFilename = null;
+                        }
+                        
+                        return updatedAnswer;
+                    });
+                    
+                    updatedQuestion.answers = updatedAnswers;
+                }
+                
+                return updatedQuestion;
+            }
+            return question;
+        });
         setQuestions(updatedQuestions);
     };
 
@@ -498,7 +551,11 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         ...questions[qIndex],
                                         questionImageFile: file,
                                         questionImagePreview: url,
-                                        isChanged: true
+                                        isChanged: true,
+                                        // Clear video fields as we're using image now
+                                        questionVideoFile: null,
+                                        questionVideoPreview: null,
+                                        questionVideoUrl: null
                                     };
                                     
                                     setQuestions(questions.map((q, i) => 
@@ -551,7 +608,11 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         ...questions[qIndex],
                                         questionImageFile: file,
                                         questionImagePreview: url,
-                                        isChanged: true
+                                        isChanged: true,
+                                        // Clear video fields as we're using image now
+                                        questionVideoFile: null,
+                                        questionVideoPreview: null,
+                                        questionVideoUrl: null
                                     };
                                     
                                     setQuestions(questions.map((q, i) => 
@@ -597,7 +658,11 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         ...questions[qIndex],
                                         questionVideoFile: file,
                                         questionVideoPreview: url,
-                                        isChanged: true
+                                        isChanged: true,
+                                        // Clear image fields as we're using video now
+                                        questionImageFile: null,
+                                        questionImagePreview: null,
+                                        questionImageUrl: null
                                     };
                                     
                                     setQuestions(questions.map((q, i) => 
@@ -650,7 +715,11 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         ...questions[qIndex],
                                         questionVideoFile: file,
                                         questionVideoPreview: url,
-                                        isChanged: true
+                                        isChanged: true,
+                                        // Clear image fields as we're using video now
+                                        questionImageFile: null,
+                                        questionImagePreview: null,
+                                        questionImageUrl: null
                                     };
                                     
                                     setQuestions(questions.map((q, i) => 
