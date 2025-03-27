@@ -336,37 +336,6 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     }
                 }
                 
-                // Handle custom feedback type changes
-                if (field === "customFeedbackType") {
-                    // Reset answers feedback fields based on the new feedback type
-                    const updatedAnswers = updatedQuestion.answers.map(answer => {
-                        const updatedAnswer = { ...answer, isChanged: true };
-                        
-                        // Clear text feedback if not using text
-                        if (!value.includes("text")) {
-                            updatedAnswer.customAnswerFeedbackText = null;
-                        }
-                        
-                        // Clear image feedback if not using image
-                        if (!value.includes("image")) {
-                            updatedAnswer.customAnswerFeedbackImage = null;
-                            updatedAnswer.customAnswerFeedbackImagePreview = null;
-                            updatedAnswer.customAnswerFeedbackImageFilename = null;
-                        }
-                        
-                        // Clear audio feedback if not using audio
-                        if (!value.includes("audio")) {
-                            updatedAnswer.customAnswerFeedbackAudio = null;
-                            updatedAnswer.customAnswerFeedbackAudioPreview = null;
-                            updatedAnswer.customAnswerFeedbackAudioFilename = null;
-                        }
-                        
-                        return updatedAnswer;
-                    });
-                    
-                    updatedQuestion.answers = updatedAnswers;
-                }
-                
                 return updatedQuestion;
             }
             return question;
