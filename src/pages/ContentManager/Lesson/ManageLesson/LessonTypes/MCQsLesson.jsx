@@ -201,8 +201,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     // Create new question
                     const createQuestionResponse = await createMultipleChoiceQuestion(
                         question.file || null,
-                        question.image || null,
-                        question.video || null,
+                        question.questionImageFile || question.image || null,
+                        question.questionVideoFile || question.video || null,
                         question.questionType,
                         question.questionText,
                         question.questionNumber,
@@ -241,8 +241,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     const updateQuestionResponse = await updateMultipleChoiceQuestion(
                         question.id,
                         question.file || null,
-                        question.image || null,
-                        question.video || null,
+                        question.questionImageFile || question.image || null,
+                        question.questionVideoFile || question.video || null,
                         question.questionType,
                         question.questionText,
                         question.questionNumber,
@@ -485,11 +485,43 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         <input
                             className={styles.input_field}
                             type="file"
-                            onChange={(e) => handleQuestionChange(qIndex, "questionImageUrl", e.target.files[0])}
+                            accept="image/*"
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                    const file = e.target.files[0];
+                                    
+                                    // Create a preview URL
+                                    const url = URL.createObjectURL(file);
+                                    
+                                    // Update the question with the file and preview
+                                    const updatedQuestion = {
+                                        ...questions[qIndex],
+                                        questionImageFile: file,
+                                        questionImagePreview: url,
+                                        isChanged: true
+                                    };
+                                    
+                                    setQuestions(questions.map((q, i) => 
+                                        i === qIndex ? updatedQuestion : q
+                                    ));
+                                }
+                            }}
                         />
-                        {question.questionImageUrl && (
-                            <img src={question.questionImageUrl} alt="Question" className={styles.image} />
-                        )}
+                        <div className={styles.media_preview_container}>
+                            {question.questionImagePreview ? (
+                                // Show preview of newly selected file
+                                <div className={styles.image_preview}>
+                                    <h4 className={styles.preview_header}>Image Preview</h4>
+                                    <img src={question.questionImagePreview} alt="Question" className={styles.image} />
+                                </div>
+                            ) : question.questionImageUrl ? (
+                                // Show existing image from database
+                                <div className={styles.image_preview}>
+                                    <h4 className={styles.preview_header}>Current Image</h4>
+                                    <img src={question.questionImageUrl} alt="Question" className={styles.image} />
+                                </div>
+                            ) : null}
+                        </div>
                     </div>
                 );
             case "Text+Image":
@@ -506,11 +538,43 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         <input
                             className={styles.input_field}
                             type="file"
-                            onChange={(e) => handleQuestionChange(qIndex, "questionImageUrl", e.target.files[0])}
+                            accept="image/*"
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                    const file = e.target.files[0];
+                                    
+                                    // Create a preview URL
+                                    const url = URL.createObjectURL(file);
+                                    
+                                    // Update the question with the file and preview
+                                    const updatedQuestion = {
+                                        ...questions[qIndex],
+                                        questionImageFile: file,
+                                        questionImagePreview: url,
+                                        isChanged: true
+                                    };
+                                    
+                                    setQuestions(questions.map((q, i) => 
+                                        i === qIndex ? updatedQuestion : q
+                                    ));
+                                }
+                            }}
                         />
-                        {question.questionImageUrl && (
-                            <img src={question.questionImageUrl} alt="Question" className={styles.image} />
-                        )}
+                        <div className={styles.media_preview_container}>
+                            {question.questionImagePreview ? (
+                                // Show preview of newly selected file
+                                <div className={styles.image_preview}>
+                                    <h4 className={styles.preview_header}>Image Preview</h4>
+                                    <img src={question.questionImagePreview} alt="Question" className={styles.image} />
+                                </div>
+                            ) : question.questionImageUrl ? (
+                                // Show existing image from database
+                                <div className={styles.image_preview}>
+                                    <h4 className={styles.preview_header}>Current Image</h4>
+                                    <img src={question.questionImageUrl} alt="Question" className={styles.image} />
+                                </div>
+                            ) : null}
+                        </div>
                     </div>
                 );
             case "Video":
@@ -520,11 +584,43 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         <input
                             className={styles.input_field}
                             type="file"
-                            onChange={(e) => handleQuestionChange(qIndex, "questionVideoUrl", e.target.files[0])}
+                            accept="video/*"
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                    const file = e.target.files[0];
+                                    
+                                    // Create a preview URL
+                                    const url = URL.createObjectURL(file);
+                                    
+                                    // Update the question with the file and preview
+                                    const updatedQuestion = {
+                                        ...questions[qIndex],
+                                        questionVideoFile: file,
+                                        questionVideoPreview: url,
+                                        isChanged: true
+                                    };
+                                    
+                                    setQuestions(questions.map((q, i) => 
+                                        i === qIndex ? updatedQuestion : q
+                                    ));
+                                }
+                            }}
                         />
-                        {question.questionVideoUrl && (
-                            <video src={question.questionVideoUrl} controls className={styles.video} />
-                        )}
+                        <div className={styles.media_preview_container}>
+                            {question.questionVideoPreview ? (
+                                // Show preview of newly selected file
+                                <div className={styles.video_preview}>
+                                    <h4 className={styles.preview_header}>Video Preview</h4>
+                                    <video src={question.questionVideoPreview} controls className={styles.video} />
+                                </div>
+                            ) : question.questionVideoUrl ? (
+                                // Show existing video from database
+                                <div className={styles.video_preview}>
+                                    <h4 className={styles.preview_header}>Current Video</h4>
+                                    <video src={question.questionVideoUrl} controls className={styles.video} />
+                                </div>
+                            ) : null}
+                        </div>
                     </div>
                 );
             case "Text+Video":
@@ -541,11 +637,43 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         <input
                             className={styles.input_field}
                             type="file"
-                            onChange={(e) => handleQuestionChange(qIndex, "questionVideoUrl", e.target.files[0])}
+                            accept="video/*"
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                    const file = e.target.files[0];
+                                    
+                                    // Create a preview URL
+                                    const url = URL.createObjectURL(file);
+                                    
+                                    // Update the question with the file and preview
+                                    const updatedQuestion = {
+                                        ...questions[qIndex],
+                                        questionVideoFile: file,
+                                        questionVideoPreview: url,
+                                        isChanged: true
+                                    };
+                                    
+                                    setQuestions(questions.map((q, i) => 
+                                        i === qIndex ? updatedQuestion : q
+                                    ));
+                                }
+                            }}
                         />
-                        {question.questionVideoUrl && (
-                            <video src={question.questionVideoUrl} controls className={styles.video} />
-                        )}
+                        <div className={styles.media_preview_container}>
+                            {question.questionVideoPreview ? (
+                                // Show preview of newly selected file
+                                <div className={styles.video_preview}>
+                                    <h4 className={styles.preview_header}>Video Preview</h4>
+                                    <video src={question.questionVideoPreview} controls className={styles.video} />
+                                </div>
+                            ) : question.questionVideoUrl ? (
+                                // Show existing video from database
+                                <div className={styles.video_preview}>
+                                    <h4 className={styles.preview_header}>Current Video</h4>
+                                    <video src={question.questionVideoUrl} controls className={styles.video} />
+                                </div>
+                            ) : null}
+                        </div>
                     </div>
                 );
             default:
