@@ -127,30 +127,12 @@ const ManageCourse = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [duplicationLoading, setDuplicationLoading] = useState({});
 
-    const fetchCategoryNames = async () => {
-        try {
-            const response = await getAllCategories();
-            if (response.status === 200) {
-                const categoryNames = {};
-                response.data.forEach(category => {
-                    categoryNames[category.CourseCategoryId] = category.CourseCategoryName;
-                });
-                setCategoryNames(categoryNames);
-            } else {
-                alert(response.data.message);
-            }
-        } catch (error) {
-            alert(error);
-        }
-    };
-
     const fetchCourses = async () => {
         setIsLoading(true);
         try {
             const response = await getAllCourses();
             if (response.status === 200) {
-                const filteredCourses = response.data.filter(course => course.CourseCategoryId === 66 || course.CourseCategoryId === 70);
-                setCourses(filteredCourses);
+                setCourses(response.data);
             } else {
                 alert(response.data.message);
             }
