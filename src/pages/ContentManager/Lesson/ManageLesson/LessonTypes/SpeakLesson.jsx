@@ -140,6 +140,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                         question.id,
                         question.question,
                         question.mediaFile,
+                        question.mediaFileSecond,
                         formattedAnswers.join(','),
                         lesson.LessonId,
                         question.questionNumber,
@@ -155,6 +156,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                     const createResponse = await createSpeakActivityQuestion(
                         question.question,
                         question.mediaFile,
+                        question.mediaFileSecond,
                         formattedAnswers.join(','),
                         lesson.LessonId,
                         question.questionNumber,
@@ -263,6 +265,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 ...newQuestion,
                 question: '',
                 mediaFile: null,
+                mediaFileSecond: null,
                 answer: [''],
             };
         } else if (activity === 'watchAndAudio') {
@@ -497,10 +500,20 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                     type="file"
                                                     onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])}
                                                 />
+                                                <input 
+                                                    type="file"
+                                                    onChange={(e) => handleQuestionChange(index, 'mediaFileSecond', e.target.files[0])}
+                                                />
                                                 {question.mediaFile && (
                                                     <div className={styles.mediaSection}>
                                                         <label className={styles.answerEditLabel}>Current Media File (Video):</label>
                                                         <video controls src={question.mediaFile} className={styles.videoSmall}></video>
+                                                    </div>
+                                                )}
+                                                {question.mediaFileSecond && (
+                                                    <div className={styles.mediaSection}>
+                                                        <label className={styles.answerEditLabel}>Current Media File (Video):</label>
+                                                        <video controls src={question.mediaFileSecond} className={styles.videoSmall}></video>
                                                     </div>
                                                 )}
                                             </>

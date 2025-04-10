@@ -33,7 +33,9 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                             <th className={styles.table_heading}>Question Image</th>
                             <th className={styles.table_heading}>Question Video</th>
                             <th className={styles.table_heading}>Options</th>
-                            <th className={styles.table_heading}>Custom Answer Feedback</th>
+                            <th className={styles.table_heading}>Custom Answer Feedback Text</th>
+                            <th className={styles.table_heading}>Custom Answer Feedback Image</th>
+                            <th className={styles.table_heading}>Custom Answer Feedback Audio</th>
                         </tr>
                     </thead>
                     <tbody className={styles.table_body}>
@@ -42,17 +44,23 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                                 <td style={{ width: "5%" }}>{question.dataValues.QuestionNumber}</td>
                                 <td style={{ width: "20%" }}>{question.dataValues.QuestionText}</td>
                                 {question.dataValues.QuestionImageUrl && (
-                                    <td style={{ width: "20%", maxWidth: "200px" }}>
-                                        <div style={{ width: "100%", textAlign: "center" }}>
-                                            <img src={question.dataValues.QuestionImageUrl} alt="Question" className={styles.questionImage} />
-                                        </div>
+                                    <td style={{ width: "20%" }}>
+                                        <img src={question.dataValues.QuestionImageUrl} alt="Question" className={styles.questionImage} />
+                                    </td>
+                                ) || (
+                                    <td style={{ width: "20%" }}>
+                                        <p style={{ color: "red" }}>No Image</p>
                                     </td>
                                 )}
                                 {question.dataValues.QuestionVideoUrl && (
-                                    <td style={{ width: "20%", maxWidth: "200px" }}>
-                                        <div style={{ width: "100%", textAlign: "center" }}>
-                                            <video src={question.dataValues.QuestionVideoUrl} alt="Question" className={styles.questionVideo} />
-                                        </div>
+                                    <td style={{ width: "20%" }}>
+                                        <video controls className={styles.questionVideo}>
+                                            <source src={question.dataValues.QuestionVideoUrl} type="video/mp4" />
+                                        </video>
+                                    </td>
+                                ) || (
+                                    <td style={{ width: "20%" }}>
+                                        <p style={{ color: "red" }}>No Video</p>
                                     </td>
                                 )}
                                 <td style={{ width: "20%" }}>

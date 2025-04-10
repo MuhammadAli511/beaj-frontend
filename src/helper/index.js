@@ -553,10 +553,11 @@ export const updateDocumentFile = async (documentFileId, file, lessonId, languag
 
 // SPEAK ACTIVITY QUESTIONS
 // API call to create a speak activity question
-export const createSpeakActivityQuestion = async (question, file, answer, lessonId, questionNumber, activityType) => {
+export const createSpeakActivityQuestion = async (question, video, image, answer, lessonId, questionNumber, activityType) => {
     const formData = new FormData();
     formData.append('question', question);
-    formData.append('file', file);
+    formData.append('video', video);
+    formData.append('image', image);
     formData.append('answer', answer);
     formData.append('lessonId', lessonId);
     formData.append('questionNumber', questionNumber);
@@ -595,10 +596,11 @@ export const getSpeakActivityQuestionById = async (speakActivityQuestionId) => {
 };
 
 // API call to update a speak activity question
-export const updateSpeakActivityQuestion = async (speakActivityQuestionId, question, file, answer, lessonId, questionNumber, activityType) => {
+export const updateSpeakActivityQuestion = async (speakActivityQuestionId, question, video, image, answer, lessonId, questionNumber, activityType) => {
     const formData = new FormData();
     formData.append('question', question);
-    formData.append('file', file);
+    formData.append('video', video);
+    formData.append('image', image);
     formData.append('answer', answer);
     formData.append('lessonId', lessonId);
     formData.append('questionNumber', questionNumber);

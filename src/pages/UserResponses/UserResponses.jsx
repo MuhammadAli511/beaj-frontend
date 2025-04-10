@@ -103,9 +103,6 @@ const UserResponses = () => {
         { value: 'conversationalAgencyBot', label: 'Conversational Agency Bot' },
         { value: 'conversationalQuestionsBot', label: 'Conversational Questions Bot' },
         { value: 'conversationalMonologueBot', label: 'Conversational Monologue Bot' },
-        // { value: 'listenAndSpeak', label: 'Listen & Speak' },
-        // { value: 'watchAndSpeak', label: 'Watch & Speak' },
-        // { value: 'mcqs', label: 'MCQs' },
     ];
 
     // Exclude Courses

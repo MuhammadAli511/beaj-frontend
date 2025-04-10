@@ -145,6 +145,7 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
             return createSpeakActivityQuestion(
                 question.questionText,
                 question.video,
+                question.image,
                 answersArray,
                 lessonId,
                 (index + 1).toString(),

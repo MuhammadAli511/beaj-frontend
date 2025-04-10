@@ -105,18 +105,28 @@ const CreateLesson = () => {
 
     // Watch and Speak
     const [wsQuestions, setWsQuestions] = useState([
-        { questionText: '', video: '', answers: [{ answerText: '' }] }
+        { questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false }
     ]);
 
     const handleWsQuestionChange = (index, event) => {
         const newWsQuestions = [...wsQuestions];
         if (event.target.type === 'file') {
             const file = event.target.files[0];
-            if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
-                newWsQuestions[index][event.target.name] = file;
-            } else {
-                alert('Please upload an MP4 video not larger than 16MB.');
+            if (event.target.name === 'image') {
+                if (file && file.type === 'image/jpeg' && file.size <= 4 * 1024 * 1024) {
+                    newWsQuestions[index][event.target.name] = file;
+                } else {
+                    alert('Please upload a JPG image not larger than 4MB.');
+                }
+            } else if (event.target.name === 'video') {
+                if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
+                    newWsQuestions[index][event.target.name] = file;
+                } else {
+                    alert('Please upload an MP4 video not larger than 16MB.');
+                }
             }
+        } else if (event.target.type === 'checkbox' && event.target.name === 'showImageUpload') {
+            newWsQuestions[index].showImageUpload = event.target.checked;
         } else {
             newWsQuestions[index][event.target.name] = event.target.value;
         }
@@ -138,7 +148,7 @@ const CreateLesson = () => {
 
     const addWsQuestion = (event) => {
         event.preventDefault();
-        setWsQuestions([...wsQuestions, { questionText: '', video: '', answers: [{ answerText: '' }] }]);
+        setWsQuestions([...wsQuestions, { questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false }]);
     };
 
     const removeWsQuestion = (index, event) => {
@@ -571,7 +581,7 @@ const CreateLesson = () => {
             setAudio(null);
             setVideo(null);
             setQuestions([{ questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }]);
-            setWsQuestions([{ questionText: '', video: '', answers: [{ answerText: '' }] }]);
+            setWsQuestions([{ questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false }]);
             setMcqs([{
                 questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
                 showCustomFeedback: false,
@@ -893,6 +903,28 @@ const CreateLesson = () => {
                                     <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
                                     {wsQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>Remove Question</button>}
                                 </div>
+                                <div className={styles.input_row}>
+                                    <InputField 
+                                        label="Enable Image Upload" 
+                                        type="checkbox" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        checked={question.showImageUpload} 
+                                        name="showImageUpload" 
+                                        id={`showImageUpload-${qIndex}`} 
+                                    />
+                                </div>
+                                {question.showImageUpload && (
+                                    <div className={styles.input_row}>
+                                        <InputField 
+                                            label="Upload Image" 
+                                            type="file" 
+                                            onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                            name="image" 
+                                            id={`image-${qIndex}`} 
+                                            fileInput 
+                                        />
+                                    </div>
+                                )}
                                 {question.answers.map((answer, aIndex) => (
                                     <div key={aIndex} className={styles.input_row}>
                                         <InputField label={`Answer ${aIndex + 1}`} type="text" onChange={e => handleWsAnswerChange(qIndex, aIndex, e)} value={answer.answerText} name="answerText" id={`answerText-${qIndex}-${aIndex}`} />
