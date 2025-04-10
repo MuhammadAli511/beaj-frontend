@@ -25,8 +25,14 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modalHeader {
@@ -39,8 +45,13 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  width: calc(100% - 17px); /* Account for scrollbar width */
+  width: calc(100% - 17px);
   margin-right: 0;
+  background-color: rgb(249, 245, 245);
+  border-radius: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
 }
 
 .modalHeader h2 {
