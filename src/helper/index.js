@@ -679,9 +679,15 @@ export const getMultipleChoiceQuestionById = async (multipleChoiceQuestionId) =>
 // API call to update a Multiple Choice Question
 export const updateMultipleChoiceQuestion = async (multipleChoiceQuestionId, file, image, video, questionType, questionText, questionNumber, lessonId, optionsType, customFeedbackType) => {
     const formData = new FormData();
-    if (file) formData.append('file', file);
-    if (image) formData.append('image', image);
-    if (video) formData.append('video', video);
+    if (file && typeof file === 'object') formData.append('file', file);
+    if (image && typeof image === 'object') formData.append('image', image);
+    if (video && typeof video === 'object') formData.append('video', video);
+
+    // For existing URLs that should be preserved
+    if (file && typeof file === 'string') formData.append('existingFileUrl', file);
+    if (image && typeof image === 'string') formData.append('existingImageUrl', image);
+    if (video && typeof video === 'string') formData.append('existingVideoUrl', video);
+
     formData.append('questionType', questionType);
     formData.append('questionText', questionText);
     formData.append('questionNumber', questionNumber);

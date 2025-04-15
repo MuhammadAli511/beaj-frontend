@@ -13,6 +13,7 @@ import {
     updateMultipleChoiceQuestionAnswer,
     deleteMultipleChoiceQuestionAnswer,
     migrateLesson,
+    getMultipleChoiceQuestionById,
 } from "../../../../../helper";
 import edit from "../../../../../assets/images/edit.svg";
 import deleteIcon from "../../../../../assets/images/delete.svg";
@@ -238,11 +239,14 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     }
                 } else if (question.isChanged) {
                     // Update existing question
+                    // First get the current question data to preserve fields we're not updating
+                    const existingQuestion = await getMultipleChoiceQuestionById(question.id);
+                    
                     const updateQuestionResponse = await updateMultipleChoiceQuestion(
                         question.id,
                         question.file || null,
-                        question.questionImageFile || question.questionImageUrl || null,
-                        question.questionVideoFile || question.questionVideoUrl || null,
+                        question.questionImageFile || question.questionImageUrl || (existingQuestion?.data?.QuestionImageUrl || null),
+                        question.questionVideoFile || question.questionVideoUrl || (existingQuestion?.data?.QuestionVideoUrl || null),
                         question.questionType,
                         question.questionText,
                         question.questionNumber,
