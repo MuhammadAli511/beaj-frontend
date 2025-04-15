@@ -551,6 +551,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                     type="file"
                                                     onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files)}
                                                 />
+                                                <label className={styles.answerEditLabel}>Upload Media File (Image)</label>
                                                 <input 
                                                     type="file"
                                                     onChange={(e) => handleQuestionChange(index, 'mediaFileSecond', e.target.files)}
@@ -563,8 +564,8 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                 )}
                                                 {question.mediaFileSecond && (
                                                     <div className={styles.mediaSection}>
-                                                        <label className={styles.answerEditLabel}>Current Media File (Video):</label>
-                                                        <video controls src={question.mediaFileSecond} className={styles.videoSmall}></video>
+                                                        <label className={styles.answerEditLabel}>Current Media File (Image):</label>
+                                                        <img src={question.mediaFileSecond} className={styles.imageSmall}></img>
                                                     </div>
                                                 )}
                                             </>
