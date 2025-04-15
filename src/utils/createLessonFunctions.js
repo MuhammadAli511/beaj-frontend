@@ -102,6 +102,7 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
             return createSpeakActivityQuestion(
                 question.questionText,
                 question.media,
+                null,
                 answersArray,
                 lessonId,
                 (index + 1).toString(),
@@ -183,6 +184,7 @@ export const createConversationalBotLesson = async (course, sequenceNumber, alia
                     question.questionText,
                     null,
                     null,
+                    null,
                     lessonId,
                     (index + 1).toString(),
                     activityType
@@ -202,6 +204,7 @@ export const createConversationalBotLesson = async (course, sequenceNumber, alia
                     question.questionText,
                     question.video,
                     null,
+                    null,
                     lessonId,
                     (index + 1).toString(),
                     activityType
@@ -219,6 +222,7 @@ export const createConversationalBotLesson = async (course, sequenceNumber, alia
             questions.map((question, index) =>
                 createSpeakActivityQuestion(
                     question.questionText,
+                    null,
                     null,
                     null,
                     lessonId,
@@ -257,6 +261,7 @@ export const createSpeakingPracticeLesson = async (course, sequenceNumber, alias
             return createSpeakActivityQuestion(
                 question.questionText,
                 question.audio,
+                null,
                 null,
                 lessonId,
                 (index + 1).toString(),
