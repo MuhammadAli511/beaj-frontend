@@ -13,6 +13,7 @@ import {
     updateMultipleChoiceQuestionAnswer,
     deleteMultipleChoiceQuestionAnswer,
     migrateLesson,
+    getMultipleChoiceQuestionById,
 } from "../../../../../helper";
 import edit from "../../../../../assets/images/edit.svg";
 import deleteIcon from "../../../../../assets/images/delete.svg";
@@ -221,14 +222,14 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     for (let answer of question.answers) {
                         const createAnswerResponse = await createMultipleChoiceQuestionAnswer(
                             answer.answerText,
-                            answer.file || null,
-                            answer.image || null,
+                            answer.file || answer.answerImageUrl || null,
+                            answer.image || answer.answerAudioUrl || null,
                             answer.isCorrect,
                             questionId,
                             answer.SequenceNumber,
-                            question.showCustomFeedback ? (question.customFeedbackType.includes("text") ? (answer.customAnswerFeedbackText || "") : null) : null,
-                            question.showCustomFeedback ? (question.customFeedbackType.includes("image") ? (answer.customAnswerFeedbackImage || null) : null) : null,
-                            question.showCustomFeedback ? (question.customFeedbackType.includes("audio") ? (answer.customAnswerFeedbackAudio || null) : null) : null
+                            question.showCustomFeedback && question.customFeedbackType.includes("text") ? answer.customAnswerFeedbackText || "" : null,
+                            question.showCustomFeedback && question.customFeedbackType.includes("image") ? (answer.customAnswerFeedbackImage || answer.customAnswerFeedbackImagePreview || answer.customAnswerFeedbackImageUrl || null) : null,
+                            question.showCustomFeedback && question.customFeedbackType.includes("audio") ? (answer.customAnswerFeedbackAudio || answer.customAnswerFeedbackAudioPreview || answer.customAnswerFeedbackAudioUrl || null) : null
                         );
 
                         if (createAnswerResponse.status !== 200) {
@@ -238,11 +239,14 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     }
                 } else if (question.isChanged) {
                     // Update existing question
+                    // First get the current question data to preserve fields we're not updating
+                    const existingQuestion = await getMultipleChoiceQuestionById(question.id);
+                    
                     const updateQuestionResponse = await updateMultipleChoiceQuestion(
                         question.id,
                         question.file || null,
-                        question.questionImageFile || question.image || null,
-                        question.questionVideoFile || question.video || null,
+                        question.questionImageFile || question.questionImageUrl || (existingQuestion?.data?.QuestionImageUrl || null),
+                        question.questionVideoFile || question.questionVideoUrl || (existingQuestion?.data?.QuestionVideoUrl || null),
                         question.questionType,
                         question.questionText,
                         question.questionNumber,
@@ -261,14 +265,14 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                         if (answer.isNew && !answer.isDeleted) {
                             const createAnswerResponse = await createMultipleChoiceQuestionAnswer(
                                 answer.answerText,
-                                answer.file || null,
-                                answer.image || null,
+                                answer.file || answer.answerImageUrl || null,
+                                answer.image || answer.answerAudioUrl || null,
                                 answer.isCorrect,
                                 question.id,
                                 answer.SequenceNumber,
-                                question.showCustomFeedback ? (question.customFeedbackType.includes("text") ? (answer.customAnswerFeedbackText || "") : null) : null,
-                                question.showCustomFeedback ? (question.customFeedbackType.includes("image") ? (answer.customAnswerFeedbackImage || null) : null) : null,
-                                question.showCustomFeedback ? (question.customFeedbackType.includes("audio") ? (answer.customAnswerFeedbackAudio || null) : null) : null
+                                question.showCustomFeedback && question.customFeedbackType.includes("text") ? answer.customAnswerFeedbackText || "" : null,
+                                question.showCustomFeedback && question.customFeedbackType.includes("image") ? (answer.customAnswerFeedbackImage || answer.customAnswerFeedbackImagePreview || answer.customAnswerFeedbackImageUrl || null) : null,
+                                question.showCustomFeedback && question.customFeedbackType.includes("audio") ? (answer.customAnswerFeedbackAudio || answer.customAnswerFeedbackAudioPreview || answer.customAnswerFeedbackAudioUrl || null) : null
                             );
 
                             if (createAnswerResponse.status !== 200) {
@@ -279,14 +283,14 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                             const updateAnswerResponse = await updateMultipleChoiceQuestionAnswer(
                                 answer.id,
                                 answer.answerText,
-                                answer.file || null,
-                                answer.image || null,
+                                answer.file || answer.answerImageUrl || null,
+                                answer.image || answer.answerAudioUrl || null,
                                 answer.isCorrect,
                                 question.id,
                                 answer.SequenceNumber,
-                                question.showCustomFeedback ? (question.customFeedbackType.includes("text") ? (answer.customAnswerFeedbackText || "") : null) : null,
-                                question.showCustomFeedback ? (question.customFeedbackType.includes("image") ? (answer.customAnswerFeedbackImage || null) : null) : null,
-                                question.showCustomFeedback ? (question.customFeedbackType.includes("audio") ? (answer.customAnswerFeedbackAudio || null) : null) : null
+                                question.showCustomFeedback && question.customFeedbackType.includes("text") ? answer.customAnswerFeedbackText || "" : null,
+                                question.showCustomFeedback && question.customFeedbackType.includes("image") ? (answer.customAnswerFeedbackImage || answer.customAnswerFeedbackImagePreview || answer.customAnswerFeedbackImageUrl || null) : null,
+                                question.showCustomFeedback && question.customFeedbackType.includes("audio") ? (answer.customAnswerFeedbackAudio || answer.customAnswerFeedbackAudioPreview || answer.customAnswerFeedbackAudioUrl || null) : null
                             );
 
                             if (updateAnswerResponse.status !== 200) {

@@ -134,38 +134,84 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
             const changedQuestions = questions.filter(question => question.isChanged);
 
             for (let question of changedQuestions) {
-                const formattedAnswers = question.answer.map(ans => `"${ans.replace(/"/g, '\\"')}"`);
+                const formattedAnswers = question.answer ? question.answer.map(ans => `"${ans.replace(/"/g, '\\"')}"`).join(',') : "";
+                
                 if (question.id) {
-                    const updateResponse = await updateSpeakActivityQuestion(
-                        question.id,
-                        question.question,
-                        question.mediaFile,
-                        question.mediaFileSecond,
-                        formattedAnswers.join(','),
-                        lesson.LessonId,
-                        question.questionNumber,
-                        updatedLessonData.activity
-                    );
+                    // Handle mediaFile/video/audio fields - only pass the File object if it's a new upload
+                    // If it's a string (URL), pass the the link to keep the existing file not null
+                    const mediaFile = question.mediaFile && typeof question.mediaFile !== 'string' ? question.mediaFile : question.mediaFile;
+                    const mediaFileSecond = question.mediaFileSecond && typeof question.mediaFileSecond !== 'string' ? question.mediaFileSecond : question.mediaFileSecond;
+                    const audio = question.audio && typeof question.audio !== 'string' ? question.audio : question.audio;
+                    
+                    // For speakingPractice activity, update with audio
+                    if (updatedLessonData.activity === 'speakingPractice') {
+                        const updateResponse = await updateSpeakActivityQuestion(
+                            question.id,
+                            question.question || "",
+                            audio, // Pass audio as video parameter for speakingPractice
+                            null, // No image
+                            formattedAnswers,
+                            lesson.LessonId,
+                            question.questionNumber,
+                            updatedLessonData.activity
+                        );
 
-                    if (updateResponse.status !== 200) {
-                        alert(updateResponse.data.message);
-                        return;
+                        if (updateResponse.status !== 200) {
+                            alert(updateResponse.data.message);
+                            return;
+                        }
+                    } else {
+                        // For other activities, update with mediaFile/mediaFileSecond
+                        const updateResponse = await updateSpeakActivityQuestion(
+                            question.id,
+                            question.question || "",
+                            mediaFile,
+                            mediaFileSecond,
+                            formattedAnswers,
+                            lesson.LessonId,
+                            question.questionNumber,
+                            updatedLessonData.activity
+                        );
+
+                        if (updateResponse.status !== 200) {
+                            alert(updateResponse.data.message);
+                            return;
+                        }
                     }
                 } else {
-                    // Create new question
-                    const createResponse = await createSpeakActivityQuestion(
-                        question.question,
-                        question.mediaFile,
-                        question.mediaFileSecond,
-                        formattedAnswers.join(','),
-                        lesson.LessonId,
-                        question.questionNumber,
-                        updatedLessonData.activity
-                    );
+                    // Create new question logic - no changes needed here
+                    // For speakingPractice activity
+                    if (updatedLessonData.activity === 'speakingPractice') {
+                        const createResponse = await createSpeakActivityQuestion(
+                            question.question || "",
+                            question.audio, // Use audio for speakingPractice
+                            null, // No image
+                            formattedAnswers,
+                            lesson.LessonId,
+                            question.questionNumber,
+                            updatedLessonData.activity
+                        );
 
-                    if (createResponse.status !== 200) {
-                        alert(createResponse.data.message);
-                        return;
+                        if (createResponse.status !== 200) {
+                            alert(createResponse.data.message);
+                            return;
+                        }
+                    } else {
+                        // For other activities
+                        const createResponse = await createSpeakActivityQuestion(
+                            question.question || "",
+                            question.mediaFile,
+                            question.mediaFileSecond,
+                            formattedAnswers,
+                            lesson.LessonId,
+                            question.questionNumber,
+                            updatedLessonData.activity
+                        );
+
+                        if (createResponse.status !== 200) {
+                            alert(createResponse.data.message);
+                            return;
+                        }
                     }
                 }
             }
@@ -182,7 +228,12 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
 
     const handleQuestionChange = (index, field, value) => {
         const updatedQuestions = questions.map((question, i) =>
-            i === index ? { ...question, [field]: value, isChanged: true } : question
+            i === index ? { 
+                ...question, 
+                [field]: field === 'audio' || field === 'mediaFile' || field === 'mediaFileSecond' ? 
+                    (value && value.length > 0 ? value[0] : value) : value, 
+                isChanged: true 
+            } : question
         );
         setQuestions(updatedQuestions);
     };
@@ -448,7 +499,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                 <input
                                                     type="file"
                                                     accept="audio/mp3,video/mp4"
-                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])}
+                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files)}
                                                 />
                                                 {question.mediaFile && (
                                                     <div className={styles.mediaSection}>
@@ -498,11 +549,12 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                 <label className={styles.answerEditLabel}>Upload Media File (Video)</label>
                                                 <input
                                                     type="file"
-                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])}
+                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files)}
                                                 />
+                                                <label className={styles.answerEditLabel}>Upload Media File (Image)</label>
                                                 <input 
                                                     type="file"
-                                                    onChange={(e) => handleQuestionChange(index, 'mediaFileSecond', e.target.files[0])}
+                                                    onChange={(e) => handleQuestionChange(index, 'mediaFileSecond', e.target.files)}
                                                 />
                                                 {question.mediaFile && (
                                                     <div className={styles.mediaSection}>
@@ -512,8 +564,8 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                 )}
                                                 {question.mediaFileSecond && (
                                                     <div className={styles.mediaSection}>
-                                                        <label className={styles.answerEditLabel}>Current Media File (Video):</label>
-                                                        <video controls src={question.mediaFileSecond} className={styles.videoSmall}></video>
+                                                        <label className={styles.answerEditLabel}>Current Media File (Image):</label>
+                                                        <img src={question.mediaFileSecond} className={styles.imageSmall}></img>
                                                     </div>
                                                 )}
                                             </>
@@ -524,7 +576,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                 <label className={styles.answerEditLabel}>Upload Media File (Video)</label>
                                                 <input
                                                     type="file"
-                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])}
+                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files)}
                                                 />
                                                 {question.mediaFile && (
                                                     <div className={styles.mediaSection}>
@@ -540,7 +592,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                 <label className={styles.answerEditLabel}>Upload Media File (Video)</label>
                                                 <input
                                                     type="file"
-                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])}
+                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files)}
                                                 />
                                                 {question.mediaFile && (
                                                     <div className={styles.mediaSection}>
@@ -563,7 +615,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                 <label className={styles.answerEditLabel}>Question Text</label>
                                                 <input className={styles.edit_input_field} type="text" value={question.questionText || ""} onChange={(e) => handleQuestionChange(index, 'questionText', e.target.value)} />
                                                 <label className={styles.answerEditLabel}>Question Video</label>
-                                                <input type="file" onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files[0])} />
+                                                <input type="file" onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files)} />
                                                 {question.mediaFile && (
                                                     <div className={styles.mediaSection}>
                                                         <label className={styles.answerEditLabel}>Current Video:</label>
@@ -583,11 +635,23 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                         {activity === 'speakingPractice' && (
                                             <>
                                                 <label className={styles.answerEditLabel}>Question Audio</label>
-                                                <input type="file" onChange={(e) => handleQuestionChange(index, 'audio', e.target.files[0])} />
+                                                <input 
+                                                    type="file" 
+                                                    accept="audio/*"
+                                                    onChange={(e) => handleQuestionChange(index, 'audio', e.target.files)}
+                                                />
                                                 {question.audio && (
                                                     <div className={styles.mediaSection}>
                                                         <label className={styles.answerEditLabel}>Current Audio:</label>
-                                                        <audio controls src={question.audio} className={styles.audio}></audio>
+                                                        <audio 
+                                                            controls 
+                                                            src={typeof question.audio === 'string' ? 
+                                                                question.audio : 
+                                                                (question.audio instanceof File ? 
+                                                                    URL.createObjectURL(question.audio) : 
+                                                                    question.audio)} 
+                                                            className={styles.audio}
+                                                        ></audio>
                                                     </div>
                                                 )}
                                             </>
