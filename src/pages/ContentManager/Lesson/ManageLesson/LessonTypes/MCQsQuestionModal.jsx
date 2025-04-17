@@ -25,7 +25,7 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                     <h2>MCQs for Lesson {lesson.LessonId}</h2>
                     <button onClick={onClose} className={styles.closeButton}>Close</button>
                 </div>
-                <div className={styles.tableContainer}>
+                <div className={`${styles.tableContainer} ${styles.tableContainer_scrollable}`}>
                     <table className={styles.table}>
                         <thead>
                             <tr>
@@ -64,7 +64,7 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                                             <p style={{ color: "red" }}>No Video</p>
                                         </td>
                                     )}
-                                    <td style={{ width: "20%" }}>
+                                    <td style={{ width: "20%" }} className={styles.scrollableCell}>
                                         {question.multipleChoiceQuestionAnswers.map((answer) => (
                                             <div key={answer.Id} className={styles.answer}>
                                                 {answer.AnswerText && <span style={{ fontWeight: answer.IsCorrect ? "bold" : "normal" }}>{answer.AnswerText}</span>}

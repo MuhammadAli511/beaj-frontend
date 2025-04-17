@@ -25,7 +25,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                     <h2>Questions for Lesson {lesson.LessonId}</h2>
                     <button onClick={onClose} className={styles.closeButton}>Close</button>
                 </div>
-                <div className={styles.tableContainer}>
+                <div className={`${styles.tableContainer} ${styles.tableContainer_scrollable}`}>
                     <table className={styles.table}>
                         <thead>
                             <tr>
