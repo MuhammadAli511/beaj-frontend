@@ -975,6 +975,18 @@ export const getLastActiveUsers = async (days, cohorts) => {
     return { status: response.status, data };
 };
 
+// POST api/stats/studentUserJourneyStats
+export const getStudentUserJourneyStats = async (date) => {
+    const response = await fetch(`${API_URL}/stats/studentUserJourneyStats`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ date }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
 
 // ADD USERS
 // POST api/chatbot/upload-user-data
