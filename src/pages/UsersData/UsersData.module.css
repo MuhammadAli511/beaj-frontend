@@ -401,3 +401,105 @@
         justify-content: center;
     }
 }
+
+/* Stats sections for acceptableMessages and activityType */
+.stats_section {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.stats_section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #444;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.stats_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.message_stat_card, .activity_stat_card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    border-left: 4px solid #51bbcc;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.message_stat_card:hover, .activity_stat_card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.message_display {
+    font-family: monospace;
+    font-size: 14px;
+    background-color: rgba(81, 187, 204, 0.1);
+    padding: 8px;
+    border-radius: 4px;
+    color: #333;
+    word-break: break-all;
+    margin-bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.message_item {
+    display: inline-flex;
+    align-items: center;
+    background-color: #eaf6f8;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin: 2px;
+    border: 1px solid rgba(81, 187, 204, 0.2);
+}
+
+.message_separator {
+    margin: 0 5px;
+    color: #888;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.activity_type {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.stat_count {
+    margin-top: auto;
+    font-weight: 600;
+    color: #51bbcc;
+    font-size: 14px;
+}
+
+@media (max-width: 1000px) {
+    .stats_grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.activity_badge {
+    display: inline-block;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+    background-color: #eaf6f8;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(81, 187, 204, 0.3);
+    text-align: center;
+}

@@ -12,6 +12,8 @@ const UsersData = () => {
     const [userData, setUserData] = useState([]);
     const [studentUserData, setStudentUserData] = useState([]);
     const [studentStats, setStudentStats] = useState({});
+    const [messageStats, setMessageStats] = useState({});
+    const [activityTypeStats, setActivityTypeStats] = useState({});
     const [activeTab, setActiveTab] = useState('student');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -103,6 +105,12 @@ const UsersData = () => {
         return filterByDate(data).length;
     };
 
+    // Utility function to format array data nicely
+    const formatArrayForDisplay = (arr) => {
+        if (!arr || !Array.isArray(arr) || arr.length === 0) return '';
+        return arr.join(', ');
+    };
+
     useEffect(() => {
         if (activeTab === 'teacher') {
             fetchTeacherData();
@@ -188,7 +196,13 @@ const UsersData = () => {
                         sortingStage: sortingStage,
                         level1_trial_starts: user.level1_trial_starts || 0,
                         level3_trial_starts: user.level3_trial_starts || 0,
-                        activityType: user.activityType || ""
+                        activityType: user.activityType || "",
+                        currentLessonId: user.currentLessonId || "",
+                        currentLesson_sequence: user.currentLesson_sequence || "",
+                        questionNumber: user.questionNumber || "",
+                        acceptableMessages: user.acceptableMessages ? formatArrayForDisplay(user.acceptableMessages) : "",
+                        last_message_content: user.last_message_content ? formatArrayForDisplay(user.last_message_content) : "",
+                        last_message_timestamp: user.last_message_timestamp ? new Date(user.last_message_timestamp).toLocaleString().replace(",", "") : ""
                     };
                 });
                 
@@ -207,6 +221,34 @@ const UsersData = () => {
                 
                 setStudentUserData(sortedUserData);
                 setStudentStats(response.data.stats || {});
+
+                // Generate acceptableMessages statistics
+                const messageStatsData = {};
+                response.data.userData.forEach(user => {
+                    if (user.acceptableMessages && user.acceptableMessages.length > 0) {
+                        const messageKey = JSON.stringify(user.acceptableMessages);
+                        if (!messageStatsData[messageKey]) {
+                            messageStatsData[messageKey] = {
+                                messages: user.acceptableMessages,
+                                count: 0
+                            };
+                        }
+                        messageStatsData[messageKey].count += 1;
+                    }
+                });
+                setMessageStats(messageStatsData);
+
+                // Generate activityType statistics
+                const activityStatsData = {};
+                response.data.userData.forEach(user => {
+                    if (user.activityType) {
+                        if (!activityStatsData[user.activityType]) {
+                            activityStatsData[user.activityType] = 0;
+                        }
+                        activityStatsData[user.activityType] += 1;
+                    }
+                });
+                setActivityTypeStats(activityStatsData);
             }
         } catch (error) {
             console.error("Error fetching student data:", error);
@@ -412,6 +454,49 @@ const UsersData = () => {
                             )}
                         </div>
                         
+                        {/* Message Statistics */}
+                        {!isLoading && Object.keys(messageStats).length > 0 && (
+                            <div className={styles.stats_section}>
+                                <h3>Users by Acceptable Messages</h3>
+                                <div className={styles.stats_grid}>
+                                    {Object.values(messageStats).sort((a, b) => b.count - a.count).map((stat, index) => (
+                                        <div key={index} className={styles.message_stat_card}>
+                                            <div className={styles.message_display}>
+                                                {stat.messages.map((msg, i) => (
+                                                    <span key={i} className={styles.message_item}>
+                                                        {msg}
+                                                        {i < stat.messages.length - 1 && <span className={styles.message_separator}>or</span>}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <div className={styles.stat_count}>
+                                                {stat.count} users
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Activity Type Statistics */}
+                        {!isLoading && Object.keys(activityTypeStats).length > 0 && (
+                            <div className={styles.stats_section}>
+                                <h3>Users by Activity Type</h3>
+                                <div className={styles.stats_grid}>
+                                    {Object.entries(activityTypeStats).sort((a, b) => b[1] - a[1]).map(([type, count], index) => (
+                                        <div key={index} className={styles.activity_stat_card}>
+                                            <div className={styles.activity_badge}>
+                                                {type || 'Unknown'}
+                                            </div>
+                                            <div className={styles.stat_count}>
+                                                {count} users
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        
                         <div className={styles.stats_summary}>
                             <CSVDownloader
                                 datas={getProcessedData(studentUserData)}
@@ -427,7 +512,13 @@ const UsersData = () => {
                                     { id: 'persona', displayName: 'Persona' },
                                     { id: 'level1_trial_starts', displayName: 'Level 1 Trials' },
                                     { id: 'level3_trial_starts', displayName: 'Level 3 Trials' },
-                                    { id: 'activityType', displayName: 'Activity Type' }
+                                    { id: 'activityType', displayName: 'Activity Type' },
+                                    { id: 'currentLessonId', displayName: 'Current Lesson ID' },
+                                    { id: 'currentLesson_sequence', displayName: 'Lesson Sequence' },
+                                    { id: 'questionNumber', displayName: 'Question Number' },
+                                    { id: 'acceptableMessages', displayName: 'Acceptable Messages' },
+                                    { id: 'last_message_content', displayName: 'Last Message' },
+                                    { id: 'last_message_timestamp', displayName: 'Last Message Time' }
                                 ]}
                                 filename="students_data.csv"
                                 className={styles.download_button}
@@ -504,6 +595,20 @@ const UsersData = () => {
                                                 )}
                                             </th>
                                             <th className={styles.table_heading}>Activity Type</th>
+                                            <th className={styles.table_heading}>Current Lesson ID</th>
+                                            <th className={styles.table_heading}>Lesson Sequence</th>
+                                            <th className={styles.table_heading}>Question Number</th>
+                                            <th className={styles.table_heading}>Acceptable Messages</th>
+                                            <th className={styles.table_heading}>Last Message</th>
+                                            <th 
+                                                className={`${styles.table_heading} ${styles.sortable}`}
+                                                onClick={() => handleSort('last_message_timestamp')}
+                                            >
+                                                Last Message Time
+                                                {sortConfig.key === 'last_message_timestamp' && (
+                                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                                                )}
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody className={styles.table_body}>
@@ -521,6 +626,12 @@ const UsersData = () => {
                                                 <td className={styles.normal_text}>{user.level1_trial_starts || 0}</td>
                                                 <td className={styles.normal_text}>{user.level3_trial_starts || 0}</td>
                                                 <td className={styles.normal_text}>{user.activityType || ''}</td>
+                                                <td className={styles.normal_text}>{user.currentLessonId || ''}</td>
+                                                <td className={styles.normal_text}>{user.currentLesson_sequence || ''}</td>
+                                                <td className={styles.normal_text}>{user.questionNumber || ''}</td>
+                                                <td className={styles.normal_text}>{user.acceptableMessages || ''}</td>
+                                                <td className={styles.normal_text}>{user.last_message_content || ''}</td>
+                                                <td className={styles.normal_text}>{user.last_message_timestamp || ''}</td>
                                             </tr>
                                         ))}
                                     </tbody>
