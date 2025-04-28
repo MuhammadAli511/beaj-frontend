@@ -294,20 +294,37 @@
     cursor: pointer;
     user-select: none;
     position: relative;
-    padding-right: 20px;
+    padding-right: 25px;
 }
 
 .sortable:hover {
     background-color: #f5f5f5;
 }
 
-.sortable span {
+.sortable::after {
+    content: '↕';
     position: absolute;
-    right: 5px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
     font-size: 12px;
+    color: #bbbbbb;
+    opacity: 0.7;
+}
+
+.sortable:hover::after {
     color: #666;
+    opacity: 1;
+}
+
+.sortable span {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #51bbcc;
+    font-weight: bold;
 }
 
 /* Responsive styles */

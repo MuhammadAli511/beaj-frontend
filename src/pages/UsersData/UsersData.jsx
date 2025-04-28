@@ -57,10 +57,18 @@ const UsersData = () => {
             const bValue = b[sortConfig.key];
 
             if (aValue === bValue) return 0;
-            if (!aValue) return 1;
-            if (!bValue) return -1;
+            if (aValue === undefined || aValue === null || aValue === "") return 1;
+            if (bValue === undefined || bValue === null || bValue === "") return -1;
 
-            const comparison = aValue.localeCompare(bValue);
+            // For numeric fields (trial starts), use numeric comparison
+            if (sortConfig.key === 'level1_trial_starts' || sortConfig.key === 'level3_trial_starts') {
+                return sortConfig.direction === 'asc' 
+                    ? Number(aValue) - Number(bValue) 
+                    : Number(bValue) - Number(aValue);
+            }
+            
+            // For date/string fields, use string comparison
+            const comparison = aValue.toString().localeCompare(bValue.toString());
             return sortConfig.direction === 'asc' ? comparison : -comparison;
         });
     };
@@ -178,6 +186,9 @@ const UsersData = () => {
                         schoolName: escapeCommas(user.schoolName || ""),
                         persona: persona,
                         sortingStage: sortingStage,
+                        level1_trial_starts: user.level1_trial_starts || 0,
+                        level3_trial_starts: user.level3_trial_starts || 0,
+                        activityType: user.activityType || ""
                     };
                 });
                 
@@ -321,7 +332,7 @@ const UsersData = () => {
                                             >
                                                 Free Demo Started
                                                 {sortConfig.key === 'freeDemoStarted' && (
-                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
                                             <th 
@@ -330,7 +341,7 @@ const UsersData = () => {
                                             >
                                                 Free Demo Ended
                                                 {sortConfig.key === 'freeDemoEnded' && (
-                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
                                             <th 
@@ -339,7 +350,7 @@ const UsersData = () => {
                                             >
                                                 User Clicked Link
                                                 {sortConfig.key === 'userClickedLink' && (
-                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
                                             <th 
@@ -348,7 +359,7 @@ const UsersData = () => {
                                             >
                                                 User Registration Complete
                                                 {sortConfig.key === 'userRegistrationComplete' && (
-                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
                                         </tr>
@@ -413,7 +424,10 @@ const UsersData = () => {
                                     { id: 'freeDemoEnded', displayName: 'Demo Ended' },
                                     { id: 'userRegistrationComplete', displayName: 'Registration' },
                                     { id: 'schoolName', displayName: 'School' },
-                                    { id: 'persona', displayName: 'Persona' }
+                                    { id: 'persona', displayName: 'Persona' },
+                                    { id: 'level1_trial_starts', displayName: 'Level 1 Trials' },
+                                    { id: 'level3_trial_starts', displayName: 'Level 3 Trials' },
+                                    { id: 'activityType', displayName: 'Activity Type' }
                                 ]}
                                 filename="students_data.csv"
                                 className={styles.download_button}
@@ -438,7 +452,7 @@ const UsersData = () => {
                                             >
                                                 Clicked Link
                                                 {sortConfig.key === 'userClickedLink' && (
-                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
                                             <th 
@@ -447,7 +461,7 @@ const UsersData = () => {
                                             >
                                                 Demo Started
                                                 {sortConfig.key === 'freeDemoStarted' && (
-                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
                                             <th 
@@ -456,7 +470,7 @@ const UsersData = () => {
                                             >
                                                 Demo Ended
                                                 {sortConfig.key === 'freeDemoEnded' && (
-                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
                                             <th 
@@ -465,12 +479,31 @@ const UsersData = () => {
                                             >
                                                 Registration
                                                 {sortConfig.key === 'userRegistrationComplete' && (
-                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
                                             <th className={styles.table_heading}>School</th>
                                             <th className={styles.table_heading}>Persona</th>
                                             <th className={styles.table_heading}>Current Stage</th>
+                                            <th 
+                                                className={`${styles.table_heading} ${styles.sortable}`}
+                                                onClick={() => handleSort('level1_trial_starts')}
+                                            >
+                                                Level 1 Trials
+                                                {sortConfig.key === 'level1_trial_starts' && (
+                                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                                                )}
+                                            </th>
+                                            <th 
+                                                className={`${styles.table_heading} ${styles.sortable}`}
+                                                onClick={() => handleSort('level3_trial_starts')}
+                                            >
+                                                Level 3 Trials
+                                                {sortConfig.key === 'level3_trial_starts' && (
+                                                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                                                )}
+                                            </th>
+                                            <th className={styles.table_heading}>Activity Type</th>
                                         </tr>
                                     </thead>
                                     <tbody className={styles.table_body}>
@@ -485,6 +518,9 @@ const UsersData = () => {
                                                 <td className={styles.normal_text}>{user.schoolName}</td>
                                                 <td className={styles.normal_text}>{user.persona}</td>
                                                 <td className={styles.normal_text}>{user.currentStage}</td>
+                                                <td className={styles.normal_text}>{user.level1_trial_starts || 0}</td>
+                                                <td className={styles.normal_text}>{user.level3_trial_starts || 0}</td>
+                                                <td className={styles.normal_text}>{user.activityType || ''}</td>
                                             </tr>
                                         ))}
                                     </tbody>
