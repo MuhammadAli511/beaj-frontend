@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar, Sidebar } from "../../components";
 import styles from './UsersData.module.css';
 import { useSidebar } from '../../components/SidebarContext';
@@ -30,6 +30,10 @@ const UsersData = () => {
         column: null
     });
 
+    // Activity Type and Acceptable Messages filters
+    const [activityTypeFilter, setActivityTypeFilter] = useState(null);
+    const [messageFilter, setMessageFilter] = useState(null);
+
     const dateColumnOptions = [
         { value: 'userClickedLink', label: 'Clicked Link' },
         { value: 'freeDemoStarted', label: 'Demo Started' },
@@ -37,9 +41,32 @@ const UsersData = () => {
         { value: 'userRegistrationComplete', label: 'Registration' }
     ];
 
+    // Utility function to format array data nicely
+    const formatArrayForDisplay = (arr) => {
+        if (!arr || !Array.isArray(arr) || arr.length === 0) return '';
+        return arr.join(', ');
+    };
+
+    // Helper function to escape commas
     const escapeCommas = (field) => {
         return field && field.includes(",") ? `"${field}"` : field;
     };
+
+    // Generate options for activity type filter
+    const activityTypeOptions = useMemo(() => {
+        return Object.keys(activityTypeStats).map(type => ({
+            value: type,
+            label: type || 'Unknown'
+        }));
+    }, [activityTypeStats]);
+
+    // Generate options for acceptable messages filter
+    const messageOptions = useMemo(() => {
+        return Object.values(messageStats).map(stat => ({
+            value: JSON.stringify(stat.messages),
+            label: formatArrayForDisplay(stat.messages)
+        }));
+    }, [messageStats]);
 
     // Handle sorting
     const handleSort = (key) => {
@@ -75,23 +102,45 @@ const UsersData = () => {
         });
     };
 
-    // Filter data by date range
-    const filterByDate = (data) => {
-        if (!dateFilter.column || !dateFilter.from || !dateFilter.to) return data;
+    // Filter data by all filters
+    const filterData = (data) => {
+        let filteredData = data;
+        
+        // Apply date filter
+        if (dateFilter.column && dateFilter.from && dateFilter.to) {
+            filteredData = filteredData.filter(item => {
+                const date = new Date(item[dateFilter.column]);
+                const fromDate = new Date(dateFilter.from);
+                const toDate = new Date(dateFilter.to);
+                toDate.setHours(23, 59, 59, 999); // Set to end of day (11:59:59.999 PM)
 
-        return data.filter(item => {
-            const date = new Date(item[dateFilter.column]);
-            const fromDate = new Date(dateFilter.from);
-            const toDate = new Date(dateFilter.to);
-            toDate.setHours(23, 59, 59, 999); // Set to end of day (11:59:59.999 PM)
-
-            return date >= fromDate && date <= toDate;
-        });
+                return date >= fromDate && date <= toDate;
+            });
+        }
+        
+        // Apply activity type filter
+        if (activityTypeFilter) {
+            filteredData = filteredData.filter(item => 
+                item.activityType === activityTypeFilter.value
+            );
+        }
+        
+        // Apply acceptable messages filter
+        if (messageFilter) {
+            const selectedMessages = JSON.parse(messageFilter.value);
+            filteredData = filteredData.filter(item => {
+                // Compare the comma-separated string versions
+                const itemMessages = item.acceptableMessages;
+                return itemMessages === formatArrayForDisplay(selectedMessages);
+            });
+        }
+        
+        return filteredData;
     };
 
-    // Get sorted and filtered data
+    // Get processed data
     const getProcessedData = (data) => {
-        const filteredData = filterByDate(data);
+        const filteredData = filterData(data);
         return sortedData(filteredData);
     };
 
@@ -102,13 +151,18 @@ const UsersData = () => {
 
     // Get filtered record count
     const getFilteredRecords = (data) => {
-        return filterByDate(data).length;
+        return filterData(data).length;
     };
 
-    // Utility function to format array data nicely
-    const formatArrayForDisplay = (arr) => {
-        if (!arr || !Array.isArray(arr) || arr.length === 0) return '';
-        return arr.join(', ');
+    // Clear all filters
+    const clearFilters = () => {
+        setDateFilter({
+            from: '',
+            to: '',
+            column: null
+        });
+        setActivityTypeFilter(null);
+        setMessageFilter(null);
     };
 
     useEffect(() => {
@@ -310,12 +364,46 @@ const UsersData = () => {
                             placeholder="Select Column"
                         />
                     </div>
+                    {activeTab === 'student' && (
+                        <>
+                            <div className={styles.filter_group}>
+                                <label className={styles.filter_label}>Activity Type</label>
+                                <Select
+                                    className={styles.select}
+                                    options={activityTypeOptions}
+                                    value={activityTypeFilter}
+                                    onChange={setActivityTypeFilter}
+                                    isClearable
+                                    placeholder="Select Activity Type"
+                                />
+                            </div>
+                            <div className={styles.filter_group}>
+                                <label className={styles.filter_label}>Acceptable Messages</label>
+                                <Select
+                                    className={styles.select}
+                                    options={messageOptions}
+                                    value={messageFilter}
+                                    onChange={setMessageFilter}
+                                    isClearable
+                                    placeholder="Select Message Type"
+                                />
+                            </div>
+                            <div className={styles.filter_group}>
+                                <button 
+                                    className={styles.clear_filters_button}
+                                    onClick={clearFilters}
+                                >
+                                    Clear Filters
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Record Count Display */}
                 <div className={styles.record_count_container}>
                     <div className={styles.record_count}>
-                        {dateFilter.column && dateFilter.from && dateFilter.to ? (
+                        {(dateFilter.column && dateFilter.from && dateFilter.to) || activityTypeFilter || messageFilter ? (
                             <>
                                 Showing <span className={styles.filtered_count}>{getFilteredRecords(activeTab === 'teacher' ? userData : studentUserData)}</span>
                                 <span className={styles.total_count}> of {getTotalRecords(activeTab === 'teacher' ? userData : studentUserData)} records</span>
