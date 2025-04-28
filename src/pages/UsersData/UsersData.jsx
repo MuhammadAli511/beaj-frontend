@@ -5,6 +5,7 @@ import { useSidebar } from '../../components/SidebarContext';
 import CSVDownloader from 'react-csv-downloader';
 import { getAllMetadata, getStudentUserJourneyStats } from '../../helper/index';
 import { TailSpin } from 'react-loader-spinner';
+import Select from 'react-select';
 
 const UsersData = () => {
     const { isSidebarOpen } = useSidebar();
@@ -14,8 +15,84 @@ const UsersData = () => {
     const [activeTab, setActiveTab] = useState('student');
     const [isLoading, setIsLoading] = useState(false);
 
+    // Sorting state
+    const [sortConfig, setSortConfig] = useState({
+        key: null,
+        direction: 'asc'
+    });
+
+    // Date filter state
+    const [dateFilter, setDateFilter] = useState({
+        from: '',
+        to: '',
+        column: null
+    });
+
+    const dateColumnOptions = [
+        { value: 'userClickedLink', label: 'Clicked Link' },
+        { value: 'freeDemoStarted', label: 'Demo Started' },
+        { value: 'freeDemoEnded', label: 'Demo Ended' },
+        { value: 'userRegistrationComplete', label: 'Registration' }
+    ];
+
     const escapeCommas = (field) => {
         return field && field.includes(",") ? `"${field}"` : field;
+    };
+
+    // Handle sorting
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    // Sort data
+    const sortedData = (data) => {
+        if (!sortConfig.key) return data;
+
+        return [...data].sort((a, b) => {
+            const aValue = a[sortConfig.key];
+            const bValue = b[sortConfig.key];
+
+            if (aValue === bValue) return 0;
+            if (!aValue) return 1;
+            if (!bValue) return -1;
+
+            const comparison = aValue.localeCompare(bValue);
+            return sortConfig.direction === 'asc' ? comparison : -comparison;
+        });
+    };
+
+    // Filter data by date range
+    const filterByDate = (data) => {
+        if (!dateFilter.column || !dateFilter.from || !dateFilter.to) return data;
+
+        return data.filter(item => {
+            const date = new Date(item[dateFilter.column]);
+            const fromDate = new Date(dateFilter.from);
+            const toDate = new Date(dateFilter.to);
+            toDate.setHours(23, 59, 59, 999); // Set to end of day (11:59:59.999 PM)
+
+            return date >= fromDate && date <= toDate;
+        });
+    };
+
+    // Get sorted and filtered data
+    const getProcessedData = (data) => {
+        const filteredData = filterByDate(data);
+        return sortedData(filteredData);
+    };
+
+    // Get total record count
+    const getTotalRecords = (data) => {
+        return data.length;
+    };
+
+    // Get filtered record count
+    const getFilteredRecords = (data) => {
+        return filterByDate(data).length;
     };
 
     useEffect(() => {
@@ -148,12 +225,59 @@ const UsersData = () => {
                         Teacher Product
                     </button>
                 </div>
+
+                {/* Date Filter Controls */}
+                <div className={styles.filters_container}>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>From Date</label>
+                        <input
+                            type="date"
+                            value={dateFilter.from}
+                            onChange={(e) => setDateFilter(prev => ({ ...prev, from: e.target.value }))}
+                            className={styles.date_input}
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>To Date</label>
+                        <input
+                            type="date"
+                            value={dateFilter.to}
+                            onChange={(e) => setDateFilter(prev => ({ ...prev, to: e.target.value }))}
+                            className={styles.date_input}
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Filter Column</label>
+                        <Select
+                            className={styles.select}
+                            options={dateColumnOptions}
+                            value={dateColumnOptions.find(option => option.value === dateFilter.column)}
+                            onChange={(option) => setDateFilter(prev => ({ ...prev, column: option?.value || null }))}
+                            isClearable
+                            placeholder="Select Column"
+                        />
+                    </div>
+                </div>
+
+                {/* Record Count Display */}
+                <div className={styles.record_count_container}>
+                    <div className={styles.record_count}>
+                        {dateFilter.column && dateFilter.from && dateFilter.to ? (
+                            <>
+                                Showing <span className={styles.filtered_count}>{getFilteredRecords(activeTab === 'teacher' ? userData : studentUserData)}</span>
+                                <span className={styles.total_count}> of {getTotalRecords(activeTab === 'teacher' ? userData : studentUserData)} records</span>
+                            </>
+                        ) : (
+                            <span className={styles.total_count}>Total records: {getTotalRecords(activeTab === 'teacher' ? userData : studentUserData)}</span>
+                        )}
+                    </div>
+                </div>
                 
                 {activeTab === 'teacher' ? (
                     <>
                         <div className={styles.stats_summary}>
                             <CSVDownloader
-                                datas={userData}
+                                datas={getProcessedData(userData)}
                                 columns={[
                                     { id: 'userId', displayName: 'User ID' },
                                     { id: 'phoneNumber', displayName: 'Phone Number' },
@@ -191,14 +315,46 @@ const UsersData = () => {
                                             <th className={styles.table_heading}>Cohort</th>
                                             <th className={styles.table_heading}>Teacher</th>
                                             <th className={styles.table_heading}>School Name</th>
-                                            <th className={styles.table_heading}>Free Demo Started</th>
-                                            <th className={styles.table_heading}>Free Demo Ended</th>
-                                            <th className={styles.table_heading}>User Clicked Link</th>
-                                            <th className={styles.table_heading}>User Registration Complete</th>
+                                            <th 
+                                                className={`${styles.table_heading} ${styles.sortable}`}
+                                                onClick={() => handleSort('freeDemoStarted')}
+                                            >
+                                                Free Demo Started
+                                                {sortConfig.key === 'freeDemoStarted' && (
+                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                )}
+                                            </th>
+                                            <th 
+                                                className={`${styles.table_heading} ${styles.sortable}`}
+                                                onClick={() => handleSort('freeDemoEnded')}
+                                            >
+                                                Free Demo Ended
+                                                {sortConfig.key === 'freeDemoEnded' && (
+                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                )}
+                                            </th>
+                                            <th 
+                                                className={`${styles.table_heading} ${styles.sortable}`}
+                                                onClick={() => handleSort('userClickedLink')}
+                                            >
+                                                User Clicked Link
+                                                {sortConfig.key === 'userClickedLink' && (
+                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                )}
+                                            </th>
+                                            <th 
+                                                className={`${styles.table_heading} ${styles.sortable}`}
+                                                onClick={() => handleSort('userRegistrationComplete')}
+                                            >
+                                                User Registration Complete
+                                                {sortConfig.key === 'userRegistrationComplete' && (
+                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                )}
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody className={styles.table_body}>
-                                        {userData.map((user, index) => (
+                                        {getProcessedData(userData).map((user, index) => (
                                             <tr key={index}>
                                                 <td>{user.userId || ""}</td>
                                                 <td>{user.phoneNumber || ""}</td>
@@ -247,7 +403,7 @@ const UsersData = () => {
                         
                         <div className={styles.stats_summary}>
                             <CSVDownloader
-                                datas={studentUserData}
+                                datas={getProcessedData(studentUserData)}
                                 columns={[
                                     { id: 'phoneNumber', displayName: 'Phone Number' },
                                     { id: 'city', displayName: 'City' },
@@ -276,17 +432,49 @@ const UsersData = () => {
                                         <tr>
                                             <th className={styles.table_heading}>Phone Number</th>
                                             <th className={styles.table_heading}>City</th>
-                                            <th className={styles.table_heading}>Clicked Link</th>
-                                            <th className={styles.table_heading}>Demo Started</th>
-                                            <th className={styles.table_heading}>Demo Ended</th>
-                                            <th className={styles.table_heading}>Registration</th>
+                                            <th 
+                                                className={`${styles.table_heading} ${styles.sortable}`}
+                                                onClick={() => handleSort('userClickedLink')}
+                                            >
+                                                Clicked Link
+                                                {sortConfig.key === 'userClickedLink' && (
+                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                )}
+                                            </th>
+                                            <th 
+                                                className={`${styles.table_heading} ${styles.sortable}`}
+                                                onClick={() => handleSort('freeDemoStarted')}
+                                            >
+                                                Demo Started
+                                                {sortConfig.key === 'freeDemoStarted' && (
+                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                )}
+                                            </th>
+                                            <th 
+                                                className={`${styles.table_heading} ${styles.sortable}`}
+                                                onClick={() => handleSort('freeDemoEnded')}
+                                            >
+                                                Demo Ended
+                                                {sortConfig.key === 'freeDemoEnded' && (
+                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                )}
+                                            </th>
+                                            <th 
+                                                className={`${styles.table_heading} ${styles.sortable}`}
+                                                onClick={() => handleSort('userRegistrationComplete')}
+                                            >
+                                                Registration
+                                                {sortConfig.key === 'userRegistrationComplete' && (
+                                                    <span>{sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}</span>
+                                                )}
+                                            </th>
                                             <th className={styles.table_heading}>School</th>
                                             <th className={styles.table_heading}>Persona</th>
                                             <th className={styles.table_heading}>Current Stage</th>
                                         </tr>
                                     </thead>
                                     <tbody className={styles.table_body}>
-                                        {studentUserData.map((user, index) => (
+                                        {getProcessedData(studentUserData).map((user, index) => (
                                             <tr key={index} className={`${styles.table_row} ${styles[user.sortingStage.toLowerCase().replace(' ', '_')]}`}>
                                                 <td className={styles.normal_text}>{user.phoneNumber}</td>
                                                 <td className={styles.normal_text}>{user.city}</td>
