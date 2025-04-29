@@ -260,7 +260,7 @@ const WhatsappLogs = () => {
                                 {filteredPhoneNumbers.length > 0 ? (
                                     filteredPhoneNumbers.map((user) => (
                                         <li
-                                            key={user.phoneNumber}
+                                            key={user.profile_id}
                                             className={`${
                                                 selectedPhoneNumber === user.phoneNumber
                                                     ? styles.active
