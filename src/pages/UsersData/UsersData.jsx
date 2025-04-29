@@ -525,20 +525,24 @@ const UsersData = () => {
                                     <TailSpin color="#51bbcc" height={50} width={50} />
                                 </div>
                             ) : (
-                                Object.entries(studentStats).map(([stage, data], index) => (
-                                    <div key={index} className={styles.stat_card}>
-                                        <h3>{stage}</h3>
-                                        <p className={styles.card_value}>{data.count}</p>
-                                        <div className={styles.card_metrics}>
-                                            <p className={styles.conversion_rate}>
-                                                Conversion: {data.percentage}%
-                                            </p>
-                                            <p className={styles.drop_rate}>
-                                                Drop: {data.dropPercentage}%
-                                            </p>
+                                // Define specific order for stats cards
+                                ['Clicked Link', 'Demo Started', 'Demo Ended', 'Registration Completed'].map((stage) => {
+                                    const data = studentStats[stage] || { count: 0, percentage: 0, dropPercentage: 0 };
+                                    return (
+                                        <div key={stage} className={styles.stat_card}>
+                                            <h3>{stage}</h3>
+                                            <p className={styles.card_value}>{data.count}</p>
+                                            <div className={styles.card_metrics}>
+                                                <p className={styles.conversion_rate}>
+                                                    Conversion: {data.percentage}%
+                                                </p>
+                                                <p className={styles.drop_rate}>
+                                                    Drop: {data.dropPercentage}%
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             )}
                         </div>
                         
