@@ -595,22 +595,9 @@ const UsersData = () => {
                                 columns={[
                                     { id: 'phoneNumber', displayName: 'Phone Number' },
                                     { id: 'city', displayName: 'City' },
-                                    { id: 'userClickedLink', displayName: 'Clicked Link' },
-                                    { id: 'freeDemoStarted', displayName: 'Demo Started' },
-                                    { id: 'currentStage', displayName: 'Demo Type' },
-                                    { id: 'freeDemoEnded', displayName: 'Demo Ended' },
                                     { id: 'userRegistrationComplete', displayName: 'Registration' },
                                     { id: 'schoolName', displayName: 'School' },
-                                    { id: 'persona', displayName: 'Persona' },
-                                    { id: 'level1_trial_starts', displayName: 'Level 1 Trials' },
-                                    { id: 'level3_trial_starts', displayName: 'Level 3 Trials' },
-                                    { id: 'activityType', displayName: 'Activity Type' },
-                                    { id: 'currentLessonId', displayName: 'Current Lesson ID' },
-                                    { id: 'currentLesson_sequence', displayName: 'Lesson Sequence' },
-                                    { id: 'questionNumber', displayName: 'Question Number' },
-                                    { id: 'acceptableMessages', displayName: 'Acceptable Messages' },
-                                    { id: 'last_message_content', displayName: 'Last Message' },
-                                    { id: 'last_message_timestamp', displayName: 'Last Message Time' }
+                                    { id: 'persona', displayName: 'Persona' }
                                 ]}
                                 filename="students_data.csv"
                                 className={styles.download_button}
