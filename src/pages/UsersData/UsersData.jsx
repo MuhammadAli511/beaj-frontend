@@ -16,6 +16,7 @@ const UsersData = () => {
     const [activityTypeStats, setActivityTypeStats] = useState({});
     const [activeTab, setActiveTab] = useState('student');
     const [isLoading, setIsLoading] = useState(false);
+    const [phoneNumberSearch, setPhoneNumberSearch] = useState('');
 
     // Sorting state
     const [sortConfig, setSortConfig] = useState({
@@ -106,6 +107,13 @@ const UsersData = () => {
     const filterData = (data) => {
         let filteredData = data;
         
+        // Apply phone number search filter
+        if (phoneNumberSearch.trim() !== '') {
+            filteredData = filteredData.filter(item => 
+                item.phoneNumber && item.phoneNumber.includes(phoneNumberSearch.trim())
+            );
+        }
+        
         // Apply date filter
         if (dateFilter.column && dateFilter.from && dateFilter.to) {
             filteredData = filteredData.filter(item => {
@@ -163,6 +171,7 @@ const UsersData = () => {
         });
         setActivityTypeFilter(null);
         setMessageFilter(null);
+        setPhoneNumberSearch('');
     };
 
     useEffect(() => {
@@ -336,6 +345,16 @@ const UsersData = () => {
                 {/* Date Filter Controls */}
                 <div className={styles.filters_container}>
                     <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Phone Number</label>
+                        <input
+                            type="text"
+                            value={phoneNumberSearch}
+                            onChange={(e) => setPhoneNumberSearch(e.target.value)}
+                            placeholder="Search phone number"
+                            className={styles.text_input}
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
                         <label className={styles.filter_label}>From Date</label>
                         <input
                             type="date"
@@ -403,7 +422,7 @@ const UsersData = () => {
                 {/* Record Count Display */}
                 <div className={styles.record_count_container}>
                     <div className={styles.record_count}>
-                        {(dateFilter.column && dateFilter.from && dateFilter.to) || activityTypeFilter || messageFilter ? (
+                        {(dateFilter.column && dateFilter.from && dateFilter.to) || activityTypeFilter || messageFilter || phoneNumberSearch ? (
                             <>
                                 Showing <span className={styles.filtered_count}>{getFilteredRecords(activeTab === 'teacher' ? userData : studentUserData)}</span>
                                 <span className={styles.total_count}> of {getTotalRecords(activeTab === 'teacher' ? userData : studentUserData)} records</span>
