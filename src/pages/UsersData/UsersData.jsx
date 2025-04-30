@@ -526,18 +526,36 @@ const UsersData = () => {
                                 </div>
                             ) : (
                                 // Define specific order for stats cards
-                                ['Clicked Link', 'Demo Started', 'Demo Ended', 'Registration Completed'].map((stage) => {
+                                ['Clicked Link', 'Demo Started', 'Demo Ended', 'Registration Completed'].map((stage, index, stagesArray) => {
                                     const data = studentStats[stage] || { count: 0, percentage: 0, dropPercentage: 0 };
+                                    
+                                    // Calculate correct conversion and drop rates based on actual counts
+                                    let conversionRate = 100; // Default for first stage
+                                    let dropRate = 0;
+                                    
+                                    if (index > 0) {
+                                        const previousStage = stagesArray[index - 1];
+                                        const previousCount = studentStats[previousStage]?.count || 0;
+                                        
+                                        if (previousCount > 0) {
+                                            conversionRate = ((data.count / previousCount) * 100).toFixed(2);
+                                            dropRate = (100 - conversionRate).toFixed(2);
+                                        } else {
+                                            conversionRate = "0.00";
+                                            dropRate = "100.00";
+                                        }
+                                    }
+                                    
                                     return (
                                         <div key={stage} className={styles.stat_card}>
                                             <h3>{stage}</h3>
                                             <p className={styles.card_value}>{data.count}</p>
                                             <div className={styles.card_metrics}>
                                                 <p className={styles.conversion_rate}>
-                                                    Conversion: {data.percentage}%
+                                                    Conversion: {conversionRate}%
                                                 </p>
                                                 <p className={styles.drop_rate}>
-                                                    Drop: {data.dropPercentage}%
+                                                    Drop: {dropRate}%
                                                 </p>
                                             </div>
                                         </div>
