@@ -839,23 +839,9 @@ const CreateLesson = () => {
                         {questions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
-                                    <InputField 
-                                        label={`Question ${qIndex + 1}`} 
-                                        type="text" 
-                                        onChange={e => handleQuestionChange(qIndex, e)} 
-                                        value={question.questionText} 
-                                        name="questionText" 
-                                        id={`questionText-${qIndex}`} 
-                                    />
+                                    <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
                                     <div className={styles.media_toggle_container}>
-                                        <InputField 
-                                            label="Upload Audio" 
-                                            type="file" 
-                                            onChange={e => handleAudioQuestionChange(qIndex, e)} 
-                                            name="media" 
-                                            id={`media-${qIndex}`} 
-                                            fileInput 
-                                        />
+                                        <InputField label="Upload Audio" type="file" onChange={e => handleQuestionChange(qIndex, e)} name="media" id={`media-${qIndex}`} fileInput />
                                     </div>
                                     {questions.length > 1 && (
                                         <button 
