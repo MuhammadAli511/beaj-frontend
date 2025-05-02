@@ -240,7 +240,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
 
     const handleAnswerChange = (questionIndex, answerIndex, value) => {
         const updatedQuestions = questions.map((question, i) => {
-            if (i === questionIndex) {
+            if (i === questionIndex && question.answer) {
                 const updatedAnswers = [...question.answer];
                 updatedAnswers[answerIndex] = value;
                 return { ...question, answer: updatedAnswers, isChanged: true };
@@ -311,7 +311,17 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 answer: [''],
                 mediaType: '',
             };
-        } else if (activity === 'watchAndSpeak') {
+        } 
+        else if (['feedbackAudio'].includes(activity)) {
+            newQuestion = {
+                    ...newQuestion,
+                    question: '',
+                    mediaFile: null,
+                    answer: [], // Empty array for feedbackAudio
+                    mediaType: 'audio',
+            };
+        }
+        else if (activity === 'watchAndSpeak') {
             newQuestion = {
                 ...newQuestion,
                 question: '',
@@ -463,7 +473,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                             onChange={(e) => handleQuestionChange(index, 'questionNumber', e.target.value)}
                                         />
 
-                                        {['listenAndSpeak'].includes(activity) && (
+                                        {['listenAndSpeak', 'feedbackAudio'].includes(activity) && (
                                             <>
                                                 <label className={styles.answerEditLabel}>Question</label>
                                                 <input
@@ -472,7 +482,10 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                     value={question.question || ""}
                                                     onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
                                                 />
+                                                {activity === 'listenAndSpeak' && (
+            <>
                                                 <label className={styles.answerEditLabel}>Answers</label>
+                                                
                                                 {question.answer.map((ans, ansIndex) => (
                                                     <div key={ansIndex} className={styles.answer_group}>
                                                         <input
@@ -495,22 +508,30 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                 >
                                                     Add New Answer
                                                 </button>
-                                                <label className={styles.answerEditLabel}>Upload Media File (Audio/Video)</label>
+                                                </>
+                                                )}
+                                                <label className={styles.answerEditLabel}>
+                                                    {activity === 'feedbackAudio' ? 'Upload Audio File' : 'Upload Media File (Audio/Video)'}
+                                                </label>
                                                 <input
                                                     type="file"
-                                                    accept="audio/mp3,video/mp4"
+                                                    accept={activity === 'feedbackAudio' ? "audio/*" : "audio/mp3,video/mp4"}
                                                     onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files)}
                                                 />
                                                 {question.mediaFile && (
-                                                    <div className={styles.mediaSection}>
-                                                        <label className={styles.answerEditLabel}>Current Media File:</label>
-                                                        {question.mediaFile && typeof question.mediaFile === 'string' && question.mediaFile.endsWith('.mp4') ? (
+                                                <div className={styles.mediaSection}>
+                                                    <label className={styles.answerEditLabel}>Current Media File:</label>
+                                                    {activity === 'feedbackAudio' ? (
+                                                        <audio controls src={question.mediaFile} className={styles.audio}></audio>
+                                                    ) : (
+                                                        question.mediaFile && typeof question.mediaFile === 'string' && question.mediaFile.endsWith('.mp4') ? (
                                                             <video controls src={question.mediaFile} className={styles.videoSmall}></video>
                                                         ) : (
                                                             <audio controls src={question.mediaFile} className={styles.audio}></audio>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                        )
+                                                    )}
+                                                </div>
+                                            )}
                                             </>
                                         )}
 
@@ -799,6 +820,7 @@ const SpeakLesson = ({ category, course, activity }) => {
         'conversationalMonologueBot': 'Conversational Monologue Bot',
         'conversationalAgencyBot': 'Conversational Agency Bot',
         'speakingPractice': 'Speaking Practice',
+        'feedbackAudio' : 'Feedback Audio',
     };
 
     return (

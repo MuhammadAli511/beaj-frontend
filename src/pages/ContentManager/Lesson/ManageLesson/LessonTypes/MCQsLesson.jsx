@@ -21,7 +21,7 @@ import styles from "./MCQsLesson.module.css";
 import MCQsQuestionModal from "./MCQsQuestionModal";
 import MigrateLessonModal from "../../../../../components/MigrateLessonModal/MigrateLessonModal";
 
-const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
+const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [lessonData, setLessonData] = useState(null);
@@ -363,6 +363,26 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const addNewQuestion = () => {
         setQuestions((prevQuestions) => {
             const newQuestionNumber = prevQuestions.length + 1;
+            if (activity === 'feedbackMcqs') {
+                return [
+                    ...prevQuestions,
+                    {
+                        id: null,
+                        questionType: "Text",
+                        questionText: "",
+                        questionNumber: newQuestionNumber,
+                        optionsType: "Text",
+                        answers: Array(3).fill(null).map((_, index) => ({
+                            id: null,
+                            answerText: "",
+                            SequenceNumber: index + 1,
+                            isNew: true,
+                            isCorrect: false,
+                        })),
+                        isNew: true
+                    },
+                ];
+            }
             return [
                 ...prevQuestions,
                 {
@@ -491,6 +511,19 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     };
 
     const renderQuestionInputs = (question, qIndex) => {
+        if (activity === 'feedbackMcqs') {
+            return (
+                <div className={styles.form_group}>
+                    <label className={styles.label}>Question Text</label>
+                    <input
+                        className={styles.input_field}
+                        type="text"
+                        value={question.questionText}
+                        onChange={(e) => handleQuestionChange(qIndex, "questionText", e.target.value)}
+                    />
+                </div>
+            );
+        }
         switch (question.questionType) {
             case "Text":
                 return (
@@ -826,17 +859,21 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                     onChange={(e) => handleQuestionChange(qIndex, "questionType", e.target.value)}
                                                 >
                                                     <option value="Text">Text</option>
+                                                    {activity === 'mcqs' && (
+                                                        <>
                                                     <option value="Image">Image</option>
                                                     <option value="Video">Video</option>
                                                     <option value="Text+Image">Text + Image</option>
                                                     <option value="Text+Video">Text + Video</option>
+                                                    </>
+                                                    )}
                                                 </select>
                                             </div>
                                             
                                             <div className={styles.question_content}>
                                                 {renderQuestionInputs(question, qIndex)}
                                             </div>
-                                            
+                                            {activity === 'mcqs' && (
                                             <div className={styles.custom_feedback_toggle}>
                                                 <div className={styles.checkbox_wrapper}>
                                                     <div className={styles.custom_checkbox_container}>
@@ -854,8 +891,9 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                     </div>
                                                 </div>
                                             </div>
+                                            )}
 
-                                            {question.showCustomFeedback && (
+                                             {activity === 'mcqs' && question.showCustomFeedback && (
                                                 <div className={styles.feedback_type_selector}>
                                                     <h5 className={styles.feedback_type_title}>Select Feedback Type</h5>
                                                     <div className={styles.radio_group}>
@@ -924,7 +962,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                         <div key={aIndex} className={styles.answer_box}>
                                                             <div className={styles.answer_header}>
                                                                 <span className={styles.answer_number}>Answer {aIndex + 1}</span>
-                                                                
+                                                                {activity === 'mcqs' && (
                                                                 <div className={styles.correct_checkbox}>
                                                                     <div className={styles.checkbox_wrapper}>
                                                                         <div className={styles.custom_checkbox_container}>
@@ -940,7 +978,9 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                                                 <span className={styles.label_text}>Correct</span>
                                                                             </label>
                                                                         </div>
+                                                                        
                                                                     </div>
+                                                                    
                                                                     
                                                                     {question.answers.length > 1 && (
                                                                         <button
@@ -951,6 +991,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                                         </button>
                                                                     )}
                                                                 </div>
+                                                                )}
                                                             </div>
                                                             
                                                             <div className={styles.answer_content}>
@@ -964,7 +1005,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                                     />
                                                                 </div>
                                                                 
-                                                                {question.showCustomFeedback && (
+                                                                {activity === 'mcqs' && question.showCustomFeedback && (
                                                                     <div className={styles.feedback_section}>
                                                                         <h5 className={styles.feedback_title}>Custom Feedback</h5>
                                                                         
@@ -1138,7 +1179,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                                     ))}
                                             </div>
                                             
-                                            {question.answers.length < 4 && (
+                                            {activity === 'mcqs' && question.answers.length < 4 && (
                                                 <button className={styles.add_button} onClick={() => addNewAnswer(qIndex)}>Add Answer</button>
                                             )}
                                         </div>
@@ -1262,7 +1303,7 @@ const MCQsLesson = ({ category, course, activity }) => {
 
     const activityMapper = {
         'mcqs': 'Multiple Choice Questions',
-        'placementTest': 'Placement Test',
+        'feedbackMcqs': 'Feedback MCQs',
     };
 
     return (
