@@ -312,6 +312,7 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
         if (questionText === "") {
             questionText = null;
         }
+
         const questionResponse = await createMultipleChoiceQuestion(
             questionAudio,
             questionImage,
