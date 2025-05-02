@@ -289,6 +289,8 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
     }
     const lessonType = "week";
 
+   console.log(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
+//    return;
     const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
     const lessonId = response.data.lesson.LessonId;
     let answerResponses = [];
@@ -312,7 +314,15 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
         if (questionText === "") {
             questionText = null;
         }
-
+        console.log(questionAudio,
+            questionImage,
+            questionVideo,
+            questionType,
+            questionText,
+            questionNumber,
+            lessonId,
+            answerTypeArray[i]);
+           
         const questionResponse = await createMultipleChoiceQuestion(
             questionAudio,
             questionImage,
@@ -323,6 +333,9 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
             lessonId,
             answerTypeArray[i]
         );
+
+       
+        
 
         const questionId = await questionResponse.data.mcq.Id;
 
@@ -341,6 +354,7 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
                 )
             )
         );
+        console.log(answerResponses);
 
         answerResponses.push(answerResponses);
     }

@@ -65,11 +65,33 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                                         </td>
                                     )}
                                     <td style={{ width: "20%" }} className={styles.scrollableCell}>
-                                        {question.multipleChoiceQuestionAnswers.map((answer) => (
-                                            <div key={answer.Id} className={styles.answer}>
-                                                {answer.AnswerText && <span style={{ fontWeight: answer.IsCorrect ? "bold" : "normal" }}>{answer.AnswerText}</span>}
-                                            </div>
-                                        ))}
+                                        {question.multipleChoiceQuestionAnswers?.map((answer, index) => {
+                                            // Debug each answer
+                                            console.log("Answer Data:", answer);
+                                            const answerText = answer.dataValues?.answerText || 
+                                                             answer.dataValues?.AnswerText || 
+                                                             answer.answerText || 
+                                                             answer.AnswerText;
+                                            const isCorrect = answer.dataValues?.IsCorrect || 
+                                                            answer.dataValues?.isCorrect || 
+                                                            answer.IsCorrect || 
+                                                            answer.isCorrect;
+
+                                            return (
+                                                <div key={answer.Id || index} className={styles.answer}>
+                                                    {answerText && (
+                                                        <span style={{ 
+                                                            fontWeight: isCorrect ? "bold" : "normal",
+                                                            color: isCorrect ? "green" : "inherit"
+                                                        }}>
+                                                            {/* {index + 1}.  */}
+                                                            {answerText}
+                                                            {/* {isCorrect && " ✓"} */}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                     </td>
                                     <td style={{ width: "15%" }}>
                                         {question.multipleChoiceQuestionAnswers.map((answer) => (

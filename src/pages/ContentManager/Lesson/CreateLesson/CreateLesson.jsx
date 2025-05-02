@@ -82,6 +82,41 @@ const CreateLesson = () => {
         }
     };
 
+    const getInitialMcqState = (activityType) => {
+        const baseAnswers = Array(3).fill().map(() => ({
+            answerType: 'text',
+            answerText: '',
+            isCorrect: false,
+            customFeedbackText: null,
+        }));
+    
+        if (activityType === 'feedbackMcqs') {
+            return {
+                questionType: 'Text',
+                questionText: '',
+                answers: baseAnswers
+            };
+        }
+    
+        return {
+            questionType: 'text',
+            questionText: '',
+            questionAudio: null,
+            questionImage: null,
+            questionVideo: null,
+            showCustomFeedback: false,
+            customFeedbackType: 'text',
+            answers: baseAnswers.map(answer => ({
+                ...answer,
+                answerAudio: null,
+                answerImage: null,
+                customFeedbackText: null,
+                customFeedbackImage: null,
+                customFeedbackAudio: null
+            }))
+        };
+    };
+
     const handleAudioChange = (e) => {
         const file = e.target.files[0];
         if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
@@ -260,9 +295,34 @@ const CreateLesson = () => {
     };
 
     // Listen and Speak
+    // const [questions, setQuestions] = useState([
+    //     { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }
+    // ]);
+
     const [questions, setQuestions] = useState([
-        { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }
+        { 
+            questionText: '', 
+            media: '', 
+            answers: activityType === 'listenAndSpeak' ? [{ answerText: '' }] : [], 
+            mediaType: 'audio' 
+        }
     ]);
+
+    const handleAudioQuestionChange = (index, event) => {
+        const newQuestions = [...questions];
+        if (event.target.type === 'file') {
+            const file = event.target.files[0];
+            const mediaType = newQuestions[index].mediaType;
+                if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+                    newQuestions[index][event.target.name] = file;
+                } else {
+                    alert('Please upload an MP3 audio not larger than 16MB.');
+                }
+        } else {
+            newQuestions[index][event.target.name] = event.target.value;
+        }
+        setQuestions(newQuestions);
+    };
 
     const handleQuestionChange = (index, event) => {
         const newQuestions = [...questions];
@@ -302,9 +362,20 @@ const CreateLesson = () => {
         setQuestions(newQuestions);
     };
 
+    // const addQuestion = (event) => {
+    //     event.preventDefault();
+    //     setQuestions([...questions, { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }]);
+    // };
+
     const addQuestion = (event) => {
         event.preventDefault();
-        setQuestions([...questions, { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }]);
+        const newQuestion = {
+            questionText: '',
+            media: '',
+            answers: activityType === 'listenAndSpeak' ? [{ answerText: '' }] : [],
+            mediaType: 'audio'
+        };
+        setQuestions([...questions, newQuestion]);
     };
 
     const removeQuestion = (index, event) => {
@@ -326,23 +397,24 @@ const CreateLesson = () => {
     };
 
     // MCQs
-    const [mcqs, setMcqs] = useState([
-        {
-            questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
-            showCustomFeedback: false,
-            customFeedbackType: 'text',
-            answers: Array(3).fill().map(() => ({ 
-                answerType: 'text', 
-                answerText: '', 
-                answerAudio: null, 
-                answerImage: null, 
-                isCorrect: false,
-                customFeedbackText: '',
-                customFeedbackImage: null,
-                customFeedbackAudio: null
-            }))
-        }
-    ]);
+    // const [mcqs, setMcqs] = useState([
+    //     {
+    //         questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
+    //         showCustomFeedback: false,
+    //         customFeedbackType: 'text',
+    //         answers: Array(3).fill().map(() => ({ 
+    //             answerType: 'text', 
+    //             answerText: '', 
+    //             answerAudio: null, 
+    //             answerImage: null, 
+    //             isCorrect: false,
+    //             customFeedbackText: '',
+    //             customFeedbackImage: null,
+    //             customFeedbackAudio: null
+    //         }))
+    //     }
+    // ]);
+    const [mcqs, setMcqs] = useState([getInitialMcqState(activityType)]);
 
     const handleMCQQuestionChange = (index, event) => {
         const newMcqs = [...mcqs];
@@ -388,23 +460,28 @@ const CreateLesson = () => {
         setMcqs(newMcqs);
     };
 
+    // const addMCQQuestion = (event) => {
+    //     event.preventDefault();
+    //     setMcqs([...mcqs, {
+    //         questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
+    //         showCustomFeedback: false,
+    //         customFeedbackType: 'text',
+    //         answers: Array(3).fill().map(() => ({ 
+    //             answerType: 'text', 
+    //             answerText: '', 
+    //             answerAudio: null, 
+    //             answerImage: null, 
+    //             isCorrect: false,
+    //             customFeedbackText: '',
+    //             customFeedbackImage: null,
+    //             customFeedbackAudio: null
+    //         }))
+    //     }]);
+    // };
+
     const addMCQQuestion = (event) => {
         event.preventDefault();
-        setMcqs([...mcqs, {
-            questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
-            showCustomFeedback: false,
-            customFeedbackType: 'text',
-            answers: Array(3).fill().map(() => ({ 
-                answerType: 'text', 
-                answerText: '', 
-                answerAudio: null, 
-                answerImage: null, 
-                isCorrect: false,
-                customFeedbackText: '',
-                customFeedbackImage: null,
-                customFeedbackAudio: null
-            }))
-        }]);
+        setMcqs([...mcqs, getInitialMcqState(activityType)]);
     };
 
     const removeMCQQuestion = (index, event) => {
@@ -566,6 +643,10 @@ const CreateLesson = () => {
                 await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
             } else if (activityType === 'speakingPractice') {
                 await createSpeakingPracticeLesson(course, sequenceNumber, alias, activityType, speakingPracticeQuestions, lessonText, day, week, status);
+            }else if (activityType === 'feedbackMcqs') {
+                await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status);
+            }else if (activityType === 'feedbackAudio') {
+                await createListenAndSpeakLesson(course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status);
             }
         } catch (error) {
             alert(error);
@@ -592,7 +673,7 @@ const CreateLesson = () => {
                     answerAudio: null, 
                     answerImage: null, 
                     isCorrect: false,
-                    customFeedbackText: '',
+                    customFeedbackText: null,
                     customFeedbackImage: null,
                     customFeedbackAudio: null
                 }))
@@ -620,7 +701,7 @@ const CreateLesson = () => {
                         id="category" 
                     />
                     <div className={styles.form_group}>
-                        <SelectField
+                        <SelectField 
                             label="Select Course"
                             options={courses
                                 .filter(course =>
@@ -702,6 +783,8 @@ const CreateLesson = () => {
                         { value: 'conversationalMonologueBot', label: 'Conversational Monologue Bot' },
                         { value: 'conversationalAgencyBot', label: 'Conversational Agency Bot' },
                         { value: 'speakingPractice', label: 'Speaking Practice' },
+                        { value: 'feedbackMcqs', label: 'Feedback MCQs' },
+                        { value: 'feedbackAudio', label: 'Feedback Audio' },
                     ]} onChange={handleActivityTypeChange} value={activityType} name="activity_type" id="activity_type" />
                     <SelectField label="Status" options={[
                         { value: 'Active', label: 'Active' },
@@ -814,6 +897,60 @@ const CreateLesson = () => {
                             </div>
                         ))}
                         <button className={`${styles.add_button} ${styles.add_question_button}`} onClick={(e) => addQuestion(e)}>Add Another Question</button>
+                    </>
+                )}
+                {(activityType === 'feedbackAudio') && (
+                    <>
+                        <div className={styles.input_row}>
+                            <div className={styles.form_group}>
+                                <InputField 
+                                    label="Lesson Text" 
+                                    type="textarea" 
+                                    value={lessonText} 
+                                    onChange={handleTextEditorChange} 
+                                    name="lesson_text" 
+                                    id="lesson_text" 
+                                />
+                            </div>
+                        </div>
+                        {questions.map((question, qIndex) => (
+                            <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.input_row}>
+                                    <InputField 
+                                        label={`Question ${qIndex + 1}`} 
+                                        type="text" 
+                                        onChange={e => handleQuestionChange(qIndex, e)} 
+                                        value={question.questionText} 
+                                        name="questionText" 
+                                        id={`questionText-${qIndex}`} 
+                                    />
+                                    <div className={styles.media_toggle_container}>
+                                        <InputField 
+                                            label="Upload Audio" 
+                                            type="file" 
+                                            onChange={e => handleAudioQuestionChange(qIndex, e)} 
+                                            name="media" 
+                                            id={`media-${qIndex}`} 
+                                            fileInput 
+                                        />
+                                    </div>
+                                    {questions.length > 1 && (
+                                        <button 
+                                            className={styles.remove_button} 
+                                            onClick={(e) => removeQuestion(qIndex, e)}
+                                        >
+                                            Remove Question
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        <button 
+                            className={`${styles.add_button} ${styles.add_question_button}`} 
+                            onClick={(e) => addQuestion(e)}
+                        >
+                            Add Another Question
+                        </button>
                     </>
                 )}
                 {activityType === 'conversationalQuestionsBot' && (
@@ -1151,6 +1288,61 @@ const CreateLesson = () => {
                         ))}
                         <button className={styles.add_button} onClick={(e) => addMCQQuestion(e)}>Add Another Question</button>
                     </>
+                )}
+                {(activityType === 'feedbackMcqs') && (
+                        <>
+                            {mcqs.map((mcq, qIndex) => (
+                                <div key={qIndex} className={styles.question_box}>
+                                    <div className={styles.question_header}>
+                                        <h3 className={styles.question_title}>Question {qIndex + 1}</h3>
+                                        {mcqs.length > 1 && (
+                                            <button 
+                                                className={styles.remove_button} 
+                                                onClick={(e) => removeMCQQuestion(qIndex, e)}
+                                            >
+                                                Remove Question
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    <div className={styles.question_section}>
+                                        <InputField 
+                                            label={`Question Text`} 
+                                            type="text" 
+                                            onChange={(e) => handleMCQQuestionChange(qIndex, e)} 
+                                            value={mcq.questionText} 
+                                            name="questionText" 
+                                            id={`questionText-${qIndex}`} 
+                                        />
+                                    </div>
+                                    
+                                    <div className={styles.answers_section}>
+                                        <h4 className={styles.answers_title}>Answer Options</h4>
+                                        
+                                        <div className={styles.answers_container}>
+                                            {mcq.answers.slice(0, 3).map((answer, aIndex) => (
+                                                <div key={aIndex} className={styles.answer_box}>
+                                                    <InputField 
+                                                        label={`Answer ${aIndex + 1}`} 
+                                                        type="text" 
+                                                        onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} 
+                                                        value={answer.answerText} 
+                                                        name="answerText" 
+                                                        id={`answerText-${qIndex}-${aIndex}`} 
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                    <button 
+                        className={styles.add_button} 
+                        onClick={(e) => addMCQQuestion(e)}
+                    >
+                        Add Another Question
+                    </button>
+                </>
                 )}
                 <button type="submit" className={styles.submit_button}>{isLoading ? <div className="loader"></div> : "Create Lesson"}</button>
             </form>

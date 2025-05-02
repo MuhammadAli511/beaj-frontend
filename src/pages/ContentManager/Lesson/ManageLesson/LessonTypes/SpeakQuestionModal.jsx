@@ -2,8 +2,14 @@ import React, { useEffect } from 'react';
 import styles from './SpeakQuestionModal.module.css';
 
 const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
-    const sortedQuestions = [...lesson.speakActivityQuestionFiles].sort((a, b) => a.questionNumber - b.questionNumber);
+    // const sortedQuestions = [...lesson.speakActivityQuestionFiles].sort((a, b) => a.questionNumber - b.questionNumber);
+    const sortedQuestions = lesson?.speakActivityQuestionFiles 
+        ? [...lesson.speakActivityQuestionFiles].sort((a, b) => a.questionNumber - b.questionNumber)
+        : lesson?.documentFiles 
+            ? [...lesson.documentFiles].sort((a, b) => a.questionNumber - b.questionNumber)
+            : [];
 
+    console.log("sortedQuestions", sortedQuestions);
     useEffect(() => {
         const handleEscapeKey = (event) => {
             if (event.key === 'Escape') {
@@ -30,6 +36,12 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                         <thead>
                             <tr>
                                 <th className={styles.table_heading}>Question Number</th>
+                                {activity === 'feedbackAudio' && (
+                                    <>
+                                        <th className={styles.table_heading}>Question</th>
+                                        <th className={styles.table_heading}>Audio</th>
+                                    </>
+                                )}
                                 {activity === 'watchAndSpeak' && (
                                     <>
                                         <th className={styles.table_heading}>Question</th>
@@ -78,6 +90,17 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                         <tbody className={styles.table_body}>
                             {sortedQuestions.map((question) => (
                                 <tr key={question.id} className={styles.table_row}>
+                                    {activity === 'feedbackAudio' && (
+                                        <>
+                                            <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                            <td style={{ width: "20%" }}>{question.question}</td>
+                                            <td style={{ width: "50%" }}>
+                                                <audio controls>
+                                                    <source src={question.mediaFile} type="audio/mp3" />
+                                                </audio>
+                                            </td>
+                                        </>
+                                    )}
                                     {activity === 'watchAndSpeak' && (
                                         <>
                                             <td style={{ width: "5%" }}>{question.questionNumber}</td>
