@@ -323,7 +323,6 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
             answerTypeArray[i]
         );
 
-
         const questionId = await questionResponse.data.mcq.Id;
 
         const answerResponses = await Promise.all(
