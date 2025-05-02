@@ -26,8 +26,6 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
     const [courses, setCourses] = useState([]);
     const [activityAliases, setActivityAliases] = useState([]);
 
-    console.log("lesson", lesson);
-
     useEffect(() => {
         if (lesson) {
             try {
@@ -44,7 +42,6 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
     const fetchLessonData = async () => {
         try {
             const lessonResponse = await getLessonById(lesson.LessonId);
-            console.log("lessonResponse", lessonResponse.data);
             if (lessonResponse.status === 200) {
                 const fetchedQuestions = lessonResponse.data.speakActivityQuestionFiles || [];
                 setLessonData(lessonResponse.data);

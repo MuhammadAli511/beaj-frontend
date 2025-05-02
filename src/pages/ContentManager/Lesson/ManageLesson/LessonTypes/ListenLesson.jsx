@@ -23,14 +23,11 @@ const EditListenLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const [courses, setCourses] = useState([]);
     const [activityAliases, setActivityAliases] = useState([]);
 
-   
-
     useEffect(() => {
         const fetchAllData = async () => {
             setIsLoading(true);
             try {
                 const lessonResponse = await getLessonById(lesson.LessonId);
-                console.log("lessonData", lessonResponse.data);
                 if (lessonResponse.status === 200) {
                     setLessonData(lessonResponse.data);
                 } else {

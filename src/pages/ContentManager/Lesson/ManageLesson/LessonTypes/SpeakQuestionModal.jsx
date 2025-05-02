@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import styles from './SpeakQuestionModal.module.css';
 
 const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
-    // const sortedQuestions = [...lesson.speakActivityQuestionFiles].sort((a, b) => a.questionNumber - b.questionNumber);
     const sortedQuestions = lesson?.speakActivityQuestionFiles 
         ? [...lesson.speakActivityQuestionFiles].sort((a, b) => a.questionNumber - b.questionNumber)
         : lesson?.documentFiles 

@@ -82,41 +82,6 @@ const CreateLesson = () => {
         }
     };
 
-    const getInitialMcqState = (activityType) => {
-        const baseAnswers = Array(3).fill().map(() => ({
-            answerType: 'text',
-            answerText: '',
-            isCorrect: false,
-            customFeedbackText: null,
-        }));
-    
-        if (activityType === 'feedbackMcqs') {
-            return {
-                questionType: 'Text',
-                questionText: '',
-                answers: baseAnswers
-            };
-        }
-    
-        return {
-            questionType: 'text',
-            questionText: '',
-            questionAudio: null,
-            questionImage: null,
-            questionVideo: null,
-            showCustomFeedback: false,
-            customFeedbackType: 'text',
-            answers: baseAnswers.map(answer => ({
-                ...answer,
-                answerAudio: null,
-                answerImage: null,
-                customFeedbackText: null,
-                customFeedbackImage: null,
-                customFeedbackAudio: null
-            }))
-        };
-    };
-
     const handleAudioChange = (e) => {
         const file = e.target.files[0];
         if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
@@ -295,34 +260,9 @@ const CreateLesson = () => {
     };
 
     // Listen and Speak
-    // const [questions, setQuestions] = useState([
-    //     { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }
-    // ]);
-
     const [questions, setQuestions] = useState([
-        { 
-            questionText: '', 
-            media: '', 
-            answers: activityType === 'listenAndSpeak' ? [{ answerText: '' }] : [], 
-            mediaType: 'audio' 
-        }
+        { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }
     ]);
-
-    const handleAudioQuestionChange = (index, event) => {
-        const newQuestions = [...questions];
-        if (event.target.type === 'file') {
-            const file = event.target.files[0];
-            const mediaType = newQuestions[index].mediaType;
-                if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
-                    newQuestions[index][event.target.name] = file;
-                } else {
-                    alert('Please upload an MP3 audio not larger than 16MB.');
-                }
-        } else {
-            newQuestions[index][event.target.name] = event.target.value;
-        }
-        setQuestions(newQuestions);
-    };
 
     const handleQuestionChange = (index, event) => {
         const newQuestions = [...questions];
@@ -362,20 +302,9 @@ const CreateLesson = () => {
         setQuestions(newQuestions);
     };
 
-    // const addQuestion = (event) => {
-    //     event.preventDefault();
-    //     setQuestions([...questions, { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }]);
-    // };
-
     const addQuestion = (event) => {
         event.preventDefault();
-        const newQuestion = {
-            questionText: '',
-            media: '',
-            answers: activityType === 'listenAndSpeak' ? [{ answerText: '' }] : [],
-            mediaType: 'audio'
-        };
-        setQuestions([...questions, newQuestion]);
+        setQuestions([...questions, { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }]);
     };
 
     const removeQuestion = (index, event) => {
@@ -397,24 +326,23 @@ const CreateLesson = () => {
     };
 
     // MCQs
-    // const [mcqs, setMcqs] = useState([
-    //     {
-    //         questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
-    //         showCustomFeedback: false,
-    //         customFeedbackType: 'text',
-    //         answers: Array(3).fill().map(() => ({ 
-    //             answerType: 'text', 
-    //             answerText: '', 
-    //             answerAudio: null, 
-    //             answerImage: null, 
-    //             isCorrect: false,
-    //             customFeedbackText: '',
-    //             customFeedbackImage: null,
-    //             customFeedbackAudio: null
-    //         }))
-    //     }
-    // ]);
-    const [mcqs, setMcqs] = useState([getInitialMcqState(activityType)]);
+    const [mcqs, setMcqs] = useState([
+        {
+            questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
+            showCustomFeedback: false,
+            customFeedbackType: 'text',
+            answers: Array(3).fill().map(() => ({ 
+                answerType: 'text', 
+                answerText: '', 
+                answerAudio: null, 
+                answerImage: null, 
+                isCorrect: false,
+                customFeedbackText: null,
+                customFeedbackImage: null,
+                customFeedbackAudio: null
+            }))
+        }
+    ]);
 
     const handleMCQQuestionChange = (index, event) => {
         const newMcqs = [...mcqs];
@@ -460,28 +388,23 @@ const CreateLesson = () => {
         setMcqs(newMcqs);
     };
 
-    // const addMCQQuestion = (event) => {
-    //     event.preventDefault();
-    //     setMcqs([...mcqs, {
-    //         questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
-    //         showCustomFeedback: false,
-    //         customFeedbackType: 'text',
-    //         answers: Array(3).fill().map(() => ({ 
-    //             answerType: 'text', 
-    //             answerText: '', 
-    //             answerAudio: null, 
-    //             answerImage: null, 
-    //             isCorrect: false,
-    //             customFeedbackText: '',
-    //             customFeedbackImage: null,
-    //             customFeedbackAudio: null
-    //         }))
-    //     }]);
-    // };
-
     const addMCQQuestion = (event) => {
         event.preventDefault();
-        setMcqs([...mcqs, getInitialMcqState(activityType)]);
+        setMcqs([...mcqs, {
+            questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
+            showCustomFeedback: false,
+            customFeedbackType: 'text',
+            answers: Array(3).fill().map(() => ({ 
+                answerType: 'text', 
+                answerText: '', 
+                answerAudio: null, 
+                answerImage: null, 
+                isCorrect: false,
+                customFeedbackText: null,
+                customFeedbackImage: null,
+                customFeedbackAudio: null
+            }))
+        }]);
     };
 
     const removeMCQQuestion = (index, event) => {
