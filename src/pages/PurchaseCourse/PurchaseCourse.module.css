@@ -136,7 +136,8 @@
   margin-bottom: 15px;
 }
 
-.target_group_section select {
+.target_group_section select,
+.target_group_select {
   padding: 10px 15px;
   width: 220px;
   margin-right: 15px;
@@ -147,13 +148,15 @@
   transition: all 0.2s ease;
 }
 
-.target_group_section select:focus {
+.target_group_section select:focus,
+.target_group_select:focus {
   outline: none;
   border-color: #51bbcc;
   box-shadow: 0 0 0 3px rgba(81, 187, 204, 0.2);
 }
 
-.target_group_section button {
+.target_group_section button,
+.target_group_button {
   padding: 10px 18px;
   background-color: #51bbcc;
   color: white;
@@ -164,12 +167,14 @@
   transition: all 0.2s ease;
 }
 
-.target_group_section button:hover {
+.target_group_section button:hover,
+.target_group_button:hover {
   background-color: #3ca0b3;
   transform: translateY(-1px);
 }
 
-.target_group_section button:disabled {
+.target_group_section button:disabled,
+.target_group_button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
   transform: none;
@@ -266,6 +271,14 @@
   height: 150px;
 }
 
+.profile_loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  margin: 10px 0;
+}
+
 .search_input {
   width: 100%;
   margin-bottom: 12px;
@@ -281,6 +294,410 @@
   outline: none;
   border-color: #51bbcc;
   box-shadow: 0 0 0 3px rgba(81, 187, 204, 0.2);
+}
+
+/* Profile selection styles */
+.profile_selection {
+  margin-bottom: 20px;
+}
+
+.profile_select {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.profile_select:focus {
+  outline: none;
+  border-color: #51bbcc;
+  box-shadow: 0 0 0 3px rgba(81, 187, 204, 0.2);
+}
+
+/* No profile selected state */
+.no_profile_selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.no_profile_icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80px;
+  height: 80px;
+  background-color: #e9f5f7;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  color: #51bbcc;
+}
+
+.no_profile_selected h3 {
+  font-size: 20px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.no_profile_selected p {
+  color: #666;
+  max-width: 400px;
+}
+
+.no_phone_selected {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #666;
+  font-style: italic;
+}
+
+.error_message {
+  color: #e53935;
+  padding: 10px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.no_courses {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+  grid-column: 1 / -1;
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal_heading {
+  color: #000;
+  font-family: "Poppins", sans-serif;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.form_group {
+  display: flex;
+  flex-direction: column;
+  margin-top: 25px;
+  width: 100%;
+}
+
+.form_group_row {
+  display: flex;
+  flex-direction: row;
+  margin-top: 50px;
+  justify-content: center;
+}
+
+.label {
+  color: #000;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 10px;
+}
+
+.input_field {
+  border: 1px solid #51bbcc;
+  background: #fff;
+  border-radius: 10px;
+  height: 46px;
+  width: 100%;
+  outline: none;
+  padding-left: 10px;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.submit_button {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #d4de00;
+  color: #000000;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-top: 10px;
+  align-self: center;
+}
+
+.cancel_button {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff0000;
+  color: #ffffff;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-top: 10px;
+  align-self: center;
+  margin-left: 20px;
+}
+
+.submit_button:hover {
+  background-color: #c4ce00;
+}
+
+.button_loader {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+/* All Profiles View Styles */
+.all_profiles_container {
+  margin-top: 20px;
+}
+
+.profiles_list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.profile_card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.profile_card:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile_card_header {
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.profile_card_title {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile_card_title h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.profile_id {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.profile_card_actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.target_group_badge {
+  padding: 4px 8px;
+  background-color: #e9f5f7;
+  color: #51bbcc;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.edit_button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.edit_button:hover {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.profile_card_content {
+  padding: 15px 20px;
+  background-color: #fff;
+}
+
+.profile_detail_row {
+  display: flex;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.profile_detail_label {
+  width: 120px;
+  font-weight: 500;
+  color: #666;
+}
+
+.profile_detail_value {
+  flex: 1;
+  color: #333;
+}
+
+.profile_courses {
+  margin-top: 15px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 15px;
+}
+
+.profile_courses h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.profile_courses ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.profile_courses li {
+  padding: 6px 0;
+  font-size: 13px;
+  color: #666;
+  border-bottom: 1px dashed #e0e0e0;
+}
+
+.profile_courses li:last-child {
+  border-bottom: none;
+}
+
+.no_profiles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  color: #666;
+  text-align: center;
+}
+
+.no_profiles svg {
+  color: #ccc;
+  margin-bottom: 15px;
+}
+
+/* View toggle styles */
+.details_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.view_toggle {
+  display: flex;
+  gap: 10px;
+}
+
+.view_toggle_button {
+  padding: 8px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  transition: all 0.2s ease;
+}
+
+.view_toggle_button:hover {
+  background-color: #e0e0e0;
+}
+
+.active_view {
+  background-color: #51bbcc;
+  color: white;
+  border-color: #51bbcc;
+}
+
+.active_view:hover {
+  background-color: #3ca0b3;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 1000px) {
@@ -301,4 +718,86 @@
   .course_list {
     grid-template-columns: 1fr;
   }
+
+  .form_group_row {
+    flex-direction: column;
+  }
+
+  .cancel_button {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+
+  .details_header {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+/* Table.module.css */
+.tableContainer {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.profileTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.profileTable thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #f8fafc;
+}
+
+.profileTable th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.profileTable tbody {
+  display: block;
+  max-height: calc(3 * 43px); /* Height for 3 rows (adjust the 53px based on your row height) */
+  overflow-y: auto;
+}
+
+.profileTable thead tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.profileTable tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.profileTable td {
+  padding: 12px 16px;
+  font-size: small;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.profileTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* For zebra striping */
+.profileTable tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+/* Hover effect */
+.profileTable tbody tr:hover {
+  background-color: #f1f5f9;
 }

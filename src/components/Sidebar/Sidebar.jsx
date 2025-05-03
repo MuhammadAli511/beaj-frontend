@@ -36,6 +36,7 @@ const Sidebar = () => {
             { name: "Last Active Users", path: "/last-active-users", roles: ["facilitator", "admin"] },
             { name: "Whatsapp Logs", path: "/whatsapp-logs", roles: ["facilitator", "admin"] },
             { name: "Purchase Course", path: "/purchase-course", roles: ["facilitator", "admin"] },
+            { name: "User Progress", path: "/user-progress", roles: ["facilitator", "admin"] },
         ],
         Content: [
             { name: "Content Manager", path: "/content-manager", roles: ["admin"] },

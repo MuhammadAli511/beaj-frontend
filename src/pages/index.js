@@ -10,6 +10,7 @@ import PurchaseCourse from './PurchaseCourse/PurchaseCourse';
 import LastActiveUsers from './LastActiveUsers/LastActiveUsers';
 import UserFeedback from './UserFeedback/UserFeedback';
 import UserResponses from './UserResponses/UserResponses';
+import UserProgress from './UserProgress/UserProgress';
 
 export {
     NotFound,
@@ -23,6 +24,7 @@ export {
     PurchaseCourse,
     LastActiveUsers,
     UserFeedback,
-    UserResponses
+    UserResponses,
+    UserProgress,
 };
 

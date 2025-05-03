@@ -12,7 +12,8 @@ import {
   AddUsers,
   LastActiveUsers,
   UserFeedback,
-  UserResponses
+  UserResponses,
+  UserProgress
 } from "./pages";
 import { SidebarProvider } from "./components/SidebarContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -107,7 +108,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+           <Route
+            path="/user-progress"
+            element={
+              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
+                <UserProgress />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </SidebarProvider>

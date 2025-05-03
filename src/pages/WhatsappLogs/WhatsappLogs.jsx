@@ -29,6 +29,13 @@ const WhatsappLogs = () => {
     const [selectedCohorts, setSelectedCohorts] = useState(['All']);
     const [inactivityData, setInactivityData] = useState({});
 
+    const [selectedBotPhone, setSelectedBotPhone] = useState(null);
+
+    const BOT_PHONE_NUMBERS = [
+        { label: "Teacher Bot", value: "410117285518514" },
+        { label: "Student Bot", value: "608292759037444" },
+    ];
+
     // Refs
     const chatContainerRef = useRef(null);
 
@@ -110,13 +117,30 @@ const WhatsappLogs = () => {
                             inactiveDays: diffDays
                         };
                     });
-                    setInactivityData(lastMessageTimeMap);
+                    // setInactivityData(lastMessageTimeMap);
 
-                    // Combine metadata with last message time data
-                    const usersWithActivity = metadataResponse.data.map(user => ({
+                    // // Combine metadata with last message time data
+                    // const usersWithActivity = metadataResponse.data.map(user => ({
+                    //     ...user,
+                    //     ...lastMessageTimeMap[user.phoneNumber]
+                    // }));
+                    // setPhoneNumbers(usersWithActivity);
+
+                    const uniqueUserMap = new Map();
+                    metadataResponse.data.forEach(user => {
+                        if (!uniqueUserMap.has(user.phoneNumber)) {
+                            uniqueUserMap.set(user.phoneNumber, user);
+                        }
+                    });
+                    const uniqueUsers = Array.from(uniqueUserMap.values());
+
+                    //  Merge metadata with inactivity data
+                    const usersWithActivity = uniqueUsers.map(user => ({
                         ...user,
                         ...lastMessageTimeMap[user.phoneNumber]
                     }));
+
+                    setInactivityData(lastMessageTimeMap);
                     setPhoneNumbers(usersWithActivity);
                 }
             } catch (error) {
@@ -128,10 +152,19 @@ const WhatsappLogs = () => {
         fetchData();
     }, []);
 
-    const fetchLogs = async (phoneNumber, currentPage) => {
+    useEffect(() => {
+        // Reset bot selection when phone number changes
+        setSelectedBotPhone(null);
+        // Reset activity logs
+        setActivityLogs([]);
+      }, [selectedPhoneNumber]);
+
+    const fetchLogs = async (phoneNumber,botPhoneNumber, currentPage) => {
         try {
+            if (!phoneNumber || !botPhoneNumber) return [];
             const logs = await getActivityLogsByPhoneNumber(
                 phoneNumber,
+                botPhoneNumber,
                 currentPage,
                 PAGE_SIZE
             );
@@ -144,6 +177,7 @@ const WhatsappLogs = () => {
 
     useEffect(() => {
         if (!selectedPhoneNumber) return;
+        if (!selectedBotPhone) return;
 
         // Reset states before fetching new logs
         setMessagesLoading(true);
@@ -153,17 +187,19 @@ const WhatsappLogs = () => {
 
         const initializeLogs = async () => {
             try {
-                const logs = await fetchLogs(selectedPhoneNumber, 1);
+                const logs = await fetchLogs(selectedPhoneNumber,selectedBotPhone, 1);
                 // Because you're showing the most recent messages at the bottom,
                 // you reverse to place oldest at top and newest at bottom
                 setActivityLogs(logs.reverse());
                 setHasMore(logs.length === PAGE_SIZE);
 
                 // Set user name if available
-                const user = phoneNumbers.find(
-                    (u) => u.phoneNumber === selectedPhoneNumber
-                );
-                setSelectedUserName(user?.name || selectedPhoneNumber);
+                // const user = phoneNumbers.find(
+                //     (u) => u.phoneNumber === selectedPhoneNumber
+                // );
+                // setSelectedUserName(user?.name || selectedPhoneNumber);
+
+                setSelectedUserName(selectedPhoneNumber);
 
                 setTimeout(() => {
                     if (chatContainerRef.current) {
@@ -179,7 +215,7 @@ const WhatsappLogs = () => {
         };
 
         initializeLogs();
-    }, [selectedPhoneNumber, phoneNumbers]);
+    }, [selectedPhoneNumber, phoneNumbers, selectedBotPhone]);
 
     const handleScroll = async () => {
         if (!chatContainerRef.current) return;
@@ -192,7 +228,7 @@ const WhatsappLogs = () => {
             const oldScrollHeight = chatContainerRef.current.scrollHeight;
 
             const nextPage = page + 1;
-            const olderLogs = await fetchLogs(selectedPhoneNumber, nextPage);
+            const olderLogs = await fetchLogs(selectedPhoneNumber,selectedBotPhone, nextPage);
 
             setActivityLogs((prev) => {
                 return [...olderLogs.reverse(), ...prev];
@@ -210,12 +246,21 @@ const WhatsappLogs = () => {
         }
     };
 
+    // Add function to handle bot phone selection
+    const handleBotPhoneSelect = (botPhone) => {
+        setSelectedBotPhone(botPhone);
+        // Reset pagination when changing bot phone
+        setPage(1);
+        setHasMore(true);
+    };
+
     const filteredPhoneNumbers = phoneNumbers.filter((user) => {
-        const name = user.name?.toLowerCase() || '';
+        // const name = user.name?.toLowerCase() || '';
         const phone = user.phoneNumber || '';
         const userCohort = user.cohort || '';
         
-        const matchesSearch = name.includes(searchQuery.toLowerCase()) || phone.includes(searchQuery);
+        // const matchesSearch = name.includes(searchQuery.toLowerCase()) || phone.includes(searchQuery);
+        const matchesSearch = phone.includes(searchQuery);
         const matchesCohort = selectedCohorts.includes('All') || selectedCohorts.includes(userCohort);
         
         return matchesSearch && matchesCohort;
@@ -234,7 +279,7 @@ const WhatsappLogs = () => {
                         <div className={styles.filters}>
                             <input
                                 type="text"
-                                placeholder="Search by name or phone..."
+                                placeholder="Search by phone number ..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className={styles.search_input}
@@ -269,7 +314,8 @@ const WhatsappLogs = () => {
                                             onClick={() => setSelectedPhoneNumber(user.phoneNumber)}
                                         >
                                             <div className={styles.user_info}>
-                                                <span>{user.name || user.phoneNumber}</span>
+                                                <span>{user.phoneNumber}</span>
+                                                {/* <span>{user.name || user.phoneNumber}</span> */}
                                                 {user.inactiveDays >= INACTIVE_DAYS_THRESHOLD && (
                                                     <span className={styles.inactive_dot} title={`Inactive for ${user.inactiveDays} days`} />
                                                 )}
@@ -287,11 +333,31 @@ const WhatsappLogs = () => {
                     <div className={styles.activity_logs}>
                         <h3>Messages with {selectedUserName || "Select a contact"}</h3>
 
+                        {/* Bot phone selection UI */}
+                        {selectedPhoneNumber && (
+                            <div className={styles.bot_phone_selector}>
+                                <h4>Select Bot Number to View Logs</h4>
+                                <div className={styles.bot_phone_buttons}>
+                                {BOT_PHONE_NUMBERS.map((bot) => (
+                                    <button
+                                        key={bot.value}
+                                        className={`${styles.bot_phone_button} ${
+                                            selectedBotPhone === bot.value ? styles.active_bot_phone : ''
+                                        }`}
+                                        onClick={() => handleBotPhoneSelect(bot.value)}
+                                    >
+                                        {bot.label}
+                                    </button>
+                                ))}
+                                </div>
+                            </div>
+                        )}
+
                         {messagesLoading ? (
                             <div className={styles.loader}>
                                 <TailSpin color="#00BFFF" height={50} width={50} />
                             </div>
-                        ) : activityLogs.length > 0 ? (
+                        ) : selectedPhoneNumber && selectedBotPhone ? ( activityLogs.length > 0 ? (
                             <div
                                 className={styles.chat_container}
                                 ref={chatContainerRef}
@@ -377,6 +443,11 @@ const WhatsappLogs = () => {
 
                                             {/* Timestamp & Info */}
                                             <div className={styles.message_footer}>
+                                                {log.messageDirection === "inbound" && (
+                                                    <span className={styles.message_timestamp}>
+                                                    {new Date(log.timestamp).toLocaleString()}
+                                                </span>
+                                                )}
                                                 <div
                                                     className={styles.info_icon}
                                                     onMouseEnter={() => setHoveredLog(log)}
@@ -385,6 +456,10 @@ const WhatsappLogs = () => {
                                                     ℹ️
                                                     {hoveredLog === log && (
                                                         <div className={styles.tooltip}>
+                                                            <p>
+                                                                <strong>Profile ID:</strong>{' '}
+                                                                {log.profile_id}
+                                                            </p>
                                                             <p>
                                                                 <strong>Course ID:</strong>{' '}
                                                                 {log.courseId}
@@ -409,9 +484,11 @@ const WhatsappLogs = () => {
                                                     )}
                                                 </div>
 
-                                                <span className={styles.message_timestamp}>
+                                                {log.messageDirection === "outbound" && (
+                                                    <span className={styles.message_timestamp}>
                                                     {new Date(log.timestamp).toLocaleString()}
                                                 </span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -419,7 +496,15 @@ const WhatsappLogs = () => {
                             </div>
                         ) : (
                             <p>No messages available for this contact</p>
-                        )}
+                        ) )
+                        :(
+                            <p className={styles.no_messages}>
+                                {selectedPhoneNumber 
+                                    ? "Please select a bot phone number to view messages" 
+                                    : "No messages available. Select a contact first."}
+                            </p>
+                        )
+                    }
                     </div>
                 </div>
             </div>

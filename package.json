@@ -9,6 +9,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "chart.js": "^4.4.7",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "fetch-blob": "^4.0.0",
     "jodit-react": "^4.1.2",
     "papaparse": "^5.5.1",

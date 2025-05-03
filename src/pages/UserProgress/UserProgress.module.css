@@ -1,0 +1,770 @@
+.main_page {
+  display: flex;
+  background: #f1f3f4;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.content {
+  margin-left: 265px;
+  padding: 25px;
+  flex-grow: 1;
+  background: #f1f3f4;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.content h1 {
+  color: #333;
+  font-size: 28px;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.container {
+  padding: 24px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.filterSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 768px) {
+  .filterSection {
+    flex-direction: row;
+  }
+}
+
+.filterItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.filterLabel {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+.select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  height: 40px;
+  width: 100%;
+}
+
+.select:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.tabsContainer {
+  margin-bottom: 16px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tabButton {
+  padding: 10px;
+  background-color: #f9fafb;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.tabButton:hover {
+  background-color: #afb2b8;
+}
+
+.activeTab {
+  background-color: #97e1ed;
+  color: #111827;
+}
+
+/* Search and Leaderboard section */
+.searchAndLeaderboard {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.searchContainer {
+  position: relative;
+  flex: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #51bbcc;
+  box-shadow: 0 0 0 3px rgba(81, 187, 204, 0.2);
+}
+
+.leaderboardButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #d4de00;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.leaderboardButton:hover {
+  background-color: #c4ce00;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboardButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.leaderboardIcon {
+  color: white;
+}
+
+.contentArea {
+  min-height: 300px;
+}
+
+/* Add these medal color styles to your CSS file */
+.goldMedal {
+  color: #ffd700 !important;
+  font-weight: bold;
+  background-color: white;
+}
+
+.silverMedal {
+  color: #c0c0c0 !important;
+  font-weight: bold;
+  background-color: white;
+}
+
+.bronzeMedal {
+  color: #cd7f32 !important;
+  font-weight: bold;
+  background-color: white;
+}
+
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #6b7280;
+  text-align: center;
+  font-size: 14px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.loadingState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #51bbcc;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.tableContainer {
+  overflow-x: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 1200px;
+  
+}
+
+.dataTable th {
+  padding: 12px 16px;
+  border: 1px solid #323232;
+}
+
+.dataTable td {
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  text-align: center;
+  
+}
+
+.dataTable th {
+  background-color: #c8f0f6;
+  font-weight: 600;
+  color: #374151;
+  position: sticky;
+  text-align: center;
+  top: 0;
+}
+
+.groupHeader {
+  text-align: center;
+  background-color: #f3f4f6;
+}
+
+.evenRow {
+  background-color: white;
+}
+
+.oddRow {
+  background-color: #f9fafb;
+}
+
+.centerText {
+  text-align: center;
+}
+
+.phoneCell {
+  background-color: #ecfdf5;
+}
+
+.totalCell {
+  text-align: center;
+  font-weight: 500;
+  background-color: bisque;
+}
+.grandtotalCell {
+  text-align: center;
+  font-weight: 500;
+  background-color:rgb(209, 236, 209);
+}
+
+/* Highlight colors for totals */
+.highlightYellow {
+  background-color: #fef3c7;
+}
+
+.highlightActivity {
+  background-color: #e0f2fe;
+}
+
+.highlightTotal {
+  background-color: #fee2e2;
+  font-weight: 600;
+}
+
+/* Leaderboard Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.leaderboardModal {
+  background-color: white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.downloadButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #d4de00;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.downloadButton:hover {
+  background-color: #c4ce00;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.closeButton:hover {
+  color: #111827;
+}
+
+.modalContent {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.leaderboardLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.leaderboardImage {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboardError {
+  color: #ef4444;
+  text-align: center;
+}
+
+
+
+@media (max-width: 1000px) {
+  .content {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .filterSection {
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .searchAndLeaderboard {
+    flex-direction: column;
+  }
+
+  .leaderboardButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.overlay_leader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal_leader {
+  background-color: white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.header_leader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header_leader h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.actions_leader {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.downloadButton_leader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #d4de00;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.downloadButton_leader:hover {
+  background-color: #c4ce00;
+}
+
+.closeButton_leader {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.closeButton_leader:hover {
+  color: #111827;
+  background-color: #f3f4f6;
+}
+
+.content_leader {
+  padding: 2px;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.loading_leader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.image_leader {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.error_leader {
+  color: #ef4444;
+  text-align: center;
+}
+
+.copyButton_leader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #34d3a8;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copyButton_leader:hover {
+  background-color: #3da7b8;
+}
+
+
+
+
+.overlay_chart {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: rgba(0, 0, 0, 0.5);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 1000;
+}
+
+.modal_chart {
+background-color: white;
+border-radius: 10px;
+width: 95%;
+max-width: 700px;
+height: 90vh;
+overflow: hidden;
+display: flex;
+flex-direction: column;
+box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.header_chart {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 16px 24px;
+border-bottom: 1px solid #e5e7eb;
+flex-wrap: wrap;
+gap: 10px;
+}
+
+.header_chart h2 {
+margin: 0;
+font-size: 18px;
+color: #333;
+flex: 1;
+}
+
+.chartControls {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.chartTypeSelect {
+padding: 8px 12px;
+border: 1px solid #d1d5db;
+border-radius: 4px;
+font-size: 14px;
+background-color: white;
+min-width: 180px;
+}
+
+.actions_chart {
+display: flex;
+gap: 12px;
+align-items: center;
+}
+
+.downloadButton_chart {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 8px 12px;
+background-color: #d4de00;
+color: #333;
+border: none;
+border-radius: 4px;
+font-size: 14px;
+cursor: pointer;
+transition: all 0.2s ease;
+}
+
+.downloadButton_chart:hover {
+background-color: #c4ce00;
+}
+
+.copyButton_chart {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 8px 12px;
+background-color: #34d3a8;
+color: black;
+border: none;
+border-radius: 4px;
+font-size: 14px;
+cursor: pointer;
+transition: all 0.2s ease;
+}
+
+.copyButton_chart:hover {
+background-color: #2bb38e;
+}
+
+.closeButton_chart {
+background: none;
+border: none;
+cursor: pointer;
+color: #6b7280;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 4px;
+border-radius: 4px;
+}
+
+.closeButton_chart:hover {
+color: #111827;
+background-color: #f3f4f6;
+}
+
+.content_chart {
+padding: 10px;
+overflow-y: auto;
+display: flex;
+justify-content: center;
+align-items: flex-start;
+flex: 1;
+}
+
+.loading_chart {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 16px;
+}
+
+.chartContainer {
+width: 100%;
+min-height: 600px;
+max-height: 80vh;
+overflow-y: auto;
+position: relative;
+padding: 10px;
+}
+
+.noChartData {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+text-align: center;
+color: #666;
+padding: 20px;
+background: rgba(255, 255, 255, 0.9);
+border-radius: 8px;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chartButton {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 10px 16px;
+background-color: #d4de00;
+color: black;
+border: none;
+border-radius: 4px;
+font-size: 14px;
+font-weight: 500;
+cursor: pointer;
+transition: all 0.2s ease;
+/* margin-bottom: 16px; */
+}
+
+.chartButton:hover {
+background-color: #3da7b8;
+transform: translateY(-1px);
+box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.chartButton:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+.chartIcon {
+color: white;
+}
+
