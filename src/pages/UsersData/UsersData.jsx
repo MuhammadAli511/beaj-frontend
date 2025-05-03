@@ -16,6 +16,7 @@ const UsersData = () => {
     const [activityTypeStats, setActivityTypeStats] = useState({});
     const [activeTab, setActiveTab] = useState('student');
     const [isLoading, setIsLoading] = useState(false);
+    const [phoneNumberSearch, setPhoneNumberSearch] = useState('');
 
     // Sorting state
     const [sortConfig, setSortConfig] = useState({
@@ -106,6 +107,13 @@ const UsersData = () => {
     const filterData = (data) => {
         let filteredData = data;
         
+        // Apply phone number search filter
+        if (phoneNumberSearch.trim() !== '') {
+            filteredData = filteredData.filter(item => 
+                item.phoneNumber && item.phoneNumber.includes(phoneNumberSearch.trim())
+            );
+        }
+        
         // Apply date filter
         if (dateFilter.column && dateFilter.from && dateFilter.to) {
             filteredData = filteredData.filter(item => {
@@ -163,6 +171,7 @@ const UsersData = () => {
         });
         setActivityTypeFilter(null);
         setMessageFilter(null);
+        setPhoneNumberSearch('');
     };
 
     useEffect(() => {
@@ -336,6 +345,16 @@ const UsersData = () => {
                 {/* Date Filter Controls */}
                 <div className={styles.filters_container}>
                     <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Phone Number</label>
+                        <input
+                            type="text"
+                            value={phoneNumberSearch}
+                            onChange={(e) => setPhoneNumberSearch(e.target.value)}
+                            placeholder="Search phone number"
+                            className={styles.text_input}
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
                         <label className={styles.filter_label}>From Date</label>
                         <input
                             type="date"
@@ -403,7 +422,7 @@ const UsersData = () => {
                 {/* Record Count Display */}
                 <div className={styles.record_count_container}>
                     <div className={styles.record_count}>
-                        {(dateFilter.column && dateFilter.from && dateFilter.to) || activityTypeFilter || messageFilter ? (
+                        {(dateFilter.column && dateFilter.from && dateFilter.to) || activityTypeFilter || messageFilter || phoneNumberSearch ? (
                             <>
                                 Showing <span className={styles.filtered_count}>{getFilteredRecords(activeTab === 'teacher' ? userData : studentUserData)}</span>
                                 <span className={styles.total_count}> of {getTotalRecords(activeTab === 'teacher' ? userData : studentUserData)} records</span>
@@ -526,18 +545,36 @@ const UsersData = () => {
                                 </div>
                             ) : (
                                 // Define specific order for stats cards
-                                ['Clicked Link', 'Demo Started', 'Demo Ended', 'Registration Completed'].map((stage) => {
+                                ['Clicked Link', 'Demo Started', 'Demo Ended', 'Registration Completed'].map((stage, index, stagesArray) => {
                                     const data = studentStats[stage] || { count: 0, percentage: 0, dropPercentage: 0 };
+                                    
+                                    // Calculate correct conversion and drop rates based on actual counts
+                                    let conversionRate = 100; // Default for first stage
+                                    let dropRate = 0;
+                                    
+                                    if (index > 0) {
+                                        const previousStage = stagesArray[index - 1];
+                                        const previousCount = studentStats[previousStage]?.count || 0;
+                                        
+                                        if (previousCount > 0) {
+                                            conversionRate = ((data.count / previousCount) * 100).toFixed(2);
+                                            dropRate = (100 - conversionRate).toFixed(2);
+                                        } else {
+                                            conversionRate = "0.00";
+                                            dropRate = "100.00";
+                                        }
+                                    }
+                                    
                                     return (
                                         <div key={stage} className={styles.stat_card}>
                                             <h3>{stage}</h3>
                                             <p className={styles.card_value}>{data.count}</p>
                                             <div className={styles.card_metrics}>
                                                 <p className={styles.conversion_rate}>
-                                                    Conversion: {data.percentage}%
+                                                    Conversion: {conversionRate}%
                                                 </p>
                                                 <p className={styles.drop_rate}>
-                                                    Drop: {data.dropPercentage}%
+                                                    Drop: {dropRate}%
                                                 </p>
                                             </div>
                                         </div>
