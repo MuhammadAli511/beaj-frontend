@@ -64,6 +64,7 @@ const LastActiveUsers = () => {
         // Map data to CSV rows
         const dataRows = userData.map(user => [
             user.userId || '',
+            user.profile_id || '',
             user.phoneNumber || '',
             user.name || '',
             user.targetGroup || '',
@@ -149,6 +150,7 @@ const LastActiveUsers = () => {
                             <thead className={styles.heading_row}>
                                 <tr>
                                     <th className={styles.table_heading}>User ID</th>
+                                    <th className={styles.table_heading}>Profile ID</th>
                                     <th className={styles.table_heading}>Phone Number</th>
                                     <th className={styles.table_heading}>Name</th>
                                     <th className={styles.table_heading}>Target Group</th>
@@ -161,6 +163,7 @@ const LastActiveUsers = () => {
                                 {userData.map((user, index) => (
                                     <tr key={index}>
                                         <td>{user.userId || ""}</td>
+                                        <td>{user.profile_id || ""}</td>
                                         <td>{user.phoneNumber || ""}</td>
                                         <td>{user.name || ""}</td>
                                         <td>{user.targetGroup || ""}</td>

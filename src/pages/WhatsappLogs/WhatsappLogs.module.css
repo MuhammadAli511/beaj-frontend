@@ -230,6 +230,7 @@
   width: 180px;
   z-index: 10;
   text-align: left;
+  color: #000;
 }
 
 .tooltip p {
@@ -381,4 +382,51 @@
   .message_outbound {
     max-width: 85%;
   }
+  .bot_phone_buttons {
+    flex-direction: column;
+  }
+}
+
+/* Bot phone selector styles */
+.bot_phone_selector {
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.bot_phone_selector h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.bot_phone_buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bot_phone_button {
+  padding: 8px 15px;
+  border: 1px solid #76e1f0;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #333;
+}
+
+.bot_phone_button:hover {
+  background-color: #e9f5f7;
+  border-color: #7ec3ce;
+  color: #000;
+}
+
+.active_bot_phone {
+  background-color: #51bbcc;
+  color: white;
+  border-color: #51bbcc;
+  box-shadow: 0 2px 5px rgba(81, 187, 204, 0.3);
 }

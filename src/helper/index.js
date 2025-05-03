@@ -829,6 +829,25 @@ export const createAudioChatLog = async (userAudio, prompt) => {
     return { status: response.status, data };
 };
 
+// GET api/userProgress/getAllUserProgressData
+export const getAlluserProgressByModule = async (courseId1, courseId2, courseId3, targetGroup, module, cohort) => {
+    const queryParams = new URLSearchParams({
+        courseId1,
+        courseId2,
+        courseId3,
+        targetGroup,
+        module,
+        cohort
+    }).toString();
+
+    const response = await fetch(`${API_URL}/userProgress/getAllUserProgressData?${queryParams}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+}
+
 
 
 // METADATA
@@ -852,11 +871,11 @@ export const getMetadataByPhoneNumber = async (phoneNumber) => {
     return { status: response.status, data };
 };
 
-export const assignTargetGroup = async (phoneNumber, targetGroup) => {
+export const assignTargetGroup = async (phoneNumber, profile_id, targetGroup) => {
     const response = await fetch(`${API_URL}/waUserMetaData/assignTargetGroup`, {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({ phoneNumber, targetGroup }),
+        body: JSON.stringify({ phoneNumber, profile_id, targetGroup }),
     });
 
     const data = await response.json();
@@ -876,8 +895,8 @@ export const getAllActivityLogs = async () => {
 };
 
 // GET api/waUserActivityLogs/getByPhoneNumber/:phoneNumber
-export const getActivityLogsByPhoneNumber = async (phoneNumber, page = 1, pageSize = 15) => {
-    const response = await fetch(`${API_URL}/waUserActivityLogs/getByPhoneNumber/${phoneNumber}?page=${page}&pageSize=${pageSize}`, {
+export const getActivityLogsByPhoneNumber = async (phoneNumber, botPhoneNumberId, page = 1, pageSize = 15) => {
+    const response = await fetch(`${API_URL}/waUserActivityLogs/getByPhoneNumber/${phoneNumber}?page=${page}&pageSize=${pageSize}&botPhoneNumberId=${botPhoneNumberId}`, {
         headers: getHeaders(),
     });
 
@@ -928,11 +947,11 @@ export const getUnpurchasedCoursesByPhoneNumber = async (phoneNumber) => {
 }
 
 // POST api/waPurchasedCourses/purchaseCourse
-export const purchaseCourse = async (phoneNumber, courseId) => {
+export const purchaseCourse = async (phoneNumber, profile_id, courseId) => {
     const response = await fetch(`${API_URL}/waPurchasedCourses/purchaseCourse`, {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({ phoneNumber, courseId }),
+        body: JSON.stringify({ phoneNumber, profile_id, courseId }),
     });
 
     const data = await response.json();

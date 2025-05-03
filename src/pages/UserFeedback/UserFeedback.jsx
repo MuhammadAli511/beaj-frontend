@@ -167,6 +167,7 @@ const UserFeedback = () => {
                             <thead className={styles.heading_row}>
                                 <tr>
                                     <th className={styles.table_heading}>ID</th>
+                                    <th className={styles.table_heading}>Profile ID</th>
                                     <th className={styles.table_heading}>Phone Number</th>
                                     <th className={styles.table_heading}>Feedback</th>
                                     <th className={styles.table_heading}>Course</th>
@@ -181,6 +182,7 @@ const UserFeedback = () => {
                                 {filteredFeedback.map((feedback) => (
                                     <tr key={feedback.id}>
                                         <td>{feedback.id}</td>
+                                         <td>{feedback.profile_id}</td>
                                         <td>{feedback.phoneNumber}</td>
                                         <td>{feedback.feedbackContent}</td>
                                         <td>{courses[feedback.courseId] || feedback.courseId}</td>
