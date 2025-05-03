@@ -117,14 +117,6 @@ const WhatsappLogs = () => {
                             inactiveDays: diffDays
                         };
                     });
-                    // setInactivityData(lastMessageTimeMap);
-
-                    // // Combine metadata with last message time data
-                    // const usersWithActivity = metadataResponse.data.map(user => ({
-                    //     ...user,
-                    //     ...lastMessageTimeMap[user.phoneNumber]
-                    // }));
-                    // setPhoneNumbers(usersWithActivity);
 
                     const uniqueUserMap = new Map();
                     metadataResponse.data.forEach(user => {
@@ -188,16 +180,9 @@ const WhatsappLogs = () => {
         const initializeLogs = async () => {
             try {
                 const logs = await fetchLogs(selectedPhoneNumber,selectedBotPhone, 1);
-                // Because you're showing the most recent messages at the bottom,
-                // you reverse to place oldest at top and newest at bottom
                 setActivityLogs(logs.reverse());
                 setHasMore(logs.length === PAGE_SIZE);
 
-                // Set user name if available
-                // const user = phoneNumbers.find(
-                //     (u) => u.phoneNumber === selectedPhoneNumber
-                // );
-                // setSelectedUserName(user?.name || selectedPhoneNumber);
 
                 setSelectedUserName(selectedPhoneNumber);
 
@@ -255,11 +240,9 @@ const WhatsappLogs = () => {
     };
 
     const filteredPhoneNumbers = phoneNumbers.filter((user) => {
-        // const name = user.name?.toLowerCase() || '';
         const phone = user.phoneNumber || '';
         const userCohort = user.cohort || '';
         
-        // const matchesSearch = name.includes(searchQuery.toLowerCase()) || phone.includes(searchQuery);
         const matchesSearch = phone.includes(searchQuery);
         const matchesCohort = selectedCohorts.includes('All') || selectedCohorts.includes(userCohort);
         
@@ -315,7 +298,6 @@ const WhatsappLogs = () => {
                                         >
                                             <div className={styles.user_info}>
                                                 <span>{user.phoneNumber}</span>
-                                                {/* <span>{user.name || user.phoneNumber}</span> */}
                                                 {user.inactiveDays >= INACTIVE_DAYS_THRESHOLD && (
                                                     <span className={styles.inactive_dot} title={`Inactive for ${user.inactiveDays} days`} />
                                                 )}

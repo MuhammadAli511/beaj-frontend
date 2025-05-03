@@ -13,18 +13,7 @@ import {
   getTargetGroupByPhoneNumber,
 } from "../../helper"
 import { TailSpin } from "react-loader-spinner"
-
-// Import the SidebarContext, but provide a fallback if it fails
-let useSidebar
-try {
-  // Try to import from the expected location
-  const sidebarModule = require("../../components/SidebarContext")
-  useSidebar = sidebarModule.useSidebar
-} catch (error) {
-  // Fallback implementation if import fails
-  useSidebar = () => ({ isSidebarOpen: false })
-  console.warn("SidebarContext not found, using fallback implementation")
-}
+import { useSidebar } from '../../components/SidebarContext';
 
 const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchase }) => {
   const [profiles, setProfiles] = useState([])
@@ -36,13 +25,11 @@ const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchas
     const fetchPhoneNumberprofiles = async () => {
       try {
         const response = await getMetadataByPhoneNumber(phoneNumber)
-        console.log(response.data)
         if (response.status === 200) {
           const data = response.data
           if (Array.isArray(data)) {
             setProfiles(data)
           } else if (typeof data === "object" && data !== null) {
-            // If the API returns a single profile object, convert it to array
             setProfiles([data])
           } else {
             console.error("Unexpected data format for profiles:", data)
@@ -72,9 +59,8 @@ const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchas
     setIsPurchasing(true)
 
     try {
-      console.log(phoneNumber, selectedProfile, courseId)
-      await onPurchase(phoneNumber, selectedProfile, courseId) // Assuming onPurchase returns a promise
-      onClose() // Close modal after successful purchase
+      await onPurchase(phoneNumber, selectedProfile, courseId)
+      onClose()
     } catch (error) {
       alert("Course Purchase failed.")
     } finally {
@@ -152,7 +138,6 @@ const TargetGroupModal = ({ isOpen, onClose, phoneNumber, onTargetGroup }) => {
       try {
         setIsLoading(true)
         const response = await getMetadataByPhoneNumber(phoneNumber)
-        // console.log("Profiles response:", response.data)
 
         if (response.status === 200) {
           const data = response.data
@@ -461,7 +446,6 @@ const PurchaseCourse = () => {
   // Handle assigning a target group
   const handleAssignTargetGroup = async (phoneNumber, profileId, targetGroup) => {
     try {
-      console.log("Assigning target group:", phoneNumber, profileId, targetGroup)
       const response = await assignTargetGroup(phoneNumber, profileId, targetGroup)
 
       if (response.status === 200) {
