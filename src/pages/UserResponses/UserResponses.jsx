@@ -9,6 +9,7 @@ import Select from 'react-select';
 const UserResponses = () => {
     const { isSidebarOpen } = useSidebar();
     const [userResponses, setUserResponses] = useState([]);
+    const [mcqStatistics, setMcqStatistics] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [courses, setCourses] = useState({});
@@ -51,9 +52,19 @@ const UserResponses = () => {
             setIsLoading(true);
             try {
                 const responsesResponse = await getQuestionResponsesByActivityType(selectedActivityType.value);
-                setUserResponses(responsesResponse.data);
-                if (responsesResponse.data.length > 0) {
-                    const firstResponse = responsesResponse.data[0];
+                
+                // Handle regular responses
+                setUserResponses(responsesResponse.data.result);
+                
+                // Handle MCQ statistics if available
+                if (responsesResponse.data.feedbackMcqsStatistics) {
+                    setMcqStatistics(responsesResponse.data.feedbackMcqsStatistics);
+                } else {
+                    setMcqStatistics(null);
+                }
+                
+                if (responsesResponse.data.result.length > 0) {
+                    const firstResponse = responsesResponse.data.result[0];
                     setSelectedWeek({ value: firstResponse.weekNumber, label: `Week ${firstResponse.weekNumber}` });
                     setSelectedDay({ value: firstResponse.dayNumber, label: `Day ${firstResponse.dayNumber}` });
                     setSelectedCourse({ value: Number(firstResponse.courseId), label: courses[firstResponse.courseId] });
@@ -261,6 +272,53 @@ const UserResponses = () => {
                     </div>
                 </div>
 
+                {/* MCQ Statistics Cards */}
+                {selectedActivityType && selectedActivityType.value === 'feedbackMcqs' && mcqStatistics && (
+                    <div className={styles.mcq_statistics_container}>
+                        <h2>MCQ Feedback Statistics</h2>
+                        <div className={styles.mcq_cards_grid}>
+                            {Object.entries(mcqStatistics).map(([question, answers], index) => (
+                                <div key={index} className={styles.mcq_card}>
+                                    <h3 className={styles.mcq_question}>
+                                        {question.split('\\n').map((line, i) => (
+                                            <div key={i} className={styles.mcq_question_line}>
+                                                {line.split(/(\*[^*]+\*)/).map((part, j) => {
+                                                    if (part.startsWith('*') && part.endsWith('*')) {
+                                                        // Bold text between asterisks
+                                                        return <strong key={j}>{part.slice(1, -1)}</strong>;
+                                                    }
+                                                    return <span key={j}>{part}</span>;
+                                                })}
+                                            </div>
+                                        ))}
+                                    </h3>
+                                    <div className={styles.mcq_answers}>
+                                        {Object.entries(answers)
+                                            .sort((a, b) => b[1] - a[1]) // Sort by count in descending order
+                                            .map(([answer, count], sortedIndex) => (
+                                            <div key={sortedIndex} className={styles.mcq_answer_row}>
+                                                <div className={styles.mcq_answer_label}>{answer}</div>
+                                                <div className={styles.mcq_answer_bar_container}>
+                                                    <div 
+                                                        className={styles.mcq_answer_bar} 
+                                                        style={{ 
+                                                            width: `${(count / Object.values(answers).reduce((a, b) => a + b, 0)) * 100}%`,
+                                                            backgroundColor: sortedIndex === 0 ? '#4CAF50' : 
+                                                                           sortedIndex === 1 ? '#FFC107' : 
+                                                                           '#FF5722'
+                                                        }}
+                                                    ></div>
+                                                </div>
+                                                <div className={styles.mcq_answer_count}>{count}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <div className={styles.table_container}>
                     {isLoading ? (
                         <div className={styles.loader_container}>
@@ -279,93 +337,168 @@ const UserResponses = () => {
                                 <thead className={styles.heading_row}>
                                     <tr>
                                         <th className={styles.table_heading}>Phone</th>
-                                        <th className={styles.table_heading}>Num</th>
-                                        <th className={styles.table_heading}>Question</th>
-                                        {selectedActivityType == 'conversationalQuestionBot' && (
+                                        {selectedActivityType && selectedActivityType.value === 'conversationalQuestionsBot' && (
                                             <>
+                                                <th className={styles.table_heading}>Num</th>
+                                                <th className={styles.table_heading}>Question</th>
                                                 <th className={styles.table_heading}>User Audio</th>
                                                 <th className={styles.table_heading}>User Transcript</th>
                                                 <th className={styles.table_heading}>Bot Audio</th>
                                             </>
                                         )}
-                                        {selectedActivityType == 'conversationalAgencyBot' && (
+                                        {selectedActivityType && selectedActivityType.value === 'conversationalAgencyBot' && (
                                             <>
+                                                <th className={styles.table_heading}>Num</th>
+                                                <th className={styles.table_heading}>Question</th>
                                                 <th className={styles.table_heading}>User Audio</th>
                                                 <th className={styles.table_heading}>User Transcript</th>
                                                 <th className={styles.table_heading}>Bot Audio</th>
                                             </>
                                         )}
-                                        {selectedActivityType == 'conversationalMonologueBot' && (
+                                        {selectedActivityType && selectedActivityType.value === 'conversationalMonologueBot' && (
                                             <>
+                                                <th className={styles.table_heading}>Num</th>
+                                                <th className={styles.table_heading}>Question</th>
                                                 <th className={styles.table_heading}>User Audio</th>
                                                 <th className={styles.table_heading}>User Transcript</th>
                                                 <th className={styles.table_heading}>Bot Audio</th>
                                                 <th className={styles.table_heading}>Bot Image</th>
                                             </>
                                         )}
-                                        {selectedActivityType == 'feedbackAudio' && (
+                                        {selectedActivityType && selectedActivityType.value === 'speakingPractice' && (
                                             <>
+                                                <th className={styles.table_heading}>Num</th>
+                                                <th className={styles.table_heading}>Question</th>
+                                                <th className={styles.table_heading}>User Audio</th>
+                                                <th className={styles.table_heading}>User Transcript</th>
+                                                <th className={styles.table_heading}>Bot Audio</th>
+                                                <th className={styles.table_heading}>Bot Image</th>
+                                            </>
+                                        )}
+                                        {selectedActivityType && selectedActivityType.value === 'feedbackAudio' && (
+                                            <>
+                                                <th className={styles.table_heading}>Question</th>
                                                 <th className={styles.table_heading}>User Audio</th>
                                             </>
                                         )}
-
+                                        {selectedActivityType && selectedActivityType.value === 'feedbackMcqs' && (
+                                            <>
+                                                <th className={styles.table_heading}>Num</th>
+                                                <th className={styles.table_heading}>Question</th>
+                                                <th className={styles.table_heading}>User Answer</th>
+                                            </>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody className={styles.table_body}>
                                     {currentResponses.map((response, index) => (
                                         <tr key={response.id || index}>
-                                            {selectedActivityType == 'conversationalQuestionBot' && (
+                                            <td>{response.phoneNumber}</td>
+                                            {response.activityType === 'conversationalQuestionsBot' && (
                                                 <>
-                                                    <td>{response.phoneNumber}</td>
                                                     <td>{response.questionNumber}</td>
-                                                    <td>{response.mediaFile}</td>
+                                                    <td><audio src={response.mediaFile} controls /></td>
                                                     <td><audio src={response.submittedUserAudio} controls /></td>
                                                     <td className={styles.submittedAnswerText}>{response.submittedAnswerText}</td>
                                                     <td><audio src={response.submittedFeedbackAudio} controls /></td>
                                                 </>
                                             )}
-                                            {selectedActivityType == 'conversationalAgencyBot' && (
+                                            {response.activityType === 'conversationalAgencyBot' && (
                                                 <>
-                                                    <td>{response.phoneNumber}</td>
                                                     <td>{response.questionNumber}</td>
-                                                    <td>{response.mediaFile}</td>
+                                                    <td><audio src={response.mediaFile} controls /></td>
                                                     <td><audio src={response.submittedUserAudio} controls /></td>
                                                     <td className={styles.submittedAnswerText}>{response.submittedAnswerText}</td>
                                                     <td><audio src={response.submittedFeedbackAudio} controls /></td>
                                                 </>
                                             )}
-                                            {selectedActivityType == 'conversationalMonologueBot' && (
+                                            {response.activityType === 'conversationalMonologueBot' && (
                                                 <>
-                                                    <td>{response.phoneNumber}</td>
                                                     <td>{response.questionNumber}</td>
-                                                    <td>{response.mediaFile}</td>
+                                                    <td><audio src={response.mediaFile} controls /></td>
                                                     <td><audio src={response.submittedUserAudio} controls /></td>
                                                     <td className={styles.submittedAnswerText}>{response.submittedAnswerText}</td>
                                                     <td><audio src={response.submittedFeedbackAudio} controls /></td>
                                                     <td>
-                                                        <div
-                                                            className={styles.image_container}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleImageClick(response.submittedFeedbackText);
-                                                            }}
-                                                        >
-                                                            <img
-                                                                style={{ width: '250px', height: '250px', cursor: 'pointer' }}
-                                                                src={response.submittedFeedbackText}
-                                                                alt="Bot Image"
-                                                            />
-                                                            <div className={styles.image_overlay}>View</div>
-                                                        </div>
+                                                        {response.submittedFeedbackText && (
+                                                            <div
+                                                                className={styles.image_container}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleImageClick(response.submittedFeedbackText);
+                                                                }}
+                                                            >
+                                                                <img
+                                                                    style={{ width: '250px', height: '250px', cursor: 'pointer' }}
+                                                                    src={response.submittedFeedbackText}
+                                                                    alt="Bot Image"
+                                                                />
+                                                                <div className={styles.image_overlay}>View</div>
+                                                            </div>
+                                                        )}
                                                     </td>
                                                 </>
                                             )}
-                                            {selectedActivityType == 'feedbackAudio' && (
+                                            {response.activityType === 'speakingPractice' && (
                                                 <>
-                                                    <td>{response.phoneNumber}</td>
                                                     <td>{response.questionNumber}</td>
-                                                    <td>{response.mediaFile}</td>
+                                                    <td><audio src={response.mediaFile} controls /></td>
                                                     <td><audio src={response.submittedUserAudio} controls /></td>
+                                                    <td className={styles.submittedAnswerText}>{response.submittedAnswerText}</td>
+                                                    <td><audio src={response.submittedFeedbackAudio} controls /></td>
+                                                    <td>
+                                                        {response.submittedFeedbackText && (
+                                                            <div
+                                                                className={styles.image_container}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleImageClick(response.submittedFeedbackText);
+                                                                }}
+                                                            >
+                                                                <img
+                                                                    style={{ width: '250px', height: '250px', cursor: 'pointer' }}
+                                                                    src={response.submittedFeedbackText}
+                                                                    alt="Bot Image"
+                                                                />
+                                                                <div className={styles.image_overlay}>View</div>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                </>
+                                            )}
+                                            {response.activityType === 'feedbackAudio' && (
+                                                <>
+                                                    <td><audio src={response.mediaFile} controls /></td>
+                                                    <td>
+                                                        {Array.isArray(response.submittedUserAudio) && response.submittedUserAudio.length > 0 ? (
+                                                            <audio src={response.submittedUserAudio[0]} controls />
+                                                        ) : (
+                                                            <audio src={response.submittedUserAudio} controls />
+                                                        )}
+                                                    </td>
+                                                </>
+                                            )}
+                                            {response.activityType === 'feedbackMcqs' && (
+                                                <>
+                                                    <td>{response.questionNumber}</td>
+                                                    <td>
+                                                        {response.question && (
+                                                            <div dangerouslySetInnerHTML={{
+                                                                __html: response.question
+                                                                    .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
+                                                                    .replace(/\\n/g, '<br />')
+                                                            }} />
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        {Array.isArray(response.answer) ? (
+                                                            response.answer.map((ans, i) => (
+                                                                <div key={i}>{ans}</div>
+                                                            ))
+                                                        ) : (
+                                                            <div>{response.answer}</div>
+                                                        )}
+                                                    </td>
                                                 </>
                                             )}
                                         </tr>

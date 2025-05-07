@@ -307,3 +307,104 @@
     flex-wrap: wrap;
   }
 }
+
+/* MCQ Statistics Styles */
+.mcq_statistics_container {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mcq_statistics_container h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.mcq_cards_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.mcq_card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mcq_question {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.mcq_question strong {
+    font-weight: 700;
+}
+
+.mcq_answer_row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.mcq_answer_label {
+    width: 40%;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.mcq_answer_bar_container {
+    flex-grow: 1;
+    height: 16px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+.mcq_answer_bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.mcq_answer_count {
+    width: 40px;
+    text-align: right;
+    font-weight: 500;
+    color: #333;
+}
+
+.mcq_question_line {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.mcq_question_line:last-child {
+    margin-bottom: 0;
+}
+
+/* Table cell styles for MCQs */
+.submittedAnswerText {
+    max-width: 300px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Update the table styles to handle formatted MCQ questions */
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid #eaeaea;
+    vertical-align: middle;
+}
+
+.table td strong {
+    font-weight: 600;
+}
