@@ -6,6 +6,28 @@ import CSVDownloader from 'react-csv-downloader';
 import { getAllMetadata, getStudentUserJourneyStats } from '../../helper/index';
 import { TailSpin } from 'react-loader-spinner';
 import Select from 'react-select';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const UsersData = () => {
     const { isSidebarOpen } = useSidebar();
@@ -17,6 +39,7 @@ const UsersData = () => {
     const [activeTab, setActiveTab] = useState('student');
     const [isLoading, setIsLoading] = useState(false);
     const [phoneNumberSearch, setPhoneNumberSearch] = useState('');
+    const [graphData, setGraphData] = useState([]);
 
     // Sorting state
     const [sortConfig, setSortConfig] = useState({
@@ -265,7 +288,8 @@ const UsersData = () => {
                         questionNumber: user.questionNumber || "",
                         acceptableMessages: user.acceptableMessages ? formatArrayForDisplay(user.acceptableMessages) : "",
                         last_message_content: user.last_message_content ? formatArrayForDisplay(user.last_message_content) : "",
-                        last_message_timestamp: user.last_message_timestamp ? new Date(user.last_message_timestamp).toLocaleString().replace(",", "") : ""
+                        last_message_timestamp: user.last_message_timestamp ? new Date(user.last_message_timestamp).toLocaleString().replace(",", "") : "",
+                        source: user.source ? `${user.source}` : ""
                     };
                 });
                 
@@ -312,6 +336,9 @@ const UsersData = () => {
                     }
                 });
                 setActivityTypeStats(activityStatsData);
+
+                // Update graphData
+                setGraphData(response.data.graphData);
             }
         } catch (error) {
             console.error("Error fetching student data:", error);
@@ -583,6 +610,74 @@ const UsersData = () => {
                             )}
                         </div>
                         
+                        {/* Conversion Graph */}
+                        {!isLoading && graphData && graphData.length > 0 && (
+                            <div className={styles.graph_container}>
+                                <h3>Daily Conversion Rates</h3>
+                                <div className={styles.chart_wrapper}>
+                                    <Line
+                                        data={{
+                                            labels: graphData.map(item => item.date),
+                                            datasets: [
+                                                {
+                                                    label: 'Clicked Count',
+                                                    data: graphData.map(item => parseInt(item.clicked_count)),
+                                                    borderColor: '#4285F4',
+                                                    backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                                                    tension: 0.3,
+                                                    yAxisID: 'y',
+                                                },
+                                                {
+                                                    label: 'Registered Count',
+                                                    data: graphData.map(item => parseInt(item.registered_count)),
+                                                    borderColor: '#34A853',
+                                                    backgroundColor: 'rgba(52, 168, 83, 0.1)',
+                                                    tension: 0.3,
+                                                    yAxisID: 'y',
+                                                }
+                                            ]
+                                        }}
+                                        options={{
+                                            responsive: true,
+                                            interaction: {
+                                                mode: 'index',
+                                                intersect: false,
+                                            },
+                                            maintainAspectRatio: false,
+                                            scales: {
+                                                y: {
+                                                    beginAtZero: true,
+                                                    title: {
+                                                        display: true,
+                                                        text: 'Count'
+                                                    }
+                                                },
+                                                x: {
+                                                    title: {
+                                                        display: true,
+                                                        text: 'Date'
+                                                    }
+                                                }
+                                            },
+                                            plugins: {
+                                                tooltip: {
+                                                    callbacks: {
+                                                        afterBody: (context) => {
+                                                            const dataIndex = context[0].dataIndex;
+                                                            return `Conversion: ${graphData[dataIndex].conversion_percentage}%`;
+                                                        }
+                                                    }
+                                                },
+                                                legend: {
+                                                    position: 'top',
+                                                }
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        
                         {/* Message Statistics */}
                         {!isLoading && Object.keys(messageStats).length > 0 && (
                             <div className={styles.stats_section}>
@@ -634,7 +729,8 @@ const UsersData = () => {
                                     { id: 'city', displayName: 'City' },
                                     { id: 'userRegistrationComplete', displayName: 'Registration' },
                                     { id: 'schoolName', displayName: 'School' },
-                                    { id: 'persona', displayName: 'Persona' }
+                                    { id: 'persona', displayName: 'Persona' },
+                                    { id: 'source', displayName: 'Source' }
                                 ]}
                                 filename="students_data.csv"
                                 className={styles.download_button}
@@ -689,6 +785,7 @@ const UsersData = () => {
                                                     <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
+                                            <th className={styles.table_heading}>Source</th>
                                             <th className={styles.table_heading}>School</th>
                                             <th className={styles.table_heading}>Persona</th>
                                             <th className={styles.table_heading}>Current Stage</th>
@@ -736,6 +833,7 @@ const UsersData = () => {
                                                 <td className={styles.normal_text}>{user.freeDemoStarted}</td>
                                                 <td className={styles.normal_text}>{user.freeDemoEnded}</td>
                                                 <td className={styles.normal_text}>{user.userRegistrationComplete}</td>
+                                                <td className={styles.normal_text}>{user.source}</td>
                                                 <td className={styles.normal_text}>{user.schoolName}</td>
                                                 <td className={styles.normal_text}>{user.persona}</td>
                                                 <td className={styles.normal_text}>{user.currentStage}</td>
