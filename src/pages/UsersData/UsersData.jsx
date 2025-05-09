@@ -73,7 +73,14 @@ const UsersData = () => {
 
     // Helper function to escape commas
     const escapeCommas = (field) => {
-        return field && field.includes(",") ? `"${field}"` : field;
+        if (!field) return field;
+        // Convert to string to handle non-string types
+        const str = String(field);
+        // If the field contains a comma or a quote, wrap it in quotes and escape any existing quotes
+        if (str.includes(",") || str.includes("\"")) {
+            return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
     };
 
     // Generate options for activity type filter
@@ -160,9 +167,16 @@ const UsersData = () => {
         if (messageFilter) {
             const selectedMessages = JSON.parse(messageFilter.value);
             filteredData = filteredData.filter(item => {
-                // Compare the comma-separated string versions
-                const itemMessages = item.acceptableMessages;
-                return itemMessages === formatArrayForDisplay(selectedMessages);
+                // Get the original message data rather than comparing the formatted strings
+                // This ensures filtering works correctly with escaped CSV values
+                const selectedMessagesStr = formatArrayForDisplay(selectedMessages);
+                const itemMessagesStr = item.acceptableMessages;
+                
+                // Remove any CSV escaping before comparison
+                const cleanSelectedStr = selectedMessagesStr.replace(/^"(.*)"$/, '$1').replace(/""/g, '"');
+                const cleanItemStr = itemMessagesStr.replace(/^"(.*)"$/, '$1').replace(/""/g, '"');
+                
+                return cleanItemStr === cleanSelectedStr;
             });
         }
         
@@ -215,14 +229,14 @@ const UsersData = () => {
                 phoneNumber: user.phoneNumber ? `${user.phoneNumber}` : "",
                 name: escapeCommas(user.name),
                 city: escapeCommas(user.city),
-                targetGroup: user.targetGroup ? `${user.targetGroup}` : "",
-                cohort: user.cohort ? `${user.cohort}` : "",
+                targetGroup: escapeCommas(user.targetGroup ? `${user.targetGroup}` : ""),
+                cohort: escapeCommas(user.cohort ? `${user.cohort}` : ""),
                 isTeacher: user.isTeacher ? `${user.isTeacher}` : "",
-                schoolName: user.schoolName ? `${user.schoolName}` : "",
-                freeDemoStarted: user.freeDemoStarted ? new Date(user.freeDemoStarted).toLocaleString().replace(",", "") : "",
-                freeDemoEnded: user.freeDemoEnded ? new Date(user.freeDemoEnded).toLocaleString().replace(",", "") : "",
-                userClickedLink: user.userClickedLink ? new Date(user.userClickedLink).toLocaleString().replace(",", "") : "",
-                userRegistrationComplete: user.userRegistrationComplete ? new Date(user.userRegistrationComplete).toLocaleString().replace(",", "") : ""
+                schoolName: escapeCommas(user.schoolName ? `${user.schoolName}` : ""),
+                freeDemoStarted: user.freeDemoStarted ? escapeCommas(new Date(user.freeDemoStarted).toLocaleString().replace(",", "")) : "",
+                freeDemoEnded: user.freeDemoEnded ? escapeCommas(new Date(user.freeDemoEnded).toLocaleString().replace(",", "")) : "",
+                userClickedLink: user.userClickedLink ? escapeCommas(new Date(user.userClickedLink).toLocaleString().replace(",", "")) : "",
+                userRegistrationComplete: user.userRegistrationComplete ? escapeCommas(new Date(user.userRegistrationComplete).toLocaleString().replace(",", "")) : ""
             }));
             setUserData(formattedData);
         } catch (error) {
@@ -272,24 +286,24 @@ const UsersData = () => {
                     return {
                         phoneNumber: user.phoneNumber || "",
                         city: escapeCommas(user.city || ""),
-                        userClickedLink: user.userClickedLink ? new Date(user.userClickedLink).toLocaleString().replace(",", "") : "",
-                        freeDemoStarted: user.freeDemoStarted ? new Date(user.freeDemoStarted).toLocaleString().replace(",", "") : "",
-                        currentStage: currentStage,
-                        freeDemoEnded: user.freeDemoEnded ? new Date(user.freeDemoEnded).toLocaleString().replace(",", "") : "",
-                        userRegistrationComplete: user.userRegistrationComplete ? new Date(user.userRegistrationComplete).toLocaleString().replace(",", "") : "",
+                        userClickedLink: user.userClickedLink ? escapeCommas(new Date(user.userClickedLink).toLocaleString().replace(",", "")) : "",
+                        freeDemoStarted: user.freeDemoStarted ? escapeCommas(new Date(user.freeDemoStarted).toLocaleString().replace(",", "")) : "",
+                        currentStage: escapeCommas(currentStage),
+                        freeDemoEnded: user.freeDemoEnded ? escapeCommas(new Date(user.freeDemoEnded).toLocaleString().replace(",", "")) : "",
+                        userRegistrationComplete: user.userRegistrationComplete ? escapeCommas(new Date(user.userRegistrationComplete).toLocaleString().replace(",", "")) : "",
                         schoolName: escapeCommas(user.schoolName || ""),
-                        persona: persona,
+                        persona: escapeCommas(persona),
                         sortingStage: sortingStage,
                         level1_trial_starts: user.level1_trial_starts || 0,
                         level3_trial_starts: user.level3_trial_starts || 0,
-                        activityType: user.activityType || "",
-                        currentLessonId: user.currentLessonId || "",
-                        currentLesson_sequence: user.currentLesson_sequence || "",
-                        questionNumber: user.questionNumber || "",
-                        acceptableMessages: user.acceptableMessages ? formatArrayForDisplay(user.acceptableMessages) : "",
-                        last_message_content: user.last_message_content ? formatArrayForDisplay(user.last_message_content) : "",
-                        last_message_timestamp: user.last_message_timestamp ? new Date(user.last_message_timestamp).toLocaleString().replace(",", "") : "",
-                        source: user.source ? `${user.source}` : ""
+                        activityType: escapeCommas(user.activityType || ""),
+                        currentLessonId: escapeCommas(user.currentLessonId || ""),
+                        currentLesson_sequence: escapeCommas(user.currentLesson_sequence || ""),
+                        questionNumber: escapeCommas(user.questionNumber || ""),
+                        acceptableMessages: user.acceptableMessages ? escapeCommas(formatArrayForDisplay(user.acceptableMessages)) : "",
+                        last_message_content: user.last_message_content ? escapeCommas(formatArrayForDisplay(user.last_message_content)) : "",
+                        last_message_timestamp: user.last_message_timestamp ? escapeCommas(new Date(user.last_message_timestamp).toLocaleString().replace(",", "")) : "",
+                        source: escapeCommas(user.source ? `${user.source}` : "")
                     };
                 });
                 
@@ -727,10 +741,23 @@ const UsersData = () => {
                                 columns={[
                                     { id: 'phoneNumber', displayName: 'Phone Number' },
                                     { id: 'city', displayName: 'City' },
+                                    { id: 'userClickedLink', displayName: 'Clicked Link' },
+                                    { id: 'freeDemoStarted', displayName: 'Demo Started' },
+                                    { id: 'freeDemoEnded', displayName: 'Demo Ended' },
                                     { id: 'userRegistrationComplete', displayName: 'Registration' },
+                                    { id: 'source', displayName: 'Source' },
                                     { id: 'schoolName', displayName: 'School' },
                                     { id: 'persona', displayName: 'Persona' },
-                                    { id: 'source', displayName: 'Source' }
+                                    { id: 'currentStage', displayName: 'Current Stage' },
+                                    { id: 'level1_trial_starts', displayName: 'Level 1 Trials' },
+                                    { id: 'level3_trial_starts', displayName: 'Level 3 Trials' },
+                                    { id: 'activityType', displayName: 'Activity Type' },
+                                    { id: 'currentLessonId', displayName: 'Current Lesson ID' },
+                                    { id: 'currentLesson_sequence', displayName: 'Lesson Sequence' },
+                                    { id: 'questionNumber', displayName: 'Question Number' },
+                                    { id: 'acceptableMessages', displayName: 'Acceptable Messages' },
+                                    { id: 'last_message_content', displayName: 'Last Message' },
+                                    { id: 'last_message_timestamp', displayName: 'Last Message Time' }
                                 ]}
                                 filename="students_data.csv"
                                 className={styles.download_button}
