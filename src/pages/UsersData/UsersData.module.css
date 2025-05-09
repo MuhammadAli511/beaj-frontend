@@ -617,3 +617,22 @@
     transform: translateY(-1px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+
+/* Column width adjustments */
+.table td:nth-child(17), /* Acceptable Messages column */
+.table th:nth-child(17) {
+    min-width: 200px;
+    max-width: 200px;
+    width: 200px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.table td:nth-child(18), /* Last Message column */
+.table th:nth-child(18) {
+    min-width: 350px;
+    max-width: 350px;
+    width: 350px;
+    white-space: normal;
+    word-wrap: break-word;
+}
