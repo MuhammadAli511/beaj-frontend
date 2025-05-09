@@ -40,6 +40,10 @@ const UsersData = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [phoneNumberSearch, setPhoneNumberSearch] = useState('');
     const [graphData, setGraphData] = useState([]);
+    
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 20; // Number of rows to display per page
 
     // Sorting state
     const [sortConfig, setSortConfig] = useState({
@@ -211,6 +215,11 @@ const UsersData = () => {
         setPhoneNumberSearch('');
     };
 
+    // Effect to reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [phoneNumberSearch, dateFilter, activityTypeFilter, messageFilter, activeTab]);
+
     useEffect(() => {
         if (activeTab === 'teacher') {
             fetchTeacherData();
@@ -359,6 +368,82 @@ const UsersData = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    // Apply pagination to the processed data
+    const getPaginatedData = (data) => {
+        const processedData = getProcessedData(data);
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+        return processedData.slice(indexOfFirstItem, indexOfLastItem);
+    };
+
+    // Total pages calculation
+    const getTotalPages = (data) => {
+        return Math.ceil(filterData(data).length / itemsPerPage);
+    };
+
+    // Pagination component
+    const Pagination = ({ data }) => {
+        const totalPages = getTotalPages(data);
+        
+        const getPageNumbers = () => {
+            const pageNumbers = [];
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+            
+            if (totalPages - startPage < maxPagesToShow) {
+                startPage = Math.max(1, totalPages - maxPagesToShow + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                pageNumbers.push(i);
+            }
+            return pageNumbers;
+        };
+
+        return (
+            <div className={styles.pagination}>
+                <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className={styles.pagination_button}
+                >
+                    1
+                </button>
+
+                {getPageNumbers()[0] > 2 && <span>...</span>}
+
+                {getPageNumbers().map(number => (
+                    number !== 1 && number !== totalPages && (
+                        <button
+                            key={number}
+                            onClick={() => setCurrentPage(number)}
+                            className={`${styles.pagination_button} ${currentPage === number ? styles.active : ''}`}
+                        >
+                            {number}
+                        </button>
+                    )
+                ))}
+
+                {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && <span>...</span>}
+
+                {totalPages > 1 && (
+                    <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        className={styles.pagination_button}
+                    >
+                        {totalPages}
+                    </button>
+                )}
+
+                <span className={styles.page_info}>
+                    ({getFilteredRecords(data)} total records)
+                </span>
+            </div>
+        );
     };
 
     return (
@@ -555,7 +640,7 @@ const UsersData = () => {
                                         </tr>
                                     </thead>
                                     <tbody className={styles.table_body}>
-                                        {getProcessedData(userData).map((user, index) => (
+                                        {getPaginatedData(userData).map((user, index) => (
                                             <tr key={index}>
                                                 <td>{user.userId || ""}</td>
                                                 <td>{user.phoneNumber || ""}</td>
@@ -573,6 +658,7 @@ const UsersData = () => {
                                         ))}
                                     </tbody>
                                 </table>
+                                <Pagination data={userData} />
                             </div>
                         )}
                     </>
@@ -852,7 +938,7 @@ const UsersData = () => {
                                         </tr>
                                     </thead>
                                     <tbody className={styles.table_body}>
-                                        {getProcessedData(studentUserData).map((user, index) => (
+                                        {getPaginatedData(studentUserData).map((user, index) => (
                                             <tr key={index} className={`${styles.table_row} ${styles[user.sortingStage.toLowerCase().replace(' ', '_')]}`}>
                                                 <td className={styles.normal_text}>{user.phoneNumber}</td>
                                                 <td className={styles.normal_text}>{user.city}</td>
@@ -877,6 +963,7 @@ const UsersData = () => {
                                         ))}
                                     </tbody>
                                 </table>
+                                <Pagination data={studentUserData} />
                             </div>
                         )}
                     </>
