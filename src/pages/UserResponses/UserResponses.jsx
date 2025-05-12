@@ -77,7 +77,7 @@ const UserResponses = () => {
         };
 
         fetchResponses();
-    }, [selectedActivityType, courses]);
+    }, [selectedActivityType, selectedCourse, courses]);
 
     useEffect(() => {
         setCurrentPage(1);

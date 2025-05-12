@@ -40,7 +40,7 @@ const UsersData = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [phoneNumberSearch, setPhoneNumberSearch] = useState('');
     const [graphData, setGraphData] = useState([]);
-    
+
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 20; // Number of rows to display per page
