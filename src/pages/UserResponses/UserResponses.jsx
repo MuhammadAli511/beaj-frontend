@@ -77,11 +77,63 @@ const UserResponses = () => {
         };
 
         fetchResponses();
-    }, [selectedActivityType, selectedCourse, courses]);
+    }, [selectedActivityType, courses]);
 
     useEffect(() => {
         setCurrentPage(1);
     }, [searchQuery, selectedWeek, selectedDay, selectedActivityType, selectedCourse]);
+
+    // Add a new useEffect to handle course changes
+    useEffect(() => {
+        const fetchCourseSpecificData = async () => {
+            if (!selectedActivityType || !selectedCourse) return;
+            
+            setIsLoading(true);
+            try {
+                // Filter data client-side instead of server-side
+                const responsesResponse = await getQuestionResponsesByActivityType(selectedActivityType.value);
+                
+                // Client-side filtering by course
+                const filteredResults = responsesResponse.data.result.filter(
+                    item => Number(item.courseId) === selectedCourse.value
+                );
+                
+                setUserResponses(filteredResults);
+                
+                // Handle MCQ statistics if available - recalculate for the filtered data
+                if (responsesResponse.data.feedbackMcqsStatistics && selectedActivityType.value === 'feedbackMcqs') {
+                    // Create filtered MCQ stats manually from the filtered results
+                    const filteredStats = {};
+                    
+                    // Only process MCQ statistics if we have feedbackMcqs data
+                    filteredResults.forEach(item => {
+                        if (item.question) {
+                            if (!filteredStats[item.question]) {
+                                filteredStats[item.question] = {};
+                            }
+                            
+                            // Get the answer
+                            const answer = Array.isArray(item.answer) ? item.answer[0] : item.answer;
+                            
+                            if (!filteredStats[item.question][answer]) {
+                                filteredStats[item.question][answer] = 1;
+                            } else {
+                                filteredStats[item.question][answer]++;
+                            }
+                        }
+                    });
+                    
+                    setMcqStatistics(filteredStats);
+                }
+            } catch (error) {
+                console.error("Error fetching course-specific data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        fetchCourseSpecificData();
+    }, [selectedCourse, selectedActivityType]);
 
     const weekOptions = Array.from({ length: 4 }, (_, i) => ({
         value: i + 1,
