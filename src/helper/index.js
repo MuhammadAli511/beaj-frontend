@@ -1052,3 +1052,26 @@ export const getQuestionResponsesByActivityType = async (activityType) => {
     const data = await response.json();
     return { status: response.status, data };
 };
+
+// PAYMENT VERIFICATION
+// GET api/waPurchasedCourses/getPurchasedCourseByPaymentStatus/:paymentStatus
+export const getPurchasedCourseByPaymentStatus = async (paymentStatus) => {
+    const response = await fetch(`${API_URL}/waPurchasedCourses/getPurchasedCourseByPaymentStatus/${paymentStatus}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// PUT api/waPurchasedCourses/updatePaymentStatusByProfileId
+export const updatePaymentStatusByProfileId = async (profileId, paymentStatus) => {
+    const response = await fetch(`${API_URL}/waPurchasedCourses/updatePaymentStatusByProfileId`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({ profileId, paymentStatus }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};

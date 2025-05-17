@@ -11,6 +11,7 @@ import LastActiveUsers from './LastActiveUsers/LastActiveUsers';
 import UserFeedback from './UserFeedback/UserFeedback';
 import UserResponses from './UserResponses/UserResponses';
 import UserProgress from './UserProgress/UserProgress';
+import PaymentVerification from './PaymentVerification/PaymentVerification';
 
 export {
     NotFound,
@@ -26,5 +27,6 @@ export {
     UserFeedback,
     UserResponses,
     UserProgress,
+    PaymentVerification,
 };
 
