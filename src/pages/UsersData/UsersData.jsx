@@ -8,25 +8,25 @@ import { TailSpin } from 'react-loader-spinner';
 import Select from 'react-select';
 import { Line } from 'react-chartjs-2';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
 } from 'chart.js';
 
 // Register ChartJS components
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
 );
 
 const UsersData = () => {
@@ -36,6 +36,7 @@ const UsersData = () => {
     const [studentStats, setStudentStats] = useState({});
     const [messageStats, setMessageStats] = useState({});
     const [activityTypeStats, setActivityTypeStats] = useState({});
+    const [personaStats, setPersonaStats] = useState({});
     const [activeTab, setActiveTab] = useState('student');
     const [isLoading, setIsLoading] = useState(false);
     const [phoneNumberSearch, setPhoneNumberSearch] = useState('');
@@ -58,9 +59,10 @@ const UsersData = () => {
         column: null
     });
 
-    // Activity Type and Acceptable Messages filters
+    // Activity Type, Acceptable Messages, and Persona filters
     const [activityTypeFilter, setActivityTypeFilter] = useState(null);
     const [messageFilter, setMessageFilter] = useState(null);
+    const [personaFilter, setPersonaFilter] = useState(null);
 
     const dateColumnOptions = [
         { value: 'userClickedLink', label: 'Clicked Link' },
@@ -86,6 +88,14 @@ const UsersData = () => {
         }
         return str;
     };
+
+    // Generate options for persona filter
+    const personaOptions = useMemo(() => {
+        return Object.keys(personaStats).filter(persona => persona).map(persona => ({
+            value: persona,
+            label: persona
+        }));
+    }, [personaStats]);
 
     // Generate options for activity type filter
     const activityTypeOptions = useMemo(() => {
@@ -126,11 +136,11 @@ const UsersData = () => {
 
             // For numeric fields (trial starts), use numeric comparison
             if (sortConfig.key === 'level1_trial_starts' || sortConfig.key === 'level3_trial_starts') {
-                return sortConfig.direction === 'asc' 
-                    ? Number(aValue) - Number(bValue) 
+                return sortConfig.direction === 'asc'
+                    ? Number(aValue) - Number(bValue)
                     : Number(bValue) - Number(aValue);
             }
-            
+
             // For date/string fields, use string comparison
             const comparison = aValue.toString().localeCompare(bValue.toString());
             return sortConfig.direction === 'asc' ? comparison : -comparison;
@@ -140,14 +150,14 @@ const UsersData = () => {
     // Filter data by all filters
     const filterData = (data) => {
         let filteredData = data;
-        
+
         // Apply phone number search filter
         if (phoneNumberSearch.trim() !== '') {
-            filteredData = filteredData.filter(item => 
+            filteredData = filteredData.filter(item =>
                 item.phoneNumber && item.phoneNumber.includes(phoneNumberSearch.trim())
             );
         }
-        
+
         // Apply date filter
         if (dateFilter.column && dateFilter.from && dateFilter.to) {
             filteredData = filteredData.filter(item => {
@@ -159,14 +169,21 @@ const UsersData = () => {
                 return date >= fromDate && date <= toDate;
             });
         }
-        
+
         // Apply activity type filter
         if (activityTypeFilter) {
-            filteredData = filteredData.filter(item => 
+            filteredData = filteredData.filter(item =>
                 item.activityType === activityTypeFilter.value
             );
         }
-        
+
+        // Apply persona filter
+        if (personaFilter) {
+            filteredData = filteredData.filter(item =>
+                item.persona === personaFilter.value
+            );
+        }
+
         // Apply acceptable messages filter
         if (messageFilter) {
             const selectedMessages = JSON.parse(messageFilter.value);
@@ -175,15 +192,15 @@ const UsersData = () => {
                 // This ensures filtering works correctly with escaped CSV values
                 const selectedMessagesStr = formatArrayForDisplay(selectedMessages);
                 const itemMessagesStr = item.acceptableMessages;
-                
+
                 // Remove any CSV escaping before comparison
                 const cleanSelectedStr = selectedMessagesStr.replace(/^"(.*)"$/, '$1').replace(/""/g, '"');
                 const cleanItemStr = itemMessagesStr.replace(/^"(.*)"$/, '$1').replace(/""/g, '"');
-                
+
                 return cleanItemStr === cleanSelectedStr;
             });
         }
-        
+
         return filteredData;
     };
 
@@ -212,13 +229,14 @@ const UsersData = () => {
         });
         setActivityTypeFilter(null);
         setMessageFilter(null);
+        setPersonaFilter(null);
         setPhoneNumberSearch('');
     };
 
     // Effect to reset to page 1 when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [phoneNumberSearch, dateFilter, activityTypeFilter, messageFilter, activeTab]);
+    }, [phoneNumberSearch, dateFilter, activityTypeFilter, messageFilter, personaFilter, activeTab]);
 
     useEffect(() => {
         if (activeTab === 'teacher') {
@@ -260,14 +278,14 @@ const UsersData = () => {
             setIsLoading(true);
             // Default date filter set to a future date to include all data
             const response = await getStudentUserJourneyStats('2025-04-26 12:00:00');
-            
+
             if (response.status === 200 && response.data) {
                 // Format user data for table
                 const formattedUserData = response.data.userData.map(user => {
                     // Determine current stage based on available data (for sorting)
                     let sortingStage;
                     let displayStage;
-                    
+
                     if (user.userRegistrationComplete) {
                         sortingStage = "Registration Complete";
                         displayStage = "Registration Complete";
@@ -289,9 +307,6 @@ const UsersData = () => {
                     // Determine demo type from engagement_type
                     const currentStage = user.engagement_type || "";
 
-                    // Determine persona based on city
-                    const persona = !user.city || user.city.trim() === "" ? "Parent / Student" : "School Admin";
-                    
                     return {
                         phoneNumber: user.phoneNumber || "",
                         city: escapeCommas(user.city || ""),
@@ -301,7 +316,7 @@ const UsersData = () => {
                         freeDemoEnded: user.freeDemoEnded ? escapeCommas(new Date(user.freeDemoEnded).toLocaleString().replace(",", "")) : "",
                         userRegistrationComplete: user.userRegistrationComplete ? escapeCommas(new Date(user.userRegistrationComplete).toLocaleString().replace(",", "")) : "",
                         schoolName: escapeCommas(user.schoolName || ""),
-                        persona: escapeCommas(persona),
+                        persona: user.persona || "parent or student",
                         sortingStage: sortingStage,
                         level1_trial_starts: user.level1_trial_starts || 0,
                         level3_trial_starts: user.level3_trial_starts || 0,
@@ -315,7 +330,7 @@ const UsersData = () => {
                         source: escapeCommas(user.source ? `${user.source}` : "")
                     };
                 });
-                
+
                 // Sort by funnel stage using the sortingStage field
                 const sortedUserData = formattedUserData.sort((a, b) => {
                     const stageOrder = {
@@ -325,10 +340,10 @@ const UsersData = () => {
                         "Registration Complete": 4,
                         "Unknown": 5
                     };
-                    
+
                     return stageOrder[a.sortingStage] - stageOrder[b.sortingStage];
                 });
-                
+
                 setStudentUserData(sortedUserData);
                 setStudentStats(response.data.stats || {});
 
@@ -360,6 +375,18 @@ const UsersData = () => {
                 });
                 setActivityTypeStats(activityStatsData);
 
+                // Generate persona statistics
+                const personaStatsData = {};
+                response.data.userData.forEach(user => {
+                    if (user.persona) {
+                        if (!personaStatsData[user.persona]) {
+                            personaStatsData[user.persona] = 0;
+                        }
+                        personaStatsData[user.persona] += 1;
+                    }
+                });
+                setPersonaStats(personaStatsData);
+
                 // Update graphData
                 setGraphData(response.data.graphData);
             }
@@ -386,17 +413,17 @@ const UsersData = () => {
     // Pagination component
     const Pagination = ({ data }) => {
         const totalPages = getTotalPages(data);
-        
+
         const getPageNumbers = () => {
             const pageNumbers = [];
             const maxPagesToShow = 5;
             let startPage = Math.max(1, currentPage - 2);
             let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-            
+
             if (totalPages - startPage < maxPagesToShow) {
                 startPage = Math.max(1, totalPages - maxPagesToShow + 1);
             }
-            
+
             for (let i = startPage; i <= endPage; i++) {
                 pageNumbers.push(i);
             }
@@ -452,15 +479,15 @@ const UsersData = () => {
             {isSidebarOpen && <Sidebar />}
             <div className={styles.content}>
                 <h1>Users Data</h1>
-                
+
                 <div className={styles.tabs}>
-                    <button 
+                    <button
                         className={`${styles.tab_button} ${activeTab === 'student' ? styles.active_tab : ''}`}
                         onClick={() => setActiveTab('student')}
                     >
                         Student Product
                     </button>
-                    <button 
+                    <button
                         className={`${styles.tab_button} ${activeTab === 'teacher' ? styles.active_tab : ''}`}
                         onClick={() => setActiveTab('teacher')}
                     >
@@ -523,6 +550,17 @@ const UsersData = () => {
                                 />
                             </div>
                             <div className={styles.filter_group}>
+                                <label className={styles.filter_label}>Persona</label>
+                                <Select
+                                    className={styles.select}
+                                    options={personaOptions}
+                                    value={personaFilter}
+                                    onChange={setPersonaFilter}
+                                    isClearable
+                                    placeholder="Select Persona"
+                                />
+                            </div>
+                            <div className={styles.filter_group}>
                                 <label className={styles.filter_label}>Acceptable Messages</label>
                                 <Select
                                     className={styles.select}
@@ -534,7 +572,7 @@ const UsersData = () => {
                                 />
                             </div>
                             <div className={styles.filter_group}>
-                                <button 
+                                <button
                                     className={styles.clear_filters_button}
                                     onClick={clearFilters}
                                 >
@@ -558,7 +596,7 @@ const UsersData = () => {
                         )}
                     </div>
                 </div>
-                
+
                 {activeTab === 'teacher' ? (
                     <>
                         <div className={styles.stats_summary}>
@@ -583,7 +621,7 @@ const UsersData = () => {
                                 text="Download CSV"
                             />
                         </div>
-                        
+
                         {isLoading ? (
                             <div className={styles.loader_container}>
                                 <TailSpin color="#51bbcc" height={50} width={50} />
@@ -601,7 +639,7 @@ const UsersData = () => {
                                             <th className={styles.table_heading}>Cohort</th>
                                             <th className={styles.table_heading}>Teacher</th>
                                             <th className={styles.table_heading}>School Name</th>
-                                            <th 
+                                            <th
                                                 className={`${styles.table_heading} ${styles.sortable}`}
                                                 onClick={() => handleSort('freeDemoStarted')}
                                             >
@@ -610,7 +648,7 @@ const UsersData = () => {
                                                     <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
-                                            <th 
+                                            <th
                                                 className={`${styles.table_heading} ${styles.sortable}`}
                                                 onClick={() => handleSort('freeDemoEnded')}
                                             >
@@ -619,7 +657,7 @@ const UsersData = () => {
                                                     <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
-                                            <th 
+                                            <th
                                                 className={`${styles.table_heading} ${styles.sortable}`}
                                                 onClick={() => handleSort('userClickedLink')}
                                             >
@@ -628,7 +666,7 @@ const UsersData = () => {
                                                     <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
-                                            <th 
+                                            <th
                                                 className={`${styles.table_heading} ${styles.sortable}`}
                                                 onClick={() => handleSort('userRegistrationComplete')}
                                             >
@@ -674,15 +712,15 @@ const UsersData = () => {
                                 // Define specific order for stats cards
                                 ['Clicked Link', 'Demo Started', 'Demo Ended', 'Registration Completed'].map((stage, index, stagesArray) => {
                                     const data = studentStats[stage] || { count: 0, percentage: 0, dropPercentage: 0 };
-                                    
+
                                     // Calculate correct conversion and drop rates based on actual counts
                                     let conversionRate = 100; // Default for first stage
                                     let dropRate = 0;
-                                    
+
                                     if (index > 0) {
                                         const previousStage = stagesArray[index - 1];
                                         const previousCount = studentStats[previousStage]?.count || 0;
-                                        
+
                                         if (previousCount > 0) {
                                             conversionRate = ((data.count / previousCount) * 100).toFixed(2);
                                             dropRate = (100 - conversionRate).toFixed(2);
@@ -691,7 +729,7 @@ const UsersData = () => {
                                             dropRate = "100.00";
                                         }
                                     }
-                                    
+
                                     return (
                                         <div key={stage} className={styles.stat_card}>
                                             <h3>{stage}</h3>
@@ -709,7 +747,7 @@ const UsersData = () => {
                                 })
                             )}
                         </div>
-                        
+
                         {/* Conversion Graph */}
                         {!isLoading && graphData && graphData.length > 0 && (
                             <div className={styles.graph_container}>
@@ -777,7 +815,7 @@ const UsersData = () => {
                                 </div>
                             </div>
                         )}
-                        
+
                         {/* Message Statistics */}
                         {!isLoading && Object.keys(messageStats).length > 0 && (
                             <div className={styles.stats_section}>
@@ -795,6 +833,25 @@ const UsersData = () => {
                                             </div>
                                             <div className={styles.stat_count}>
                                                 {stat.count} users
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Persona Statistics */}
+                        {!isLoading && Object.keys(personaStats).length > 0 && (
+                            <div className={styles.stats_section}>
+                                <h3>Users by Persona</h3>
+                                <div className={styles.stats_grid}>
+                                    {Object.entries(personaStats).filter(([persona]) => persona).sort((a, b) => b[1] - a[1]).map(([persona, count], index) => (
+                                        <div key={index} className={styles.activity_stat_card}>
+                                            <div className={styles.activity_badge}>
+                                                {persona || 'Unknown'}
+                                            </div>
+                                            <div className={styles.stat_count}>
+                                                {count} users
                                             </div>
                                         </div>
                                     ))}
@@ -820,7 +877,7 @@ const UsersData = () => {
                                 </div>
                             </div>
                         )}
-                        
+
                         <div className={styles.stats_summary}>
                             <CSVDownloader
                                 datas={getProcessedData(studentUserData)}
@@ -850,7 +907,7 @@ const UsersData = () => {
                                 text="Download CSV"
                             />
                         </div>
-                        
+
                         {isLoading ? (
                             <div className={styles.loader_container}>
                                 <TailSpin color="#51bbcc" height={50} width={50} />
@@ -862,7 +919,7 @@ const UsersData = () => {
                                         <tr>
                                             <th className={styles.table_heading}>Phone Number</th>
                                             <th className={styles.table_heading}>City</th>
-                                            <th 
+                                            <th
                                                 className={`${styles.table_heading} ${styles.sortable}`}
                                                 onClick={() => handleSort('userClickedLink')}
                                             >
@@ -871,7 +928,7 @@ const UsersData = () => {
                                                     <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
-                                            <th 
+                                            <th
                                                 className={`${styles.table_heading} ${styles.sortable}`}
                                                 onClick={() => handleSort('freeDemoStarted')}
                                             >
@@ -880,7 +937,7 @@ const UsersData = () => {
                                                     <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
-                                            <th 
+                                            <th
                                                 className={`${styles.table_heading} ${styles.sortable}`}
                                                 onClick={() => handleSort('freeDemoEnded')}
                                             >
@@ -889,7 +946,7 @@ const UsersData = () => {
                                                     <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
-                                            <th 
+                                            <th
                                                 className={`${styles.table_heading} ${styles.sortable}`}
                                                 onClick={() => handleSort('userRegistrationComplete')}
                                             >
@@ -902,7 +959,7 @@ const UsersData = () => {
                                             <th className={styles.table_heading}>School</th>
                                             <th className={styles.table_heading}>Persona</th>
                                             <th className={styles.table_heading}>Current Stage</th>
-                                            <th 
+                                            <th
                                                 className={`${styles.table_heading} ${styles.sortable}`}
                                                 onClick={() => handleSort('level1_trial_starts')}
                                             >
@@ -911,7 +968,7 @@ const UsersData = () => {
                                                     <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
                                                 )}
                                             </th>
-                                            <th 
+                                            <th
                                                 className={`${styles.table_heading} ${styles.sortable}`}
                                                 onClick={() => handleSort('level3_trial_starts')}
                                             >
@@ -926,7 +983,7 @@ const UsersData = () => {
                                             <th className={styles.table_heading}>Question Number</th>
                                             <th className={styles.table_heading}>Acceptable Messages</th>
                                             <th className={styles.table_heading}>Last Message</th>
-                                            <th 
+                                            <th
                                                 className={`${styles.table_heading} ${styles.sortable}`}
                                                 onClick={() => handleSort('last_message_timestamp')}
                                             >
