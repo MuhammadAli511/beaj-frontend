@@ -243,3 +243,18 @@ img {
   transform: translateY(-2px);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
+
+.test_button {
+  padding: 8px 16px;
+  background-color: rgb(76, 162, 229);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin: 0 auto;
+  display: block;
+  min-width: 60px;
+}

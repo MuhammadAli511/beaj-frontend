@@ -7,12 +7,14 @@ import {
     getAllActivityAliases,
     updateLesson,
     updateDocumentFile,
-    migrateLesson
+    migrateLesson,
+    testLesson
 } from "../../../../../helper";
 import edit from '../../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../../assets/images/delete.svg';
 import styles from './ReadLesson.module.css';
 import MigrateLessonModal from "../../../../../components/MigrateLessonModal/MigrateLessonModal";
+import TestLessonModal from "../../../../../components/TestLessonModal/TestLessonModal";
 
 const EditReadLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -322,6 +324,7 @@ const ReadLesson = ({ category, course }) => {
     const [isEditReadLessonModalOpen, setIsEditReadLessonModalOpen] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
+    const [isTestLessonModalOpen, setIsTestLessonModalOpen] = useState(false);
     const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT == "DEV";
 
     const fetchLessons = async () => {
@@ -383,6 +386,26 @@ const ReadLesson = ({ category, course }) => {
         fetchLessons();
     };
 
+    const openTestLessonModal = (lesson) => {
+            setSelectedLesson(lesson);
+            setIsTestLessonModalOpen(true);
+        };
+    
+        const closeTestLessonModal = () => {
+            setSelectedLesson(null);
+            setIsTestLessonModalOpen(false);
+        };
+    
+        const handleTestLesson = async (profile_id, phoneNumber, selectedLesson) => {
+            console.log(phoneNumber, selectedLesson);
+            const testResponse = await testLesson(profile_id, phoneNumber, selectedLesson);
+            if (testResponse.status !== 200) {
+                alert(testResponse.data.message);
+            } else {
+                alert("Lesson test setup successfully.");
+            }
+        };
+
     const handleDeleteLesson = async (lesson) => {
         const isConfirmed = window.confirm(
             "Are you sure you want to delete this lesson?"
@@ -425,6 +448,7 @@ const ReadLesson = ({ category, course }) => {
                             <th className={styles.table_heading}>Status</th>
                             {isDevEnvironment && <th className={styles.table_heading}>Migrate</th>}
                             <th className={styles.table_heading}>Edit</th>
+                            <th className={styles.table_heading}>Test</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
                     </thead>
@@ -471,6 +495,14 @@ const ReadLesson = ({ category, course }) => {
                                             alt="Edit"
                                         />
                                     </td>
+                                    <td style={{ width: "4%" }}>
+                                        <button
+                                            className={styles.test_button}
+                                            onClick={() => openTestLessonModal(lesson)}
+                                        >
+                                            Test
+                                        </button>
+                                    </td>
                                     <td style={{ width: "6.66%" }}>
                                         <img
                                             onClick={() => handleDeleteLesson(lesson)}
@@ -496,6 +528,14 @@ const ReadLesson = ({ category, course }) => {
                 lesson={selectedLesson}
                 onMigrate={handleMigrateLesson}
             />
+             {isTestLessonModalOpen && selectedLesson && (
+                            <TestLessonModal
+                                isOpen={isTestLessonModalOpen}
+                                onClose={closeTestLessonModal}
+                                lesson={selectedLesson}
+                                onTest={handleTestLesson}
+                            />
+                        )}
         </div>
     );
 };

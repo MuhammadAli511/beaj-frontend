@@ -1,33 +1,28 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Navbar, Sidebar } from "../../components";
-import styles from './UsersData.module.css';
-import { useSidebar } from '../../components/SidebarContext';
-import CSVDownloader from 'react-csv-downloader';
-import { getAllMetadata, getStudentUserJourneyStats } from '../../helper/index';
-import { TailSpin } from 'react-loader-spinner';
-import Select from 'react-select';
-import { Line } from 'react-chartjs-2';
+import { useState, useEffect, useMemo } from "react"
+import { Navbar, Sidebar } from "../../components"
+import styles from "./UsersData.module.css"
+import { useSidebar } from "../../components/SidebarContext"
+import CSVDownloader from "react-csv-downloader"
+import { getAllMetadata, getStudentUserJourneyStats,getStudentTrialUserJourneyStats } from "../../helper/index"
+import { TailSpin } from "react-loader-spinner"
+import Select from "react-select"
+import { Line, Bar, Pie, Doughnut, Radar,PolarArea } from "react-chartjs-2"
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
+  ArcElement,
   Title,
   Tooltip,
-  Legend
-} from 'chart.js';
+  Legend,
+  RadialLinearScale
+} from "chart.js"
 
 // Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(RadialLinearScale,CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend)
 
 const UsersData = () => {
     const { isSidebarOpen } = useSidebar();
@@ -40,6 +35,14 @@ const UsersData = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [phoneNumberSearch, setPhoneNumberSearch] = useState('');
     const [graphData, setGraphData] = useState([]);
+
+    const [userGroupPie, setUserGroupPie] = useState({ labels: [], data: [] });
+
+    const [trialLevel1Data, setTrialLevel1Data] = useState({ labels: [], data: [] });
+    const [trialLevel3Data, setTrialLevel3Data] = useState({ labels: [], data: [] });
+    const [registrationType, setRegistrationType] = useState({ labels: [], data: [] });
+    const [trialOpt, setTrialOpt] = useState({ labels: [], data: [] });
+    const [cumuReg, setCumuReg] = useState({ labels: [], data: [] });
     
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -260,6 +263,76 @@ const UsersData = () => {
             setIsLoading(true);
             // Default date filter set to a future date to include all data
             const response = await getStudentUserJourneyStats('2025-04-26 12:00:00');
+            const response1 = await getStudentTrialUserJourneyStats('2025-04-26 12:00:00');
+
+            if (response1.status === 200 && response1.data) {
+                const userGroup = response1.data.userGroup;
+
+                // Safely map known sources to custom labels
+                const labelMap = {
+                    'Unknown': "Can't Tell",
+                    'Social Media ads': 'Social Media',
+                    'Community': 'Community'
+                };
+
+                let labels = [];
+                let data = [];
+
+                userGroup.forEach(item => {
+                    const label = labelMap[item.source] || item.source;
+                    labels.push(label);
+                    data.push(parseInt(item.user_count || '0'));
+                });
+
+                setUserGroupPie({ labels, data });
+
+                const trialLevel1 = response1.data.lastActivityLevel1;
+                const trialLevel3 = response1.data.lastActivityLevel3;
+
+                labels = trialLevel1.map(item => item.LessonId);
+                data = trialLevel1.map(item => parseInt(item.total_students_completed));
+
+                setTrialLevel1Data({ labels, data });
+
+                labels = trialLevel3.map(item => item.LessonId);
+                data = trialLevel3.map(item => parseInt(item.total_students_completed));
+
+                setTrialLevel3Data({ labels, data });
+
+                const trialOptResp = response1.data.trialOpt?.[0];
+                
+                labels = ["Grade 1 or 2", "Grade 3 to 6"];
+                data = [
+                parseInt(trialOptResp.course_117 || 0),
+                parseInt(trialOptResp.course_113 || 0),
+                ];
+
+                console.log({ labels, data: data });
+
+                setTrialOpt({ labels, data });
+
+                const resgistrationTypeResp = response1.data.RegistrationType;
+                labels = resgistrationTypeResp.map(item => item.persona);
+                data = resgistrationTypeResp.map(item => parseInt(item.count));
+
+                setRegistrationType({ labels, data });
+
+                const cumuResp = response1.data.CumulativeReg?.[0];
+                
+                labels = ["Grade 1 or 2", "Grade 3 to 6"];
+                data = [
+                parseInt(cumuResp.course_117 || 0),
+                parseInt(cumuResp.course_113 || 0),
+                ];
+
+                console.log({ labels, data: data });
+
+                setCumuReg({ labels, data });
+
+                // setTrialLevel1Data(trialLevel1);
+                // setTrialLevel3Data(trialLevel3);
+            }
+
             
             if (response.status === 200 && response.data) {
                 // Format user data for table
@@ -777,6 +850,316 @@ const UsersData = () => {
                                 </div>
                             </div>
                         )}
+
+                        {/* New Charts Section */}
+            
+            {!isLoading && (
+             <div className={styles.charts_grid}>
+             {/* User Persona Pie Chart */}
+                <div className={styles.chart_container}>
+                  <h3>User Demographic Information</h3>
+                  <p>Distribution of users based on demographic categories.</p>
+                  <div className={styles.chart_wrapper}>
+                    <Pie
+                      data={{
+                        labels: userGroupPie.labels,
+                        datasets: [
+                          {
+                            data: userGroupPie.data,
+                            backgroundColor: ["rgba(255, 159, 64, 0.6)", "rgba(75, 192, 192, 0.6)", "rgba(153, 102, 255, 0.6)"],
+                            borderColor: ["rgba(255, 159, 64, 1)", "rgba(75, 192, 192, 1)", "rgba(153, 102, 255, 1)"],
+                            borderWidth: 1,
+                            boldness: 200,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: "bottom",
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: (context) => {
+                                const label = context.label || ""
+                                const value = context.raw || 0
+                                const total = context.dataset.data.reduce((acc, val) => acc + val, 0)
+                                const percentage = ((value / total) * 100).toFixed(1)
+                                return `${label}: ${value} (${percentage}%)`
+                              },
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+                 
+                
+                 <div className={styles.chart_container}>
+                  <h3>Trial Opt-ins by Level</h3>
+                  <p>Highlights number of users opting in for trials at each grade.</p>
+                  <div className={styles.chart_wrapper}>
+                    <Bar
+                            data={{
+                                labels: trialOpt.labels,
+                                datasets: [
+                                {
+                                    label: 'Trial Completions',
+                                    data: trialOpt.data,
+                                    backgroundColor: ['rgba(116, 243, 105, 0.6)', 'rgba(255, 205, 86, 0.6)'],
+                                    borderColor: ['rgba(116, 243, 105, 1)', 'rgba(255, 205, 86, 1)'],
+                                    borderWidth: 1,
+                                },
+                                ],
+                            }}
+                            options={{
+                                indexAxis: 'y', 
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    title: {
+                                    display: true,
+                                    text: 'No. of People',
+                                    },
+                                },
+                                y: {
+                                    title: {
+                                    display: true,
+                                    text: 'Trial Level',
+                                    },
+                                },
+                                },
+                                plugins: {
+                                legend: {
+                                    display: false,
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                    label: (context) => `Completed: ${context.raw}`,
+                                    },
+                                },
+                                },
+                            }}
+                            />
+
+                  </div>
+                </div>
+
+                 {/* <div className={styles.charts_grid}> */}
+                {/* Trial Level Bar Chart */}
+                <div className={styles.chart_container}>
+                  <h3>Trial Grade 1 or 2 Drop Off</h3>
+                  <p>Shows drop-off rates for users in trial across different lessons.</p>
+                  <div className={styles.chart_wrapper}>
+                    <Bar
+                      data={{
+                       labels: trialLevel1Data.labels,
+                        datasets: [
+                          {
+                            label: "Level 1 Completions",
+                            data: trialLevel1Data.data,
+                            backgroundColor: ["rgba(255, 99, 132, 0.6)", "rgba(54, 162, 235, 0.6)"],
+                            borderColor: ["rgba(255, 99, 132, 1)", "rgba(54, 162, 235, 1)"],
+                            borderWidth: 1,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            title: {
+                              display: true,
+                              text: "No. of People",
+                            },
+                          },
+                          x: {
+                            title: {
+                              display: true,
+                              text: "Lessons",
+                            },
+                          },
+                        },
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: (context) => `Trials: ${context.raw}`,
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.chart_container}>
+                  <h3>Trial Grade 3 to 6 Drop Off</h3>
+                  <p>Shows drop-off rates for users in trial across different lessons.</p>
+                  <div className={styles.chart_wrapper}>
+                    <Bar
+                      data={{
+                       labels: trialLevel3Data.labels,
+                        datasets: [
+                          {
+                            label: "Level 3 Completions",
+                            data: trialLevel3Data.data,
+                            backgroundColor: ["rgba(255, 99, 132, 0.6)", "rgba(54, 162, 235, 0.6)"],
+                            borderColor: ["rgba(255, 99, 132, 1)", "rgba(54, 162, 235, 1)"],
+                            borderWidth: 1,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            title: {
+                              display: true,
+                              text: "No. of People",
+                            },
+                          },
+                          x: {
+                            title: {
+                              display: true,
+                              text: "Lessons",
+                            },
+                          },
+                        },
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: (context) => `Trials: ${context.raw}`,
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+              {/* </div> */}
+
+
+                <div className={styles.chart_container}>
+                    <h3>User Persona Distribution</h3>
+                    <p>Breakdown of users by different persona or registration types.</p>
+                    <div className={styles.chart_wrapper}>
+                        <Doughnut
+                        data={{
+                            labels: registrationType.labels,
+                            datasets: [
+                            {
+                                label: "Persona Count",
+                                data: registrationType.data,
+                                backgroundColor: [
+                                "rgba(255, 99, 132, 0.6)",   // Red
+                                "rgba(54, 162, 235, 0.6)",   // Blue
+                                "rgba(255, 206, 86, 0.6)",   // Yellow
+                                ],
+                                borderColor: [
+                                "rgba(255, 99, 132, 1)",
+                                "rgba(54, 162, 235, 1)",
+                                "rgba(255, 206, 86, 1)",
+                                ],
+                                borderWidth: 1,
+                            },
+                            ],
+                        }}
+                        options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                            legend: {
+                                position: "bottom",
+                            },
+                            tooltip: {
+                                callbacks: {
+                                label: (context) => {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${context.label}: ${value} (${percentage}%)`;
+                                },
+                                },
+                            },
+                            },
+                        }}
+                        />
+                    </div>
+                    </div>
+
+
+                 <div className={styles.chart_container}>
+                        <h3>Cumulative Registration Distribution</h3>
+                        <p>Shows overall registrations distributed across levels.</p>
+                        <div className={styles.chart_wrapper}>
+                            <Bar
+                            data={{
+                                labels: cumuReg.labels, // e.g. ['Grade 1-2', 'Grade 3-6']
+                                datasets: [
+                                {
+                                    // label: ["Grade 1-2", "Grade"],
+                                    data: cumuReg.data, // [82, ...]
+                                    backgroundColor: "rgba(75, 192, 192, 0.6)",
+                                    borderColor: "rgba(75, 192, 192, 1)",
+                                    borderWidth: 1,
+                                },
+                                ],
+                            }}
+                            options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                x: {
+                                    stacked: false,
+                                    title: {
+                                    display: true,
+                                    // text: "User Type / Grade",
+                                    },
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                    display: true,
+                                    text: "Registrations",
+                                    },
+                                },
+                                },
+                                plugins: {
+                                tooltip: {
+                                    mode: "index",
+                                    intersect: false,
+                                },
+                                legend: {
+                                    // position: "bottom",
+                                    display: false, 
+                                },
+                                },
+                            }}
+                            />
+                        </div>
+                        </div>
+
+
+
+                </div>
+            )}
+
+            
                         
                         {/* Message Statistics */}
                         {!isLoading && Object.keys(messageStats).length > 0 && (
