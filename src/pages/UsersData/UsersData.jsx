@@ -1192,11 +1192,9 @@ const UsersData = () => {
                         </div>
                         </div>
 
-                     </div>
-                    {/* End of Charts Section */}
-                    
 
-                
+
+                </div>
             )}
 
             
@@ -1414,6 +1412,5 @@ const UsersData = () => {
         </div>
     );
 };
-
 
 export default UsersData;
