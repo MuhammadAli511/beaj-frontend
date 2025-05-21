@@ -13,7 +13,8 @@ import {
   LastActiveUsers,
   UserFeedback,
   UserResponses,
-  UserProgress
+  UserProgress,
+  PaymentVerification
 } from "./pages";
 import { SidebarProvider } from "./components/SidebarContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -48,6 +49,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
                 <PurchaseCourse />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment-verification"
+            element={
+              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
+                <PaymentVerification />
               </ProtectedRoute>
             }
           />
