@@ -478,6 +478,17 @@ export const migrateLesson = async (lessonId, courseId) => {
     return { status: response.status, data };
 };
 
+// API call to migrate lesson
+export const testLesson = async (profile_id, phoneNumber, lesson) => {
+    const response = await fetch(`${API_URL}/lesson/testLesson`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ profile_id, phoneNumber, lesson }),
+    });
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
 // API call to get all lessons by course
 export const getLessonsByCourse = async (courseId) => {
     const response = await fetch(`${API_URL}/lesson/getByCourseId/${courseId}`, {
@@ -997,6 +1008,17 @@ export const getLastActiveUsers = async (days, cohorts) => {
 // POST api/stats/studentUserJourneyStats
 export const getStudentUserJourneyStats = async (date) => {
     const response = await fetch(`${API_URL}/stats/studentUserJourneyStats`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ date }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+export const getStudentTrialUserJourneyStats = async (date) => {
+    const response = await fetch(`${API_URL}/stats/studentTrialUserJourneyStats`, {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ date }),

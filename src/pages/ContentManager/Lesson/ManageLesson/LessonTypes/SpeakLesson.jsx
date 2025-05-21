@@ -9,13 +9,15 @@ import {
     updateSpeakActivityQuestion,
     deleteSpeakActivityQuestion,
     createSpeakActivityQuestion,
-    migrateLesson
+    migrateLesson,
+    testLesson
 } from "../../../../../helper";
 import edit from '../../../../../assets/images/edit.svg';
 import deleteIcon from '../../../../../assets/images/delete.svg';
 import styles from './SpeakLesson.module.css';
 import SpeakQuestionModal from './SpeakQuestionModal';
 import MigrateLessonModal from "../../../../../components/MigrateLessonModal/MigrateLessonModal";
+import TestLessonModal from "../../../../../components/TestLessonModal/TestLessonModal";
 
 
 const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
@@ -729,6 +731,7 @@ const SpeakLesson = ({ category, course, activity }) => {
     const [isSpeakQuestionModalOpen, setIsSpeakQuestionModalOpen] = useState(false);
     const [isEditSpeakLessonModalOpen, setIsEditSpeakLessonModalOpen] = useState(false);
     const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
+    const [isTestLessonModalOpen, setIsTestLessonModalOpen] = useState(false);
     const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT == "DEV";
 
     const fetchLessons = async () => {
@@ -793,6 +796,25 @@ const SpeakLesson = ({ category, course, activity }) => {
         closeMigrateLessonModal();
         fetchLessons();
     };
+    const openTestLessonModal = (lesson) => {
+            setSelectedLesson(lesson);
+            setIsTestLessonModalOpen(true);
+        };
+    
+        const closeTestLessonModal = () => {
+            setSelectedLesson(null);
+            setIsTestLessonModalOpen(false);
+        };
+    
+        const handleTestLesson = async (profile_id, phoneNumber, selectedLesson) => {
+            console.log(phoneNumber, selectedLesson);
+            const testResponse = await testLesson(profile_id, phoneNumber, selectedLesson);
+            if (testResponse.status !== 200) {
+                alert(testResponse.data.message);
+            } else {
+                alert("Lesson test setup successfully.");
+            }
+        };
 
     const handleDeleteLesson = async (lessonId) => {
         const isConfirmed = window.confirm("Are you sure you want to delete this lesson?");
@@ -843,6 +865,7 @@ const SpeakLesson = ({ category, course, activity }) => {
                             <th className={styles.table_heading}>Status</th>
                             {isDevEnvironment && <th className={styles.table_heading}>Migrate</th>}
                             <th className={styles.table_heading}>Edit</th>
+                            <th className={styles.table_heading}>Test</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
                     </thead>
@@ -878,6 +901,14 @@ const SpeakLesson = ({ category, course, activity }) => {
                                         alt="Edit"
                                     />
                                 </td>
+                                <td style={{ width: "4%" }}>
+                                        <button
+                                            className={styles.test_button}
+                                            onClick={() => openTestLessonModal(lesson)}
+                                        >
+                                            Test
+                                        </button>
+                                    </td>
                                 <td style={{ width: "6.66%" }}>
                                     <img
                                         onClick={() => handleDeleteLesson(lesson.LessonId)}
@@ -914,6 +945,14 @@ const SpeakLesson = ({ category, course, activity }) => {
                     onMigrate={handleMigrateLesson}
                 />
             )}
+             {isTestLessonModalOpen && selectedLesson && (
+                            <TestLessonModal
+                                isOpen={isTestLessonModalOpen}
+                                onClose={closeTestLessonModal}
+                                lesson={selectedLesson}
+                                onTest={handleTestLesson}
+                            />
+                        )}
         </div>
     );
 };
