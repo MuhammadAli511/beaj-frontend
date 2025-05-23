@@ -1,39 +1,36 @@
 import React, { useState, useEffect } from "react";
 import styles from "./TestLessonModal.module.css";
-import Select from "react-select";
 
 const TestLessonModal = ({ isOpen, onClose, lesson, onTest }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isTesting, setIsTesting] = useState(false);
-    // const [TestPhoneNumber, setTestPhoneNumber] = useState("");
-    const [selectedOption, setSelectedOption] = useState(null);
-
-    const options = [
-        // { value: { phoneNumber: "+923225036358", profile_id: 8768 }, label: "+923225036358 (ID: 8768)" },
-        { value: { phoneNumber: "+923012232148", profile_id: 4398 }, label: "+923012232148 (ID: 4398)" },
-        { value: { phoneNumber: "+923151076203", profile_id: 1623 }, label: "+923151076203 (ID: 1623)" },
-        // Add more users here...
-    ];
+    const [TestPhoneNumber, setTestPhoneNumber] = useState("");
 
     useEffect(() => {
         if (isOpen) {
             setIsLoading(false);
-            setSelectedOption(null);
+            setTestPhoneNumber("");
         }
     }, [isOpen]);
 
     const handleTest = async () => {
 
-         if (!selectedOption) {
-            alert("Please select a phone number - profile id.");
+         const phoneRegex = /^\+92\d{10}$/;
+
+        if (!TestPhoneNumber) {
+            alert("Please enter a phone number.");
             return;
         }
 
-        const { phoneNumber, profile_id } = selectedOption.value;
+        if (!phoneRegex.test(TestPhoneNumber)) {
+            alert("Invalid phone number.\nFormat should be: +923XXXXXXXXX (10 digits after +92)");
+            return;
+        }
+
         setIsTesting(true);
 
         try {
-            await onTest(profile_id, phoneNumber, lesson);
+            await onTest(TestPhoneNumber, lesson);
         } catch (error) {
             alert("Testing failed.");
         } finally {
@@ -48,22 +45,15 @@ const TestLessonModal = ({ isOpen, onClose, lesson, onTest }) => {
                     <div className={styles.modalContent}>
                         <h2 className={styles.modal_heading}>Test Lesson</h2>
                         <div className={styles.form_group}>
-                            <label className={styles.label}>Select Phone Number - Profile Id</label>
-                            <Select
-                                options={options}
-                                value={selectedOption}
-                                onChange={setSelectedOption}
-                                isSearchable
-                                placeholder="Select Number..."
-                            />
-                            {/* <input
+                            <label className={styles.label}>Enter Phone Number</label>
+                            <input
                                 placeholder="+92XXXXXXXXXX"
                                 className={styles.input_field}
                                 type="text"
                                 id="phoneNumber"
                                 onChange={(e) => setTestPhoneNumber(e.target.value)}
                                 value={TestPhoneNumber}
-                            /> */}
+                            />
                         </div>
                         <div className={styles.form_group_row}>
                             <button

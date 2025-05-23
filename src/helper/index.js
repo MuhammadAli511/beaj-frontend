@@ -479,11 +479,11 @@ export const migrateLesson = async (lessonId, courseId) => {
 };
 
 // API call to migrate lesson
-export const testLesson = async (profile_id, phoneNumber, lesson) => {
+export const testLesson = async (phoneNumber, lesson) => {
     const response = await fetch(`${API_URL}/lesson/testLesson`, {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({ profile_id, phoneNumber, lesson }),
+        body: JSON.stringify({ phoneNumber, lesson }),
     });
     const data = await response.json();
     return { status: response.status, data };
