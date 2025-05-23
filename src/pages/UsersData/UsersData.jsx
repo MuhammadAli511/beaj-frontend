@@ -307,22 +307,23 @@ const UsersData = () => {
                 const trialLevel1 = response1.data.lastActivityLevel1;
                 const trialLevel3 = response1.data.lastActivityLevel3;
 
-                labels = trialLevel1.map(item => item.LessonId);
-                data = trialLevel1.map(item => parseInt(item.total_students_completed));
+                labels = trialLevel1.map(item => item.lesson);
+                data = trialLevel1.map(item => parseInt(item.count));
 
                 setTrialLevel1Data({ labels, data });
 
-                labels = trialLevel3.map(item => item.LessonId);
-                data = trialLevel3.map(item => parseInt(item.total_students_completed));
+                labels = trialLevel3.map(item => item.lesson);
+                data = trialLevel3.map(item => parseInt(item.count));
 
                 setTrialLevel3Data({ labels, data });
 
                 const trialOptResp = response1.data.trialOpt?.[0];
                 
-                labels = ["Grade 1 or 2", "Grade 3 to 6"];
+                labels = ["Grade 1 or 2", "Grade 3 to 6", "Both"];
                 data = [
                 parseInt(trialOptResp.course_117 || 0),
                 parseInt(trialOptResp.course_113 || 0),
+                parseInt(trialOptResp.both_courses || 0),
                 ];
 
                 console.log({ labels, data: data });
@@ -335,15 +336,19 @@ const UsersData = () => {
 
                 setRegistrationType({ labels, data });
 
-                const cumuResp = response1.data.CumulativeReg?.[0];
+                const cumuResp = response1.data.CumulativeReg;
                 
-                labels = ["Grade 1 or 2", "Grade 3 to 6"];
-                data = [
-                parseInt(cumuResp.course_117 || 0),
-                parseInt(cumuResp.course_113 || 0),
-                ];
+                labels = cumuResp.map(item => {
+                    if (!item.classLevel) return "Unknown";
 
-                console.log({ labels, data: data });
+                    return item.classLevel
+                        .split(" ")
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(" ");
+                });
+                data = cumuResp.map(item => parseInt(item.count));
+
+                console.log(cumuResp);
 
                 setCumuReg({ labels, data });
 
@@ -947,8 +952,8 @@ const UsersData = () => {
                                 {
                                     label: 'Trial Completions',
                                     data: trialOpt.data,
-                                    backgroundColor: ['rgba(116, 243, 105, 0.6)', 'rgba(255, 205, 86, 0.6)'],
-                                    borderColor: ['rgba(116, 243, 105, 1)', 'rgba(255, 205, 86, 1)'],
+                                    backgroundColor: ['rgba(116, 243, 105, 0.6)', 'rgba(255, 205, 86, 0.6)', 'rgba(123, 198, 230, 0.6)'],
+                                    borderColor: ['rgba(116, 243, 105, 1)', 'rgba(255, 205, 86, 1)', 'rgb(110, 213, 244)'],
                                     borderWidth: 1,
                                 },
                                 ],
@@ -978,7 +983,7 @@ const UsersData = () => {
                                 },
                                 tooltip: {
                                     callbacks: {
-                                    label: (context) => `Completed: ${context.raw}`,
+                                    label: (context) => `Opted: ${context.raw}`,
                                     },
                                 },
                                 },
@@ -1104,13 +1109,13 @@ const UsersData = () => {
                                 label: "Persona Count",
                                 data: registrationType.data,
                                 backgroundColor: [
-                                "rgba(255, 99, 132, 0.6)",   // Red
-                                "rgba(54, 162, 235, 0.6)",   // Blue
+                                "rgba(238, 130, 238, 0.6)",   // Red
+                                "rgba(106, 90, 205, 0.6)",   // Blue
                                 "rgba(255, 206, 86, 0.6)",   // Yellow
                                 ],
                                 borderColor: [
-                                "rgba(255, 99, 132, 1)",
-                                "rgba(54, 162, 235, 1)",
+                                "rgba(238, 130, 238, 1)",
+                                "rgba(106, 90, 205, 1)",
                                 "rgba(255, 206, 86, 1)",
                                 ],
                                 borderWidth: 1,
@@ -1141,56 +1146,55 @@ const UsersData = () => {
                     </div>
 
 
-                 <div className={styles.chart_container}>
-                        <h3>Cumulative Registration Distribution</h3>
+                        <div className={styles.chart_container}>
+                 <h3>Cumulative Registration Distribution</h3>
                         <p>Shows overall registrations distributed across levels.</p>
-                        <div className={styles.chart_wrapper}>
-                            <Bar
-                            data={{
-                                labels: cumuReg.labels, // e.g. ['Grade 1-2', 'Grade 3-6']
-                                datasets: [
-                                {
-                                    // label: ["Grade 1-2", "Grade"],
-                                    data: cumuReg.data, // [82, ...]
-                                    backgroundColor: "rgba(75, 192, 192, 0.6)",
-                                    borderColor: "rgba(75, 192, 192, 1)",
-                                    borderWidth: 1,
-                                },
-                                ],
-                            }}
-                            options={{
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                x: {
-                                    stacked: false,
-                                    title: {
-                                    display: true,
-                                    // text: "User Type / Grade",
-                                    },
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    title: {
-                                    display: true,
-                                    text: "Registrations",
-                                    },
-                                },
-                                },
-                                plugins: {
-                                tooltip: {
-                                    mode: "index",
-                                    intersect: false,
-                                },
-                                legend: {
-                                    // position: "bottom",
-                                    display: false, 
-                                },
-                                },
-                            }}
-                            />
-                        </div>
-                        </div>
+                  <div className={styles.chart_wrapper}>
+                    <Bar
+                      data={{
+                       labels: cumuReg.labels,
+                        datasets: [
+                          {
+                            label: "Level 3 Completions",
+                            data: cumuReg.data,
+                            backgroundColor: ["rgba(255, 99, 71, 0.6)", "rgba(60, 179, 113, 0.6)"],
+                            borderColor: ["rgba(255, 99, 71, 1)", "rgba(60, 179, 113, 1)"],
+                            borderWidth: 1,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            title: {
+                              display: true,
+                              text: "No. of People",
+                            },
+                          },
+                          x: {
+                            title: {
+                              display: true,
+                              text: "Lessons",
+                            },
+                          },
+                        },
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: (context) => `Trials: ${context.raw}`,
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
 
 
 

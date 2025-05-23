@@ -806,13 +806,14 @@ const SpeakLesson = ({ category, course, activity }) => {
             setIsTestLessonModalOpen(false);
         };
     
-        const handleTestLesson = async (profile_id, phoneNumber, selectedLesson) => {
+        const handleTestLesson = async (phoneNumber, selectedLesson) => {
             console.log(phoneNumber, selectedLesson);
-            const testResponse = await testLesson(profile_id, phoneNumber, selectedLesson);
+            const testResponse = await testLesson(phoneNumber, selectedLesson);
             if (testResponse.status !== 200) {
                 alert(testResponse.data.message);
             } else {
-                alert("Lesson test setup successfully.");
+               alert(`Lesson test setup successfully.\nType : ${testResponse.data.result.message}`);
+               closeTestLessonModal();
             }
         };
 
