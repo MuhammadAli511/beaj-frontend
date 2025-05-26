@@ -36,6 +36,7 @@ const UsersData = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [phoneNumberSearch, setPhoneNumberSearch] = useState('');
     const [graphData, setGraphData] = useState([]);
+    const [sourceStats, setSourceStats] = useState({});
 
     const [userGroupPie, setUserGroupPie] = useState({ labels: [], data: [] });
 
@@ -66,6 +67,7 @@ const UsersData = () => {
     const [activityTypeFilter, setActivityTypeFilter] = useState(null);
     const [messageFilter, setMessageFilter] = useState(null);
     const [personaFilter, setPersonaFilter] = useState(null);
+    const [sourceFilter, setSourceFilter] = useState(null);
 
     const dateColumnOptions = [
         { value: 'userClickedLink', label: 'Clicked Link' },
@@ -99,6 +101,14 @@ const UsersData = () => {
             label: persona
         }));
     }, [personaStats]);
+
+    // Generate options for source filter
+    const sourceOptions = useMemo(() => {
+        return Object.keys(sourceStats).filter(source => source).map(source => ({
+            value: source,
+            label: source || 'Unknown'
+        }));
+    }, [sourceStats]);
 
     // Generate options for activity type filter
     const activityTypeOptions = useMemo(() => {
@@ -187,6 +197,13 @@ const UsersData = () => {
             );
         }
 
+        // Apply source filter
+        if (sourceFilter) {
+            filteredData = filteredData.filter(item =>
+                item.source === sourceFilter.value
+            );
+        }
+
         // Apply acceptable messages filter
         if (messageFilter) {
             const selectedMessages = JSON.parse(messageFilter.value);
@@ -233,13 +250,14 @@ const UsersData = () => {
         setActivityTypeFilter(null);
         setMessageFilter(null);
         setPersonaFilter(null);
+        setSourceFilter(null);
         setPhoneNumberSearch('');
     };
 
     // Effect to reset to page 1 when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [phoneNumberSearch, dateFilter, activityTypeFilter, messageFilter, personaFilter, activeTab]);
+    }, [phoneNumberSearch, dateFilter, activityTypeFilter, messageFilter, personaFilter, sourceFilter, activeTab]);
 
     useEffect(() => {
         if (activeTab === 'teacher') {
@@ -465,6 +483,18 @@ const UsersData = () => {
                 });
                 setPersonaStats(personaStatsData);
 
+                // Generate source statistics
+                const sourceStatsData = {};
+                response.data.userData.forEach(user => {
+                    if (user.source) {
+                        if (!sourceStatsData[user.source]) {
+                            sourceStatsData[user.source] = 0;
+                        }
+                        sourceStatsData[user.source] += 1;
+                    }
+                });
+                setSourceStats(sourceStatsData);
+
                 // Update graphData
                 setGraphData(response.data.graphData);
             }
@@ -636,6 +666,17 @@ const UsersData = () => {
                                     onChange={setPersonaFilter}
                                     isClearable
                                     placeholder="Select Persona"
+                                />
+                            </div>
+                            <div className={styles.filter_group}>
+                                <label className={styles.filter_label}>Source</label>
+                                <Select
+                                    className={styles.select}
+                                    options={sourceOptions}
+                                    value={sourceFilter}
+                                    onChange={setSourceFilter}
+                                    isClearable
+                                    placeholder="Select Source"
                                 />
                             </div>
                             <div className={styles.filter_group}>
@@ -909,8 +950,8 @@ const UsersData = () => {
                         datasets: [
                           {
                             data: userGroupPie.data,
-                            backgroundColor: ["rgba(255, 159, 64, 0.6)", "rgba(75, 192, 192, 0.6)", "rgba(153, 102, 255, 0.6)"],
-                            borderColor: ["rgba(255, 159, 64, 1)", "rgba(75, 192, 192, 1)", "rgba(153, 102, 255, 1)"],
+                            backgroundColor: ["rgba(255, 159, 64, 0.6)", "rgba(75, 192, 192, 0.6)", "rgba(153, 102, 255, 0.6)", "rgba(255, 99, 132, 0.6)", "rgba(54, 162, 235, 0.6)", "rgba(255, 206, 86, 0.6)"],
+                            borderColor: ["rgba(255, 159, 64, 1)", "rgba(75, 192, 192, 1)", "rgba(153, 102, 255, 1)", "rgba(255, 99, 132, 1)", "rgba(54, 162, 235, 1)", "rgba(255, 206, 86, 1)"],
                             borderWidth: 1,
                             boldness: 200,
                           },
