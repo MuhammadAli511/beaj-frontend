@@ -210,6 +210,50 @@ img {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Question Group Container - for difficulty level groupings */
+.question_group_container {
+  margin-bottom: 40px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f7ff 100%);
+  border-radius: 15px;
+  border: 2px solid #e3f2fd;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.question_group_header {
+  background: linear-gradient(135deg, #51BBCC 0%, #3d8f9d 100%);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 12px;
+  margin: -20px -20px 25px -20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(81, 187, 204, 0.3);
+  position: relative;
+}
+
+.question_group_header::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 10px solid #3d8f9d;
+}
+
+.difficulty_variants_container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
 .question_box {
   display: flex;
   flex-direction: column;
@@ -219,6 +263,74 @@ img {
   border: 1px solid #e0e0e0;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+/* Enhanced styling for difficulty level questions */
+.difficulty_question_box {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+}
+
+.difficulty_question_box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Different colors for each difficulty level */
+.difficulty_easy {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+  border: 2px solid #4caf50;
+  border-left: 6px solid #4caf50;
+}
+
+.difficulty_medium {
+  background: linear-gradient(135deg, #fff3e0 0%, #fff8f0 100%);
+  border: 2px solid #ff9800;
+  border-left: 6px solid #ff9800;
+}
+
+.difficulty_hard {
+  background: linear-gradient(135deg, #ffebee 0%, #fff0f0 100%);
+  border: 2px solid #f44336;
+  border-left: 6px solid #f44336;
+}
+
+/* Difficulty level badges */
+.difficulty_badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.badge_easy {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+}
+
+.badge_medium {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: white;
+}
+
+.badge_hard {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: white;
 }
 
 .questionEditLabel {
@@ -320,6 +432,30 @@ img {
   background-color: #e63946;
   transform: translateY(-2px);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced remove button for difficulty questions */
+.remove_question_group_button {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 20px auto;
+  min-width: 200px;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.remove_question_group_button:hover {
+  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
 }
 
 .active {
@@ -470,4 +606,32 @@ img {
 .text_area:focus {
   border-color: #51BBCC;
   box-shadow: 0 0 0 3px rgba(81, 187, 204, 0.2);
+}
+
+.custom_feedback_section {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  border: 1px dashed #51BBCC;
+}
+
+.feedback_title {
+  color: #444;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+.imageSmall {
+  max-width: 200px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.audio {
+  width: 100%;
+  max-width: 300px;
 }

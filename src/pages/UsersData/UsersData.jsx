@@ -6,7 +6,7 @@ import CSVDownloader from "react-csv-downloader"
 import { getAllMetadata, getStudentUserJourneyStats, getStudentTrialUserJourneyStats } from "../../helper/index"
 import { TailSpin } from "react-loader-spinner"
 import Select from "react-select"
-import { Line, Bar, Pie, Doughnut, Radar, PolarArea } from "react-chartjs-2"
+import { Line, Bar, Pie, Doughnut } from "react-chartjs-2"
 import {
     Chart as ChartJS,
     CategoryScale,

@@ -738,7 +738,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                             )}
                                             <input
                                                 type="file"
-                                                accept="audio/*"
+                                                accept="audio/mpeg"
                                                 onChange={(e) => {
                                                     const file = e.target.files[0];
                                                     if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
@@ -775,197 +775,244 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                     </div>
                                 )}
 
-                                {questions.map((question, index) => (
-                                    <div key={index} className={styles.question_box}>
-                                        <label className={styles.answerEditLabel}>
-                                            {enableDifficultyLevel ?
-                                                `Question ${question.questionNumber || Math.floor(index / 3) + 1} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'Easy'}` :
-                                                'Question Number'
+                                {enableDifficultyLevel ? (
+                                    // Group questions by questionNumber when difficulty level is enabled
+                                    (() => {
+                                        const groupedQuestions = {};
+                                        questions.forEach((question, qIndex) => {
+                                            const questionNumber = question.questionNumber || Math.floor(qIndex / 3) + 1;
+                                            if (!groupedQuestions[questionNumber]) {
+                                                groupedQuestions[questionNumber] = [];
                                             }
-                                        </label>
-                                        {!enableDifficultyLevel && (
+                                            groupedQuestions[questionNumber].push({ ...question, originalIndex: qIndex });
+                                        });
+
+                                        return Object.keys(groupedQuestions).map((questionNumber) => (
+                                            <div key={`group-${questionNumber}`} className={styles.question_group_container}>
+                                                <div className={styles.question_group_header}>
+                                                    Question {questionNumber}
+                                                </div>
+                                                <div className={styles.difficulty_variants_container}>
+                                                    {groupedQuestions[questionNumber].map((question) => {
+                                                        const difficultyClass = question.difficultyLevel === 'easy' ? styles.difficulty_easy :
+                                                                               question.difficultyLevel === 'medium' ? styles.difficulty_medium :
+                                                                               styles.difficulty_hard;
+                                                        
+                                                        const badgeClass = question.difficultyLevel === 'easy' ? styles.badge_easy :
+                                                                          question.difficultyLevel === 'medium' ? styles.badge_medium :
+                                                                          styles.badge_hard;
+                                                        
+                                                        return (
+                                                            <div key={question.originalIndex} className={`${styles.difficulty_question_box} ${difficultyClass}`}>
+                                                                <div className={`${styles.difficulty_badge} ${badgeClass}`}>
+                                                                    {question.difficultyLevel}
+                                                                </div>
+
+                                                                {['listenAndSpeak', 'feedbackAudio'].includes(activity) && (
+                                                                    <>
+                                                                        <label className={styles.answerEditLabel}>Question</label>
+                                                                        <input
+                                                                            className={styles.edit_input_field}
+                                                                            type="text"
+                                                                            value={question.question || ""}
+                                                                            onChange={(e) => handleQuestionChange(question.originalIndex, 'question', e.target.value)}
+                                                                        />
+                                                                        {activity === 'listenAndSpeak' && (
+                                                                            <>
+                                                                                <label className={styles.answerEditLabel}>Answers</label>
+
+                                                                                {question.answer && question.answer.map((ans, ansIndex) => (
+                                                                                    <div key={ansIndex} className={styles.answer_group}>
+                                                                                        <input
+                                                                                            className={styles.edit_input_field}
+                                                                                            type="text"
+                                                                                            value={ans}
+                                                                                            onChange={(e) => handleAnswerChange(question.originalIndex, ansIndex, e.target.value)}
+                                                                                        />
+                                                                                        <button
+                                                                                            className={styles.delete_button}
+                                                                                            onClick={() => removeAnswer(question.originalIndex, ansIndex)}
+                                                                                        >
+                                                                                            Remove Answer
+                                                                                        </button>
+                                                                                    </div>
+                                                                                ))}
+                                                                                <button
+                                                                                    className={styles.add_button}
+                                                                                    onClick={() => addNewAnswer(question.originalIndex)}
+                                                                                >
+                                                                                    Add New Answer
+                                                                                </button>
+                                                                            </>
+                                                                        )}
+                                                                        <label className={styles.answerEditLabel}>
+                                                                            {activity === 'feedbackAudio' ? 'Upload Audio File' : 'Upload Media File (Audio/Video)'}
+                                                                        </label>
+                                                                        <input
+                                                                            type="file"
+                                                                            accept={activity === 'feedbackAudio' ? "audio/*" : "audio/mp3,video/mp4"}
+                                                                            onChange={(e) => handleQuestionChange(question.originalIndex, 'mediaFile', e.target.files)}
+                                                                        />
+                                                                        {question.mediaFile && (
+                                                                            <div className={styles.mediaSection}>
+                                                                                <label className={styles.answerEditLabel}>Current Media File:</label>
+                                                                                {activity === 'feedbackAudio' ? (
+                                                                                    <audio controls src={question.mediaFile} className={styles.audio}></audio>
+                                                                                ) : (
+                                                                                    question.mediaFile && typeof question.mediaFile === 'string' && question.mediaFile.endsWith('.mp4') ? (
+                                                                                        <video controls src={question.mediaFile} className={styles.videoSmall}></video>
+                                                                                    ) : (
+                                                                                        <audio controls src={question.mediaFile} className={styles.audio}></audio>
+                                                                                    )
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+
+                                                                        {/* Custom Feedback Section for listenAndSpeak */}
+                                                                        <div className={styles.custom_feedback_section}>
+                                                                            <h5 className={styles.feedback_title}>Custom Feedback</h5>
+
+                                                                            <div className={styles.checkbox_wrapper}>
+                                                                                <div className={styles.custom_checkbox_container}>
+                                                                                    <input
+                                                                                        className={styles.custom_checkbox}
+                                                                                        type="checkbox"
+                                                                                        onChange={(e) => handleQuestionChange(question.originalIndex, 'enableCustomFeedbackText', e.target.checked)}
+                                                                                        checked={question.enableCustomFeedbackText || false}
+                                                                                        name="enableCustomFeedbackText"
+                                                                                        id={`enableCustomFeedbackText-${question.originalIndex}`}
+                                                                                    />
+                                                                                    <label className={styles.checkbox_label} htmlFor={`enableCustomFeedbackText-${question.originalIndex}`}>
+                                                                                        <span className={styles.checkmark}></span>
+                                                                                        <span className={styles.label_text}>Enable Text Feedback</span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </div>
+                                                                            {question.enableCustomFeedbackText && (
+                                                                                <input
+                                                                                    className={styles.edit_input_field}
+                                                                                    type="text"
+                                                                                    placeholder="Custom feedback text"
+                                                                                    value={question.customFeedbackText || ""}
+                                                                                    onChange={(e) => handleQuestionChange(question.originalIndex, 'customFeedbackText', e.target.value)}
+                                                                                />
+                                                                            )}
+
+                                                                            <div className={styles.checkbox_wrapper}>
+                                                                                <div className={styles.custom_checkbox_container}>
+                                                                                    <input
+                                                                                        className={styles.custom_checkbox}
+                                                                                        type="checkbox"
+                                                                                        onChange={(e) => handleQuestionChange(question.originalIndex, 'enableCustomFeedbackImage', e.target.checked)}
+                                                                                        checked={question.enableCustomFeedbackImage || false}
+                                                                                        name="enableCustomFeedbackImage"
+                                                                                        id={`enableCustomFeedbackImage-${question.originalIndex}`}
+                                                                                    />
+                                                                                    <label className={styles.checkbox_label} htmlFor={`enableCustomFeedbackImage-${question.originalIndex}`}>
+                                                                                        <span className={styles.checkmark}></span>
+                                                                                        <span className={styles.label_text}>Enable Image Feedback</span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </div>
+                                                                            {question.enableCustomFeedbackImage && (
+                                                                                <>
+                                                                                    <input
+                                                                                        type="file"
+                                                                                        accept="image/*"
+                                                                                        onChange={(e) => handleQuestionChange(question.originalIndex, 'customFeedbackImage', e.target.files)}
+                                                                                    />
+                                                                                    {question.customFeedbackImage && (
+                                                                                        <div className={styles.mediaSection}>
+                                                                                            <label className={styles.answerEditLabel}>Current Feedback Image:</label>
+                                                                                            <img
+                                                                                                src={typeof question.customFeedbackImage === 'string' ?
+                                                                                                    question.customFeedbackImage :
+                                                                                                    (question.customFeedbackImage instanceof File ?
+                                                                                                        URL.createObjectURL(question.customFeedbackImage) :
+                                                                                                        question.customFeedbackImage)}
+                                                                                                className={styles.imageSmall}
+                                                                                                alt="Feedback"
+                                                                                            />
+                                                                                        </div>
+                                                                                    )}
+                                                                                </>
+                                                                            )}
+
+                                                                            <div className={styles.checkbox_wrapper}>
+                                                                                <div className={styles.custom_checkbox_container}>
+                                                                                    <input
+                                                                                        className={styles.custom_checkbox}
+                                                                                        type="checkbox"
+                                                                                        onChange={(e) => handleQuestionChange(question.originalIndex, 'enableCustomFeedbackAudio', e.target.checked)}
+                                                                                        checked={question.enableCustomFeedbackAudio || false}
+                                                                                        name="enableCustomFeedbackAudio"
+                                                                                        id={`enableCustomFeedbackAudio-${question.originalIndex}`}
+                                                                                    />
+                                                                                    <label className={styles.checkbox_label} htmlFor={`enableCustomFeedbackAudio-${question.originalIndex}`}>
+                                                                                        <span className={styles.checkmark}></span>
+                                                                                        <span className={styles.label_text}>Enable Audio Feedback</span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </div>
+                                                                            {question.enableCustomFeedbackAudio && (
+                                                                                <>
+                                                                                    <input
+                                                                                        type="file"
+                                                                                        accept="audio/*"
+                                                                                        onChange={(e) => handleQuestionChange(question.originalIndex, 'customFeedbackAudio', e.target.files)}
+                                                                                    />
+                                                                                    {question.customFeedbackAudio && (
+                                                                                        <div className={styles.mediaSection}>
+                                                                                            <label className={styles.answerEditLabel}>Current Feedback Audio:</label>
+                                                                                            <audio
+                                                                                                controls
+                                                                                                src={typeof question.customFeedbackAudio === 'string' ?
+                                                                                                    question.customFeedbackAudio :
+                                                                                                    (question.customFeedbackAudio instanceof File ?
+                                                                                                        URL.createObjectURL(question.customFeedbackAudio) :
+                                                                                                        question.customFeedbackAudio)}
+                                                                                                className={styles.audio}
+                                                                                            ></audio>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </>
+                                                                            )}
+                                                                        </div>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                                
+                                                {questions.length > 3 && (
+                                                    <button className={styles.remove_question_group_button} onClick={(e) => {
+                                                        const currentQuestionNumber = groupedQuestions[questionNumber][0].questionNumber;
+                                                        const questionsToDelete = questions.filter(q => q.questionNumber === currentQuestionNumber);
+                                                        questionsToDelete.forEach((q, i) => {
+                                                            const questionIndex = questions.findIndex(qu => qu === q);
+                                                            handleDeleteQuestion(q.id, questionIndex);
+                                                        });
+                                                    }}>
+                                                        Remove Question {questionNumber} (All Variants)
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ));
+                                    })()
+                                ) : (
+                                    // Regular questions when difficulty level is disabled
+                                    questions.map((question, index) => (
+                                        <div key={index} className={styles.question_box}>
+                                            <label className={styles.answerEditLabel}>Question Number</label>
                                             <input
                                                 className={styles.edit_input_field}
                                                 type="number"
                                                 value={question.questionNumber !== undefined ? question.questionNumber : ""}
                                                 onChange={(e) => handleQuestionChange(index, 'questionNumber', e.target.value)}
                                             />
-                                        )}
 
-                                        {['listenAndSpeak', 'feedbackAudio'].includes(activity) && (
-                                            <>
-                                                <label className={styles.answerEditLabel}>Question</label>
-                                                <input
-                                                    className={styles.edit_input_field}
-                                                    type="text"
-                                                    value={question.question || ""}
-                                                    onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
-                                                />
-                                                {activity === 'listenAndSpeak' && (
-                                                    <>
-                                                        <label className={styles.answerEditLabel}>Answers</label>
-
-                                                        {question.answer.map((ans, ansIndex) => (
-                                                            <div key={ansIndex} className={styles.answer_group}>
-                                                                <input
-                                                                    className={styles.edit_input_field}
-                                                                    type="text"
-                                                                    value={ans}
-                                                                    onChange={(e) => handleAnswerChange(index, ansIndex, e.target.value)}
-                                                                />
-                                                                <button
-                                                                    className={styles.delete_button}
-                                                                    onClick={() => removeAnswer(index, ansIndex)}
-                                                                >
-                                                                    Remove Answer
-                                                                </button>
-                                                            </div>
-                                                        ))}
-                                                        <button
-                                                            className={styles.add_button}
-                                                            onClick={() => addNewAnswer(index)}
-                                                        >
-                                                            Add New Answer
-                                                        </button>
-                                                    </>
-                                                )}
-                                                <label className={styles.answerEditLabel}>
-                                                    {activity === 'feedbackAudio' ? 'Upload Audio File' : 'Upload Media File (Audio/Video)'}
-                                                </label>
-                                                <input
-                                                    type="file"
-                                                    accept={activity === 'feedbackAudio' ? "audio/*" : "audio/mp3,video/mp4"}
-                                                    onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files)}
-                                                />
-                                                {question.mediaFile && (
-                                                    <div className={styles.mediaSection}>
-                                                        <label className={styles.answerEditLabel}>Current Media File:</label>
-                                                        {activity === 'feedbackAudio' ? (
-                                                            <audio controls src={question.mediaFile} className={styles.audio}></audio>
-                                                        ) : (
-                                                            question.mediaFile && typeof question.mediaFile === 'string' && question.mediaFile.endsWith('.mp4') ? (
-                                                                <video controls src={question.mediaFile} className={styles.videoSmall}></video>
-                                                            ) : (
-                                                                <audio controls src={question.mediaFile} className={styles.audio}></audio>
-                                                            )
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                {/* Custom Feedback Section for listenAndSpeak */}
-                                                <div className={styles.custom_feedback_section}>
-                                                    <h5 className={styles.feedback_title}>Custom Feedback</h5>
-
-                                                    <div className={styles.checkbox_wrapper}>
-                                                        <div className={styles.custom_checkbox_container}>
-                                                            <input
-                                                                className={styles.custom_checkbox}
-                                                                type="checkbox"
-                                                                onChange={(e) => handleQuestionChange(index, 'enableCustomFeedbackText', e.target.checked)}
-                                                                checked={question.enableCustomFeedbackText || false}
-                                                                name="enableCustomFeedbackText"
-                                                                id={`enableCustomFeedbackText-${index}`}
-                                                            />
-                                                            <label className={styles.checkbox_label} htmlFor={`enableCustomFeedbackText-${index}`}>
-                                                                <span className={styles.checkmark}></span>
-                                                                <span className={styles.label_text}>Enable Text Feedback</span>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    {question.enableCustomFeedbackText && (
-                                                        <input
-                                                            className={styles.edit_input_field}
-                                                            type="text"
-                                                            placeholder="Custom feedback text"
-                                                            value={question.customFeedbackText || ""}
-                                                            onChange={(e) => handleQuestionChange(index, 'customFeedbackText', e.target.value)}
-                                                        />
-                                                    )}
-
-                                                    <div className={styles.checkbox_wrapper}>
-                                                        <div className={styles.custom_checkbox_container}>
-                                                            <input
-                                                                className={styles.custom_checkbox}
-                                                                type="checkbox"
-                                                                onChange={(e) => handleQuestionChange(index, 'enableCustomFeedbackImage', e.target.checked)}
-                                                                checked={question.enableCustomFeedbackImage || false}
-                                                                name="enableCustomFeedbackImage"
-                                                                id={`enableCustomFeedbackImage-${index}`}
-                                                            />
-                                                            <label className={styles.checkbox_label} htmlFor={`enableCustomFeedbackImage-${index}`}>
-                                                                <span className={styles.checkmark}></span>
-                                                                <span className={styles.label_text}>Enable Image Feedback</span>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    {question.enableCustomFeedbackImage && (
-                                                        <>
-                                                            <input
-                                                                type="file"
-                                                                accept="image/*"
-                                                                onChange={(e) => handleQuestionChange(index, 'customFeedbackImage', e.target.files)}
-                                                            />
-                                                            {question.customFeedbackImage && (
-                                                                <div className={styles.mediaSection}>
-                                                                    <label className={styles.answerEditLabel}>Current Feedback Image:</label>
-                                                                    <img
-                                                                        src={typeof question.customFeedbackImage === 'string' ?
-                                                                            question.customFeedbackImage :
-                                                                            (question.customFeedbackImage instanceof File ?
-                                                                                URL.createObjectURL(question.customFeedbackImage) :
-                                                                                question.customFeedbackImage)}
-                                                                        className={styles.imageSmall}
-                                                                        alt="Feedback"
-                                                                    />
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    )}
-
-                                                    <div className={styles.checkbox_wrapper}>
-                                                        <div className={styles.custom_checkbox_container}>
-                                                            <input
-                                                                className={styles.custom_checkbox}
-                                                                type="checkbox"
-                                                                onChange={(e) => handleQuestionChange(index, 'enableCustomFeedbackAudio', e.target.checked)}
-                                                                checked={question.enableCustomFeedbackAudio || false}
-                                                                name="enableCustomFeedbackAudio"
-                                                                id={`enableCustomFeedbackAudio-${index}`}
-                                                            />
-                                                            <label className={styles.checkbox_label} htmlFor={`enableCustomFeedbackAudio-${index}`}>
-                                                                <span className={styles.checkmark}></span>
-                                                                <span className={styles.label_text}>Enable Audio Feedback</span>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    {question.enableCustomFeedbackAudio && (
-                                                        <>
-                                                            <input
-                                                                type="file"
-                                                                accept="audio/*"
-                                                                onChange={(e) => handleQuestionChange(index, 'customFeedbackAudio', e.target.files)}
-                                                            />
-                                                            {question.customFeedbackAudio && (
-                                                                <div className={styles.mediaSection}>
-                                                                    <label className={styles.answerEditLabel}>Current Feedback Audio:</label>
-                                                                    <audio
-                                                                        controls
-                                                                        src={typeof question.customFeedbackAudio === 'string' ?
-                                                                            question.customFeedbackAudio :
-                                                                            (question.customFeedbackAudio instanceof File ?
-                                                                                URL.createObjectURL(question.customFeedbackAudio) :
-                                                                                question.customFeedbackAudio)}
-                                                                        className={styles.audio}
-                                                                    ></audio>
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-
-                                        {activity === 'watchAndSpeak' && (
+                                            {['listenAndSpeak', 'feedbackAudio'].includes(activity) && (
                                             <>
                                                 <label className={styles.answerEditLabel}>Question</label>
                                                 <input
@@ -1461,7 +1508,8 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                             {enableDifficultyLevel ? 'Delete Question (All Variants)' : 'Delete Question'}
                                         </button>
                                     </div>
-                                ))}
+                                ))
+                                )}
 
                                 <button
                                     className={styles.add_question_button}

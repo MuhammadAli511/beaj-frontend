@@ -32,7 +32,7 @@ export const createAudioLesson = async (course, sequenceNumber, alias, activityT
 
 export const createVideoLesson = async (course, sequenceNumber, alias, activityType, video, lessonText, day, week, status, textInstruction = null, audioInstruction = null) => {
     if (!video) {
-        alert('Please upload an audio');
+        alert('Please upload a audio');
         return;
     }
     if (!sequenceNumber) {
@@ -56,7 +56,7 @@ export const createVideoLesson = async (course, sequenceNumber, alias, activityT
 
 export const createReadLesson = async (course, sequenceNumber, alias, activityType, video, lessonText, day, week, status, textInstruction = null, audioInstruction = null) => {
     if (!video) {
-        alert('Please upload an video');
+        alert('Please upload a video');
         return;
     }
     if (!sequenceNumber) {

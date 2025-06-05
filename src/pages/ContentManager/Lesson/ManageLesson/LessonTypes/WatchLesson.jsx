@@ -341,7 +341,7 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                             )}
                                             <input
                                                 type="file"
-                                                accept="audio/*"
+                                                accept="audio/mpeg"
                                                 onChange={(e) => {
                                                     const file = e.target.files[0];
                                                     if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {

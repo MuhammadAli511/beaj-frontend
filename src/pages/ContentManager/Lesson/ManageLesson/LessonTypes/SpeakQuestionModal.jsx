@@ -262,7 +262,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                             )}
                                         </>
                                     )}
-                                    {(activity == 'listenAndSpeak') && (
+                                    {(activity === 'listenAndSpeak') && (
                                         <>
                                             <td style={{ width: "5%" }}>
                                                 {hasDifficultyLevels ? 

@@ -251,10 +251,10 @@ const CreateLesson = () => {
                 setWsQuestions(renumberedQuestions);
             }
         } else {
-            if (wsQuestions.length > 1) {
-                const newWsQuestions = [...wsQuestions];
-                newWsQuestions.splice(index, 1);
-                setWsQuestions(newWsQuestions);
+        if (wsQuestions.length > 1) {
+            const newWsQuestions = [...wsQuestions];
+            newWsQuestions.splice(index, 1);
+            setWsQuestions(newWsQuestions);
             }
         }
     };
@@ -393,20 +393,20 @@ const CreateLesson = () => {
                     alert('Please upload an MP3 audio not larger than 16MB.');
                 }
             } else {
-                const mediaType = newQuestions[index].mediaType;
-                
-                if (mediaType === 'video') {
-                    if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
-                        newQuestions[index][event.target.name] = file;
-                    } else {
-                        alert('Please upload an MP4 video not larger than 16MB.');
-                    }
+            const mediaType = newQuestions[index].mediaType;
+            
+            if (mediaType === 'video') {
+                if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
+                    newQuestions[index][event.target.name] = file;
                 } else {
-                    if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
-                        newQuestions[index][event.target.name] = file;
-                    } else {
-                        alert('Please upload an MP3 audio not larger than 16MB.');
-                    }
+                    alert('Please upload an MP4 video not larger than 16MB.');
+                }
+            } else {
+                if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+                    newQuestions[index][event.target.name] = file;
+                } else {
+                    alert('Please upload an MP3 audio not larger than 16MB.');
+                }
                 }
             }
         } else if (event.target.type === 'checkbox' && event.target.name.startsWith('enableCustomFeedback')) {
@@ -490,10 +490,10 @@ const CreateLesson = () => {
                 setQuestions(renumberedQuestions);
             }
         } else {
-            if (questions.length > 1) {
-                const newQuestions = [...questions];
-                newQuestions.splice(index, 1);
-                setQuestions(newQuestions);
+        if (questions.length > 1) {
+            const newQuestions = [...questions];
+            newQuestions.splice(index, 1);
+            setQuestions(newQuestions);
             }
         }
     };
@@ -1112,20 +1112,178 @@ const CreateLesson = () => {
                             <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
-                        {questions.map((question, qIndex) => (
+                        {enableDifficultyLevel ? (
+                            // Group questions by questionNumber when difficulty level is enabled
+                            (() => {
+                                const groupedQuestions = {};
+                                questions.forEach((question, qIndex) => {
+                                    const questionNumber = question.questionNumber || Math.floor(qIndex / 3) + 1;
+                                    if (!groupedQuestions[questionNumber]) {
+                                        groupedQuestions[questionNumber] = [];
+                                    }
+                                    groupedQuestions[questionNumber].push({ ...question, originalIndex: qIndex });
+                                });
+
+                                return Object.keys(groupedQuestions).map((questionNumber) => (
+                                    <div key={`group-${questionNumber}`} className={styles.question_group_container}>
+                                        <div className={styles.question_group_header}>
+                                            Question {questionNumber}
+                                        </div>
+                                        <div className={styles.difficulty_variants_container}>
+                                            {groupedQuestions[questionNumber].map((question) => {
+                                                const difficultyClass = question.difficultyLevel === 'easy' ? styles.difficulty_easy :
+                                                                       question.difficultyLevel === 'medium' ? styles.difficulty_medium :
+                                                                       styles.difficulty_hard;
+                                                
+                                                const badgeClass = question.difficultyLevel === 'easy' ? styles.badge_easy :
+                                                                 question.difficultyLevel === 'medium' ? styles.badge_medium :
+                                                                 styles.badge_hard;
+                                                
+                                                return (
+                                                    <div key={question.originalIndex} className={`${styles.difficulty_question_box} ${difficultyClass}`}>
+                                                        <div className={`${styles.difficulty_badge} ${badgeClass}`}>
+                                                            {question.difficultyLevel}
+                                                        </div>
+                                                        
+                                                        <div className={styles.input_row}>
+                                                            <InputField 
+                                                                label="Question Text"
+                                                                type="text" 
+                                                                onChange={e => handleQuestionChange(question.originalIndex, e)} 
+                                                                value={question.questionText} 
+                                                                name="questionText" 
+                                                                id={`questionText-${question.originalIndex}`} 
+                                                            />
+                                                            
+                                                            <div className={styles.media_toggle_container}>
+                                                                <div className={styles.toggle_buttons}>
+                                                                    <button 
+                                                                        type="button"
+                                                                        className={`${styles.toggle_button} ${question.mediaType === 'audio' ? styles.active : ''}`}
+                                                                        onClick={() => {
+                                                                            const newQuestions = [...questions];
+                                                                            newQuestions[question.originalIndex].mediaType = 'audio';
+                                                                            setQuestions(newQuestions);
+                                                                        }}
+                                                                    >
+                                                                        Audio
+                                                                    </button>
+                                                                    <button 
+                                                                        type="button"
+                                                                        className={`${styles.toggle_button} ${question.mediaType === 'video' ? styles.active : ''}`}
+                                                                        onClick={() => {
+                                                                            const newQuestions = [...questions];
+                                                                            newQuestions[question.originalIndex].mediaType = 'video';
+                                                                            setQuestions(newQuestions);
+                                                                        }}
+                                                                    >
+                                                                        Video
+                                                                    </button>
+                                                                </div>
+                                                                
+                                                                {question.mediaType === 'audio' ? (
+                                                                    <InputField label="Upload Audio" type="file" onChange={e => handleQuestionChange(question.originalIndex, e)} name="media" id={`media-${question.originalIndex}`} fileInput />
+                                                                ) : (
+                                                                    <InputField label="Upload Video" type="file" onChange={e => handleQuestionChange(question.originalIndex, e)} name="media" id={`media-${question.originalIndex}`} fileInput />
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {question.answers.map((answer, aIndex) => (
+                                                            <div key={aIndex} className={styles.input_row}>
+                                                                <InputField label={`Answer ${aIndex + 1}`} type="text" onChange={e => handleAnswerChange(question.originalIndex, aIndex, e)} value={answer.answerText} name="answerText" id={`answerText-${question.originalIndex}-${aIndex}`} />
+                                                                {question.answers.length > 1 && <button className={styles.remove_button} onClick={(e) => removeAnswer(question.originalIndex, aIndex, e)}>Remove Answer</button>}
+                                                            </div>
+                                                        ))}
+                                                        <button className={`${styles.add_button} ${styles.add_answer_button}`} onClick={(e) => addAnswer(question.originalIndex, e)}>Add Another Answer</button>
+
+                                                        {/* Custom Feedback Section */}
+                                                        <div className={styles.custom_feedback_section}>
+                                                            <h5 className={styles.feedback_title}>Custom Feedback</h5>
+                                                            
+                                                            <InputField 
+                                                                label="Enable Text Feedback" 
+                                                                type="checkbox" 
+                                                                onChange={e => handleQuestionChange(question.originalIndex, e)} 
+                                                                checked={question.enableCustomFeedbackText || false} 
+                                                                name="enableCustomFeedbackText" 
+                                                                id={`enableCustomFeedbackText-${question.originalIndex}`} 
+                                                            />
+                                                            {question.enableCustomFeedbackText && (
+                                                                <InputField 
+                                                                    label="Feedback Text" 
+                                                                    type="text" 
+                                                                    onChange={e => handleQuestionChange(question.originalIndex, e)} 
+                                                                    value={question.customFeedbackText || ""} 
+                                                                    name="customFeedbackText" 
+                                                                    id={`customFeedbackText-${question.originalIndex}`} 
+                                                                />
+                                                            )}
+
+                                                            <InputField 
+                                                                label="Enable Image Feedback" 
+                                                                type="checkbox" 
+                                                                onChange={e => handleQuestionChange(question.originalIndex, e)} 
+                                                                checked={question.enableCustomFeedbackImage || false} 
+                                                                name="enableCustomFeedbackImage" 
+                                                                id={`enableCustomFeedbackImage-${question.originalIndex}`} 
+                                                            />
+                                                            {question.enableCustomFeedbackImage && (
+                                                                <InputField 
+                                                                    label="Upload Feedback Image" 
+                                                                    type="file" 
+                                                                    onChange={e => handleQuestionChange(question.originalIndex, e)} 
+                                                                    name="customFeedbackImage" 
+                                                                    id={`customFeedbackImage-${question.originalIndex}`} 
+                                                                    fileInput 
+                                                                />
+                                                            )}
+
+                                                            <InputField 
+                                                                label="Enable Audio Feedback" 
+                                                                type="checkbox" 
+                                                                onChange={e => handleQuestionChange(question.originalIndex, e)} 
+                                                                checked={question.enableCustomFeedbackAudio || false} 
+                                                                name="enableCustomFeedbackAudio" 
+                                                                id={`enableCustomFeedbackAudio-${question.originalIndex}`} 
+                                                            />
+                                                            {question.enableCustomFeedbackAudio && (
+                                                                <InputField 
+                                                                    label="Upload Feedback Audio" 
+                                                                    type="file" 
+                                                                    onChange={e => handleQuestionChange(question.originalIndex, e)} 
+                                                                    name="customFeedbackAudio" 
+                                                                    id={`customFeedbackAudio-${question.originalIndex}`} 
+                                                                    fileInput 
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        
+                                        {questions.length > 3 && (
+                                            <button className={styles.remove_question_group_button} onClick={(e) => removeQuestion(groupedQuestions[questionNumber][0].originalIndex, e)}>
+                                                Remove Question {questionNumber} (All Variants)
+                                            </button>
+                                        )}
+                                    </div>
+                                ));
+                            })()
+                        ) : (
+                            // Regular questions when difficulty level is disabled
+                            questions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
-                                    <InputField 
-                                        label={enableDifficultyLevel ? 
-                                            `Question ${question.questionNumber || Math.floor(qIndex / 3) + 1} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'Easy'}` : 
-                                            `Question ${qIndex + 1}`
-                                        } 
-                                        type="text" 
-                                        onChange={e => handleQuestionChange(qIndex, e)} 
-                                        value={question.questionText} 
-                                        name="questionText" 
-                                        id={`questionText-${qIndex}`} 
-                                    />
+                                        <InputField 
+                                            label={`Question ${qIndex + 1}`}
+                                            type="text" 
+                                            onChange={e => handleQuestionChange(qIndex, e)} 
+                                            value={question.questionText} 
+                                            name="questionText" 
+                                            id={`questionText-${qIndex}`} 
+                                        />
                                     
                                     <div className={styles.media_toggle_container}>
                                         <div className={styles.toggle_buttons}>
@@ -1160,12 +1318,13 @@ const CreateLesson = () => {
                                         )}
                                     </div>
                                     
-                                    {(enableDifficultyLevel ? questions.length > 3 && qIndex % 3 === 0 : questions.length > 1) && 
-                                        <button className={styles.remove_button} onClick={(e) => removeQuestion(qIndex, e)}>
-                                            Remove Question{enableDifficultyLevel ? ' (All Variants)' : ''}
-                                        </button>
-                                    }
+                                        {questions.length > 1 && 
+                                            <button className={styles.remove_button} onClick={(e) => removeQuestion(qIndex, e)}>
+                                                Remove Question
+                                            </button>
+                                        }
                                 </div>
+                                    
                                 {question.answers.map((answer, aIndex) => (
                                     <div key={aIndex} className={styles.input_row}>
                                         <InputField label={`Answer ${aIndex + 1}`} type="text" onChange={e => handleAnswerChange(qIndex, aIndex, e)} value={answer.answerText} name="answerText" id={`answerText-${qIndex}-${aIndex}`} />
@@ -1174,71 +1333,70 @@ const CreateLesson = () => {
                                 ))}
                                 <button className={`${styles.add_button} ${styles.add_answer_button}`} onClick={(e) => addAnswer(qIndex, e)}>Add Another Answer</button>
 
-                                {/* Custom Feedback Section */}
-                                <div className={styles.custom_feedback_section}>
-                                    <h5 className={styles.feedback_title}>Custom Feedback</h5>
-                                    
-                                    <InputField 
-                                        label="Enable Text Feedback" 
-                                        type="checkbox" 
-                                        onChange={e => handleQuestionChange(qIndex, e)} 
-                                        checked={question.enableCustomFeedbackText || false} 
-                                        name="enableCustomFeedbackText" 
-                                        id={`enableCustomFeedbackText-${qIndex}`} 
-                                    />
-                                    {question.enableCustomFeedbackText && (
+                                    {/* Custom Feedback Section */}
+                                    <div className={styles.custom_feedback_section}>
+                                        <h5 className={styles.feedback_title}>Custom Feedback</h5>
+                                        
                                         <InputField 
-                                            label="Feedback Text" 
-                                            type="text" 
+                                            label="Enable Text Feedback" 
+                                            type="checkbox" 
                                             onChange={e => handleQuestionChange(qIndex, e)} 
-                                            value={question.customFeedbackText || ""} 
-                                            name="customFeedbackText" 
-                                            id={`customFeedbackText-${qIndex}`} 
+                                            checked={question.enableCustomFeedbackText || false} 
+                                            name="enableCustomFeedbackText" 
+                                            id={`enableCustomFeedbackText-${qIndex}`} 
                                         />
-                                    )}
+                                        {question.enableCustomFeedbackText && (
+                                            <InputField 
+                                                label="Feedback Text" 
+                                                type="text" 
+                                                onChange={e => handleQuestionChange(qIndex, e)} 
+                                                value={question.customFeedbackText || ""} 
+                                                name="customFeedbackText" 
+                                                id={`customFeedbackText-${qIndex}`} 
+                                            />
+                                        )}
 
-                                    <InputField 
-                                        label="Enable Image Feedback" 
-                                        type="checkbox" 
-                                        onChange={e => handleQuestionChange(qIndex, e)} 
-                                        checked={question.enableCustomFeedbackImage || false} 
-                                        name="enableCustomFeedbackImage" 
-                                        id={`enableCustomFeedbackImage-${qIndex}`} 
-                                    />
-                                    {question.enableCustomFeedbackImage && (
                                         <InputField 
-                                            label="Upload Feedback Image" 
-                                            type="file" 
+                                            label="Enable Image Feedback" 
+                                            type="checkbox" 
                                             onChange={e => handleQuestionChange(qIndex, e)} 
-                                            name="customFeedbackImage" 
-                                            id={`customFeedbackImage-${qIndex}`} 
-                                            fileInput 
+                                            checked={question.enableCustomFeedbackImage || false} 
+                                            name="enableCustomFeedbackImage" 
+                                            id={`enableCustomFeedbackImage-${qIndex}`} 
                                         />
-                                    )}
+                                        {question.enableCustomFeedbackImage && (
+                                            <InputField 
+                                                label="Upload Feedback Image" 
+                                                type="file" 
+                                                onChange={e => handleQuestionChange(qIndex, e)} 
+                                                name="customFeedbackImage" 
+                                                id={`customFeedbackImage-${qIndex}`} 
+                                                fileInput 
+                                            />
+                                        )}
 
-                                    <InputField 
-                                        label="Enable Audio Feedback" 
-                                        type="checkbox" 
-                                        onChange={e => handleQuestionChange(qIndex, e)} 
-                                        checked={question.enableCustomFeedbackAudio || false} 
-                                        name="enableCustomFeedbackAudio" 
-                                        id={`enableCustomFeedbackAudio-${qIndex}`} 
-                                    />
-                                    {question.enableCustomFeedbackAudio && (
                                         <InputField 
-                                            label="Upload Feedback Audio" 
-                                            type="file" 
+                                            label="Enable Audio Feedback" 
+                                            type="checkbox" 
                                             onChange={e => handleQuestionChange(qIndex, e)} 
-                                            name="customFeedbackAudio" 
-                                            id={`customFeedbackAudio-${qIndex}`} 
-                                            fileInput 
+                                            checked={question.enableCustomFeedbackAudio || false} 
+                                            name="enableCustomFeedbackAudio" 
+                                            id={`enableCustomFeedbackAudio-${qIndex}`} 
                                         />
-                                    )}
-
-
-                                </div>
+                                        {question.enableCustomFeedbackAudio && (
+                                            <InputField 
+                                                label="Upload Feedback Audio" 
+                                                type="file" 
+                                                onChange={e => handleQuestionChange(qIndex, e)} 
+                                                name="customFeedbackAudio" 
+                                                id={`customFeedbackAudio-${qIndex}`} 
+                                                fileInput 
+                                            />
+                                        )}
                             </div>
-                        ))}
+                                </div>
+                            ))
+                        )}
                         <button className={`${styles.add_button} ${styles.add_question_button}`} onClick={(e) => addQuestion(e)}>Add Another Question</button>
                     </>
                 )}
@@ -1362,26 +1520,174 @@ const CreateLesson = () => {
                             <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
                             </div>
                         </div>
-                        {wsQuestions.map((question, qIndex) => (
+                        {enableDifficultyLevel ? (
+                            // Group questions by questionNumber when difficulty level is enabled
+                            (() => {
+                                const groupedQuestions = {};
+                                wsQuestions.forEach((question, qIndex) => {
+                                    const questionNumber = question.questionNumber || Math.floor(qIndex / 3) + 1;
+                                    if (!groupedQuestions[questionNumber]) {
+                                        groupedQuestions[questionNumber] = [];
+                                    }
+                                    groupedQuestions[questionNumber].push({ ...question, originalIndex: qIndex });
+                                });
+
+                                return Object.keys(groupedQuestions).map((questionNumber) => (
+                                    <div key={`group-${questionNumber}`} className={styles.question_group_container}>
+                                        <div className={styles.question_group_header}>
+                                            Question {questionNumber}
+                                        </div>
+                                        <div className={styles.difficulty_variants_container}>
+                                            {groupedQuestions[questionNumber].map((question) => {
+                                                const difficultyClass = question.difficultyLevel === 'easy' ? styles.difficulty_easy :
+                                                                       question.difficultyLevel === 'medium' ? styles.difficulty_medium :
+                                                                       styles.difficulty_hard;
+                                                
+                                                const badgeClass = question.difficultyLevel === 'easy' ? styles.badge_easy :
+                                                                 question.difficultyLevel === 'medium' ? styles.badge_medium :
+                                                                 styles.badge_hard;
+                                                
+                                                return (
+                                                    <div key={question.originalIndex} className={`${styles.difficulty_question_box} ${difficultyClass}`}>
+                                                        <div className={`${styles.difficulty_badge} ${badgeClass}`}>
+                                                            {question.difficultyLevel}
+                                                        </div>
+                                                        
+                                                        <div className={styles.input_row}>
+                                                            <InputField 
+                                                                label="Question Text"
+                                                                type="text" 
+                                                                onChange={e => handleWsQuestionChange(question.originalIndex, e)} 
+                                                                value={question.questionText} 
+                                                                name="questionText" 
+                                                                id={`questionText-${question.originalIndex}`} 
+                                                            />
+                                                            <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(question.originalIndex, e)} name="video" id={`video-${question.originalIndex}`} fileInput />
+                                                        </div>
+                                                        
+                                                        <div className={styles.input_row}>
+                                                            <InputField 
+                                                                label="Enable Image Upload" 
+                                                                type="checkbox" 
+                                                                onChange={e => handleWsQuestionChange(question.originalIndex, e)} 
+                                                                checked={question.showImageUpload} 
+                                                                name="showImageUpload" 
+                                                                id={`showImageUpload-${question.originalIndex}`} 
+                                                            />
+                                                        </div>
+                                                        {question.showImageUpload && (
+                                                            <div className={styles.input_row}>
+                                                                <InputField 
+                                                                    label="Upload Image" 
+                                                                    type="file" 
+                                                                    onChange={e => handleWsQuestionChange(question.originalIndex, e)} 
+                                                                    name="image" 
+                                                                    id={`image-${question.originalIndex}`} 
+                                                                    fileInput 
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        {question.answers.map((answer, aIndex) => (
+                                                            <div key={aIndex} className={styles.input_row}>
+                                                                <InputField label={`Answer ${aIndex + 1}`} type="text" onChange={e => handleWsAnswerChange(question.originalIndex, aIndex, e)} value={answer.answerText} name="answerText" id={`answerText-${question.originalIndex}-${aIndex}`} />
+                                                                {question.answers.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsAnswer(question.originalIndex, aIndex, e)}>Remove Answer</button>}
+                                                            </div>
+                                                        ))}
+                                                        <button className={styles.add_button} onClick={(e) => addWsAnswer(question.originalIndex, e)}>Add Another Answer</button>
+
+                                                        {/* Custom Feedback Section for watchAndSpeak */}
+                                                        <div className={styles.custom_feedback_section}>
+                                                            <h5 className={styles.feedback_title}>Custom Feedback</h5>
+                                                            
+                                                            <InputField 
+                                                                label="Enable Text Feedback" 
+                                                                type="checkbox" 
+                                                                onChange={e => handleWsQuestionChange(question.originalIndex, e)} 
+                                                                checked={question.enableCustomFeedbackText || false} 
+                                                                name="enableCustomFeedbackText" 
+                                                                id={`enableCustomFeedbackText-${question.originalIndex}`} 
+                                                            />
+                                                            {question.enableCustomFeedbackText && (
+                                                                <InputField 
+                                                                    label="Feedback Text" 
+                                                                    type="text" 
+                                                                    onChange={e => handleWsQuestionChange(question.originalIndex, e)} 
+                                                                    value={question.customFeedbackText || ""} 
+                                                                    name="customFeedbackText" 
+                                                                    id={`customFeedbackText-${question.originalIndex}`} 
+                                                                />
+                                                            )}
+
+                                                            <InputField 
+                                                                label="Enable Image Feedback" 
+                                                                type="checkbox" 
+                                                                onChange={e => handleWsQuestionChange(question.originalIndex, e)} 
+                                                                checked={question.enableCustomFeedbackImage || false} 
+                                                                name="enableCustomFeedbackImage" 
+                                                                id={`enableCustomFeedbackImage-${question.originalIndex}`} 
+                                                            />
+                                                            {question.enableCustomFeedbackImage && (
+                                                                <InputField 
+                                                                    label="Upload Feedback Image" 
+                                                                    type="file" 
+                                                                    onChange={e => handleWsQuestionChange(question.originalIndex, e)} 
+                                                                    name="customFeedbackImage" 
+                                                                    id={`customFeedbackImage-${question.originalIndex}`} 
+                                                                    fileInput 
+                                                                />
+                                                            )}
+
+                                                            <InputField 
+                                                                label="Enable Audio Feedback" 
+                                                                type="checkbox" 
+                                                                onChange={e => handleWsQuestionChange(question.originalIndex, e)} 
+                                                                checked={question.enableCustomFeedbackAudio || false} 
+                                                                name="enableCustomFeedbackAudio" 
+                                                                id={`enableCustomFeedbackAudio-${question.originalIndex}`} 
+                                                            />
+                                                            {question.enableCustomFeedbackAudio && (
+                                                                <InputField 
+                                                                    label="Upload Feedback Audio" 
+                                                                    type="file" 
+                                                                    onChange={e => handleWsQuestionChange(question.originalIndex, e)} 
+                                                                    name="customFeedbackAudio" 
+                                                                    id={`customFeedbackAudio-${question.originalIndex}`} 
+                                                                    fileInput 
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        
+                                        {wsQuestions.length > 3 && (
+                                            <button className={styles.remove_question_group_button} onClick={(e) => removeWsQuestion(groupedQuestions[questionNumber][0].originalIndex, e)}>
+                                                Remove Question {questionNumber} (All Variants)
+                                            </button>
+                                        )}
+                                    </div>
+                                ));
+                            })()
+                        ) : (
+                            // Regular questions when difficulty level is disabled
+                            wsQuestions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
-                                    <InputField 
-                                        label={enableDifficultyLevel ? 
-                                            `Question ${question.questionNumber || Math.floor(qIndex / 3) + 1} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'Easy'}` : 
-                                            `Question ${qIndex + 1}`
-                                        } 
-                                        type="text" 
-                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
-                                        value={question.questionText} 
-                                        name="questionText" 
-                                        id={`questionText-${qIndex}`} 
-                                    />
+                                        <InputField 
+                                            label={`Question ${qIndex + 1}`}
+                                            type="text" 
+                                            onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                            value={question.questionText} 
+                                            name="questionText" 
+                                            id={`questionText-${qIndex}`} 
+                                        />
                                     <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
-                                    {(enableDifficultyLevel ? wsQuestions.length > 3 && qIndex % 3 === 0 : wsQuestions.length > 1) && 
-                                        <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>
-                                            Remove Question{enableDifficultyLevel ? ' (All Variants)' : ''}
-                                        </button>
-                                    }
+                                        {wsQuestions.length > 1 && 
+                                            <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>
+                                                Remove Question
+                                            </button>
+                                        }
                                 </div>
                                 <div className={styles.input_row}>
                                     <InputField 
@@ -1413,69 +1719,70 @@ const CreateLesson = () => {
                                 ))}
                                 <button className={styles.add_button} onClick={(e) => addWsAnswer(qIndex, e)}>Add Another Answer</button>
 
-                                {/* Custom Feedback Section for watchAndSpeak */}
-                                <div className={styles.custom_feedback_section}>
-                                    <h5 className={styles.feedback_title}>Custom Feedback</h5>
-                                    
-                                    <InputField 
-                                        label="Enable Text Feedback" 
-                                        type="checkbox" 
-                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
-                                        checked={question.enableCustomFeedbackText || false} 
-                                        name="enableCustomFeedbackText" 
-                                        id={`enableCustomFeedbackText-${qIndex}`} 
-                                    />
-                                    {question.enableCustomFeedbackText && (
+                                    {/* Custom Feedback Section for watchAndSpeak */}
+                                    <div className={styles.custom_feedback_section}>
+                                        <h5 className={styles.feedback_title}>Custom Feedback</h5>
+                                        
                                         <InputField 
-                                            label="Feedback Text" 
-                                            type="text" 
+                                            label="Enable Text Feedback" 
+                                            type="checkbox" 
                                             onChange={e => handleWsQuestionChange(qIndex, e)} 
-                                            value={question.customFeedbackText || ""} 
-                                            name="customFeedbackText" 
-                                            id={`customFeedbackText-${qIndex}`} 
+                                            checked={question.enableCustomFeedbackText || false} 
+                                            name="enableCustomFeedbackText" 
+                                            id={`enableCustomFeedbackText-${qIndex}`} 
                                         />
-                                    )}
+                                        {question.enableCustomFeedbackText && (
+                                            <InputField 
+                                                label="Feedback Text" 
+                                                type="text" 
+                                                onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                                value={question.customFeedbackText || ""} 
+                                                name="customFeedbackText" 
+                                                id={`customFeedbackText-${qIndex}`} 
+                                            />
+                                        )}
 
-                                    <InputField 
-                                        label="Enable Image Feedback" 
-                                        type="checkbox" 
-                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
-                                        checked={question.enableCustomFeedbackImage || false} 
-                                        name="enableCustomFeedbackImage" 
-                                        id={`enableCustomFeedbackImage-${qIndex}`} 
-                                    />
-                                    {question.enableCustomFeedbackImage && (
                                         <InputField 
-                                            label="Upload Feedback Image" 
-                                            type="file" 
+                                            label="Enable Image Feedback" 
+                                            type="checkbox" 
                                             onChange={e => handleWsQuestionChange(qIndex, e)} 
-                                            name="customFeedbackImage" 
-                                            id={`customFeedbackImage-${qIndex}`} 
-                                            fileInput 
+                                            checked={question.enableCustomFeedbackImage || false} 
+                                            name="enableCustomFeedbackImage" 
+                                            id={`enableCustomFeedbackImage-${qIndex}`} 
                                         />
-                                    )}
+                                        {question.enableCustomFeedbackImage && (
+                                            <InputField 
+                                                label="Upload Feedback Image" 
+                                                type="file" 
+                                                onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                                name="customFeedbackImage" 
+                                                id={`customFeedbackImage-${qIndex}`} 
+                                                fileInput 
+                                            />
+                                        )}
 
-                                    <InputField 
-                                        label="Enable Audio Feedback" 
-                                        type="checkbox" 
-                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
-                                        checked={question.enableCustomFeedbackAudio || false} 
-                                        name="enableCustomFeedbackAudio" 
-                                        id={`enableCustomFeedbackAudio-${qIndex}`} 
-                                    />
-                                    {question.enableCustomFeedbackAudio && (
                                         <InputField 
-                                            label="Upload Feedback Audio" 
-                                            type="file" 
+                                            label="Enable Audio Feedback" 
+                                            type="checkbox" 
                                             onChange={e => handleWsQuestionChange(qIndex, e)} 
-                                            name="customFeedbackAudio" 
-                                            id={`customFeedbackAudio-${qIndex}`} 
-                                            fileInput 
+                                            checked={question.enableCustomFeedbackAudio || false} 
+                                            name="enableCustomFeedbackAudio" 
+                                            id={`enableCustomFeedbackAudio-${qIndex}`} 
                                         />
-                                    )}
-                                </div>
+                                        {question.enableCustomFeedbackAudio && (
+                                            <InputField 
+                                                label="Upload Feedback Audio" 
+                                                type="file" 
+                                                onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                                name="customFeedbackAudio" 
+                                                id={`customFeedbackAudio-${qIndex}`} 
+                                                fileInput 
+                                            />
+                                        )}
                             </div>
-                        ))}
+                                </div>
+                            ))
+                        )}
                         <button className={styles.add_button} onClick={(e) => addWsQuestion(e)}>Add Another Question</button>
                     </>
                 )}
