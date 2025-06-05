@@ -186,7 +186,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 Alias: document.getElementById("activity_alias").value,
                 status: document.getElementById("status").value,
                 textInstruction: enableTextInstruction ? textInstruction : null,
-                audioInstruction: enableAudioInstruction ? audioInstruction : null,
+                audioInstruction: enableAudioInstruction ? (audioInstruction ?? lessonData.audioInstructionUrl) : null,
             };
 
             // Save the updated lesson data
@@ -418,10 +418,61 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
         }
     };
 
+    const handleDeleteQuestions = async (questionsToDelete) => {
+        if (questionsToDelete.length === 0) return;
+
+        const hasUnsavedQuestions = questionsToDelete.some(q => !q.id);
+        const hasSavedQuestions = questionsToDelete.some(q => q.id);
+
+        let isConfirmed = true;
+        if (hasSavedQuestions) {
+            const questionCount = questionsToDelete.length;
+            isConfirmed = window.confirm(
+                `Are you sure you want to delete ${questionCount} question${questionCount > 1 ? 's' : ''}?`
+            );
+        }
+
+        if (isConfirmed) {
+            try {
+                // Delete saved questions from server
+                const savedQuestions = questionsToDelete.filter(q => q.id);
+                const deletePromises = savedQuestions.map(question => 
+                    deleteSpeakActivityQuestion(question.id)
+                );
+
+                if (deletePromises.length > 0) {
+                    const deleteResponses = await Promise.all(deletePromises);
+                    const failedDeletions = deleteResponses.filter(response => response.status !== 200);
+                    
+                    if (failedDeletions.length > 0) {
+                        alert(`Failed to delete ${failedDeletions.length} question(s). Please try again.`);
+                        return;
+                    }
+                }
+
+                // Update state once to remove all deleted questions
+                const questionIdsToDelete = questionsToDelete.map(q => q.id);
+                const questionIndicesToDelete = questionsToDelete.map(q => questions.indexOf(q));
+                
+                const updatedQuestions = questions.filter((question, index) => 
+                    !questionIdsToDelete.includes(question.id) && 
+                    !questionIndicesToDelete.includes(index)
+                );
+                
+                setQuestions(updatedQuestions);
+                
+                const deletedCount = questionsToDelete.length;
+                alert(`${deletedCount} question${deletedCount > 1 ? 's' : ''} deleted successfully`);
+            } catch (error) {
+                alert(`Error deleting questions: ${error}`);
+            }
+        }
+    };
+
     const addNewQuestion = () => {
         if (enableDifficultyLevel) {
             // Add 3 variants for the new question
-            const currentQuestionNumber = Math.floor(questions.length / 3) + 1;
+            const currentQuestionNumber = (Math.max(0, ...questions.map(q => q.questionNumber ?? 0))) + 1;
             const newQuestions = ['easy', 'medium', 'hard'].map(difficulty => {
                 let baseQuestion = {
                     id: null,
@@ -985,18 +1036,15 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                     })}
                                                 </div>
                                                 
-                                                {questions.length > 3 && (
-                                                    <button className={styles.remove_question_group_button} onClick={(e) => {
-                                                        const currentQuestionNumber = groupedQuestions[questionNumber][0].questionNumber;
-                                                        const questionsToDelete = questions.filter(q => q.questionNumber === currentQuestionNumber);
-                                                        questionsToDelete.forEach((q, i) => {
-                                                            const questionIndex = questions.findIndex(qu => qu === q);
-                                                            handleDeleteQuestion(q.id, questionIndex);
-                                                        });
-                                                    }}>
-                                                        Remove Question {questionNumber} (All Variants)
-                                                    </button>
-                                                )}
+                                                                                {questions.length > 3 && (
+                                    <button className={styles.remove_question_group_button} onClick={(e) => {
+                                        const currentQuestionNumber = groupedQuestions[questionNumber][0].questionNumber;
+                                        const questionsToDelete = questions.filter(q => q.questionNumber === currentQuestionNumber);
+                                        handleDeleteQuestions(questionsToDelete);
+                                    }}>
+                                        Remove Question {questionNumber} (All Variants)
+                                    </button>
+                                )}
                                             </div>
                                         ));
                                     })()
@@ -1495,10 +1543,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                                     // Delete all 3 variants if it's the first of the group
                                                     const questionNumber = question.questionNumber;
                                                     const questionsToDelete = questions.filter(q => q.questionNumber === questionNumber);
-                                                    questionsToDelete.forEach((q, i) => {
-                                                        const questionIndex = questions.findIndex(qu => qu === q);
-                                                        handleDeleteQuestion(q.id, questionIndex);
-                                                    });
+                                                    handleDeleteQuestions(questionsToDelete);
                                                 } else if (!enableDifficultyLevel) {
                                                     handleDeleteQuestion(question.id, index);
                                                 }
@@ -1554,7 +1599,7 @@ const SpeakLesson = ({ category, course, activity }) => {
     const [isEditSpeakLessonModalOpen, setIsEditSpeakLessonModalOpen] = useState(false);
     const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
     const [isTestLessonModalOpen, setIsTestLessonModalOpen] = useState(false);
-    const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT == "DEV";
+    const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT === "DEV";
 
     const fetchLessons = async () => {
         try {

@@ -613,10 +613,19 @@ export const createSpeakActivityQuestion = async (question, video, image, answer
     formData.append('lessonId', lessonId);
     formData.append('questionNumber', questionNumber);
     formData.append('activityType', activityType);
-    formData.append('customFeedbackText', customFeedbackText);
-    formData.append('customFeedbackImage', customFeedbackImage);
-    formData.append('customFeedbackAudio', customFeedbackAudio);
-    formData.append('difficultyLevel', difficultyLevel);
+
+    if (customFeedbackText !== null && customFeedbackText !== undefined) {
+        formData.append('customFeedbackText', customFeedbackText);
+    }
+    if (customFeedbackImage !== null && customFeedbackImage !== undefined) {
+        formData.append('customFeedbackImage', customFeedbackImage);
+    }
+    if (customFeedbackAudio !== null && customFeedbackAudio !== undefined) {
+        formData.append('customFeedbackAudio', customFeedbackAudio);
+    }
+    if (difficultyLevel !== null && difficultyLevel !== undefined) {
+        formData.append('difficultyLevel', difficultyLevel);
+    }
 
     const response = await fetch(`${API_URL}/speakActivityQuestion/create`, {
         method: "POST",
@@ -660,10 +669,18 @@ export const updateSpeakActivityQuestion = async (speakActivityQuestionId, quest
     formData.append('lessonId', lessonId);
     formData.append('questionNumber', questionNumber);
     formData.append('activityType', activityType);
-    formData.append('customFeedbackText', customFeedbackText);
-    formData.append('customFeedbackImage', customFeedbackImage);
-    formData.append('customFeedbackAudio', customFeedbackAudio);
-    formData.append('difficultyLevel', difficultyLevel);
+    if (customFeedbackText !== null && customFeedbackText !== undefined) {
+        formData.append('customFeedbackText', customFeedbackText);
+    }
+    if (customFeedbackImage !== null && customFeedbackImage !== undefined) {
+        formData.append('customFeedbackImage', customFeedbackImage);
+    }
+    if (customFeedbackAudio !== null && customFeedbackAudio !== undefined) {
+        formData.append('customFeedbackAudio', customFeedbackAudio);
+    }
+    if (difficultyLevel !== null && difficultyLevel !== undefined) {
+        formData.append('difficultyLevel', difficultyLevel);
+    }
 
     const response = await fetch(`${API_URL}/speakActivityQuestion/update/${speakActivityQuestionId}`, {
         method: "PUT",

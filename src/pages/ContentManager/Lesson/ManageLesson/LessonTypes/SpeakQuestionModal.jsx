@@ -1,6 +1,27 @@
 import React, { useEffect } from 'react';
 import styles from './SpeakQuestionModal.module.css';
 
+// Reusable component for custom feedback cells
+const CustomFeedbackCells = ({ question }) => (
+    <>
+        <td style={{ width: "15%" }}>
+            {question.customFeedbackText || 'N/A'}
+        </td>
+        <td style={{ width: "15%" }}>
+            {question.customFeedbackImage ? (
+                <img src={question.customFeedbackImage} alt="Custom Feedback" className={styles.image} />
+            ) : 'N/A'}
+        </td>
+        <td style={{ width: "15%" }}>
+            {question.customFeedbackAudio ? (
+                <audio controls>
+                    <source src={question.customFeedbackAudio} type="audio/mp3" />
+                </audio>
+            ) : 'N/A'}
+        </td>
+    </>
+);
+
 const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
     const sortedQuestions = lesson?.speakActivityQuestionFiles 
         ? [...lesson.speakActivityQuestionFiles].sort((a, b) => {
@@ -131,23 +152,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                 </audio>
                                             </td>
                                             {hasCustomFeedback && (
-                                                <>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackText || 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackImage ? (
-                                                            <img src={question.customFeedbackImage} alt="Custom Feedback" className={styles.image} />
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackAudio ? (
-                                                            <audio controls>
-                                                                <source src={question.customFeedbackAudio} type="audio/mp3" />
-                                                            </audio>
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                </>
+                                                <CustomFeedbackCells question={question} />
                                             )}
                                         </>
                                     )}
@@ -174,23 +179,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                 )}
                                             </td>
                                             {hasCustomFeedback && (
-                                                <>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackText || 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackImage ? (
-                                                            <img src={question.customFeedbackImage} alt="Custom Feedback" className={styles.image} />
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackAudio ? (
-                                                            <audio controls>
-                                                                <source src={question.customFeedbackAudio} type="audio/mp3" />
-                                                            </audio>
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                </>
+                                                <CustomFeedbackCells question={question} />
                                             )}
                                         </>
                                     )}
@@ -208,23 +197,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                 </video>
                                             </td>
                                             {hasCustomFeedback && (
-                                                <>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackText || 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackImage ? (
-                                                            <img src={question.customFeedbackImage} alt="Custom Feedback" className={styles.image} />
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackAudio ? (
-                                                            <audio controls>
-                                                                <source src={question.customFeedbackAudio} type="audio/mp3" />
-                                                            </audio>
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                </>
+                                                <CustomFeedbackCells question={question} />
                                             )}
                                         </>
                                     )}
@@ -242,23 +215,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                 </video>
                                             </td>
                                             {hasCustomFeedback && (
-                                                <>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackText || 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackImage ? (
-                                                            <img src={question.customFeedbackImage} alt="Custom Feedback" className={styles.image} />
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackAudio ? (
-                                                            <audio controls>
-                                                                <source src={question.customFeedbackAudio} type="audio/mp3" />
-                                                            </audio>
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                </>
+                                                <CustomFeedbackCells question={question} />
                                             )}
                                         </>
                                     )}
@@ -284,23 +241,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                 )}
                                             </td>
                                             {hasCustomFeedback && (
-                                                <>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackText || 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackImage ? (
-                                                            <img src={question.customFeedbackImage} alt="Custom Feedback" className={styles.image} />
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackAudio ? (
-                                                            <audio controls>
-                                                                <source src={question.customFeedbackAudio} type="audio/mp3" />
-                                                            </audio>
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                </>
+                                                <CustomFeedbackCells question={question} />
                                             )}
                                         </>
                                     )}
@@ -318,23 +259,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                 </audio>
                                             </td>
                                             {hasCustomFeedback && (
-                                                <>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackText || 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackImage ? (
-                                                            <img src={question.customFeedbackImage} alt="Custom Feedback" className={styles.image} />
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackAudio ? (
-                                                            <audio controls>
-                                                                <source src={question.customFeedbackAudio} type="audio/mp3" />
-                                                            </audio>
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                </>
+                                                <CustomFeedbackCells question={question} />
                                             )}
                                         </>
                                     )}
@@ -353,23 +278,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                 </video>
                                             </td>
                                             {hasCustomFeedback && (
-                                                <>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackText || 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackImage ? (
-                                                            <img src={question.customFeedbackImage} alt="Custom Feedback" className={styles.image} />
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackAudio ? (
-                                                            <audio controls>
-                                                                <source src={question.customFeedbackAudio} type="audio/mp3" />
-                                                            </audio>
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                </>
+                                                <CustomFeedbackCells question={question} />
                                             )}
                                         </>
                                     )}
@@ -390,23 +299,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                 </audio>
                                             </td>
                                             {hasCustomFeedback && (
-                                                <>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackText || 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackImage ? (
-                                                            <img src={question.customFeedbackImage} alt="Custom Feedback" className={styles.image} />
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackAudio ? (
-                                                            <audio controls>
-                                                                <source src={question.customFeedbackAudio} type="audio/mp3" />
-                                                            </audio>
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                </>
+                                                <CustomFeedbackCells question={question} />
                                             )}
                                         </>
                                     )}
@@ -424,23 +317,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                 </audio>
                                             </td>
                                             {hasCustomFeedback && (
-                                                <>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackText || 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackImage ? (
-                                                            <img src={question.customFeedbackImage} alt="Custom Feedback" className={styles.image} />
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                    <td style={{ width: "15%" }}>
-                                                        {question.customFeedbackAudio ? (
-                                                            <audio controls>
-                                                                <source src={question.customFeedbackAudio} type="audio/mp3" />
-                                                            </audio>
-                                                        ) : 'N/A'}
-                                                    </td>
-                                                </>
+                                                <CustomFeedbackCells question={question} />
                                             )}
                                         </>
                                     )}
