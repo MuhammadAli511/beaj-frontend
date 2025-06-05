@@ -106,7 +106,11 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
                 answersArray,
                 lessonId,
                 (index + 1).toString(),
-                activityType
+                activityType,
+                question.customFeedbackText || null,
+                question.customFeedbackImage || null,
+                question.customFeedbackAudio || null,
+                question.difficultyLevel || null
             );
         })
     );
@@ -150,7 +154,11 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
                 answersArray,
                 lessonId,
                 (index + 1).toString(),
-                activityType
+                activityType,
+                question.customFeedbackText || null,
+                question.customFeedbackImage || null,
+                question.customFeedbackAudio || null,
+                question.difficultyLevel || null
             );
         })
     );

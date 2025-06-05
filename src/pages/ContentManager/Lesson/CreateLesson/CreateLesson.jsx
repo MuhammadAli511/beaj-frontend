@@ -74,6 +74,7 @@ const CreateLesson = () => {
     const [enableAudioInstruction, setEnableAudioInstruction] = useState(false);
     const [textInstruction, setTextInstruction] = useState('');
     const [audioInstruction, setAudioInstruction] = useState(null);
+    const [enableDifficultyLevel, setEnableDifficultyLevel] = useState(false);
 
     // Listen
     const [image, setImage] = useState(null);
@@ -120,7 +121,20 @@ const CreateLesson = () => {
 
     // Watch and Speak
     const [wsQuestions, setWsQuestions] = useState([
-        { questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false }
+        { 
+            questionText: '', 
+            video: '', 
+            image: '', 
+            answers: [{ answerText: '' }], 
+            showImageUpload: false,
+            customFeedbackText: null,
+            customFeedbackImage: null,
+            customFeedbackAudio: null,
+            difficultyLevel: null,
+            enableCustomFeedbackText: false,
+            enableCustomFeedbackImage: false,
+            enableCustomFeedbackAudio: false
+        }
     ]);
 
     const handleWsQuestionChange = (index, event) => {
@@ -139,9 +153,28 @@ const CreateLesson = () => {
                 } else {
                     alert('Please upload an MP4 video not larger than 16MB.');
                 }
+            } else if (event.target.name === 'customFeedbackImage') {
+                if (file && file.type.startsWith('image/') && file.size <= 4 * 1024 * 1024) {
+                    newWsQuestions[index][event.target.name] = file;
+                } else {
+                    alert('Please upload an image not larger than 4MB.');
+                }
+            } else if (event.target.name === 'customFeedbackAudio') {
+                if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+                    newWsQuestions[index][event.target.name] = file;
+                } else {
+                    alert('Please upload an MP3 audio not larger than 16MB.');
+                }
             }
         } else if (event.target.type === 'checkbox' && event.target.name === 'showImageUpload') {
             newWsQuestions[index].showImageUpload = event.target.checked;
+        } else if (event.target.type === 'checkbox' && event.target.name.startsWith('enableCustomFeedback')) {
+            newWsQuestions[index][event.target.name] = event.target.checked;
+            // Clear the corresponding custom feedback field if disabled
+            if (!event.target.checked) {
+                const feedbackField = event.target.name.replace('enable', '').replace(/([A-Z])/g, (match) => match.toLowerCase());
+                newWsQuestions[index][`custom${feedbackField.charAt(0).toUpperCase() + feedbackField.slice(1)}`] = null;
+            }
         } else {
             newWsQuestions[index][event.target.name] = event.target.value;
         }
@@ -163,15 +196,66 @@ const CreateLesson = () => {
 
     const addWsQuestion = (event) => {
         event.preventDefault();
-        setWsQuestions([...wsQuestions, { questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false }]);
+        
+        if (enableDifficultyLevel && ['watchAndSpeak', 'watchAndAudio', 'watchAndImage'].includes(activityType)) {
+            const currentQuestionNumber = Math.floor(wsQuestions.length / 3) + 1;
+            const newQuestions = ['easy', 'medium', 'hard'].map(difficulty => ({
+                questionText: '', 
+                video: '', 
+                image: '', 
+                answers: [{ answerText: '' }], 
+                showImageUpload: false, 
+                customFeedbackText: null, 
+                customFeedbackImage: null, 
+                customFeedbackAudio: null, 
+                difficultyLevel: difficulty,
+                questionNumber: currentQuestionNumber,
+                enableCustomFeedbackText: false, 
+                enableCustomFeedbackImage: false, 
+                enableCustomFeedbackAudio: false
+            }));
+            setWsQuestions([...wsQuestions, ...newQuestions]);
+        } else {
+            setWsQuestions([...wsQuestions, { 
+                questionText: '', 
+                video: '', 
+                image: '', 
+                answers: [{ answerText: '' }], 
+                showImageUpload: false, 
+                customFeedbackText: null, 
+                customFeedbackImage: null, 
+                customFeedbackAudio: null, 
+                difficultyLevel: null, 
+                enableCustomFeedbackText: false, 
+                enableCustomFeedbackImage: false, 
+                enableCustomFeedbackAudio: false 
+            }]);
+        }
     };
 
     const removeWsQuestion = (index, event) => {
         event.preventDefault();
-        if (wsQuestions.length > 1) {
-            const newWsQuestions = [...wsQuestions];
-            newWsQuestions.splice(index, 1);
-            setWsQuestions(newWsQuestions);
+        
+        if (enableDifficultyLevel && ['watchAndSpeak', 'watchAndAudio', 'watchAndImage'].includes(activityType)) {
+            // Remove all 3 variants of the question
+            const questionNumber = wsQuestions[index].questionNumber;
+            const newQuestions = wsQuestions.filter(q => q.questionNumber !== questionNumber);
+            
+            // Renumber remaining questions
+            const renumberedQuestions = newQuestions.map((q, i) => ({
+                ...q,
+                questionNumber: Math.floor(i / 3) + 1
+            }));
+            
+            if (renumberedQuestions.length >= 3) {
+                setWsQuestions(renumberedQuestions);
+            }
+        } else {
+            if (wsQuestions.length > 1) {
+                const newWsQuestions = [...wsQuestions];
+                newWsQuestions.splice(index, 1);
+                setWsQuestions(newWsQuestions);
+            }
         }
     };
 
@@ -276,27 +360,61 @@ const CreateLesson = () => {
 
     // Listen and Speak
     const [questions, setQuestions] = useState([
-        { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }
+        { 
+            questionText: '', 
+            media: '', 
+            answers: [{ answerText: '' }], 
+            mediaType: 'audio',
+            customFeedbackText: null,
+            customFeedbackImage: null,
+            customFeedbackAudio: null,
+            difficultyLevel: null,
+            enableCustomFeedbackText: false,
+            enableCustomFeedbackImage: false,
+            enableCustomFeedbackAudio: false
+        }
     ]);
 
     const handleQuestionChange = (index, event) => {
         const newQuestions = [...questions];
         if (event.target.type === 'file') {
             const file = event.target.files[0];
-            const mediaType = newQuestions[index].mediaType;
             
-            if (mediaType === 'video') {
-                if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
+            if (event.target.name === 'customFeedbackImage') {
+                if (file && file.type.startsWith('image/') && file.size <= 4 * 1024 * 1024) {
                     newQuestions[index][event.target.name] = file;
                 } else {
-                    alert('Please upload an MP4 video not larger than 16MB.');
+                    alert('Please upload an image not larger than 4MB.');
                 }
-            } else {
+            } else if (event.target.name === 'customFeedbackAudio') {
                 if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
                     newQuestions[index][event.target.name] = file;
                 } else {
                     alert('Please upload an MP3 audio not larger than 16MB.');
                 }
+            } else {
+                const mediaType = newQuestions[index].mediaType;
+                
+                if (mediaType === 'video') {
+                    if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
+                        newQuestions[index][event.target.name] = file;
+                    } else {
+                        alert('Please upload an MP4 video not larger than 16MB.');
+                    }
+                } else {
+                    if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+                        newQuestions[index][event.target.name] = file;
+                    } else {
+                        alert('Please upload an MP3 audio not larger than 16MB.');
+                    }
+                }
+            }
+        } else if (event.target.type === 'checkbox' && event.target.name.startsWith('enableCustomFeedback')) {
+            newQuestions[index][event.target.name] = event.target.checked;
+            // Clear the corresponding custom feedback field if disabled
+            if (!event.target.checked) {
+                const feedbackField = event.target.name.replace('enable', '').replace(/([A-Z])/g, (match) => match.toLowerCase());
+                newQuestions[index][`custom${feedbackField.charAt(0).toUpperCase() + feedbackField.slice(1)}`] = null;
             }
         } else {
             newQuestions[index][event.target.name] = event.target.value;
@@ -319,15 +437,64 @@ const CreateLesson = () => {
 
     const addQuestion = (event) => {
         event.preventDefault();
-        setQuestions([...questions, { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }]);
+        
+        if (enableDifficultyLevel) {
+            const currentQuestionNumber = Math.floor(questions.length / 3) + 1;
+            const newQuestions = ['easy', 'medium', 'hard'].map(difficulty => ({
+                questionText: '', 
+                media: '', 
+                answers: [{ answerText: '' }], 
+                mediaType: 'audio', 
+                customFeedbackText: null, 
+                customFeedbackImage: null, 
+                customFeedbackAudio: null, 
+                difficultyLevel: difficulty,
+                questionNumber: currentQuestionNumber,
+                enableCustomFeedbackText: false, 
+                enableCustomFeedbackImage: false, 
+                enableCustomFeedbackAudio: false
+            }));
+            setQuestions([...questions, ...newQuestions]);
+        } else {
+            setQuestions([...questions, { 
+                questionText: '', 
+                media: '', 
+                answers: [{ answerText: '' }], 
+                mediaType: 'audio', 
+                customFeedbackText: null, 
+                customFeedbackImage: null, 
+                customFeedbackAudio: null, 
+                difficultyLevel: null, 
+                enableCustomFeedbackText: false, 
+                enableCustomFeedbackImage: false, 
+                enableCustomFeedbackAudio: false 
+            }]);
+        }
     };
 
     const removeQuestion = (index, event) => {
         event.preventDefault();
-        if (questions.length > 1) {
-            const newQuestions = [...questions];
-            newQuestions.splice(index, 1);
-            setQuestions(newQuestions);
+        
+        if (enableDifficultyLevel) {
+            // Remove all 3 variants of the question
+            const questionNumber = questions[index].questionNumber;
+            const newQuestions = questions.filter(q => q.questionNumber !== questionNumber);
+            
+            // Renumber remaining questions
+            const renumberedQuestions = newQuestions.map((q, i) => ({
+                ...q,
+                questionNumber: Math.floor(i / 3) + 1
+            }));
+            
+            if (renumberedQuestions.length >= 3) {
+                setQuestions(renumberedQuestions);
+            }
+        } else {
+            if (questions.length > 1) {
+                const newQuestions = [...questions];
+                newQuestions.splice(index, 1);
+                setQuestions(newQuestions);
+            }
         }
     };
 
@@ -569,6 +736,63 @@ const CreateLesson = () => {
         setTextInstruction(e.target.value);
     };
 
+    const handleEnableDifficultyLevelChange = (e) => {
+        const isEnabled = e.target.checked;
+        setEnableDifficultyLevel(isEnabled);
+        
+        if (isEnabled) {
+            // Transform questions to have 3 variants per question
+            if (activityType === 'listenAndSpeak') {
+                const expandedQuestions = [];
+                questions.forEach((question, index) => {
+                    ['easy', 'medium', 'hard'].forEach(difficulty => {
+                        expandedQuestions.push({
+                            ...question,
+                            questionNumber: index + 1,
+                            difficultyLevel: difficulty,
+                            questionText: question.questionText || '',
+                        });
+                    });
+                });
+                setQuestions(expandedQuestions);
+            } else if (['watchAndSpeak', 'watchAndAudio', 'watchAndImage'].includes(activityType)) {
+                const expandedQuestions = [];
+                wsQuestions.forEach((question, index) => {
+                    ['easy', 'medium', 'hard'].forEach(difficulty => {
+                        expandedQuestions.push({
+                            ...question,
+                            questionNumber: index + 1,
+                            difficultyLevel: difficulty,
+                            questionText: question.questionText || '',
+                        });
+                    });
+                });
+                setWsQuestions(expandedQuestions);
+            }
+        } else {
+            // Collapse back to single questions
+            if (activityType === 'listenAndSpeak') {
+                const collapsedQuestions = [];
+                for (let i = 0; i < questions.length; i += 3) {
+                    collapsedQuestions.push({
+                        ...questions[i],
+                        difficultyLevel: null,
+                    });
+                }
+                setQuestions(collapsedQuestions);
+            } else if (['watchAndSpeak', 'watchAndAudio', 'watchAndImage'].includes(activityType)) {
+                const collapsedQuestions = [];
+                for (let i = 0; i < wsQuestions.length; i += 3) {
+                    collapsedQuestions.push({
+                        ...wsQuestions[i],
+                        difficultyLevel: null,
+                    });
+                }
+                setWsQuestions(collapsedQuestions);
+            }
+        }
+    };
+
     const handleCreateLesson = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -626,8 +850,25 @@ const CreateLesson = () => {
             setEnableAudioInstruction(false);
             setTextInstruction('');
             setAudioInstruction(null);
-            setQuestions([{ questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }]);
-            setWsQuestions([{ questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false }]);
+            if (enableDifficultyLevel && ['listenAndSpeak'].includes(activityType)) {
+                setQuestions([
+                    { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio', customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'easy', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false },
+                    { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio', customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'medium', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false },
+                    { questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio', customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'hard', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false }
+                ]);
+            } else {
+                setQuestions([{ questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio', customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: null, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false }]);
+            }
+            
+            if (enableDifficultyLevel && ['watchAndSpeak', 'watchAndAudio', 'watchAndImage'].includes(activityType)) {
+                setWsQuestions([
+                    { questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false, customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'easy', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false },
+                    { questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false, customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'medium', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false },
+                    { questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false, customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'hard', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false }
+                ]);
+            } else {
+                setWsQuestions([{ questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false, customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: null, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false }]);
+            }
             setMcqs([{
                 questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
                 showCustomFeedback: false,
@@ -798,6 +1039,23 @@ const CreateLesson = () => {
                         )}
                     </div>
                 </div>
+
+                {/* Difficulty Level Toggle */}
+                {['listenAndSpeak', 'watchAndSpeak', 'watchAndAudio', 'watchAndImage'].includes(activityType) && (
+                    <div className={styles.input_row}>
+                        <div className={styles.form_group}>
+                            <InputField 
+                                label="Enable Difficulty Level (Easy, Medium, Hard variants)" 
+                                type="checkbox" 
+                                onChange={handleEnableDifficultyLevelChange} 
+                                checked={enableDifficultyLevel} 
+                                name="enableDifficultyLevel" 
+                                id="enableDifficultyLevel" 
+                            />
+                        </div>
+                    </div>
+                )}
+
                 {activityType === 'audio' && (
                     <>
                         <div className={styles.input_row}>
@@ -857,7 +1115,17 @@ const CreateLesson = () => {
                         {questions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
-                                    <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
+                                    <InputField 
+                                        label={enableDifficultyLevel ? 
+                                            `Question ${question.questionNumber || Math.floor(qIndex / 3) + 1} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'Easy'}` : 
+                                            `Question ${qIndex + 1}`
+                                        } 
+                                        type="text" 
+                                        onChange={e => handleQuestionChange(qIndex, e)} 
+                                        value={question.questionText} 
+                                        name="questionText" 
+                                        id={`questionText-${qIndex}`} 
+                                    />
                                     
                                     <div className={styles.media_toggle_container}>
                                         <div className={styles.toggle_buttons}>
@@ -892,7 +1160,11 @@ const CreateLesson = () => {
                                         )}
                                     </div>
                                     
-                                    {questions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeQuestion(qIndex, e)}>Remove Question</button>}
+                                    {(enableDifficultyLevel ? questions.length > 3 && qIndex % 3 === 0 : questions.length > 1) && 
+                                        <button className={styles.remove_button} onClick={(e) => removeQuestion(qIndex, e)}>
+                                            Remove Question{enableDifficultyLevel ? ' (All Variants)' : ''}
+                                        </button>
+                                    }
                                 </div>
                                 {question.answers.map((answer, aIndex) => (
                                     <div key={aIndex} className={styles.input_row}>
@@ -901,6 +1173,70 @@ const CreateLesson = () => {
                                     </div>
                                 ))}
                                 <button className={`${styles.add_button} ${styles.add_answer_button}`} onClick={(e) => addAnswer(qIndex, e)}>Add Another Answer</button>
+
+                                {/* Custom Feedback Section */}
+                                <div className={styles.custom_feedback_section}>
+                                    <h5 className={styles.feedback_title}>Custom Feedback</h5>
+                                    
+                                    <InputField 
+                                        label="Enable Text Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackText || false} 
+                                        name="enableCustomFeedbackText" 
+                                        id={`enableCustomFeedbackText-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackText && (
+                                        <InputField 
+                                            label="Feedback Text" 
+                                            type="text" 
+                                            onChange={e => handleQuestionChange(qIndex, e)} 
+                                            value={question.customFeedbackText || ""} 
+                                            name="customFeedbackText" 
+                                            id={`customFeedbackText-${qIndex}`} 
+                                        />
+                                    )}
+
+                                    <InputField 
+                                        label="Enable Image Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackImage || false} 
+                                        name="enableCustomFeedbackImage" 
+                                        id={`enableCustomFeedbackImage-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackImage && (
+                                        <InputField 
+                                            label="Upload Feedback Image" 
+                                            type="file" 
+                                            onChange={e => handleQuestionChange(qIndex, e)} 
+                                            name="customFeedbackImage" 
+                                            id={`customFeedbackImage-${qIndex}`} 
+                                            fileInput 
+                                        />
+                                    )}
+
+                                    <InputField 
+                                        label="Enable Audio Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackAudio || false} 
+                                        name="enableCustomFeedbackAudio" 
+                                        id={`enableCustomFeedbackAudio-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackAudio && (
+                                        <InputField 
+                                            label="Upload Feedback Audio" 
+                                            type="file" 
+                                            onChange={e => handleQuestionChange(qIndex, e)} 
+                                            name="customFeedbackAudio" 
+                                            id={`customFeedbackAudio-${qIndex}`} 
+                                            fileInput 
+                                        />
+                                    )}
+
+
+                                </div>
                             </div>
                         ))}
                         <button className={`${styles.add_button} ${styles.add_question_button}`} onClick={(e) => addQuestion(e)}>Add Another Question</button>
@@ -1029,9 +1365,23 @@ const CreateLesson = () => {
                         {wsQuestions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
-                                    <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleWsQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
+                                    <InputField 
+                                        label={enableDifficultyLevel ? 
+                                            `Question ${question.questionNumber || Math.floor(qIndex / 3) + 1} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'Easy'}` : 
+                                            `Question ${qIndex + 1}`
+                                        } 
+                                        type="text" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        value={question.questionText} 
+                                        name="questionText" 
+                                        id={`questionText-${qIndex}`} 
+                                    />
                                     <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
-                                    {wsQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>Remove Question</button>}
+                                    {(enableDifficultyLevel ? wsQuestions.length > 3 && qIndex % 3 === 0 : wsQuestions.length > 1) && 
+                                        <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>
+                                            Remove Question{enableDifficultyLevel ? ' (All Variants)' : ''}
+                                        </button>
+                                    }
                                 </div>
                                 <div className={styles.input_row}>
                                     <InputField 
@@ -1062,6 +1412,68 @@ const CreateLesson = () => {
                                     </div>
                                 ))}
                                 <button className={styles.add_button} onClick={(e) => addWsAnswer(qIndex, e)}>Add Another Answer</button>
+
+                                {/* Custom Feedback Section for watchAndSpeak */}
+                                <div className={styles.custom_feedback_section}>
+                                    <h5 className={styles.feedback_title}>Custom Feedback</h5>
+                                    
+                                    <InputField 
+                                        label="Enable Text Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackText || false} 
+                                        name="enableCustomFeedbackText" 
+                                        id={`enableCustomFeedbackText-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackText && (
+                                        <InputField 
+                                            label="Feedback Text" 
+                                            type="text" 
+                                            onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                            value={question.customFeedbackText || ""} 
+                                            name="customFeedbackText" 
+                                            id={`customFeedbackText-${qIndex}`} 
+                                        />
+                                    )}
+
+                                    <InputField 
+                                        label="Enable Image Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackImage || false} 
+                                        name="enableCustomFeedbackImage" 
+                                        id={`enableCustomFeedbackImage-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackImage && (
+                                        <InputField 
+                                            label="Upload Feedback Image" 
+                                            type="file" 
+                                            onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                            name="customFeedbackImage" 
+                                            id={`customFeedbackImage-${qIndex}`} 
+                                            fileInput 
+                                        />
+                                    )}
+
+                                    <InputField 
+                                        label="Enable Audio Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackAudio || false} 
+                                        name="enableCustomFeedbackAudio" 
+                                        id={`enableCustomFeedbackAudio-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackAudio && (
+                                        <InputField 
+                                            label="Upload Feedback Audio" 
+                                            type="file" 
+                                            onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                            name="customFeedbackAudio" 
+                                            id={`customFeedbackAudio-${qIndex}`} 
+                                            fileInput 
+                                        />
+                                    )}
+                                </div>
                             </div>
                         ))}
                         <button className={styles.add_button} onClick={(e) => addWsQuestion(e)}>Add Another Question</button>
@@ -1077,8 +1489,84 @@ const CreateLesson = () => {
                         {wsQuestions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
-                                    <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
-                                    {wsQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>Remove Question</button>}
+                                    <InputField 
+                                        label={enableDifficultyLevel ? 
+                                            `Question ${question.questionNumber || Math.floor(qIndex / 3) + 1} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'Easy'} Video` : 
+                                            "Upload Video"
+                                        } 
+                                        type="file" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        name="video" 
+                                        id={`video-${qIndex}`} 
+                                        fileInput 
+                                    />
+                                    {(enableDifficultyLevel ? wsQuestions.length > 3 && qIndex % 3 === 0 : wsQuestions.length > 1) && 
+                                        <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>
+                                            Remove Question{enableDifficultyLevel ? ' (All Variants)' : ''}
+                                        </button>
+                                    }
+                                </div>
+
+                                {/* Custom Feedback Section for watchAndAudio */}
+                                <div className={styles.custom_feedback_section}>
+                                    <h5 className={styles.feedback_title}>Custom Feedback</h5>
+                                    
+                                    <InputField 
+                                        label="Enable Text Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackText || false} 
+                                        name="enableCustomFeedbackText" 
+                                        id={`enableCustomFeedbackText-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackText && (
+                                        <InputField 
+                                            label="Feedback Text" 
+                                            type="text" 
+                                            onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                            value={question.customFeedbackText || ""} 
+                                            name="customFeedbackText" 
+                                            id={`customFeedbackText-${qIndex}`} 
+                                        />
+                                    )}
+
+                                    <InputField 
+                                        label="Enable Image Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackImage || false} 
+                                        name="enableCustomFeedbackImage" 
+                                        id={`enableCustomFeedbackImage-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackImage && (
+                                        <InputField 
+                                            label="Upload Feedback Image" 
+                                            type="file" 
+                                            onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                            name="customFeedbackImage" 
+                                            id={`customFeedbackImage-${qIndex}`} 
+                                            fileInput 
+                                        />
+                                    )}
+
+                                    <InputField 
+                                        label="Enable Audio Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackAudio || false} 
+                                        name="enableCustomFeedbackAudio" 
+                                        id={`enableCustomFeedbackAudio-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackAudio && (
+                                        <InputField 
+                                            label="Upload Feedback Audio" 
+                                            type="file" 
+                                            onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                            name="customFeedbackAudio" 
+                                            id={`customFeedbackAudio-${qIndex}`} 
+                                            fileInput 
+                                        />
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -1095,8 +1583,84 @@ const CreateLesson = () => {
                         {wsQuestions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
-                                    <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
-                                    {wsQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>Remove Question</button>}
+                                    <InputField 
+                                        label={enableDifficultyLevel ? 
+                                            `Question ${question.questionNumber || Math.floor(qIndex / 3) + 1} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'Easy'} Video` : 
+                                            "Upload Video"
+                                        } 
+                                        type="file" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        name="video" 
+                                        id={`video-${qIndex}`} 
+                                        fileInput 
+                                    />
+                                    {(enableDifficultyLevel ? wsQuestions.length > 3 && qIndex % 3 === 0 : wsQuestions.length > 1) && 
+                                        <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>
+                                            Remove Question{enableDifficultyLevel ? ' (All Variants)' : ''}
+                                        </button>
+                                    }
+                                </div>
+
+                                {/* Custom Feedback Section for watchAndImage */}
+                                <div className={styles.custom_feedback_section}>
+                                    <h5 className={styles.feedback_title}>Custom Feedback</h5>
+                                    
+                                    <InputField 
+                                        label="Enable Text Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackText || false} 
+                                        name="enableCustomFeedbackText" 
+                                        id={`enableCustomFeedbackText-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackText && (
+                                        <InputField 
+                                            label="Feedback Text" 
+                                            type="text" 
+                                            onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                            value={question.customFeedbackText || ""} 
+                                            name="customFeedbackText" 
+                                            id={`customFeedbackText-${qIndex}`} 
+                                        />
+                                    )}
+
+                                    <InputField 
+                                        label="Enable Image Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackImage || false} 
+                                        name="enableCustomFeedbackImage" 
+                                        id={`enableCustomFeedbackImage-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackImage && (
+                                        <InputField 
+                                            label="Upload Feedback Image" 
+                                            type="file" 
+                                            onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                            name="customFeedbackImage" 
+                                            id={`customFeedbackImage-${qIndex}`} 
+                                            fileInput 
+                                        />
+                                    )}
+
+                                    <InputField 
+                                        label="Enable Audio Feedback" 
+                                        type="checkbox" 
+                                        onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                        checked={question.enableCustomFeedbackAudio || false} 
+                                        name="enableCustomFeedbackAudio" 
+                                        id={`enableCustomFeedbackAudio-${qIndex}`} 
+                                    />
+                                    {question.enableCustomFeedbackAudio && (
+                                        <InputField 
+                                            label="Upload Feedback Audio" 
+                                            type="file" 
+                                            onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                            name="customFeedbackAudio" 
+                                            id={`customFeedbackAudio-${qIndex}`} 
+                                            fileInput 
+                                        />
+                                    )}
                                 </div>
                             </div>
                         ))}
