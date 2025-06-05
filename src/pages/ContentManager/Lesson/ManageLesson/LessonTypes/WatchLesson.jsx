@@ -409,7 +409,6 @@ const WatchLesson = ({ category, course, activity }) => {
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
     const [isTestLessonModalOpen, setIsTestLessonModalOpen] = useState(false);
-    console.log(process.env.REACT_APP_ENVIRONMENT);
     const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT == "DEV";
 
     const fetchLessons = async () => {
@@ -464,7 +463,6 @@ const WatchLesson = ({ category, course, activity }) => {
         };
     
         const handleTestLesson = async (phoneNumber, selectedLesson) => {
-            console.log(phoneNumber, selectedLesson);
             const testResponse = await testLesson(phoneNumber, selectedLesson);
             if (testResponse.status !== 200) {
                 alert(testResponse.data.message);

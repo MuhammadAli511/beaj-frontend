@@ -1394,7 +1394,6 @@ const MCQsLesson = ({ category, course, activity }) => {
     };
 
     const handleTestLesson = async (phoneNumber, selectedLesson) => {
-        console.log(phoneNumber, selectedLesson);
         const testResponse = await testLesson(phoneNumber, selectedLesson);
         if (testResponse.status !== 200) {
             alert(testResponse.data.message);

@@ -207,8 +207,6 @@ const Dashboard = () => {
             },
         ],
     };
-    
-    console.log('Pie chart data:', pieChartData);
 
     const pieChartOptions = {
         plugins: {
