@@ -402,11 +402,31 @@ export const deleteConstant = async (key) => {
 
 // LESSON
 // API call to create a lesson
-export const createLesson = async (lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status) => {
+export const createLesson = async (lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status, textInstruction = null, audioInstruction = null) => {
+    const formData = new FormData();
+    formData.append('lessonType', lessonType);
+    formData.append('dayNumber', dayNumber);
+    formData.append('activity', activity);
+    formData.append('activityAlias', activityAlias);
+    formData.append('weekNumber', weekNumber);
+    formData.append('text', text);
+    formData.append('courseId', courseId);
+    formData.append('sequenceNumber', sequenceNumber);
+    formData.append('status', status);
+
+    if (textInstruction !== null) {
+        formData.append('textInstruction', textInstruction);
+    }
+    if (audioInstruction !== null) {
+        formData.append('file', audioInstruction);
+    }
+
     const response = await fetch(`${API_URL}/lesson/create`, {
         method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status }),
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: formData,
     });
 
     const data = await response.json();
@@ -434,11 +454,31 @@ export const getLessonById = async (lessonId) => {
 };
 
 // API call to update a lesson
-export const updateLesson = async (lessonId, lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status) => {
+export const updateLesson = async (lessonId, lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status, textInstruction = null, audioInstruction = null) => {
+    const formData = new FormData();
+    formData.append('lessonType', lessonType);
+    formData.append('dayNumber', dayNumber);
+    formData.append('activity', activity);
+    formData.append('activityAlias', activityAlias);
+    formData.append('weekNumber', weekNumber);
+    formData.append('text', text);
+    formData.append('courseId', courseId);
+    formData.append('sequenceNumber', sequenceNumber);
+    formData.append('status', status);
+
+    if (textInstruction !== null) {
+        formData.append('textInstruction', textInstruction);
+    }
+    if (audioInstruction !== null) {
+        formData.append('file', audioInstruction);
+    }
+
     const response = await fetch(`${API_URL}/lesson/update/${lessonId}`, {
         method: "PUT",
-        headers: getHeaders(),
-        body: JSON.stringify({ lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status }),
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: formData,
     });
 
     const data = await response.json();

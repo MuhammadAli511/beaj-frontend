@@ -69,6 +69,12 @@ const CreateLesson = () => {
     const [status, setStatus] = useState('Active');
     const [showAllCourses, setShowAllCourses] = useState(false);
 
+    // Instructions
+    const [enableTextInstruction, setEnableTextInstruction] = useState(false);
+    const [enableAudioInstruction, setEnableAudioInstruction] = useState(false);
+    const [textInstruction, setTextInstruction] = useState('');
+    const [audioInstruction, setAudioInstruction] = useState(null);
+
     // Listen
     const [image, setImage] = useState(null);
     const [audio, setAudio] = useState(null);
@@ -86,6 +92,15 @@ const CreateLesson = () => {
         const file = e.target.files[0];
         if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
             setAudio(file);
+        } else {
+            alert('Please upload an MP3 audio not larger than 16MB.');
+        }
+    };
+
+    const handleAudioInstructionChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+            setAudioInstruction(file);
         } else {
             alert('Please upload an MP3 audio not larger than 16MB.');
         }
@@ -536,40 +551,63 @@ const CreateLesson = () => {
         setShowAllCourses(e.target.checked);
     };
 
+    const handleEnableTextInstructionChange = (e) => {
+        setEnableTextInstruction(e.target.checked);
+        if (!e.target.checked) {
+            setTextInstruction('');
+        }
+    };
+
+    const handleEnableAudioInstructionChange = (e) => {
+        setEnableAudioInstruction(e.target.checked);
+        if (!e.target.checked) {
+            setAudioInstruction(null);
+        }
+    };
+
+    const handleTextInstructionChange = (e) => {
+        setTextInstruction(e.target.value);
+    };
+
     const handleCreateLesson = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        
+        // Prepare instruction values - null if toggle is off
+        const finalTextInstruction = enableTextInstruction ? textInstruction : null;
+        const finalAudioInstruction = enableAudioInstruction ? audioInstruction : null;
+        
         try {
             if (activityType === 'audio') {
-                await createAudioLesson(course, sequenceNumber, alias, activityType, image, audio, lessonText, day, week, status);
+                await createAudioLesson(course, sequenceNumber, alias, activityType, image, audio, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'video') {
-                await createVideoLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status);
+                await createVideoLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'videoEnd') {
-                await createVideoLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status);
+                await createVideoLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'read') {
-                await createReadLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status);
+                await createReadLesson(course, sequenceNumber, alias, activityType, video, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'listenAndSpeak') {
-                await createListenAndSpeakLesson(course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status);
+                await createListenAndSpeakLesson(course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'mcqs') {
-                await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status);
+                await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'watchAndSpeak') {
-                await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status);
+                await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'watchAndAudio') {
-                await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status);
+                await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'watchAndImage') {
-                await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status);
+                await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'conversationalQuestionsBot') {
-                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
+                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'conversationalMonologueBot') {
-                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, monologueQuestions, lessonText, day, week, status);
+                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, monologueQuestions, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'conversationalAgencyBot') {
-                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status);
+                await createConversationalBotLesson(course, sequenceNumber, alias, activityType, botQuestions, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'speakingPractice') {
-                await createSpeakingPracticeLesson(course, sequenceNumber, alias, activityType, speakingPracticeQuestions, lessonText, day, week, status);
+                await createSpeakingPracticeLesson(course, sequenceNumber, alias, activityType, speakingPracticeQuestions, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             }else if (activityType === 'feedbackMcqs') {
-                await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status);
+                await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             }else if (activityType === 'feedbackAudio') {
-                await createListenAndSpeakLesson(course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status);
+                await createListenAndSpeakLesson(course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             }
         } catch (error) {
             alert(error);
@@ -584,6 +622,10 @@ const CreateLesson = () => {
             setImage(null);
             setAudio(null);
             setVideo(null);
+            setEnableTextInstruction(false);
+            setEnableAudioInstruction(false);
+            setTextInstruction('');
+            setAudioInstruction(null);
             setQuestions([{ questionText: '', media: '', answers: [{ answerText: '' }], mediaType: 'audio' }]);
             setWsQuestions([{ questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false }]);
             setMcqs([{
@@ -713,6 +755,48 @@ const CreateLesson = () => {
                         { value: 'Active', label: 'Active' },
                         { value: 'Inactive', label: 'Inactive' }
                     ]} onChange={handleStatusChange} value={status} name="status" id="status" />
+                </div>
+                <div className={styles.input_row}>
+                    <div className={styles.form_group}>
+                        <InputField 
+                            label="Enable Text Instruction" 
+                            type="checkbox" 
+                            onChange={handleEnableTextInstructionChange} 
+                            checked={enableTextInstruction} 
+                            name="enableTextInstruction" 
+                            id="enableTextInstruction" 
+                        />
+                        {enableTextInstruction && (
+                            <InputField 
+                                label="Text Instruction" 
+                                type="textarea" 
+                                value={textInstruction} 
+                                onChange={handleTextInstructionChange} 
+                                name="textInstruction" 
+                                id="textInstruction" 
+                            />
+                        )}
+                    </div>
+                    <div className={styles.form_group}>
+                        <InputField 
+                            label="Enable Audio Instruction" 
+                            type="checkbox" 
+                            onChange={handleEnableAudioInstructionChange} 
+                            checked={enableAudioInstruction} 
+                            name="enableAudioInstruction" 
+                            id="enableAudioInstruction" 
+                        />
+                        {enableAudioInstruction && (
+                            <InputField 
+                                label="Upload Audio Instruction" 
+                                type="file" 
+                                onChange={handleAudioInstructionChange} 
+                                name="audioInstruction" 
+                                id="audioInstruction" 
+                                fileInput 
+                            />
+                        )}
+                    </div>
                 </div>
                 {activityType === 'audio' && (
                     <>

@@ -30,6 +30,10 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
     const [questions, setQuestions] = useState([]);
     const [courses, setCourses] = useState([]);
     const [activityAliases, setActivityAliases] = useState([]);
+    const [enableTextInstruction, setEnableTextInstruction] = useState(false);
+    const [enableAudioInstruction, setEnableAudioInstruction] = useState(false);
+    const [textInstruction, setTextInstruction] = useState('');
+    const [audioInstruction, setAudioInstruction] = useState(null);
 
     useEffect(() => {
         if (lesson) {
@@ -114,6 +118,14 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                 });
                 setLessonData(lessonResponse.data);
                 setQuestions(mappedQuestions.sort((a, b) => a.questionNumber - b.questionNumber));
+                // Set instruction states based on lesson data
+                if (lessonResponse.data.textInstruction) {
+                    setEnableTextInstruction(true);
+                    setTextInstruction(lessonResponse.data.textInstruction);
+                }
+                if (lessonResponse.data.audioInstructionUrl) {
+                    setEnableAudioInstruction(true);
+                }
             } else {
                 alert(lessonResponse.data.message);
             }
@@ -162,6 +174,10 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
         setLessonData(null);
         setCourses([]);
         setActivityAliases([]);
+        setEnableTextInstruction(false);
+        setEnableAudioInstruction(false);
+        setTextInstruction('');
+        setAudioInstruction(null);
         onClose();
     };
 
@@ -177,6 +193,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                 dayNumber: document.getElementById("dayNumber").value,
                 activityAlias: document.getElementById("activity_alias").value,
                 status: document.getElementById("status").value,
+                textInstruction: enableTextInstruction ? textInstruction : null,
+                audioInstruction: enableAudioInstruction ? audioInstruction : null,
             };
 
             // Save the updated lesson data
@@ -191,6 +209,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                 updatedLessonData.courseId,
                 updatedLessonData.SequenceNumber,
                 lessonData.status,
+                updatedLessonData.textInstruction,
+                updatedLessonData.audioInstruction
             );
 
             if (updateLessonResponse.status !== 200) {
@@ -832,6 +852,92 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                         <option value="Active">Active</option>
                                         <option value="Not Active">Not Active</option>
                                     </select>
+                                </div>
+
+                                {/* Text Instruction */}
+                                <div className={styles.form_group}>
+                                    <div className={styles.checkbox_wrapper}>
+                                        <div className={styles.custom_checkbox_container}>
+                                            <input 
+                                                className={styles.custom_checkbox} 
+                                                type="checkbox" 
+                                                checked={enableTextInstruction}
+                                                onChange={(e) => setEnableTextInstruction(e.target.checked)}
+                                                id="enableTextInstruction"
+                                            />
+                                            <label className={styles.checkbox_label} htmlFor="enableTextInstruction">
+                                                <span className={styles.checkmark}></span>
+                                                <span className={styles.label_text}>Text Instruction</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {enableTextInstruction && (
+                                        <textarea
+                                            className={styles.input_field}
+                                            placeholder="Enter text instruction..."
+                                            value={textInstruction}
+                                            onChange={(e) => setTextInstruction(e.target.value)}
+                                            rows={3}
+                                            style={{marginTop: "10px"}}
+                                        />
+                                    )}
+                                </div>
+
+                                {/* Audio Instruction */}
+                                <div className={styles.form_group}>
+                                    <div className={styles.checkbox_wrapper}>
+                                        <div className={styles.custom_checkbox_container}>
+                                            <input 
+                                                className={styles.custom_checkbox} 
+                                                type="checkbox" 
+                                                checked={enableAudioInstruction}
+                                                onChange={(e) => setEnableAudioInstruction(e.target.checked)}
+                                                id="enableAudioInstruction"
+                                            />
+                                            <label className={styles.checkbox_label} htmlFor="enableAudioInstruction">
+                                                <span className={styles.checkmark}></span>
+                                                <span className={styles.label_text}>Audio Instruction</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {enableAudioInstruction && (
+                                        <div>
+                                            {lessonData.audioInstructionUrl && (
+                                                <div style={{ marginBottom: "10px" }}>
+                                                    <label className={styles.label}>Current Audio:</label>
+                                                    <audio controls style={{ display: "block", marginTop: "5px" }}>
+                                                        <source src={lessonData.audioInstructionUrl} type="audio/mpeg" />
+                                                        Your browser does not support the audio element.
+                                                    </audio>
+                                                </div>
+                                            )}
+                                            <input
+                                                className={styles.input_field}
+                                                type="file"
+                                                accept=".mp3,audio/mpeg"
+                                                onChange={(e) => {
+                                                    const file = e.target.files[0];
+                                                    if (file) {
+                                                        if (file.size > 16 * 1024 * 1024) {
+                                                            alert("File size should be less than 16MB");
+                                                            e.target.value = "";
+                                                            return;
+                                                        }
+                                                        if (!file.type.includes("audio/mpeg") && !file.name.endsWith(".mp3")) {
+                                                            alert("Please select an MP3 file");
+                                                            e.target.value = "";
+                                                            return;
+                                                        }
+                                                        setAudioInstruction(file);
+                                                    }
+                                                }}
+                                                style={{marginTop: "10px"}}
+                                            />
+                                            <small style={{ color: "#666", fontSize: "12px" }}>
+                                                Upload MP3 file (max 16MB)
+                                            </small>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Edit Questions */}

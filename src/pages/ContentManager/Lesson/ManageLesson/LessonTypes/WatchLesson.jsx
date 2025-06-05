@@ -23,6 +23,10 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     const [video, setVideo] = useState(null);
     const [courses, setCourses] = useState([]);
     const [activityAliases, setActivityAliases] = useState([]);
+    const [enableTextInstruction, setEnableTextInstruction] = useState(false);
+    const [enableAudioInstruction, setEnableAudioInstruction] = useState(false);
+    const [textInstruction, setTextInstruction] = useState('');
+    const [audioInstruction, setAudioInstruction] = useState(null);
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -31,6 +35,14 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                 const lessonResponse = await getLessonById(lesson.LessonId);
                 if (lessonResponse.status === 200) {
                     setLessonData(lessonResponse.data);
+                    // Set instruction states based on lesson data
+                    if (lessonResponse.data.textInstruction) {
+                        setEnableTextInstruction(true);
+                        setTextInstruction(lessonResponse.data.textInstruction);
+                    }
+                    if (lessonResponse.data.audioInstructionUrl) {
+                        setEnableAudioInstruction(true);
+                    }
                 } else {
                     alert(lessonResponse.data.message);
                 }
@@ -67,6 +79,10 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
         setCourses([]);
         setActivityAliases([]);
         setVideo(null);
+        setEnableTextInstruction(false);
+        setEnableAudioInstruction(false);
+        setTextInstruction('');
+        setAudioInstruction(null);
         onClose();
     };
 
@@ -80,6 +96,8 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
             Alias: document.getElementById("activity_alias").value,
             status: document.getElementById("status").value,
             video,
+            textInstruction: enableTextInstruction ? textInstruction : null,
+            audioInstruction: enableAudioInstruction ? audioInstruction : null,
         };
 
         try {
@@ -94,7 +112,9 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                 updatedLessonData.text,
                 updatedLessonData.CourseId,
                 updatedLessonData.SequenceNumber,
-                updatedLessonData.status
+                updatedLessonData.status,
+                updatedLessonData.textInstruction,
+                updatedLessonData.audioInstruction
             );
             if (updateResponse.status === 200) {
                 if (updatedLessonData.video) {
@@ -253,6 +273,87 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         <option value="Active">Active</option>
                                         <option value="Not Active">Not Active</option>
                                     </select>
+                                </div>
+                                <div className={styles.form_group}>
+                                    <div className={styles.checkbox_wrapper}>
+                                        <div className={styles.custom_checkbox_container}>
+                                            <input 
+                                                className={styles.custom_checkbox} 
+                                                type="checkbox" 
+                                                onChange={(e) => {
+                                                    setEnableTextInstruction(e.target.checked);
+                                                    if (!e.target.checked) {
+                                                        setTextInstruction('');
+                                                    }
+                                                }} 
+                                                checked={enableTextInstruction} 
+                                                name="enableTextInstruction" 
+                                                id="enableTextInstruction"
+                                            />
+                                            <label className={styles.checkbox_label} htmlFor="enableTextInstruction">
+                                                <span className={styles.checkmark}></span>
+                                                <span className={styles.label_text}>Enable Text Instruction</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {enableTextInstruction && (
+                                        <textarea 
+                                            className={styles.text_area} 
+                                            onChange={(e) => setTextInstruction(e.target.value)} 
+                                            value={textInstruction} 
+                                            placeholder="Text Instruction"
+                                            style={{marginTop: "10px"}}
+                                        />
+                                    )}
+                                </div>
+                                <div className={styles.form_group}>
+                                    <div className={styles.checkbox_wrapper}>
+                                        <div className={styles.custom_checkbox_container}>
+                                            <input 
+                                                className={styles.custom_checkbox} 
+                                                type="checkbox" 
+                                                onChange={(e) => {
+                                                    setEnableAudioInstruction(e.target.checked);
+                                                    if (!e.target.checked) {
+                                                        setAudioInstruction(null);
+                                                    }
+                                                }} 
+                                                checked={enableAudioInstruction} 
+                                                name="enableAudioInstruction" 
+                                                id="enableAudioInstruction"
+                                            />
+                                            <label className={styles.checkbox_label} htmlFor="enableAudioInstruction">
+                                                <span className={styles.checkmark}></span>
+                                                <span className={styles.label_text}>Enable Audio Instruction</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {enableAudioInstruction && (
+                                        <>
+                                            {lessonData.audioInstructionUrl && (
+                                                <div className={styles.current_audio}>
+                                                    <label className={styles.label}>Current Audio Instruction:</label>
+                                                    <audio controls>
+                                                        <source src={lessonData.audioInstructionUrl} type="audio/mpeg" />
+                                                        Your browser does not support the audio element.
+                                                    </audio>
+                                                </div>
+                                            )}
+                                            <input
+                                                type="file"
+                                                accept="audio/*"
+                                                onChange={(e) => {
+                                                    const file = e.target.files[0];
+                                                    if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+                                                        setAudioInstruction(file);
+                                                    } else {
+                                                        alert('Please upload an MP3 audio not larger than 16MB.');
+                                                    }
+                                                }}
+                                                style={{marginTop: "10px"}}
+                                            />
+                                        </>
+                                    )}
                                 </div>
                                 <div className={styles.form_group}>
                                     <label className={styles.label}>Video</label>
