@@ -312,7 +312,14 @@ const ManageLesson = () => {
                         .filter(course =>
                             !course.CourseName.includes('2024') &&
                             !course.CourseName.includes('Level 3 - T1 - January 27, 2025') &&
-                            !course.CourseName.includes('Level 3 - T2 - January 27, 2025')
+                            !course.CourseName.includes('Level 3 - T2 - January 27, 2025') &&
+                            !course.CourseName.includes('Level 1 - T1 - January 27, 2025') &&
+                            !course.CourseName.includes('Level 1 - T2 - January 27, 2025') &&
+                            !course.CourseName.includes('Level 2 - T1 - February 24, 2025') &&
+                            !course.CourseName.includes('Level 2 - T2 - February 24, 2025') &&
+                            !course.CourseName.includes('Level 3 - T1 - April 7, 2025') &&
+                            !course.CourseName.includes('Level 3 - T2 - April 7, 2025') &&
+                            course.CourseName !== 'Free Trial'
                         )
                         .sort((a, b) => {
                             // Extract level numbers if they exist
