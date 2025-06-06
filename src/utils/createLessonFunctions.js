@@ -334,7 +334,7 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
 
         const questionId = await questionResponse.data.mcq.Id;
 
-        const answerResponses = await Promise.all(
+        const currentAnswerResponses = await Promise.all(
             answerTextArray.map((answer, index) =>
                 createMultipleChoiceQuestionAnswer(
                     answerTextArray[index],
@@ -350,7 +350,7 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
             )
         );
 
-        answerResponses.push(answerResponses);
+        answerResponses.push(currentAnswerResponses);
     }
 
     if (answerResponses.every(response => response.every(answer => answer.status === 200)) && response.status === 200) {

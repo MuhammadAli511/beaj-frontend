@@ -282,7 +282,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                             )}
                                         </>
                                     )}
-                                    {activity == 'conversationalAgencyBot' && (
+                                    {activity === 'conversationalAgencyBot' && (
                                         <>
                                             <td style={{ width: "5%" }}>
                                                 {hasDifficultyLevels ? 

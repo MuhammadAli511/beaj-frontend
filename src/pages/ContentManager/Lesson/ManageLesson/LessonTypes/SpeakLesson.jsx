@@ -345,8 +345,8 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                     updatedQuestion[field] = value;
                     // Clear the corresponding custom feedback field if disabled
                     if (!value) {
-                        const feedbackField = field.replace('enable', '').replace(/([A-Z])/g, (match) => match.toLowerCase());
-                        updatedQuestion[`custom${feedbackField.charAt(0).toUpperCase() + feedbackField.slice(1)}`] = null;
+                        const feedbackField = field.replace('enable', '');
+                        updatedQuestion[feedbackField] = null;
                     }
                 } else {
                     updatedQuestion[field] = value;
@@ -521,6 +521,14 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                         enableCustomFeedbackText: false,
                         enableCustomFeedbackImage: false,
                         enableCustomFeedbackAudio: false,
+                    };
+                } else if (['feedbackAudio'].includes(activity)) {
+                    baseQuestion = {
+                        ...baseQuestion,
+                        question: '',
+                        mediaFile: null,
+                        answer: [], // Empty array for feedbackAudio
+                        mediaType: 'audio',
                     };
                 }
 

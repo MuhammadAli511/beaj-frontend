@@ -42,6 +42,7 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                     }
                     if (lessonResponse.data.audioInstructionUrl) {
                         setEnableAudioInstruction(true);
+                        setAudioInstruction(lessonResponse.data.audioInstructionUrl);
                     }
                 } else {
                     alert(lessonResponse.data.message);
@@ -87,6 +88,16 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
     };
 
     const handleSave = async () => {
+        // Handle audioInstruction logic to prevent overwriting existing audio
+        let audioInstructionValue;
+        if (enableAudioInstruction) {
+            // If audio instruction is enabled but no new file provided, preserve existing
+            audioInstructionValue = audioInstruction || 'preserve_existing';
+        } else {
+            // If audio instruction is disabled, set to null
+            audioInstructionValue = null;
+        }
+
         const updatedLessonData = {
             ...lessonData,
             CourseId: document.getElementById("course_id").value,
@@ -97,7 +108,7 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
             status: document.getElementById("status").value,
             video,
             textInstruction: enableTextInstruction ? textInstruction : null,
-            audioInstruction: enableAudioInstruction ? audioInstruction : null,
+            audioInstruction: audioInstructionValue,
         };
 
         try {

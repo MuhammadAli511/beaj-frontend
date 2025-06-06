@@ -56,21 +56,21 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                 const mappedQuestions = fetchedQuestions.map((question) => {
                     // Determine the feedback type based on existing data
                     let determinedFeedbackType = question.dataValues.CustomFeedbackType || "text";
-                    
+
                     // If no explicit type is stored, determine based on actual data
                     if (!question.dataValues.CustomFeedbackType) {
                         // Check each answer to find any with feedback
                         let hasTextFeedback = false;
                         let hasImageFeedback = false;
                         let hasAudioFeedback = false;
-                        
+
                         // Loop through all answers to find any with feedback
                         question.multipleChoiceQuestionAnswers.forEach(answer => {
                             if (answer.CustomAnswerFeedbackText) hasTextFeedback = true;
                             if (answer.CustomAnswerFeedbackImage) hasImageFeedback = true;
                             if (answer.CustomAnswerFeedbackAudio) hasAudioFeedback = true;
                         });
-                        
+
                         // Determine the most comprehensive feedback type
                         if (hasTextFeedback && hasImageFeedback) {
                             determinedFeedbackType = "text+image";
@@ -84,7 +84,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                             determinedFeedbackType = "audio";
                         }
                     }
-                    
+
                     return {
                         id: question.dataValues.Id,
                         questionType: question.dataValues.QuestionType,
@@ -96,12 +96,12 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                         optionsType: question.dataValues.OptionsType,
                         customFeedbackType: determinedFeedbackType,
                         showCustomFeedback: Boolean(
-                          question.dataValues.CustomFeedbackType || 
-                          question.multipleChoiceQuestionAnswers.some(a => 
-                            a.CustomAnswerFeedbackText || 
-                            a.CustomAnswerFeedbackImage || 
-                            a.CustomAnswerFeedbackAudio
-                          )
+                            question.dataValues.CustomFeedbackType ||
+                            question.multipleChoiceQuestionAnswers.some(a =>
+                                a.CustomAnswerFeedbackText ||
+                                a.CustomAnswerFeedbackImage ||
+                                a.CustomAnswerFeedbackAudio
+                            )
                         ),
                         answers: question.multipleChoiceQuestionAnswers.map((answer) => ({
                             id: answer.Id,
@@ -263,7 +263,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                     // Update existing question
                     // First get the current question data to preserve fields we're not updating
                     const existingQuestion = await getMultipleChoiceQuestionById(question.id);
-                    
+
                     const updateQuestionResponse = await updateMultipleChoiceQuestion(
                         question.id,
                         question.file || null,
@@ -344,7 +344,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
         const updatedQuestions = questions.map((question, i) => {
             if (i === index) {
                 const updatedQuestion = { ...question, [field]: value, isChanged: true };
-                
+
                 // When changing question type, clear irrelevant media fields
                 if (field === "questionType") {
                     // Clear video fields if switching to a type that doesn't use video
@@ -353,7 +353,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                         updatedQuestion.questionVideoPreview = null;
                         updatedQuestion.questionVideoUrl = null;
                     }
-                    
+
                     // Clear image fields if switching to a type that doesn't use image
                     if (!value.includes("Image")) {
                         updatedQuestion.questionImageFile = null;
@@ -361,7 +361,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                         updatedQuestion.questionImageUrl = null;
                     }
                 }
-                
+
                 return updatedQuestion;
             }
             return question;
@@ -570,10 +570,10 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                             onChange={(e) => {
                                 if (e.target.files && e.target.files[0]) {
                                     const file = e.target.files[0];
-                                    
+
                                     // Create a preview URL
                                     const url = URL.createObjectURL(file);
-                                    
+
                                     // Update the question with the file and preview
                                     const updatedQuestion = {
                                         ...questions[qIndex],
@@ -585,8 +585,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                         questionVideoPreview: null,
                                         questionVideoUrl: null
                                     };
-                                    
-                                    setQuestions(questions.map((q, i) => 
+
+                                    setQuestions(questions.map((q, i) =>
                                         i === qIndex ? updatedQuestion : q
                                     ));
                                 }
@@ -627,10 +627,10 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                             onChange={(e) => {
                                 if (e.target.files && e.target.files[0]) {
                                     const file = e.target.files[0];
-                                    
+
                                     // Create a preview URL
                                     const url = URL.createObjectURL(file);
-                                    
+
                                     // Update the question with the file and preview
                                     const updatedQuestion = {
                                         ...questions[qIndex],
@@ -642,8 +642,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                         questionVideoPreview: null,
                                         questionVideoUrl: null
                                     };
-                                    
-                                    setQuestions(questions.map((q, i) => 
+
+                                    setQuestions(questions.map((q, i) =>
                                         i === qIndex ? updatedQuestion : q
                                     ));
                                 }
@@ -677,10 +677,10 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                             onChange={(e) => {
                                 if (e.target.files && e.target.files[0]) {
                                     const file = e.target.files[0];
-                                    
+
                                     // Create a preview URL
                                     const url = URL.createObjectURL(file);
-                                    
+
                                     // Update the question with the file and preview
                                     const updatedQuestion = {
                                         ...questions[qIndex],
@@ -692,8 +692,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                         questionImagePreview: null,
                                         questionImageUrl: null
                                     };
-                                    
-                                    setQuestions(questions.map((q, i) => 
+
+                                    setQuestions(questions.map((q, i) =>
                                         i === qIndex ? updatedQuestion : q
                                     ));
                                 }
@@ -734,10 +734,10 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                             onChange={(e) => {
                                 if (e.target.files && e.target.files[0]) {
                                     const file = e.target.files[0];
-                                    
+
                                     // Create a preview URL
                                     const url = URL.createObjectURL(file);
-                                    
+
                                     // Update the question with the file and preview
                                     const updatedQuestion = {
                                         ...questions[qIndex],
@@ -749,8 +749,8 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                         questionImagePreview: null,
                                         questionImageUrl: null
                                     };
-                                    
-                                    setQuestions(questions.map((q, i) => 
+
+                                    setQuestions(questions.map((q, i) =>
                                         i === qIndex ? updatedQuestion : q
                                     ));
                                 }
@@ -858,9 +858,9 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                 <div className={styles.form_group}>
                                     <div className={styles.checkbox_wrapper}>
                                         <div className={styles.custom_checkbox_container}>
-                                            <input 
-                                                className={styles.custom_checkbox} 
-                                                type="checkbox" 
+                                            <input
+                                                className={styles.custom_checkbox}
+                                                type="checkbox"
                                                 checked={enableTextInstruction}
                                                 onChange={(e) => setEnableTextInstruction(e.target.checked)}
                                                 id="enableTextInstruction"
@@ -878,7 +878,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                             value={textInstruction}
                                             onChange={(e) => setTextInstruction(e.target.value)}
                                             rows={3}
-                                            style={{marginTop: "10px"}}
+                                            style={{ marginTop: "10px" }}
                                         />
                                     )}
                                 </div>
@@ -887,11 +887,16 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                 <div className={styles.form_group}>
                                     <div className={styles.checkbox_wrapper}>
                                         <div className={styles.custom_checkbox_container}>
-                                            <input 
-                                                className={styles.custom_checkbox} 
-                                                type="checkbox" 
+                                            <input
+                                                className={styles.custom_checkbox}
+                                                type="checkbox"
                                                 checked={enableAudioInstruction}
-                                                onChange={(e) => setEnableAudioInstruction(e.target.checked)}
+                                                onChange={(e) => {
+                                                    setEnableAudioInstruction(e.target.checked);
+                                                    if (!e.target.checked) {
+                                                        setAudioInstruction(null);
+                                                    }
+                                                }}
                                                 id="enableAudioInstruction"
                                             />
                                             <label className={styles.checkbox_label} htmlFor="enableAudioInstruction">
@@ -931,7 +936,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                                         setAudioInstruction(file);
                                                     }
                                                 }}
-                                                style={{marginTop: "10px"}}
+                                                style={{ marginTop: "10px" }}
                                             />
                                             <small style={{ color: "#666", fontSize: "12px" }}>
                                                 Upload MP3 file (max 16MB)
@@ -947,7 +952,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                             <h3 className={styles.question_title}>Question {question.questionNumber}</h3>
                                             <button className={styles.remove_button} onClick={() => removeQuestion(qIndex)}>Remove Question</button>
                                         </div>
-                                        
+
                                         <div className={styles.question_section}>
                                             <div className={styles.input_row}>
                                                 <label className={styles.label}>Question Number</label>
@@ -958,7 +963,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                                     onChange={(e) => handleQuestionChange(qIndex, "questionNumber", e.target.value)}
                                                 />
                                             </div>
-                                            
+
                                             <div className={styles.input_row}>
                                                 <label className={styles.label}>Question Type</label>
                                                 <select
@@ -969,39 +974,39 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                                     <option value="Text">Text</option>
                                                     {activity === 'mcqs' && (
                                                         <>
-                                                    <option value="Image">Image</option>
-                                                    <option value="Video">Video</option>
-                                                    <option value="Text+Image">Text + Image</option>
-                                                    <option value="Text+Video">Text + Video</option>
-                                                    </>
+                                                            <option value="Image">Image</option>
+                                                            <option value="Video">Video</option>
+                                                            <option value="Text+Image">Text + Image</option>
+                                                            <option value="Text+Video">Text + Video</option>
+                                                        </>
                                                     )}
                                                 </select>
                                             </div>
-                                            
+
                                             <div className={styles.question_content}>
                                                 {renderQuestionInputs(question, qIndex)}
                                             </div>
                                             {activity === 'mcqs' && (
-                                            <div className={styles.custom_feedback_toggle}>
-                                                <div className={styles.checkbox_wrapper}>
-                                                    <div className={styles.custom_checkbox_container}>
-                                                        <input 
-                                                            className={styles.custom_checkbox} 
-                                                            type="checkbox" 
-                                                            checked={question.showCustomFeedback || false}
-                                                            onChange={(e) => handleQuestionChange(qIndex, "showCustomFeedback", e.target.checked)}
-                                                            id={`showCustomFeedback-${qIndex}`}
-                                                        />
-                                                        <label className={styles.checkbox_label} htmlFor={`showCustomFeedback-${qIndex}`}>
-                                                            <span className={styles.checkmark}></span>
-                                                            <span className={styles.label_text}>Enable Custom Feedback</span>
-                                                        </label>
+                                                <div className={styles.custom_feedback_toggle}>
+                                                    <div className={styles.checkbox_wrapper}>
+                                                        <div className={styles.custom_checkbox_container}>
+                                                            <input
+                                                                className={styles.custom_checkbox}
+                                                                type="checkbox"
+                                                                checked={question.showCustomFeedback || false}
+                                                                onChange={(e) => handleQuestionChange(qIndex, "showCustomFeedback", e.target.checked)}
+                                                                id={`showCustomFeedback-${qIndex}`}
+                                                            />
+                                                            <label className={styles.checkbox_label} htmlFor={`showCustomFeedback-${qIndex}`}>
+                                                                <span className={styles.checkmark}></span>
+                                                                <span className={styles.label_text}>Enable Custom Feedback</span>
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
                                             )}
 
-                                             {activity === 'mcqs' && question.showCustomFeedback && (
+                                            {activity === 'mcqs' && question.showCustomFeedback && (
                                                 <div className={styles.feedback_type_selector}>
                                                     <h5 className={styles.feedback_type_title}>Select Feedback Type</h5>
                                                     <div className={styles.radio_group}>
@@ -1059,10 +1064,10 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                                 </div>
                                             )}
                                         </div>
-                                        
+
                                         <div className={styles.answers_section}>
                                             <h4 className={styles.answers_title}>Answer Options</h4>
-                                            
+
                                             <div className={styles.answers_container}>
                                                 {question.answers
                                                     .filter((answer) => !answer.isDeleted)
@@ -1071,37 +1076,37 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                                             <div className={styles.answer_header}>
                                                                 <span className={styles.answer_number}>Answer {aIndex + 1}</span>
                                                                 {activity === 'mcqs' && (
-                                                                <div className={styles.correct_checkbox}>
-                                                                    <div className={styles.checkbox_wrapper}>
-                                                                        <div className={styles.custom_checkbox_container}>
-                                                                            <input 
-                                                                                className={styles.custom_checkbox} 
-                                                                                type="checkbox" 
-                                                                                checked={answer.isCorrect}
-                                                                                onChange={(e) => handleAnswerChange(qIndex, aIndex, "isCorrect", e.target.checked)}
-                                                                                id={`isCorrect-${qIndex}-${aIndex}`}
-                                                                            />
-                                                                            <label className={styles.checkbox_label} htmlFor={`isCorrect-${qIndex}-${aIndex}`}>
-                                                                                <span className={styles.checkmark}></span>
-                                                                                <span className={styles.label_text}>Correct</span>
-                                                                            </label>
+                                                                    <div className={styles.correct_checkbox}>
+                                                                        <div className={styles.checkbox_wrapper}>
+                                                                            <div className={styles.custom_checkbox_container}>
+                                                                                <input
+                                                                                    className={styles.custom_checkbox}
+                                                                                    type="checkbox"
+                                                                                    checked={answer.isCorrect}
+                                                                                    onChange={(e) => handleAnswerChange(qIndex, aIndex, "isCorrect", e.target.checked)}
+                                                                                    id={`isCorrect-${qIndex}-${aIndex}`}
+                                                                                />
+                                                                                <label className={styles.checkbox_label} htmlFor={`isCorrect-${qIndex}-${aIndex}`}>
+                                                                                    <span className={styles.checkmark}></span>
+                                                                                    <span className={styles.label_text}>Correct</span>
+                                                                                </label>
+                                                                            </div>
+
                                                                         </div>
-                                                                        
+
+
+                                                                        {question.answers.length > 1 && (
+                                                                            <button
+                                                                                className={styles.remove_button}
+                                                                                onClick={() => removeAnswer(qIndex, aIndex)}
+                                                                            >
+                                                                                Remove Answer
+                                                                            </button>
+                                                                        )}
                                                                     </div>
-                                                                    
-                                                                    
-                                                                    {question.answers.length > 1 && (
-                                                                        <button
-                                                                            className={styles.remove_button}
-                                                                            onClick={() => removeAnswer(qIndex, aIndex)}
-                                                                        >
-                                                                            Remove Answer
-                                                                        </button>
-                                                                    )}
-                                                                </div>
                                                                 )}
                                                             </div>
-                                                            
+
                                                             <div className={styles.answer_content}>
                                                                 <div className={styles.input_row}>
                                                                     <label className={styles.label}>Answer Text</label>
@@ -1112,181 +1117,181 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                                                         onChange={(e) => handleAnswerChange(qIndex, aIndex, "answerText", e.target.value)}
                                                                     />
                                                                 </div>
-                                                                
+
                                                                 {activity === 'mcqs' && question.showCustomFeedback && (
                                                                     <div className={styles.feedback_section}>
                                                                         <h5 className={styles.feedback_title}>Custom Feedback</h5>
-                                                                        
-                                                                        {(question.customFeedbackType === "text" || 
-                                                                          question.customFeedbackType === "text+image" || 
-                                                                          question.customFeedbackType === "text+audio") && (
-                                                                            <div className={styles.input_row}>
-                                                                                <label className={styles.label}>Feedback Text</label>
-                                                                                <input
-                                                                                    className={styles.input_field}
-                                                                                    type="text"
-                                                                                    value={answer.customAnswerFeedbackText || ""}
-                                                                                    onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackText", e.target.value)}
-                                                                                />
-                                                                            </div>
-                                                                        )}
-                                                                        
-                                                                        {(question.customFeedbackType === "image" || 
-                                                                          question.customFeedbackType === "text+image") && (
-                                                                            <div className={styles.feedback_media_container}>
-                                                                                <label className={styles.label}>Feedback Image</label>
-                                                                                <input
-                                                                                    className={styles.input_field}
-                                                                                    type="file"
-                                                                                    accept="image/*"
-                                                                                    onChange={(e) => {
-                                                                                        if (e.target.files && e.target.files[0]) {
-                                                                                            const file = e.target.files[0];
-                                                                                            
-                                                                                            // Create a preview URL for the selected file
-                                                                                            const url = URL.createObjectURL(file);
-                                                                                            
-                                                                                            // Update multiple properties at once to ensure UI updates properly
-                                                                                            const updatedAnswer = {
-                                                                                                ...question.answers[aIndex],
-                                                                                                customAnswerFeedbackImage: file,
-                                                                                                customAnswerFeedbackImagePreview: url,
-                                                                                                customAnswerFeedbackImageFilename: file.name,
-                                                                                                isChanged: true
-                                                                                            };
-                                                                                            
-                                                                                            const updatedAnswers = question.answers.map((ans, idx) => 
-                                                                                                idx === aIndex ? updatedAnswer : ans
-                                                                                            );
-                                                                                            
-                                                                                            const updatedQuestion = {
-                                                                                                ...question,
-                                                                                                answers: updatedAnswers,
-                                                                                                isChanged: true
-                                                                                            };
-                                                                                            
-                                                                                            const updatedQuestions = questions.map((q, idx) =>
-                                                                                                idx === qIndex ? updatedQuestion : q
-                                                                                            );
-                                                                                            
-                                                                                            setQuestions(updatedQuestions);
-                                                                                        }
-                                                                                    }}
-                                                                                />
-                                                                                <div className={styles.audio_preview_container}>
-                                                                                    <h4 className={styles.preview_header}>
-                                                                                        Image Preview
-                                                                                    </h4>
-                                                                                    <div className={styles.image_preview}>
-                                                                                        {answer.customAnswerFeedbackImagePreview ? (
-                                                                                            // Show preview of newly selected file
-                                                                                            <img 
-                                                                                                src={answer.customAnswerFeedbackImagePreview} 
-                                                                                                alt="Feedback Preview" 
-                                                                                                className={styles.image} 
-                                                                                            />
-                                                                                        ) : answer.customAnswerFeedbackImage && typeof answer.customAnswerFeedbackImage === 'string' ? (
-                                                                                            // Show existing image from database
-                                                                                            <img 
-                                                                                                src={answer.customAnswerFeedbackImage} 
-                                                                                                alt="Feedback" 
-                                                                                                className={styles.image} 
-                                                                                            />
-                                                                                        ) : answer.customAnswerFeedbackImage ? (
-                                                                                            // For newly added file but no preview yet
-                                                                                            <div className={styles.file_selected_message}>
-                                                                                                Image file selected and will be uploaded when you save
-                                                                                            </div>
-                                                                                        ) : (
-                                                                                            <div className={styles.no_preview}>No image selected</div>
-                                                                                        )}
+
+                                                                        {(question.customFeedbackType === "text" ||
+                                                                            question.customFeedbackType === "text+image" ||
+                                                                            question.customFeedbackType === "text+audio") && (
+                                                                                <div className={styles.input_row}>
+                                                                                    <label className={styles.label}>Feedback Text</label>
+                                                                                    <input
+                                                                                        className={styles.input_field}
+                                                                                        type="text"
+                                                                                        value={answer.customAnswerFeedbackText || ""}
+                                                                                        onChange={(e) => handleAnswerChange(qIndex, aIndex, "customAnswerFeedbackText", e.target.value)}
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+
+                                                                        {(question.customFeedbackType === "image" ||
+                                                                            question.customFeedbackType === "text+image") && (
+                                                                                <div className={styles.feedback_media_container}>
+                                                                                    <label className={styles.label}>Feedback Image</label>
+                                                                                    <input
+                                                                                        className={styles.input_field}
+                                                                                        type="file"
+                                                                                        accept="image/*"
+                                                                                        onChange={(e) => {
+                                                                                            if (e.target.files && e.target.files[0]) {
+                                                                                                const file = e.target.files[0];
+
+                                                                                                // Create a preview URL for the selected file
+                                                                                                const url = URL.createObjectURL(file);
+
+                                                                                                // Update multiple properties at once to ensure UI updates properly
+                                                                                                const updatedAnswer = {
+                                                                                                    ...question.answers[aIndex],
+                                                                                                    customAnswerFeedbackImage: file,
+                                                                                                    customAnswerFeedbackImagePreview: url,
+                                                                                                    customAnswerFeedbackImageFilename: file.name,
+                                                                                                    isChanged: true
+                                                                                                };
+
+                                                                                                const updatedAnswers = question.answers.map((ans, idx) =>
+                                                                                                    idx === aIndex ? updatedAnswer : ans
+                                                                                                );
+
+                                                                                                const updatedQuestion = {
+                                                                                                    ...question,
+                                                                                                    answers: updatedAnswers,
+                                                                                                    isChanged: true
+                                                                                                };
+
+                                                                                                const updatedQuestions = questions.map((q, idx) =>
+                                                                                                    idx === qIndex ? updatedQuestion : q
+                                                                                                );
+
+                                                                                                setQuestions(updatedQuestions);
+                                                                                            }
+                                                                                        }}
+                                                                                    />
+                                                                                    <div className={styles.audio_preview_container}>
+                                                                                        <h4 className={styles.preview_header}>
+                                                                                            Image Preview
+                                                                                        </h4>
+                                                                                        <div className={styles.image_preview}>
+                                                                                            {answer.customAnswerFeedbackImagePreview ? (
+                                                                                                // Show preview of newly selected file
+                                                                                                <img
+                                                                                                    src={answer.customAnswerFeedbackImagePreview}
+                                                                                                    alt="Feedback Preview"
+                                                                                                    className={styles.image}
+                                                                                                />
+                                                                                            ) : answer.customAnswerFeedbackImage && typeof answer.customAnswerFeedbackImage === 'string' ? (
+                                                                                                // Show existing image from database
+                                                                                                <img
+                                                                                                    src={answer.customAnswerFeedbackImage}
+                                                                                                    alt="Feedback"
+                                                                                                    className={styles.image}
+                                                                                                />
+                                                                                            ) : answer.customAnswerFeedbackImage ? (
+                                                                                                // For newly added file but no preview yet
+                                                                                                <div className={styles.file_selected_message}>
+                                                                                                    Image file selected and will be uploaded when you save
+                                                                                                </div>
+                                                                                            ) : (
+                                                                                                <div className={styles.no_preview}>No image selected</div>
+                                                                                            )}
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        )}
-                                                                        
-                                                                        {(question.customFeedbackType === "audio" || 
-                                                                          question.customFeedbackType === "text+audio") && (
-                                                                            <div className={styles.feedback_media_container}>
-                                                                                <label className={styles.label}>Feedback Audio</label>
-                                                                                <input
-                                                                                    className={styles.input_field}
-                                                                                    type="file"
-                                                                                    accept="audio/*"
-                                                                                    onChange={(e) => {
-                                                                                        if (e.target.files && e.target.files[0]) {
-                                                                                            const file = e.target.files[0];
-                                                                                            
-                                                                                            // Create a preview URL for the selected file
-                                                                                            const url = URL.createObjectURL(file);
-                                                                                            
-                                                                                            // Update multiple properties at once to ensure UI updates properly
-                                                                                            const updatedAnswer = {
-                                                                                                ...question.answers[aIndex],
-                                                                                                customAnswerFeedbackAudio: file,
-                                                                                                customAnswerFeedbackAudioPreview: url,
-                                                                                                customAnswerFeedbackAudioFilename: file.name,
-                                                                                                isChanged: true
-                                                                                            };
-                                                                                            
-                                                                                            const updatedAnswers = question.answers.map((ans, idx) => 
-                                                                                                idx === aIndex ? updatedAnswer : ans
-                                                                                            );
-                                                                                            
-                                                                                            const updatedQuestion = {
-                                                                                                ...question,
-                                                                                                answers: updatedAnswers,
-                                                                                                isChanged: true
-                                                                                            };
-                                                                                            
-                                                                                            const updatedQuestions = questions.map((q, idx) =>
-                                                                                                idx === qIndex ? updatedQuestion : q
-                                                                                            );
-                                                                                            
-                                                                                            setQuestions(updatedQuestions);
-                                                                                        }
-                                                                                    }}
-                                                                                />
-                                                                                <div className={styles.audio_preview_container}>
-                                                                                    <h4 className={styles.preview_header}>
-                                                                                        Audio Preview
-                                                                                    </h4>
-                                                                                    <div className={styles.audio_preview}>
-                                                                                        {answer.customAnswerFeedbackAudioPreview ? (
-                                                                                            // Show preview of newly selected file
-                                                                                            <audio 
-                                                                                                src={answer.customAnswerFeedbackAudioPreview} 
-                                                                                                controls
-                                                                                                preload="auto"
-                                                                                                className={styles.audio_player}
-                                                                                            />
-                                                                                        ) : answer.customAnswerFeedbackAudio && typeof answer.customAnswerFeedbackAudio === 'string' ? (
-                                                                                            // Show existing audio from database
-                                                                                            <audio 
-                                                                                                src={answer.customAnswerFeedbackAudio} 
-                                                                                                controls
-                                                                                                preload="auto"
-                                                                                                className={styles.audio_player}
-                                                                                            />
-                                                                                        ) : answer.customAnswerFeedbackAudio ? (
-                                                                                            // For newly added file, create a URL and display it
-                                                                                            <div className={styles.file_selected_message}>
-                                                                                                Audio file selected and will be uploaded when you save
-                                                                                            </div>
-                                                                                        ) : (
-                                                                                            <div className={styles.no_preview}>No audio selected</div>
-                                                                                        )}
+                                                                            )}
+
+                                                                        {(question.customFeedbackType === "audio" ||
+                                                                            question.customFeedbackType === "text+audio") && (
+                                                                                <div className={styles.feedback_media_container}>
+                                                                                    <label className={styles.label}>Feedback Audio</label>
+                                                                                    <input
+                                                                                        className={styles.input_field}
+                                                                                        type="file"
+                                                                                        accept="audio/*"
+                                                                                        onChange={(e) => {
+                                                                                            if (e.target.files && e.target.files[0]) {
+                                                                                                const file = e.target.files[0];
+
+                                                                                                // Create a preview URL for the selected file
+                                                                                                const url = URL.createObjectURL(file);
+
+                                                                                                // Update multiple properties at once to ensure UI updates properly
+                                                                                                const updatedAnswer = {
+                                                                                                    ...question.answers[aIndex],
+                                                                                                    customAnswerFeedbackAudio: file,
+                                                                                                    customAnswerFeedbackAudioPreview: url,
+                                                                                                    customAnswerFeedbackAudioFilename: file.name,
+                                                                                                    isChanged: true
+                                                                                                };
+
+                                                                                                const updatedAnswers = question.answers.map((ans, idx) =>
+                                                                                                    idx === aIndex ? updatedAnswer : ans
+                                                                                                );
+
+                                                                                                const updatedQuestion = {
+                                                                                                    ...question,
+                                                                                                    answers: updatedAnswers,
+                                                                                                    isChanged: true
+                                                                                                };
+
+                                                                                                const updatedQuestions = questions.map((q, idx) =>
+                                                                                                    idx === qIndex ? updatedQuestion : q
+                                                                                                );
+
+                                                                                                setQuestions(updatedQuestions);
+                                                                                            }
+                                                                                        }}
+                                                                                    />
+                                                                                    <div className={styles.audio_preview_container}>
+                                                                                        <h4 className={styles.preview_header}>
+                                                                                            Audio Preview
+                                                                                        </h4>
+                                                                                        <div className={styles.audio_preview}>
+                                                                                            {answer.customAnswerFeedbackAudioPreview ? (
+                                                                                                // Show preview of newly selected file
+                                                                                                <audio
+                                                                                                    src={answer.customAnswerFeedbackAudioPreview}
+                                                                                                    controls
+                                                                                                    preload="auto"
+                                                                                                    className={styles.audio_player}
+                                                                                                />
+                                                                                            ) : answer.customAnswerFeedbackAudio && typeof answer.customAnswerFeedbackAudio === 'string' ? (
+                                                                                                // Show existing audio from database
+                                                                                                <audio
+                                                                                                    src={answer.customAnswerFeedbackAudio}
+                                                                                                    controls
+                                                                                                    preload="auto"
+                                                                                                    className={styles.audio_player}
+                                                                                                />
+                                                                                            ) : answer.customAnswerFeedbackAudio ? (
+                                                                                                // For newly added file, create a URL and display it
+                                                                                                <div className={styles.file_selected_message}>
+                                                                                                    Audio file selected and will be uploaded when you save
+                                                                                                </div>
+                                                                                            ) : (
+                                                                                                <div className={styles.no_preview}>No audio selected</div>
+                                                                                            )}
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        )}
+                                                                            )}
                                                                     </div>
                                                                 )}
                                                             </div>
                                                         </div>
                                                     ))}
                                             </div>
-                                            
+
                                             {activity === 'mcqs' && question.answers.length < 4 && (
                                                 <button className={styles.add_button} onClick={() => addNewAnswer(qIndex)}>Add Answer</button>
                                             )}
@@ -1456,7 +1461,7 @@ const MCQsLesson = ({ category, course, activity }) => {
                             <th className={styles.table_heading}>Status</th>
                             {isDevEnvironment && <th className={styles.table_heading}>Migrate</th>}
                             <th className={styles.table_heading}>Edit</th>
-                             <th className={styles.table_heading}>Test</th>
+                            <th className={styles.table_heading}>Test</th>
                             <th className={styles.table_heading}>Delete</th>
                         </tr>
                     </thead>
@@ -1498,13 +1503,13 @@ const MCQsLesson = ({ category, course, activity }) => {
                                     />
                                 </td>
                                 <td style={{ width: "4%" }}>
-                                        <button
-                                            className={styles.test_button}
-                                            onClick={() => openTestLessonModal(lesson)}
-                                        >
-                                            Test
-                                        </button>
-                                    </td>
+                                    <button
+                                        className={styles.test_button}
+                                        onClick={() => openTestLessonModal(lesson)}
+                                    >
+                                        Test
+                                    </button>
+                                </td>
                                 <td style={{ width: "6.66%" }}>
                                     <img
                                         onClick={() => handleDeleteLesson(lesson.LessonId)}

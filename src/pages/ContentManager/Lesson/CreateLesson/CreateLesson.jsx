@@ -249,15 +249,11 @@ const CreateLesson = () => {
                 questionNumber: Math.floor(i / 3) + 1
             }));
 
-            if (renumberedQuestions.length >= 3) {
-                setWsQuestions(renumberedQuestions);
-            }
+            setWsQuestions(renumberedQuestions);
         } else {
-            if (wsQuestions.length > 1) {
-                const newWsQuestions = [...wsQuestions];
-                newWsQuestions.splice(index, 1);
-                setWsQuestions(newWsQuestions);
-            }
+            const newWsQuestions = [...wsQuestions];
+            newWsQuestions.splice(index, 1);
+            setWsQuestions(newWsQuestions);
         }
     };
 
