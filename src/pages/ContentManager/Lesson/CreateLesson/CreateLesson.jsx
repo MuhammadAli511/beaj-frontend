@@ -69,6 +69,27 @@ const CreateLesson = () => {
     const [status, setStatus] = useState('Active');
     const [showAllCourses, setShowAllCourses] = useState(false);
 
+    // Get user role from localStorage
+    const userRole = localStorage.getItem('role');
+
+    // Filter categories based on role
+    const filterCategoriesByRole = (categoriesData) => {
+        if (userRole === 'kid-lesson-creator') {
+            return categoriesData.filter(category => 
+                category.CourseCategoryName === "Chatbot Courses - Kids"
+            );
+        } else if (userRole === 'teacher-lesson-creator') {
+            return categoriesData.filter(category => 
+                category.CourseCategoryName === "Chatbot Courses - Teachers"
+            );
+        } else {
+            // For other roles, show categories with "Chatbot" in their name
+            return categoriesData.filter(category => 
+                category.CourseCategoryName.includes("Chatbot")
+            );
+        }
+    };
+
     // Instructions
     const [enableTextInstruction, setEnableTextInstruction] = useState(false);
     const [enableAudioInstruction, setEnableAudioInstruction] = useState(false);
@@ -610,12 +631,11 @@ const CreateLesson = () => {
                     setActivityAliases(filteredAliases);
                     const firstAlias = aliasesResponse.data[0].Alias;
                     setAlias(firstAlias);
-                    const categoriesData = categoriesResponse.data.filter(category =>
-                        category.CourseCategoryName.includes("Chatbot")
-                    );
-                    setCategories(categoriesData);
-                    if (categoriesData.length > 0) {
-                        const firstCategoryId = categoriesData[0].CourseCategoryId;
+                    // Filter categories based on user role
+                    const filteredCategories = filterCategoriesByRole(categoriesResponse.data);
+                    setCategories(filteredCategories);
+                    if (filteredCategories.length > 0) {
+                        const firstCategoryId = filteredCategories[0].CourseCategoryId;
                         setCategory(firstCategoryId);
                         const coursesResponse = await getCoursesByCategoryId(firstCategoryId);
                         if (coursesResponse.status === 200) {
@@ -643,7 +663,7 @@ const CreateLesson = () => {
             }
         };
         fetchCategoriesAndDefaultCourses();
-    }, []);
+    }, [userRole]);
 
     const handleCategoryChange = async (e) => {
         setCategory(e.target.value);
