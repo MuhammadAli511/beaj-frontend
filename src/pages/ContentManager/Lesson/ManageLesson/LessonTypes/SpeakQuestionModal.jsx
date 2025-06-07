@@ -1,14 +1,53 @@
 import React, { useEffect } from 'react';
 import styles from './SpeakQuestionModal.module.css';
 
+// Reusable component for custom feedback cells
+const CustomFeedbackCells = ({ question }) => (
+    <>
+        <td style={{ width: "15%" }}>
+            {question.customFeedbackText || 'N/A'}
+        </td>
+        <td style={{ width: "15%" }}>
+            {question.customFeedbackImage ? (
+                <img src={question.customFeedbackImage} alt="Custom Feedback" className={styles.image} />
+            ) : 'N/A'}
+        </td>
+        <td style={{ width: "15%" }}>
+            {question.customFeedbackAudio ? (
+                <audio controls>
+                    <source src={question.customFeedbackAudio} type="audio/mp3" />
+                </audio>
+            ) : 'N/A'}
+        </td>
+    </>
+);
+
 const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
     const sortedQuestions = lesson?.speakActivityQuestionFiles 
-        ? [...lesson.speakActivityQuestionFiles].sort((a, b) => a.questionNumber - b.questionNumber)
+        ? [...lesson.speakActivityQuestionFiles].sort((a, b) => {
+            // Sort by question number first, then by difficulty level if present
+            if (a.questionNumber !== b.questionNumber) {
+                return a.questionNumber - b.questionNumber;
+            }
+            // If both have difficulty levels, sort by difficulty (easy, medium, hard)
+            if (a.difficultyLevel && b.difficultyLevel) {
+                const difficultyOrder = { 'easy': 1, 'medium': 2, 'hard': 3 };
+                return (difficultyOrder[a.difficultyLevel] || 0) - (difficultyOrder[b.difficultyLevel] || 0);
+            }
+            return 0;
+        })
         : lesson?.documentFiles 
             ? [...lesson.documentFiles].sort((a, b) => a.questionNumber - b.questionNumber)
             : [];
+    
+    // Check if any question has difficulty level to determine if we should show the difficulty column
+    const hasDifficultyLevels = sortedQuestions.some(q => q.difficultyLevel);
+    
+    // Check if any question has custom feedback to determine if we should show feedback columns
+    const hasCustomFeedback = sortedQuestions.some(q => 
+        q.customFeedbackText || q.customFeedbackImage || q.customFeedbackAudio
+    );
 
-    console.log("sortedQuestions", sortedQuestions);
     useEffect(() => {
         const handleEscapeKey = (event) => {
             if (event.key === 'Escape') {
@@ -34,7 +73,9 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                     <table className={styles.table}>
                         <thead>
                             <tr>
-                                <th className={styles.table_heading}>Question Number</th>
+                                <th className={styles.table_heading}>
+                                    {hasDifficultyLevels ? 'Question Number & Difficulty' : 'Question Number'}
+                                </th>
                                 {activity === 'feedbackAudio' && (
                                     <>
                                         <th className={styles.table_heading}>Question</th>
@@ -84,6 +125,13 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                 {activity === 'speakingPractice' && (
                                     <th className={styles.table_heading}>Audio</th>
                                 )}
+                                {hasCustomFeedback && (
+                                    <>
+                                        <th className={styles.table_heading}>Custom Text Feedback</th>
+                                        <th className={styles.table_heading}>Custom Image Feedback</th>
+                                        <th className={styles.table_heading}>Custom Audio Feedback</th>
+                                    </>
+                                )}
                             </tr>
                         </thead>
                         <tbody className={styles.table_body}>
@@ -91,18 +139,31 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                 <tr key={question.id} className={styles.table_row}>
                                     {activity === 'feedbackAudio' && (
                                         <>
-                                            <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                            <td style={{ width: "5%" }}>
+                                                {hasDifficultyLevels ? 
+                                                    `${question.questionNumber} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'N/A'}` : 
+                                                    question.questionNumber
+                                                }
+                                            </td>
                                             <td style={{ width: "20%" }}>{question.question}</td>
                                             <td style={{ width: "50%" }}>
                                                 <audio controls>
                                                     <source src={question.mediaFile} type="audio/mp3" />
                                                 </audio>
                                             </td>
+                                            {hasCustomFeedback && (
+                                                <CustomFeedbackCells question={question} />
+                                            )}
                                         </>
                                     )}
                                     {activity === 'watchAndSpeak' && (
                                         <>
-                                            <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                            <td style={{ width: "5%" }}>
+                                                {hasDifficultyLevels ? 
+                                                    `${question.questionNumber} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'N/A'}` : 
+                                                    question.questionNumber
+                                                }
+                                            </td>
                                             <td style={{ width: "20%" }}>{question.question}</td>
                                             <td style={{ width: "35%" }}>{question.answer.join(', ')}</td>
                                             <td style={{ width: "100%" }}>
@@ -117,31 +178,55 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                     <p>No Image</p>
                                                 )}
                                             </td>
+                                            {hasCustomFeedback && (
+                                                <CustomFeedbackCells question={question} />
+                                            )}
                                         </>
                                     )}
                                     {activity === 'watchAndAudio' && (
                                         <>
-                                            <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                            <td style={{ width: "5%" }}>
+                                                {hasDifficultyLevels ? 
+                                                    `${question.questionNumber} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'N/A'}` : 
+                                                    question.questionNumber
+                                                }
+                                            </td>
                                             <td style={{ width: "100%" }}>
                                                 <video controls className={styles.video}>
                                                     <source src={question.mediaFile} type="video/mp4" />
                                                 </video>
                                             </td>
+                                            {hasCustomFeedback && (
+                                                <CustomFeedbackCells question={question} />
+                                            )}
                                         </>
                                     )}
                                     {activity === 'watchAndImage' && (
                                         <>
-                                            <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                            <td style={{ width: "5%" }}>
+                                                {hasDifficultyLevels ? 
+                                                    `${question.questionNumber} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'N/A'}` : 
+                                                    question.questionNumber
+                                                }
+                                            </td>
                                             <td style={{ width: "100%" }}>
                                                 <video controls className={styles.video}>
                                                     <source src={question.mediaFile} type="video/mp4" />
                                                 </video>
                                             </td>
+                                            {hasCustomFeedback && (
+                                                <CustomFeedbackCells question={question} />
+                                            )}
                                         </>
                                     )}
-                                    {(activity == 'listenAndSpeak') && (
+                                    {(activity === 'listenAndSpeak') && (
                                         <>
-                                            <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                            <td style={{ width: "5%" }}>
+                                                {hasDifficultyLevels ? 
+                                                    `${question.questionNumber} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'N/A'}` : 
+                                                    question.questionNumber
+                                                }
+                                            </td>
                                             <td style={{ width: "20%" }}>{question.question}</td>
                                             <td style={{ width: "35%" }}>{question.answer.join(', ')}</td>
                                             <td style={{ width: "100%" }}>
@@ -155,32 +240,56 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                     </audio>
                                                 )}
                                             </td>
+                                            {hasCustomFeedback && (
+                                                <CustomFeedbackCells question={question} />
+                                            )}
                                         </>
                                     )}
                                     {activity == 'conversationalQuestionsBot' && (
                                         <>
-                                            <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                            <td style={{ width: "5%" }}>
+                                                {hasDifficultyLevels ? 
+                                                    `${question.questionNumber} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'N/A'}` : 
+                                                    question.questionNumber
+                                                }
+                                            </td>
                                             <td style={{ width: "100%" }}>
                                                 <audio controls>
                                                     <source src={question.mediaFile} type="audio/mp3" />
                                                 </audio>
                                             </td>
+                                            {hasCustomFeedback && (
+                                                <CustomFeedbackCells question={question} />
+                                            )}
                                         </>
                                     )}
                                     {activity == 'conversationalMonologueBot' && (
                                         <>
-                                            <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                            <td style={{ width: "5%" }}>
+                                                {hasDifficultyLevels ? 
+                                                    `${question.questionNumber} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'N/A'}` : 
+                                                    question.questionNumber
+                                                }
+                                            </td>
                                             <td style={{ width: "50%" }}>{question.question}</td>
                                             <td style={{ width: "100%" }}>
                                                 <video controls className={styles.video}>
                                                     <source src={question.mediaFile} type="video/mp4" />
                                                 </video>
                                             </td>
+                                            {hasCustomFeedback && (
+                                                <CustomFeedbackCells question={question} />
+                                            )}
                                         </>
                                     )}
-                                    {activity == 'conversationalAgencyBot' && (
+                                    {activity === 'conversationalAgencyBot' && (
                                         <>
-                                            <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                            <td style={{ width: "5%" }}>
+                                                {hasDifficultyLevels ? 
+                                                    `${question.questionNumber} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'N/A'}` : 
+                                                    question.questionNumber
+                                                }
+                                            </td>
                                             <td style={{ width: "100%" }}>
                                                 {question.question}
                                             </td>
@@ -189,16 +298,27 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                                     <source src={question.mediaFile} type="audio/mp3" />
                                                 </audio>
                                             </td>
+                                            {hasCustomFeedback && (
+                                                <CustomFeedbackCells question={question} />
+                                            )}
                                         </>
                                     )}
                                     {activity === 'speakingPractice' && (
                                         <>
-                                            <td style={{ width: "5%" }}>{question.questionNumber}</td>
+                                            <td style={{ width: "5%" }}>
+                                                {hasDifficultyLevels ? 
+                                                    `${question.questionNumber} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'N/A'}` : 
+                                                    question.questionNumber
+                                                }
+                                            </td>
                                             <td style={{ width: "100%" }}>
                                                 <audio controls>
                                                     <source src={question.mediaFile} type="audio/mp3" />
                                                 </audio>
                                             </td>
+                                            {hasCustomFeedback && (
+                                                <CustomFeedbackCells question={question} />
+                                            )}
                                         </>
                                     )}
                                 </tr>

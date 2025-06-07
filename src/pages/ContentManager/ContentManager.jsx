@@ -18,30 +18,43 @@ import { useSidebar } from "../../components/SidebarContext"
 const ContentManager = () => {
     const { isSidebarOpen } = useSidebar();
     const [mainTab, setMainTab] = useState('Manage');
-    const [subTab, setSubTab] = useState('Category');
+    const [subTab, setSubTab] = useState('Lesson'); // Default to Lesson for all users
+    
+    // Get user role from localStorage
+    const userRole = localStorage.getItem('role');
+    
+    // Check if user is a lesson creator
+    const isLessonCreator = userRole === 'kid-lesson-creator' || userRole === 'teacher-lesson-creator';
+    
+    // Define available sub-tabs based on role
+    const getAvailableSubTabs = () => {
+        if (isLessonCreator) {
+            return ['Lesson']; // Only lesson functionality for lesson creators
+        }
+        return ['Category', 'Course', 'Weeks', 'Lesson', 'Alias', 'Constant']; // All functionality for admin
+    };
+    
     const renderContent = () => {
         if (mainTab === 'Manage') {
-            if (subTab === 'Category') return <ManageCategory />;
-            if (subTab === 'Course') return <ManageCourse />;
-            if (subTab === 'Weeks') return <ManageCourseWeek />;
+            if (subTab === 'Category' && !isLessonCreator) return <ManageCategory />;
+            if (subTab === 'Course' && !isLessonCreator) return <ManageCourse />;
+            if (subTab === 'Weeks' && !isLessonCreator) return <ManageCourseWeek />;
             if (subTab === 'Lesson') return <ManageLesson />;
-            if (subTab === 'Alias') return <ManageAlias />;
-            if (subTab === 'Constant') return <ManageConstant />;
+            if (subTab === 'Alias' && !isLessonCreator) return <ManageAlias />;
+            if (subTab === 'Constant' && !isLessonCreator) return <ManageConstant />;
         }
         if (mainTab === 'Create') {
-            if (subTab === 'Category') return <CreateCategory />;
-            if (subTab === 'Course') return <CreateCourse />;
-            if (subTab === 'Weeks') return <CreateCourseWeek />;
+            if (subTab === 'Category' && !isLessonCreator) return <CreateCategory />;
+            if (subTab === 'Course' && !isLessonCreator) return <CreateCourse />;
+            if (subTab === 'Weeks' && !isLessonCreator) return <CreateCourseWeek />;
             if (subTab === 'Lesson') return <CreateLesson />;
-            if (subTab === 'Alias') return <CreateAlias />;
-            if (subTab === 'Constant') return <CreateConstant />;
+            if (subTab === 'Alias' && !isLessonCreator) return <CreateAlias />;
+            if (subTab === 'Constant' && !isLessonCreator) return <CreateConstant />;
         }
-
     };
 
     const isActive = (tab) => mainTab === tab;
     const isSubActive = (sub) => subTab === sub;
-
 
     return (
         <div className={styles.main_page}>
@@ -54,12 +67,18 @@ const ContentManager = () => {
                 </div>
                 {['Manage', 'Create'].includes(mainTab) && (
                     <div className={styles.sub_tabs}>
-                        <button className={isSubActive('Category') ? styles.active : ''} onClick={() => setSubTab('Category')}>Category</button>
-                        <button className={isSubActive('Course') ? styles.active : ''} onClick={() => setSubTab('Course')}>Course</button>
-                        <button className={isSubActive('Weeks') ? styles.active : ''} onClick={() => setSubTab('Weeks')}>Weeks</button>
-                        <button className={isSubActive('Lesson') ? styles.active : ''} onClick={() => setSubTab('Lesson')}>Lesson</button>
-                        <button className={isSubActive('Alias') ? styles.active : ''} onClick={() => setSubTab('Alias')}>Alias</button>
-                        <button className={isSubActive('Constant') ? styles.active : ''} onClick={() => setSubTab('Constant')}>Constants</button>
+                        {getAvailableSubTabs().map((tabName) => {
+                            const displayName = tabName === 'Constant' ? 'Constants' : tabName;
+                            return (
+                                <button 
+                                    key={tabName}
+                                    className={isSubActive(tabName) ? styles.active : ''} 
+                                    onClick={() => setSubTab(tabName)}
+                                >
+                                    {displayName}
+                                </button>
+                            );
+                        })}
                     </div>
                 )}
                 {renderContent()}

@@ -31,7 +31,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -39,7 +39,7 @@ function App() {
           <Route
             path="/whatsapp-logs"
             element={
-              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
                 <WhatsappLogs />
               </ProtectedRoute>
             }
@@ -47,7 +47,7 @@ function App() {
           <Route
             path="/purchase-course"
             element={
-              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <PurchaseCourse />
               </ProtectedRoute>
             }
@@ -55,7 +55,7 @@ function App() {
           <Route
             path="/payment-verification"
             element={
-              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <PaymentVerification />
               </ProtectedRoute>
             }
@@ -63,7 +63,7 @@ function App() {
           <Route
             path="/last-active-users"
             element={
-              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
                 <LastActiveUsers />
               </ProtectedRoute>
             }
@@ -72,7 +72,7 @@ function App() {
           <Route
             path="/content-manager"
             element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
                 <ContentManager />
               </ProtectedRoute>
             }
@@ -80,7 +80,7 @@ function App() {
           <Route
             path="/user-feedback"
             element={
-              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
                 <UserFeedback />
               </ProtectedRoute>
             }
@@ -88,7 +88,7 @@ function App() {
           <Route
             path="/user-responses"
             element={
-              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
                 <UserResponses />
               </ProtectedRoute>
             }
@@ -112,7 +112,7 @@ function App() {
           <Route
             path="/users-data"
             element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
                 <UsersData />
               </ProtectedRoute>
             }
@@ -120,7 +120,7 @@ function App() {
            <Route
             path="/user-progress"
             element={
-              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
                 <UserProgress />
               </ProtectedRoute>
             }

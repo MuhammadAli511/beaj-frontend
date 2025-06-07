@@ -186,7 +186,6 @@ const AddUsers = () => {
 
                     if (invalidRows.length > 0) {
                         setError(`Found ${invalidRows.length} invalid rows. Check console for details.`);
-                        console.log('Invalid rows:', invalidRows);
                     }
                 },
                 header: true,

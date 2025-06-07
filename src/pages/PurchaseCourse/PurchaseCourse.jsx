@@ -509,7 +509,6 @@ const PurchaseCourse = () => {
     setError(null)
 
     try {
-      console.log("Purchasing course:", phone, profileId, courseId)
       const response = await purchaseCourse(phone, courseId, profileId)
 
       if (response.status === 200) {

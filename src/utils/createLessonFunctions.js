@@ -1,5 +1,5 @@
 import { createLesson, uploadDocumentFile, createSpeakActivityQuestion, createMultipleChoiceQuestion, createMultipleChoiceQuestionAnswer } from "../helper";
-export const createAudioLesson = async (course, sequenceNumber, alias, activityType, image, audio, lessonText, day, week, status) => {
+export const createAudioLesson = async (course, sequenceNumber, alias, activityType, image, audio, lessonText, day, week, status, textInstruction = null, audioInstruction = null) => {
     if (!image) {
         alert('Please upload an image');
         return;
@@ -14,7 +14,7 @@ export const createAudioLesson = async (course, sequenceNumber, alias, activityT
     }
     const lessonType = "week";
 
-    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
+    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status, textInstruction, audioInstruction);
     const lessonId = response.data.lesson.LessonId;
 
     const [imageResponse, audioResponse] = await Promise.all([
@@ -30,9 +30,9 @@ export const createAudioLesson = async (course, sequenceNumber, alias, activityT
 };
 
 
-export const createVideoLesson = async (course, sequenceNumber, alias, activityType, video, lessonText, day, week, status) => {
+export const createVideoLesson = async (course, sequenceNumber, alias, activityType, video, lessonText, day, week, status, textInstruction = null, audioInstruction = null) => {
     if (!video) {
-        alert('Please upload an audio');
+        alert('Please upload a audio');
         return;
     }
     if (!sequenceNumber) {
@@ -41,7 +41,7 @@ export const createVideoLesson = async (course, sequenceNumber, alias, activityT
     }
     const lessonType = "week";
 
-    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
+    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status, textInstruction, audioInstruction);
     const lessonId = response.data.lesson.LessonId;
 
     const videoResponse = await uploadDocumentFile(video, lessonId, "English", "video");
@@ -54,9 +54,9 @@ export const createVideoLesson = async (course, sequenceNumber, alias, activityT
 };
 
 
-export const createReadLesson = async (course, sequenceNumber, alias, activityType, video, lessonText, day, week, status) => {
+export const createReadLesson = async (course, sequenceNumber, alias, activityType, video, lessonText, day, week, status, textInstruction = null, audioInstruction = null) => {
     if (!video) {
-        alert('Please upload an video');
+        alert('Please upload a video');
         return;
     }
     if (!sequenceNumber) {
@@ -65,7 +65,7 @@ export const createReadLesson = async (course, sequenceNumber, alias, activityTy
     }
     const lessonType = "week";
 
-    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
+    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status, textInstruction, audioInstruction);
     const lessonId = response.data.lesson.LessonId;
 
     const videoResponse = await uploadDocumentFile(video, lessonId, "English", "video");
@@ -78,7 +78,7 @@ export const createReadLesson = async (course, sequenceNumber, alias, activityTy
 };
 
 
-export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {
+export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status, textInstruction = null, audioInstruction = null) => {
     if (!questions) {
         alert('Please upload questions');
         return;
@@ -89,7 +89,7 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
     }
     const lessonType = "week";
 
-    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
+    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status, textInstruction, audioInstruction);
     const lessonId = response.data.lesson.LessonId;
 
     const questionResponses = await Promise.all(
@@ -106,7 +106,11 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
                 answersArray,
                 lessonId,
                 (index + 1).toString(),
-                activityType
+                activityType,
+                question.customFeedbackText || null,
+                question.customFeedbackImage || null,
+                question.customFeedbackAudio || null,
+                question.difficultyLevel || null
             );
         })
     );
@@ -119,7 +123,7 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
 };
 
 
-export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {
+export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status, textInstruction = null, audioInstruction = null) => {
     if (!questions) {
         alert('Please upload questions');
         return;
@@ -130,7 +134,7 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
     }
     const lessonType = "week";
 
-    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
+    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status, textInstruction, audioInstruction);
     const lessonId = response.data.lesson.LessonId;
 
     const questionResponses = await Promise.all(
@@ -150,7 +154,11 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
                 answersArray,
                 lessonId,
                 (index + 1).toString(),
-                activityType
+                activityType,
+                question.customFeedbackText || null,
+                question.customFeedbackImage || null,
+                question.customFeedbackAudio || null,
+                question.difficultyLevel || null
             );
         })
     );
@@ -163,7 +171,7 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
 };
 
 
-export const createConversationalBotLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {
+export const createConversationalBotLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status, textInstruction = null, audioInstruction = null) => {
     if (!questions) {
         alert('Please upload questions');
         return;
@@ -174,7 +182,7 @@ export const createConversationalBotLesson = async (course, sequenceNumber, alia
     }
     const lessonType = "week";
 
-    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
+    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status, textInstruction, audioInstruction);
     const lessonId = response.data.lesson.LessonId;
 
     if (activityType == "conversationalQuestionsBot") {
@@ -242,7 +250,7 @@ export const createConversationalBotLesson = async (course, sequenceNumber, alia
 };
 
 
-export const createSpeakingPracticeLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status) => {
+export const createSpeakingPracticeLesson = async (course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status, textInstruction = null, audioInstruction = null) => {
     if (!questions) {
         alert('Please upload questions');
         return;
@@ -253,7 +261,7 @@ export const createSpeakingPracticeLesson = async (course, sequenceNumber, alias
     }
     const lessonType = "week";
 
-    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
+    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status, textInstruction, audioInstruction);
     const lessonId = response.data.lesson.LessonId;
 
     const questionResponses = await Promise.all(
@@ -278,7 +286,7 @@ export const createSpeakingPracticeLesson = async (course, sequenceNumber, alias
 };
 
 
-export const createMCQLesson = async (course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status) => {
+export const createMCQLesson = async (course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status, textInstruction = null, audioInstruction = null) => {
     if (!mcqs) {
         alert('Please upload questions');
         return;
@@ -289,7 +297,7 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
     }
     const lessonType = "week";
 
-    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status);
+    const response = await createLesson(lessonType, day, activityType, alias, week, lessonText, course, sequenceNumber, status, textInstruction, audioInstruction);
     const lessonId = response.data.lesson.LessonId;
     let answerResponses = [];
 
@@ -326,7 +334,7 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
 
         const questionId = await questionResponse.data.mcq.Id;
 
-        const answerResponses = await Promise.all(
+        const currentAnswerResponses = await Promise.all(
             answerTextArray.map((answer, index) =>
                 createMultipleChoiceQuestionAnswer(
                     answerTextArray[index],
@@ -342,7 +350,7 @@ export const createMCQLesson = async (course, sequenceNumber, alias, activityTyp
             )
         );
 
-        answerResponses.push(answerResponses);
+        answerResponses.push(currentAnswerResponses);
     }
 
     if (answerResponses.every(response => response.every(answer => answer.status === 200)) && response.status === 200) {

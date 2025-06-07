@@ -26,21 +26,21 @@ const Sidebar = () => {
     // Define menu sections with their items
     const menuSections = {
         Stats: [
-            { name: "Dashboard", path: "/dashboard", roles: ["facilitator", "admin"] },
+            { name: "Dashboard", path: "/dashboard", roles: ["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"] },
         ],
         Users: [
             { name: "Add Users", path: "/add-users", roles: ["admin"] },
-            { name: "Users Data", path: "/users-data", roles: ["admin"] },
-            { name: "User Feedback", path: "/user-feedback", roles: ["facilitator", "admin"] },
-            { name: "User Responses", path: "/user-responses", roles: ["facilitator", "admin"] },
-            { name: "Last Active Users", path: "/last-active-users", roles: ["facilitator", "admin"] },
-            { name: "Whatsapp Logs", path: "/whatsapp-logs", roles: ["facilitator", "admin"] },
-            { name: "Purchase Course", path: "/purchase-course", roles: ["facilitator", "admin"] },
-            { name: "Payment Verification", path: "/payment-verification", roles: ["facilitator", "admin"] },
-            { name: "User Progress", path: "/user-progress", roles: ["facilitator", "admin"] },
+            { name: "Users Data", path: "/users-data", roles: ["admin", "kid-lesson-creator", "teacher-lesson-creator"] },
+            { name: "User Feedback", path: "/user-feedback", roles: ["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"] },
+            { name: "User Responses", path: "/user-responses", roles: ["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"] },
+            { name: "Last Active Users", path: "/last-active-users", roles: ["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"] },
+            { name: "Whatsapp Logs", path: "/whatsapp-logs", roles: ["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"] },
+            { name: "Purchase Course", path: "/purchase-course", roles: ["admin"] },
+            { name: "Payment Verification", path: "/payment-verification", roles: ["admin"] },
+            { name: "User Progress", path: "/user-progress", roles: ["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"] },
         ],
         Content: [
-            { name: "Content Manager", path: "/content-manager", roles: ["admin"] },
+            { name: "Content Manager", path: "/content-manager", roles: ["admin", "kid-lesson-creator", "teacher-lesson-creator"] },
             // { name: "Prompt Playground", path: "/prompt-playground", roles: ["admin"] },
         ],
     };
