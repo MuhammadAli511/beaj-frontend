@@ -402,11 +402,31 @@ export const deleteConstant = async (key) => {
 
 // LESSON
 // API call to create a lesson
-export const createLesson = async (lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status) => {
+export const createLesson = async (lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status, textInstruction = null, audioInstruction = null) => {
+    const formData = new FormData();
+    formData.append('lessonType', lessonType);
+    formData.append('dayNumber', dayNumber);
+    formData.append('activity', activity);
+    formData.append('activityAlias', activityAlias);
+    formData.append('weekNumber', weekNumber);
+    formData.append('text', text);
+    formData.append('courseId', courseId);
+    formData.append('sequenceNumber', sequenceNumber);
+    formData.append('status', status);
+
+    if (textInstruction !== null) {
+        formData.append('textInstruction', textInstruction);
+    }
+    if (audioInstruction !== null) {
+        formData.append('file', audioInstruction);
+    }
+
     const response = await fetch(`${API_URL}/lesson/create`, {
         method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status }),
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: formData,
     });
 
     const data = await response.json();
@@ -434,11 +454,31 @@ export const getLessonById = async (lessonId) => {
 };
 
 // API call to update a lesson
-export const updateLesson = async (lessonId, lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status) => {
+export const updateLesson = async (lessonId, lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status, textInstruction = null, audioInstruction = null) => {
+    const formData = new FormData();
+    formData.append('lessonType', lessonType);
+    formData.append('dayNumber', dayNumber);
+    formData.append('activity', activity);
+    formData.append('activityAlias', activityAlias);
+    formData.append('weekNumber', weekNumber);
+    formData.append('text', text);
+    formData.append('courseId', courseId);
+    formData.append('sequenceNumber', sequenceNumber);
+    formData.append('status', status);
+
+    if (textInstruction !== null) {
+        formData.append('textInstruction', textInstruction);
+    }
+    if (audioInstruction !== null) {
+        formData.append('file', audioInstruction);
+    }
+
     const response = await fetch(`${API_URL}/lesson/update/${lessonId}`, {
         method: "PUT",
-        headers: getHeaders(),
-        body: JSON.stringify({ lessonType, dayNumber, activity, activityAlias, weekNumber, text, courseId, sequenceNumber, status }),
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: formData,
     });
 
     const data = await response.json();
@@ -564,7 +604,7 @@ export const updateDocumentFile = async (documentFileId, file, lessonId, languag
 
 // SPEAK ACTIVITY QUESTIONS
 // API call to create a speak activity question
-export const createSpeakActivityQuestion = async (question, video, image, answer, lessonId, questionNumber, activityType) => {
+export const createSpeakActivityQuestion = async (question, video, image, answer, lessonId, questionNumber, activityType, customFeedbackText = null, customFeedbackImage = null, customFeedbackAudio = null, difficultyLevel = null) => {
     const formData = new FormData();
     formData.append('question', question);
     formData.append('video', video);
@@ -573,6 +613,19 @@ export const createSpeakActivityQuestion = async (question, video, image, answer
     formData.append('lessonId', lessonId);
     formData.append('questionNumber', questionNumber);
     formData.append('activityType', activityType);
+
+    if (customFeedbackText !== null && customFeedbackText !== undefined) {
+        formData.append('customFeedbackText', customFeedbackText);
+    }
+    if (customFeedbackImage !== null && customFeedbackImage !== undefined) {
+        formData.append('customFeedbackImage', customFeedbackImage);
+    }
+    if (customFeedbackAudio !== null && customFeedbackAudio !== undefined) {
+        formData.append('customFeedbackAudio', customFeedbackAudio);
+    }
+    if (difficultyLevel !== null && difficultyLevel !== undefined) {
+        formData.append('difficultyLevel', difficultyLevel);
+    }
 
     const response = await fetch(`${API_URL}/speakActivityQuestion/create`, {
         method: "POST",
@@ -607,7 +660,7 @@ export const getSpeakActivityQuestionById = async (speakActivityQuestionId) => {
 };
 
 // API call to update a speak activity question
-export const updateSpeakActivityQuestion = async (speakActivityQuestionId, question, video, image, answer, lessonId, questionNumber, activityType) => {
+export const updateSpeakActivityQuestion = async (speakActivityQuestionId, question, video, image, answer, lessonId, questionNumber, activityType, customFeedbackText = null, customFeedbackImage = null, customFeedbackAudio = null, difficultyLevel = null) => {
     const formData = new FormData();
     formData.append('question', question);
     formData.append('video', video);
@@ -616,6 +669,18 @@ export const updateSpeakActivityQuestion = async (speakActivityQuestionId, quest
     formData.append('lessonId', lessonId);
     formData.append('questionNumber', questionNumber);
     formData.append('activityType', activityType);
+    if (customFeedbackText !== null && customFeedbackText !== undefined) {
+        formData.append('customFeedbackText', customFeedbackText);
+    }
+    if (customFeedbackImage !== null && customFeedbackImage !== undefined) {
+        formData.append('customFeedbackImage', customFeedbackImage);
+    }
+    if (customFeedbackAudio !== null && customFeedbackAudio !== undefined) {
+        formData.append('customFeedbackAudio', customFeedbackAudio);
+    }
+    if (difficultyLevel !== null && difficultyLevel !== undefined) {
+        formData.append('difficultyLevel', difficultyLevel);
+    }
 
     const response = await fetch(`${API_URL}/speakActivityQuestion/update/${speakActivityQuestionId}`, {
         method: "PUT",

@@ -8,7 +8,7 @@ import SpeakLesson from './LessonTypes/SpeakLesson';
 import MCQsLesson from './LessonTypes/MCQsLesson';
 import MigrateLessonModal from '../../../../components/MigrateLessonModal/MigrateLessonModal';
 
-const lessonTypes = [
+const allLessonTypes = [
     'All', 'Watch', 'Watch End', 'Read', 'Listen & Speak', 'Watch & Speak', 'Watch & Audio', 'Watch & Image',
     'MCQs', 'Conversational Questions Bot', 'Conversational Monologue Bot', 'Conversational Agency Bot', 'Speaking Practice',
     'Feedback MCQs', 'Feedback Audio',
@@ -41,19 +41,46 @@ const ManageLesson = () => {
     const [selectedWeek, setSelectedWeek] = useState('all');
     const [selectedDay, setSelectedDay] = useState('all');
 
+    // Get user role from localStorage
+    const userRole = localStorage.getItem('role');
+
+    // Filter lesson types based on role
+    const getLessonTypes = () => {
+        if (userRole === 'kid-lesson-creator' || userRole === 'teacher-lesson-creator') {
+            return ['All']; // Only show 'All' tab for these roles
+        }
+        return allLessonTypes; // Show all tabs for other roles
+    };
+
+    // Filter categories based on role
+    const filterCategoriesByRole = (categoriesData) => {
+        if (userRole === 'kid-lesson-creator') {
+            return categoriesData.filter(category => 
+                category.CourseCategoryName === "Chatbot Courses - Kids"
+            );
+        } else if (userRole === 'teacher-lesson-creator') {
+            return categoriesData.filter(category => 
+                category.CourseCategoryName === "Chatbot Courses - Teachers"
+            );
+        } else {
+            // For other roles, show categories with "Chatbot" in their name
+            return categoriesData.filter(category => 
+                category.CourseCategoryName.includes("Chatbot")
+            );
+        }
+    };
+
     useEffect(() => {
         const fetchCategoriesAndDefaultCourses = async () => {
             setIsLoading(true);
             try {
                 const categoriesResponse = await getAllCategories();
                 if (categoriesResponse.status === 200) {
-                    // Filter categories to only include those with "Chatbot" in their name
-                    const categoriesData = categoriesResponse.data.filter(category => 
-                        category.CourseCategoryName.includes("Chatbot")
-                    );
-                    setCategories(categoriesData);
-                    if (categoriesData.length > 0) {
-                        const firstCategoryId = categoriesData[0].CourseCategoryId;
+                    // Filter categories based on user role
+                    const filteredCategories = filterCategoriesByRole(categoriesResponse.data);
+                    setCategories(filteredCategories);
+                    if (filteredCategories.length > 0) {
+                        const firstCategoryId = filteredCategories[0].CourseCategoryId;
                         setCategory(firstCategoryId);
                         const coursesResponse = await getCoursesByCategoryId(firstCategoryId);
                         if (coursesResponse.status === 200) {
@@ -76,7 +103,7 @@ const ManageLesson = () => {
             }
         };
         fetchCategoriesAndDefaultCourses();
-    }, []);
+    }, [userRole]);
 
     const handleCategoryChange = async (e) => {
         try {
@@ -312,7 +339,14 @@ const ManageLesson = () => {
                         .filter(course =>
                             !course.CourseName.includes('2024') &&
                             !course.CourseName.includes('Level 3 - T1 - January 27, 2025') &&
-                            !course.CourseName.includes('Level 3 - T2 - January 27, 2025')
+                            !course.CourseName.includes('Level 3 - T2 - January 27, 2025') &&
+                            !course.CourseName.includes('Level 1 - T1 - January 27, 2025') &&
+                            !course.CourseName.includes('Level 1 - T2 - January 27, 2025') &&
+                            !course.CourseName.includes('Level 2 - T1 - February 24, 2025') &&
+                            !course.CourseName.includes('Level 2 - T2 - February 24, 2025') &&
+                            !course.CourseName.includes('Level 3 - T1 - April 7, 2025') &&
+                            !course.CourseName.includes('Level 3 - T2 - April 7, 2025') &&
+                            course.CourseName !== 'Free Trial'
                         )
                         .sort((a, b) => {
                             // Extract level numbers if they exist
@@ -381,7 +415,7 @@ const ManageLesson = () => {
                 </div>
             )}
             <div className={styles.tabs}>
-                {lessonTypes.map((type) => (
+                {getLessonTypes().map((type) => (
                     <button
                         key={type}
                         className={activeTab === type ? styles.active : ''}

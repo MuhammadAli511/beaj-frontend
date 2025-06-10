@@ -30,10 +30,16 @@ const Login = () => {
             if (response.status === 200) {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('email', email);
-                if (email == "info@beaj.org") {
+                if (email == "facilitator@beaj.org") {
                     localStorage.setItem('role', "facilitator");
-                } else {
+                } else if (email == "kid-lesson-creator@beaj.org") {
+                    localStorage.setItem('role', "kid-lesson-creator");
+                } else if (email == "teacher-lesson-creator@beaj.org") {
+                    localStorage.setItem('role', "teacher-lesson-creator");
+                } else if (email == "super-admin@beaj.org") {
                     localStorage.setItem('role', "admin");
+                } else {
+                    navigate("/login");
                 }
                 await new Promise(resolve => setTimeout(resolve, 500));
                 navigate("/dashboard");

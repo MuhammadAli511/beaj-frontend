@@ -66,8 +66,6 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                                     )}
                                     <td style={{ width: "20%" }} className={styles.scrollableCell}>
                                         {question.multipleChoiceQuestionAnswers?.map((answer, index) => {
-                                            // Debug each answer
-                                            console.log("Answer Data:", answer);
                                             const answerText = answer.dataValues?.answerText || 
                                                              answer.dataValues?.AnswerText || 
                                                              answer.answerText || 
