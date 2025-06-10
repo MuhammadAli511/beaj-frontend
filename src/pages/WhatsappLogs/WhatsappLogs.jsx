@@ -27,13 +27,13 @@ const WhatsappLogs = () => {
     const [hoveredLog, setHoveredLog] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCohorts, setSelectedCohorts] = useState(['All']);
-    const [inactivityData, setInactivityData] = useState({});
 
     const [selectedBotPhone, setSelectedBotPhone] = useState(null);
 
     const BOT_PHONE_NUMBERS = [
         { label: "Teacher Bot", value: "410117285518514" },
         { label: "Student Bot", value: "608292759037444" },
+        { label: "Marketing Bot", value: "630734623462388" },
     ];
 
     // Refs
@@ -132,7 +132,6 @@ const WhatsappLogs = () => {
                         ...lastMessageTimeMap[user.phoneNumber]
                     }));
 
-                    setInactivityData(lastMessageTimeMap);
                     setPhoneNumbers(usersWithActivity);
                 }
             } catch (error) {
