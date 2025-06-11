@@ -331,7 +331,16 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 mediaFileSecond: null,
                 answer: [''],
             };
-        } else if (activity === 'watchAndAudio') {
+        }else if (activity === 'assessmentWatchAndSpeak') {
+            newQuestion = {
+                ...newQuestion,
+                question: '',
+                mediaFile: null,
+                mediaFileSecond: null,
+                answer: [''],
+            };
+        }
+         else if (activity === 'watchAndAudio') {
             newQuestion = {
                 ...newQuestion,
                 question: '',
@@ -537,7 +546,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                                             </>
                                         )}
 
-                                        {activity === 'watchAndSpeak' && (
+                                        {(activity === 'watchAndSpeak' || activity === 'assessmentWatchAndSpeak')  && (
                                             <>
                                                 <label className={styles.answerEditLabel}>Question</label>
                                                 <input
@@ -844,6 +853,7 @@ const SpeakLesson = ({ category, course, activity }) => {
         'conversationalAgencyBot': 'Conversational Agency Bot',
         'speakingPractice': 'Speaking Practice',
         'feedbackAudio' : 'Feedback Audio',
+        'assessmentWatchAndSpeak': 'Assessment Watch & Speak',
     };
 
     return (

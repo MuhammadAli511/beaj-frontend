@@ -41,7 +41,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                         <th className={styles.table_heading}>Audio</th>
                                     </>
                                 )}
-                                {activity === 'watchAndSpeak' && (
+                                {(activity === 'watchAndSpeak' || activity === 'assessmentWatchAndSpeak') && (
                                     <>
                                         <th className={styles.table_heading}>Question</th>
                                         <th className={styles.table_heading}>Answer</th>
@@ -100,7 +100,7 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                             </td>
                                         </>
                                     )}
-                                    {activity === 'watchAndSpeak' && (
+                                    {(activity === 'watchAndSpeak' || activity === 'assessmentWatchAndSpeak') && (
                                         <>
                                             <td style={{ width: "5%" }}>{question.questionNumber}</td>
                                             <td style={{ width: "20%" }}>{question.question}</td>

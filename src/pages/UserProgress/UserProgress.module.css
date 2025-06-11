@@ -79,9 +79,9 @@
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 2px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #b3b7bd;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -89,7 +89,7 @@
 .tabButton {
   padding: 10px;
   background-color: #f9fafb;
-  border: none;
+  border: 1px solid #b3b7bd;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
@@ -104,7 +104,6 @@
   background-color: #97e1ed;
   color: #111827;
 }
-
 /* Search and Leaderboard section */
 .searchAndLeaderboard {
   display: flex;
@@ -704,7 +703,7 @@ padding: 10px;
 overflow-y: auto;
 display: flex;
 justify-content: center;
-align-items: flex-start;
+/* align-items: flex-start; */
 flex: 1;
 }
 
