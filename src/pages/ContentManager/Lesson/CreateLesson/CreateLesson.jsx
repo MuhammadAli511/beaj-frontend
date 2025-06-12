@@ -148,10 +148,11 @@ const CreateLesson = () => {
     const [wsQuestions, setWsQuestions] = useState([
         {
             questionText: '',
-            video: '',
-            image: '',
+            media: '', // mediaFile
+            mediaSecond: '', // mediaFileSecond
             answers: [{ answerText: '' }],
             showImageUpload: false,
+            mediaType: 'video', // for watchAndAudio: 'video' or 'audio'
             customFeedbackText: null,
             customFeedbackImage: null,
             customFeedbackAudio: null,
@@ -167,17 +168,27 @@ const CreateLesson = () => {
         const newWsQuestions = [...wsQuestions];
         if (event.target.type === 'file') {
             const file = event.target.files[0];
-            if (event.target.name === 'image') {
+            if (event.target.name === 'mediaSecond') {
                 if (file && file.type === 'image/jpeg' && file.size <= 4 * 1024 * 1024) {
                     newWsQuestions[index][event.target.name] = file;
                 } else {
                     alert('Please upload a JPG image not larger than 4MB.');
                 }
-            } else if (event.target.name === 'video') {
-                if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
-                    newWsQuestions[index][event.target.name] = file;
+            } else if (event.target.name === 'media') {
+                const mediaType = newWsQuestions[index].mediaType;
+                
+                if (mediaType === 'video') {
+                    if (file && file.type === 'video/mp4' && file.size <= 16 * 1024 * 1024) {
+                        newWsQuestions[index][event.target.name] = file;
+                    } else {
+                        alert('Please upload an MP4 video not larger than 16MB.');
+                    }
                 } else {
-                    alert('Please upload an MP4 video not larger than 16MB.');
+                    if (file && file.type === 'audio/mpeg' && file.size <= 16 * 1024 * 1024) {
+                        newWsQuestions[index][event.target.name] = file;
+                    } else {
+                        alert('Please upload an MP3 audio not larger than 16MB.');
+                    }
                 }
             } else if (event.target.name === 'customFeedbackImage') {
                 if (file && file.type.startsWith('image/') && file.size <= 4 * 1024 * 1024) {
@@ -227,10 +238,11 @@ const CreateLesson = () => {
             const currentQuestionNumber = Math.floor(wsQuestions.length / 3) + 1;
             const newQuestions = ['easy', 'medium', 'hard'].map(difficulty => ({
                 questionText: '',
-                video: '',
-                image: '',
+                media: '',
+                mediaSecond: '',
                 answers: [{ answerText: '' }],
                 showImageUpload: false,
+                mediaType: 'video',
                 customFeedbackText: null,
                 customFeedbackImage: null,
                 customFeedbackAudio: null,
@@ -244,10 +256,11 @@ const CreateLesson = () => {
         } else {
             setWsQuestions([...wsQuestions, {
                 questionText: '',
-                video: '',
-                image: '',
+                media: '',
+                mediaSecond: '',
                 answers: [{ answerText: '' }],
                 showImageUpload: false,
+                mediaType: 'video',
                 customFeedbackText: null,
                 customFeedbackImage: null,
                 customFeedbackAudio: null,
@@ -896,12 +909,12 @@ const CreateLesson = () => {
 
             if (enableDifficultyLevel && ['watchAndSpeak', 'watchAndAudio', 'watchAndImage'].includes(activityType)) {
                 setWsQuestions([
-                    { questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false, customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'easy', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false },
-                    { questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false, customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'medium', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false },
-                    { questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false, customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'hard', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false }
+                    { questionText: '', media: '', mediaSecond: '', answers: [{ answerText: '' }], showImageUpload: false, mediaType: 'video', customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'easy', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false },
+                    { questionText: '', media: '', mediaSecond: '', answers: [{ answerText: '' }], showImageUpload: false, mediaType: 'video', customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'medium', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false },
+                    { questionText: '', media: '', mediaSecond: '', answers: [{ answerText: '' }], showImageUpload: false, mediaType: 'video', customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: 'hard', questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false }
                 ]);
             } else {
-                setWsQuestions([{ questionText: '', video: '', image: '', answers: [{ answerText: '' }], showImageUpload: false, customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: null, questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false }]);
+                setWsQuestions([{ questionText: '', media: '', mediaSecond: '', answers: [{ answerText: '' }], showImageUpload: false, mediaType: 'video', customFeedbackText: null, customFeedbackImage: null, customFeedbackAudio: null, difficultyLevel: null, questionNumber: 1, enableCustomFeedbackText: false, enableCustomFeedbackImage: false, enableCustomFeedbackAudio: false }]);
             }
             setMcqs([{
                 questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
@@ -1605,7 +1618,7 @@ const CreateLesson = () => {
                                                                 name="questionText"
                                                                 id={`questionText-${question.originalIndex}`}
                                                             />
-                                                            <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(question.originalIndex, e)} name="video" id={`video-${question.originalIndex}`} fileInput />
+                                                            <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(question.originalIndex, e)} name="media" id={`media-${question.originalIndex}`} fileInput />
                                                         </div>
 
                                                         <div className={styles.input_row}>
@@ -1624,8 +1637,8 @@ const CreateLesson = () => {
                                                                     label="Upload Image"
                                                                     type="file"
                                                                     onChange={e => handleWsQuestionChange(question.originalIndex, e)}
-                                                                    name="image"
-                                                                    id={`image-${question.originalIndex}`}
+                                                                    name="mediaSecond"
+                                                                    id={`mediaSecond-${question.originalIndex}`}
                                                                     fileInput
                                                                 />
                                                             </div>
@@ -1725,7 +1738,7 @@ const CreateLesson = () => {
                                             name="questionText"
                                             id={`questionText-${qIndex}`}
                                         />
-                                        <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
+                                        <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="media" id={`media-${qIndex}`} fileInput />
                                         {wsQuestions.length > 1 &&
                                             <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>
                                                 Remove Question
@@ -1748,8 +1761,8 @@ const CreateLesson = () => {
                                                 label="Upload Image"
                                                 type="file"
                                                 onChange={e => handleWsQuestionChange(qIndex, e)}
-                                                name="image"
-                                                id={`image-${qIndex}`}
+                                                name="mediaSecond"
+                                                id={`mediaSecond-${qIndex}`}
                                                 fileInput
                                             />
                                         </div>
@@ -1839,17 +1852,59 @@ const CreateLesson = () => {
                         {wsQuestions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
-                                    <InputField
-                                        label={enableDifficultyLevel ?
-                                            `Question ${question.questionNumber || Math.floor(qIndex / 3) + 1} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'Easy'} Video` :
-                                            "Upload Video"
-                                        }
-                                        type="file"
-                                        onChange={e => handleWsQuestionChange(qIndex, e)}
-                                        name="video"
-                                        id={`video-${qIndex}`}
-                                        fileInput
-                                    />
+                                    <div className={styles.media_toggle_container}>
+                                        <div className={styles.toggle_buttons}>
+                                            <button
+                                                type="button"
+                                                className={`${styles.toggle_button} ${question.mediaType === 'video' ? styles.active : ''}`}
+                                                onClick={() => {
+                                                    const newWsQuestions = [...wsQuestions];
+                                                    newWsQuestions[qIndex].mediaType = 'video';
+                                                    setWsQuestions(newWsQuestions);
+                                                }}
+                                            >
+                                                Video
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`${styles.toggle_button} ${question.mediaType === 'audio' ? styles.active : ''}`}
+                                                onClick={() => {
+                                                    const newWsQuestions = [...wsQuestions];
+                                                    newWsQuestions[qIndex].mediaType = 'audio';
+                                                    setWsQuestions(newWsQuestions);
+                                                }}
+                                            >
+                                                Audio
+                                            </button>
+                                        </div>
+
+                                        {question.mediaType === 'video' ? (
+                                            <InputField 
+                                                label={enableDifficultyLevel ?
+                                                    `Question ${question.questionNumber || Math.floor(qIndex / 3) + 1} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'Easy'} Video` :
+                                                    "Upload Video"
+                                                }
+                                                type="file" 
+                                                onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                                name="media" 
+                                                id={`media-${qIndex}`} 
+                                                fileInput 
+                                            />
+                                        ) : (
+                                            <InputField 
+                                                label={enableDifficultyLevel ?
+                                                    `Question ${question.questionNumber || Math.floor(qIndex / 3) + 1} - ${question.difficultyLevel ? question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1) : 'Easy'} Audio` :
+                                                    "Upload Audio"
+                                                }
+                                                type="file" 
+                                                onChange={e => handleWsQuestionChange(qIndex, e)} 
+                                                name="media" 
+                                                id={`media-${qIndex}`} 
+                                                fileInput 
+                                            />
+                                        )}
+                                    </div>
+                                    
                                     {(enableDifficultyLevel ? wsQuestions.length > 3 && qIndex % 3 === 0 : wsQuestions.length > 1) &&
                                         <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>
                                             Remove Question{enableDifficultyLevel ? ' (All Variants)' : ''}
@@ -2327,7 +2382,7 @@ const CreateLesson = () => {
                             <div key={qIndex} className={styles.question_box}>
                                 <div className={styles.input_row}>
                                     <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleWsQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
-                                    <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
+                                    <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="media" id={`media-${qIndex}`} fileInput />
                                     {wsQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>Remove Question</button>}
                                 </div>
                                 <div className={styles.input_row}>
@@ -2346,8 +2401,8 @@ const CreateLesson = () => {
                                             label="Upload Image"
                                             type="file"
                                             onChange={e => handleWsQuestionChange(qIndex, e)}
-                                            name="image"
-                                            id={`image-${qIndex}`}
+                                            name="mediaSecond"
+                                            id={`mediaSecond-${qIndex}`}
                                             fileInput
                                         />
                                     </div>
