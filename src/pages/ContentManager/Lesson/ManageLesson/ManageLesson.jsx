@@ -11,7 +11,7 @@ import MigrateLessonModal from '../../../../components/MigrateLessonModal/Migrat
 const allLessonTypes = [
     'All', 'Watch', 'Watch End', 'Read', 'Listen & Speak', 'Watch & Speak', 'Watch & Audio', 'Watch & Image',
     'MCQs', 'Conversational Questions Bot', 'Conversational Monologue Bot', 'Conversational Agency Bot', 'Speaking Practice',
-    'Feedback MCQs', 'Feedback Audio',
+    'Feedback MCQs', 'Feedback Audio', 'Assessment MCQs', 'Assessment Watch & Speak'
 ];
 
 const SelectField = ({ label, options, onChange, value, name, id }) => (
@@ -55,16 +55,16 @@ const ManageLesson = () => {
     // Filter categories based on role
     const filterCategoriesByRole = (categoriesData) => {
         if (userRole === 'kid-lesson-creator') {
-            return categoriesData.filter(category => 
+            return categoriesData.filter(category =>
                 category.CourseCategoryName === "Chatbot Courses - Kids"
             );
         } else if (userRole === 'teacher-lesson-creator') {
-            return categoriesData.filter(category => 
+            return categoriesData.filter(category =>
                 category.CourseCategoryName === "Chatbot Courses - Teachers"
             );
         } else {
             // For other roles, show categories with "Chatbot" in their name
-            return categoriesData.filter(category => 
+            return categoriesData.filter(category =>
                 category.CourseCategoryName.includes("Chatbot")
             );
         }
@@ -313,6 +313,10 @@ const ManageLesson = () => {
                 return <MCQsLesson category={category} course={course} activity='feedbackMcqs' />;
             case 'Feedback Audio':
                 return <SpeakLesson category={category} course={course} activity='feedbackAudio' />;
+            case 'Assessment MCQs':
+                return <MCQsLesson category={category} course={course} activity='assessmentMcqs' />;
+            case 'Assessment Watch & Speak':
+                return <SpeakLesson category={category} course={course} activity='assessmentWatchAndSpeak' />;
             default:
                 return null;
         }

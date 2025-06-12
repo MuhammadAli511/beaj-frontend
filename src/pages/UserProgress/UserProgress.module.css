@@ -79,9 +79,9 @@
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 2px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #b3b7bd;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -89,7 +89,7 @@
 .tabButton {
   padding: 10px;
   background-color: #f9fafb;
-  border: none;
+  border: 1px solid #b3b7bd;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
@@ -104,7 +104,6 @@
   background-color: #97e1ed;
   color: #111827;
 }
-
 /* Search and Leaderboard section */
 .searchAndLeaderboard {
   display: flex;
@@ -245,7 +244,6 @@
   border-collapse: collapse;
   font-size: 14px;
   min-width: 1200px;
-  
 }
 
 .dataTable th {
@@ -257,7 +255,6 @@
   padding: 12px 16px;
   border: 1px solid #e5e7eb;
   text-align: center;
-  
 }
 
 .dataTable th {
@@ -298,7 +295,7 @@
 .grandtotalCell {
   text-align: center;
   font-weight: 500;
-  background-color:rgb(209, 236, 209);
+  background-color: rgb(209, 236, 209);
 }
 
 /* Highlight colors for totals */
@@ -418,8 +415,6 @@
   text-align: center;
 }
 
-
-
 @media (max-width: 1000px) {
   .content {
     margin-left: 0;
@@ -440,20 +435,6 @@
     justify-content: center;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .overlay_leader {
   position: fixed;
@@ -580,191 +561,185 @@
   background-color: #3da7b8;
 }
 
-
-
-
 .overlay_chart {
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background-color: rgba(0, 0, 0, 0.5);
-display: flex;
-justify-content: center;
-align-items: center;
-z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 .modal_chart {
-background-color: white;
-border-radius: 10px;
-width: 95%;
-max-width: 700px;
-height: 90vh;
-overflow: hidden;
-display: flex;
-flex-direction: column;
-box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  background-color: white;
+  border-radius: 10px;
+  width: 95%;
+  max-width: 700px;
+  height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .header_chart {
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 16px 24px;
-border-bottom: 1px solid #e5e7eb;
-flex-wrap: wrap;
-gap: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .header_chart h2 {
-margin: 0;
-font-size: 18px;
-color: #333;
-flex: 1;
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+  flex: 1;
 }
 
 .chartControls {
-display: flex;
-align-items: center;
-gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .chartTypeSelect {
-padding: 8px 12px;
-border: 1px solid #d1d5db;
-border-radius: 4px;
-font-size: 14px;
-background-color: white;
-min-width: 180px;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  min-width: 180px;
 }
 
 .actions_chart {
-display: flex;
-gap: 12px;
-align-items: center;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .downloadButton_chart {
-display: flex;
-align-items: center;
-gap: 8px;
-padding: 8px 12px;
-background-color: #d4de00;
-color: #333;
-border: none;
-border-radius: 4px;
-font-size: 14px;
-cursor: pointer;
-transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #d4de00;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .downloadButton_chart:hover {
-background-color: #c4ce00;
+  background-color: #c4ce00;
 }
 
 .copyButton_chart {
-display: flex;
-align-items: center;
-gap: 8px;
-padding: 8px 12px;
-background-color: #34d3a8;
-color: black;
-border: none;
-border-radius: 4px;
-font-size: 14px;
-cursor: pointer;
-transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #34d3a8;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .copyButton_chart:hover {
-background-color: #2bb38e;
+  background-color: #2bb38e;
 }
 
 .closeButton_chart {
-background: none;
-border: none;
-cursor: pointer;
-color: #6b7280;
-display: flex;
-align-items: center;
-justify-content: center;
-padding: 4px;
-border-radius: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
 }
 
 .closeButton_chart:hover {
-color: #111827;
-background-color: #f3f4f6;
+  color: #111827;
+  background-color: #f3f4f6;
 }
 
 .content_chart {
-padding: 10px;
-overflow-y: auto;
-display: flex;
-justify-content: center;
-align-items: flex-start;
-flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  flex: 1;
 }
 
 .loading_chart {
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 }
 
 .chartContainer {
-width: 100%;
-min-height: 600px;
-max-height: 80vh;
-overflow-y: auto;
-position: relative;
-padding: 10px;
+  width: 100%;
+  min-height: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 10px;
 }
 
 .noChartData {
-position: absolute;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-text-align: center;
-color: #666;
-padding: 20px;
-background: rgba(255, 255, 255, 0.9);
-border-radius: 8px;
-box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #666;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .chartButton {
-display: flex;
-align-items: center;
-gap: 8px;
-padding: 10px 16px;
-background-color: #d4de00;
-color: black;
-border: none;
-border-radius: 4px;
-font-size: 14px;
-font-weight: 500;
-cursor: pointer;
-transition: all 0.2s ease;
-/* margin-bottom: 16px; */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #d4de00;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .chartButton:hover {
-background-color: #3da7b8;
-transform: translateY(-1px);
-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #3da7b8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .chartButton:disabled {
-opacity: 0.5;
-cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .chartIcon {
-color: white;
+  color: white;
 }
-

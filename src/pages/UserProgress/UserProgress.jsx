@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Navbar, Sidebar } from "../../components";
 import styles from './UserProgress.module.css';
@@ -85,14 +86,19 @@ const LeaderboardModal = ({ isOpen, onClose, targetGroup, cohort, viewType, imag
     </div>
   )
 }
+
 const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) => {
   const [chartType, setChartType] = useState("L1")
-  const [chartImage, setChartImage] = useState(null)
   const [loading, setLoading] = useState(false)
   const [chartData, setChartData] = useState(null)
   const [chartOptions, setChartOptions] = useState(null)
   const chartRef = useRef(null)
   const chartContainerRef = useRef(null)
+  const [optionFilter, setOptionFilter] = useState("all")
+  const [thresholdValue, setThresholdValue] = useState(null)
+  const [maxTotalLessons, setMaxTotalLessons] = useState(null)
+  const [filteredCount, setFilteredCount] = useState(0)
+  const [totalCount, setTotalCount] = useState(0)
 
   // Column indices for different chart types
   const chartTypeIndices = {
@@ -101,25 +107,50 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
     L3: { title: "Level 3 Progress" },
     Grand: { title: "Grand Total Progress" },
   }
-  // Function to determine the max scale value based on the highest value in the dataset
-  const getMaxScaleValue = (maxValue) => {
-    if (maxValue <= 6) return 6;
-    if (maxValue <= 12) return 12;
-    if (maxValue <= 18) return 18;
-    if (maxValue <= 24) return 24;
-    if (maxValue <= 48) return 48;
-    return 72;
-  };
 
   // Function to determine the "Total Lessons" value based on the highest value in the dataset
   const getTotalLessonsValue = (maxValue) => {
-    if (maxValue <= 6) return 6;
-    if (maxValue <= 12) return 12;
-    if (maxValue <= 18) return 18;
-    if (maxValue <= 24) return 24;
-    if (maxValue <= 48) return 48;
-    return 72;
-  };
+    if (maxValue <= 6) return 6
+    if (maxValue <= 12) return 12
+    if (maxValue <= 18) return 18
+    if (maxValue <= 24) return 24
+    if (maxValue <= 48) return 48
+    return 72
+  }
+
+  // Initialize threshold when modal opens or chart type changes
+  useEffect(() => {
+    if (isOpen && userData && userData.length > 0) {
+      const columnIndices = {
+        L1: 7,
+        L2: 12,
+        L3: 17,
+        Grand: 18,
+      }
+
+      const valueColumnIndex = columnIndices[chartType]
+
+      // Get all valid values for the current chart type
+      const validValues = userData
+        .map((row) => {
+          const value = Number.parseInt(row[valueColumnIndex] || "")
+          return isNaN(value) ? 0 : value
+        })
+        .filter((value) => value !== null)
+
+      const maxValue = Math.max(...validValues, 6)
+      const totalLessons = getTotalLessonsValue(maxValue)
+
+      setMaxTotalLessons(totalLessons)
+      setTotalCount(userData.length)
+
+      // Set initial threshold to max total lessons if not already set
+      if (thresholdValue === null) {
+        setThresholdValue(totalLessons)
+      }
+    }
+  }, [isOpen, chartType, userData])
+
   // Generate chart data and options
   const generateChart = () => {
     setLoading(true)
@@ -138,9 +169,9 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
       const title = chartTypeIndices[chartType].title
 
       // Get usernames (column 2) and data for the selected level
-      const processedData = userData.map((row) => {
+      let processedData = userData.map((row) => {
         const username = row[2] || ""
-        const value = Number.parseInt(row[valueColumnIndex] || '')
+        const value = Number.parseInt(row[valueColumnIndex] || "")
 
         return {
           name: username,
@@ -148,47 +179,67 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
         }
       })
 
-      // Sort data by value in descending order
-      // processedData.sort((a, b) => b.value - a.value)
+      // Remove entries with null/undefined names
+      processedData = processedData.filter((item) => item.name && item.name.trim() !== "")
+
+      // Store original count
+      const originalCount = processedData.length
+
+      // Apply filtering based on threshold and option filter
+      if (thresholdValue !== null && thresholdValue > 0) {
+        processedData = processedData.filter((item) => {
+          switch (optionFilter) {
+            case "all":
+              return item.value <= thresholdValue
+            case "update":
+              return item.value === thresholdValue
+            case "lagging":
+              return item.value < thresholdValue
+            default:
+              return true
+          }
+        })
+      }
+
+      // Update filtered count
+      setFilteredCount(processedData.length)
 
       // Find the maximum value for setting the scale
-      const maxValue = Math.max(...processedData.map((item) => item.value), 6);
-
-      const totalLessonsValue = getTotalLessonsValue(maxValue);
-
-      let maxScaleValue = maxValue;
-      // const maxScaleValue = getMaxScaleValue(maxValue);
+      const maxValue = Math.max(...processedData.map((item) => item.value), 6)
+      const totalLessonsValue = maxTotalLessons || getTotalLessonsValue(maxValue)
 
       // Add "Total Lessons" as the first item
       processedData.unshift({
         name: "Total Lessons",
-        value: totalLessonsValue,
-        isTotal: true // Flag to identify this as the total bar
+        value: thresholdValue,
+        isTotal: true,
+      })
 
-      });
-
-      // Create chart data object
+      // Create chart data object with consistent styling
       const data = {
         labels: processedData.map((item) => item.name),
         datasets: [
           {
             label: "Lessons Completed",
             data: processedData.map((item) => item.value),
-            backgroundColor: processedData.map((item) =>
-              item.name === "Total Lessons" ? "#4CD964" : "#51bbcc" // Green for Total Lessons, blue for others
-            ),
-            borderColor: processedData.map((item) =>
-              item.name === "Total Lessons" ? "#3CB371" : "#3da7b8"
-            ),
+            backgroundColor: processedData.map((item) => {
+              if (item.name === "Total Lessons") return "#4CD964" // Green for Total Lessons
+              if (item.isEmpty) return "#ff6b6b" // Red for empty state
+              return "#51bbcc" // Blue for others
+            }),
+            borderColor: processedData.map((item) => {
+              if (item.name === "Total Lessons") return "#3CB371"
+              if (item.isEmpty) return "#ff5252"
+              return "#3da7b8"
+            }),
             borderWidth: 1,
-            //   barThickness: 6,
             barPercentage: 0.8,
             categoryPercentage: 0.8,
           },
         ],
       }
 
-      // Create chart options object
+      // Create chart options object with consistent formatting
       const options = {
         indexAxis: "y", // This makes the bar chart horizontal
         responsive: true,
@@ -204,24 +255,23 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
           },
           title: {
             display: true,
-            text: title,
+            text: `${title}`,
             font: {
               size: 18,
               weight: "bold",
             },
             padding: {
-              // top: 10,
-              // bottom: 5,
             },
           },
           subtitle: {
             display: true,
-            text: "Week 1, 2, 3 & 4",
+            text: `Showing ${filteredCount} of ${totalCount} users | Threshold: ${thresholdValue || "None"} | Filter: ${optionFilter}`,
             font: {
               size: 14,
+              // style: "italic",
             },
+            color: "#666",
             padding: {
-              bottom: 20,
             },
           },
           tooltip: {
@@ -229,7 +279,6 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
               label: (context) => `Lessons: ${context.raw}`,
             },
           },
-          // Add datalabels plugin configuration
           datalabels: {
             display: true,
             align: "end",
@@ -243,7 +292,6 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
             padding: {
               left: 10,
             },
-            // Ensure labels are always visible
             clamp: true,
             clip: false,
           },
@@ -264,7 +312,6 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
               font: {
                 size: 11,
               },
-              // Make sure all labels are visible
               autoSkip: false,
               maxRotation: 0,
             },
@@ -284,7 +331,7 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
               },
             },
             beginAtZero: true,
-            max: totalLessonsValue, // Add 10% padding to max value
+            max: thresholdValue, // Consistent max value
             grid: {
               display: true,
               drawBorder: true,
@@ -293,7 +340,7 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
               color: "#e5e7eb",
             },
             ticks: {
-              stepSize: totalLessonsValue <= 24 ? 5 : 10, // Adjust step size based on scale
+              stepSize: thresholdValue <= 24 ? 5 : 12, // Consistent step size
             },
           },
         },
@@ -309,15 +356,27 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
     }
   }
 
-  // Handle chart type change
+  const handleOptionFilterChange = (e) => {
+    setOptionFilter(e.target.value)
+  }
+
   const handleChartTypeChange = (e) => {
     setChartType(e.target.value)
+    // Reset threshold when chart type changes
+    setThresholdValue(null)
   }
+
+  const handleThresholdChange = (e) => {
+    const value = e.target.value
+    if (/^\d*$/.test(value)) {
+      setThresholdValue(value ? Number.parseInt(value) : null)
+    }
+  }
+
   const handleDownload = () => {
     if (!chartRef.current) return
 
     try {
-      // Get the chart canvas
       const chartCanvas = chartRef.current.canvas
       if (!chartCanvas) {
         console.error("Canvas not found")
@@ -325,28 +384,22 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
         return
       }
 
-      // Create a temporary canvas to capture just the chart
       const tempCanvas = document.createElement("canvas")
       const tempCtx = tempCanvas.getContext("2d")
 
-      // Set dimensions to match the chart
       tempCanvas.width = chartCanvas.width
       tempCanvas.height = chartCanvas.height
 
-      // Fill with white background
       tempCtx.fillStyle = "white"
       tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
 
-      // Draw the chart onto the temporary canvas
       tempCtx.drawImage(chartCanvas, 0, 0)
 
-      // Convert to image
       const imageUrl = tempCanvas.toDataURL("image/png", 1.0)
 
-      // Create download link
       const link = document.createElement("a")
       link.href = imageUrl
-      link.download = `${chartTypeIndices[chartType].title}-${targetGroup}-${cohort}.png`
+      link.download = `${chartTypeIndices[chartType].title}-${targetGroup}-${cohort}-${optionFilter}-${thresholdValue || "all"}.png`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -374,7 +427,6 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
     if (!chartRef.current) return
 
     try {
-      // Create a temporary canvas to capture just the chart
       const chartCanvas = chartRef.current.canvas
       if (!chartCanvas) {
         console.error("Canvas not found")
@@ -382,25 +434,19 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
         return
       }
 
-      // Create a new canvas for the chart only
       const tempCanvas = document.createElement("canvas")
       const tempCtx = tempCanvas.getContext("2d")
 
-      // Set dimensions to match the chart
       tempCanvas.width = chartCanvas.width
       tempCanvas.height = chartCanvas.height
 
-      // Fill with white background
       tempCtx.fillStyle = "white"
       tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
 
-      // Draw the chart onto the temporary canvas
       tempCtx.drawImage(chartCanvas, 0, 0)
 
-      // Convert to image
       const imageUrl = tempCanvas.toDataURL("image/png", 1.0)
 
-      // Copy to clipboard
       const blob = await (await fetch(imageUrl)).blob()
       await navigator.clipboard.write([
         new ClipboardItem({
@@ -415,12 +461,12 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
     }
   }
 
-  // Generate chart when chart type changes or modal opens
+  // Generate chart when dependencies change
   useEffect(() => {
-    if (isOpen && userData && userData.length > 0) {
+    if (isOpen && userData && userData.length > 0 && maxTotalLessons !== null) {
       generateChart()
     }
-  }, [isOpen, chartType, userData])
+  }, [isOpen, chartType, userData, optionFilter, thresholdValue, maxTotalLessons])
 
   // Early return if modal is not open
   if (!isOpen) return null
@@ -432,14 +478,6 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
           <h2>
             Progress Chart - {targetGroup} {cohort}
           </h2>
-          <div className={styles.chartControls}>
-            <select className={styles.chartTypeSelect} value={chartType} onChange={handleChartTypeChange}>
-              <option value="L1">L1 Progress Chart</option>
-              <option value="L2">L2 Progress Chart</option>
-              <option value="L3">L3 Progress Chart</option>
-              <option value="Grand">Grand Total Chart</option>
-            </select>
-          </div>
           <div className={styles.actions_chart}>
             {chartData && (
               <>
@@ -457,6 +495,29 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
               ❌
             </button>
           </div>
+          <div className={styles.chartControls}>
+            <input
+              type="number"
+              className={styles.searchInput}
+              placeholder={`Max threshold (${maxTotalLessons || "Loading..."})`}
+              min="1"
+              max={maxTotalLessons || 72}
+              step="1"
+              value={thresholdValue || ""}
+              onChange={handleThresholdChange}
+            />
+            <select className={styles.chartTypeSelect} value={chartType} onChange={handleChartTypeChange}>
+              <option value="L1">L1 Progress Chart</option>
+              <option value="L2">L2 Progress Chart</option>
+              <option value="L3">L3 Progress Chart</option>
+              <option value="Grand">Grand Total Chart</option>
+            </select>
+            <select className={styles.chartTypeSelect} value={optionFilter} onChange={handleOptionFilterChange}>
+              <option value="all">All</option>
+              <option value="update">Up-to-date</option>
+              <option value="lagging">Lagging Behind</option>
+            </select>
+          </div>
         </div>
         <div className={styles.content_chart}>
           {loading ? (
@@ -470,7 +531,8 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
                 data={chartData}
                 options={chartOptions}
                 ref={chartRef}
-                height={chartData.labels.length * 25} // Dynamic height based on number of users
+                height={600}
+                width={800}
               />
             </div>
           ) : (
@@ -490,6 +552,7 @@ const UserProgress = () => {
   const [targetGroup, setTargetGroup] = useState("");
   const [cohort, setCohort] = useState("");
   const [botType, setBotType] = useState("teacher");
+  const [rollout, setRollout] = useState("1");
 
   // State for tabs and search
   const [activeTab, setActiveTab] = useState("");
@@ -599,6 +662,10 @@ const UserProgress = () => {
     }
 
   };
+
+  const handleRolloutChange = (e) => {
+    setRollout(e.target.value);
+  }
   const handleBotTypeChange = (e) => {
     setBotType(e.target.value);
   }
@@ -918,27 +985,46 @@ const UserProgress = () => {
               >
                 <option value="">Select bot type</option>
                 <option value="teacher">Teacher</option>
-                {/* <option value="student">Student</option> */}
+                <option value="student">Student</option>
               </select>
             </div>
 
-            {/* First dropdown - Target Group */}
+
             <div className={styles.filterItem}>
-              <label className={styles.filterLabel}>Target Group</label>
+              <label className={styles.filterLabel}>Rollout</label>
               <select
                 className={styles.select}
-                value={targetGroup}
-                onChange={handleTargetGroupChange}
-                disabled={!botType}
+                value={rollout}
+                onChange={handleRolloutChange}
+                default={rollout}
               >
-                <option value="">
-                  {!botType ? "Select bot type first" : "Select target group"}
-                </option>
-                <option value="T1">T1</option>
-                <option value="T2">T2</option>
-                {/* <option value="Control">Control</option> */}
+                <option value="">Select rollout</option>
+                <option value="1">Rollout - 1</option>
+                {(botType === "teacher") && (
+                  <option value="0">Pilot - 0</option>
+                )}
               </select>
             </div>
+
+            {botType !== "student" && (
+              <div className={styles.filterItem}>
+                <label className={styles.filterLabel}>Target Group</label>
+                <select
+                  className={styles.select}
+                  value={targetGroup}
+                  onChange={handleTargetGroupChange}
+                  disabled={!botType}
+                >
+                  <option value="">
+                    {!botType ? "Select bot type first" : "Select target group"}
+                  </option>
+                  <option value="T1">T1</option>
+                  <option value="T2">T2</option>
+                  {/* <option value="Control">Control</option> */}
+                </select>
+              </div>
+            )}
+
 
             {/* Second dropdown - Cohort (enabled only when target group is selected) */}
             <div className={styles.filterItem}>
@@ -947,10 +1033,10 @@ const UserProgress = () => {
                 className={styles.select}
                 value={cohort}
                 onChange={handleCohortChange}
-                disabled={!targetGroup}
+                disabled={!targetGroup && botType == "teacher"}
               >
                 <option value="">
-                  {!targetGroup ? "Select target group first" : "Select cohort"}
+                  {(!targetGroup && botType == "teacher") ? "Select target group first" : "Select cohort"}
                 </option>
                 {cohortOptions.map((option) => (
                   <option key={option} value={option}>
@@ -967,20 +1053,30 @@ const UserProgress = () => {
               <button
                 className={`${styles.tabButton} ${activeTab === "lesson" ? styles.activeTab : ""}`}
                 onClick={() => handleTabChange("lesson")}
+                disabled={!cohort}
               >
                 Lesson View
               </button>
               <button
                 className={`${styles.tabButton} ${activeTab === "week" ? styles.activeTab : ""}`}
                 onClick={() => handleTabChange("week")}
+                disabled={!cohort}
               >
                 Week View
               </button>
               <button
                 className={`${styles.tabButton} ${activeTab === "activity" ? styles.activeTab : ""}`}
                 onClick={() => handleTabChange("activity")}
+                disabled={!cohort}
               >
                 Activity View
+              </button>
+              <button
+                className={`${styles.tabButton} ${activeTab === "assessment" ? styles.activeTab : ""}`}
+                onClick={() => handleTabChange("assessment")}
+                disabled={!cohort}
+              >
+                Assessment View
               </button>
             </div>
           </div>

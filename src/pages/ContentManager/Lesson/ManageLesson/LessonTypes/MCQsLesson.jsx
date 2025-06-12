@@ -385,6 +385,26 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
     const addNewQuestion = () => {
         setQuestions((prevQuestions) => {
             const newQuestionNumber = prevQuestions.length + 1;
+            if (activity === 'assessmentMcqs') {
+                return [
+                    ...prevQuestions,
+                    {
+                        id: null,
+                        questionType: "Text",
+                        questionText: "",
+                        questionNumber: newQuestionNumber,
+                        optionsType: "Text",
+                        answers: Array(3).fill(null).map((_, index) => ({
+                            id: null,
+                            answerText: "",
+                            SequenceNumber: index + 1,
+                            isNew: true,
+                            isCorrect: false,
+                        })),
+                        isNew: true
+                    },
+                ];
+            }
             if (activity === 'feedbackMcqs') {
                 return [
                     ...prevQuestions,
@@ -534,6 +554,19 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
 
     const renderQuestionInputs = (question, qIndex) => {
         if (activity === 'feedbackMcqs') {
+            return (
+                <div className={styles.form_group}>
+                    <label className={styles.label}>Question Text</label>
+                    <input
+                        className={styles.input_field}
+                        type="text"
+                        value={question.questionText}
+                        onChange={(e) => handleQuestionChange(qIndex, "questionText", e.target.value)}
+                    />
+                </div>
+            );
+        }
+        if (activity === 'assessmentMcqs') {
             return (
                 <div className={styles.form_group}>
                     <label className={styles.label}>Question Text</label>
@@ -1075,7 +1108,7 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                                         <div key={aIndex} className={styles.answer_box}>
                                                             <div className={styles.answer_header}>
                                                                 <span className={styles.answer_number}>Answer {aIndex + 1}</span>
-                                                                {activity === 'mcqs' && (
+                                                                {activity === 'mcqs' || activity === 'assessmentMcqs' && (
                                                                     <div className={styles.correct_checkbox}>
                                                                         <div className={styles.checkbox_wrapper}>
                                                                             <div className={styles.custom_checkbox_container}>
@@ -1439,6 +1472,7 @@ const MCQsLesson = ({ category, course, activity }) => {
     const activityMapper = {
         'mcqs': 'Multiple Choice Questions',
         'feedbackMcqs': 'Feedback MCQs',
+        'assessmentMcqs': 'Assessment MCQs',
     };
 
     return (

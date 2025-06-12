@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import styles from './CreateLesson.module.css';
 import { getAllCategories, getCoursesByCategoryId, getCourseById, getAllActivityAliases } from '../../../../helper';
-import { createAudioLesson, createVideoLesson, createReadLesson, createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson, createConversationalBotLesson, createSpeakingPracticeLesson } from '../../../../utils/createLessonFunctions';
+import {
+    createAudioLesson, createVideoLesson, createReadLesson,
+    createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson,
+    createConversationalBotLesson, createSpeakingPracticeLesson
+} from '../../../../utils/createLessonFunctions';
 
 const SelectField = ({ label, options, onChange, value, name, id }) => (
     <div className={styles.form_group}>
@@ -75,16 +79,16 @@ const CreateLesson = () => {
     // Filter categories based on role
     const filterCategoriesByRole = (categoriesData) => {
         if (userRole === 'kid-lesson-creator') {
-            return categoriesData.filter(category => 
+            return categoriesData.filter(category =>
                 category.CourseCategoryName === "Chatbot Courses - Kids"
             );
         } else if (userRole === 'teacher-lesson-creator') {
-            return categoriesData.filter(category => 
+            return categoriesData.filter(category =>
                 category.CourseCategoryName === "Chatbot Courses - Teachers"
             );
         } else {
             // For other roles, show categories with "Chatbot" in their name
-            return categoriesData.filter(category => 
+            return categoriesData.filter(category =>
                 category.CourseCategoryName.includes("Chatbot")
             );
         }
@@ -858,6 +862,10 @@ const CreateLesson = () => {
                 await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
             } else if (activityType === 'feedbackAudio') {
                 await createListenAndSpeakLesson(course, sequenceNumber, alias, activityType, questions, lessonText, day, week, status, finalTextInstruction, finalAudioInstruction);
+            } else if (activityType === 'assessmentMcqs') {
+                await createMCQLesson(course, sequenceNumber, alias, activityType, mcqs, lessonText, day, week, status);
+            } else if (activityType === 'assessmentWatchAndSpeak') {
+                await createWatchAndSpeakLesson(course, sequenceNumber, alias, activityType, wsQuestions, lessonText, day, week, status);
             }
         } catch (error) {
             alert(error);
@@ -1024,6 +1032,8 @@ const CreateLesson = () => {
                         { value: 'speakingPractice', label: 'Speaking Practice' },
                         { value: 'feedbackMcqs', label: 'Feedback MCQs' },
                         { value: 'feedbackAudio', label: 'Feedback Audio' },
+                        { value: 'assessmentMcqs', label: 'Assessment MCQs' },
+                        { value: 'assessmentWatchAndSpeak', label: 'Assessment Watch and Speak' },
                     ]} onChange={handleActivityTypeChange} value={activityType} name="activity_type" id="activity_type" />
                     <SelectField label="Status" options={[
                         { value: 'Active', label: 'Active' },
@@ -2239,6 +2249,119 @@ const CreateLesson = () => {
                         >
                             Add Another Question
                         </button>
+                    </>
+                )}
+                {(activityType === 'assessmentMcqs') && (
+                    <>
+                        {mcqs.map((mcq, qIndex) => (
+                            <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.question_header}>
+                                    <h3 className={styles.question_title}>Question {qIndex + 1}</h3>
+                                    {mcqs.length > 1 && (
+                                        <button
+                                            className={styles.remove_button}
+                                            onClick={(e) => removeMCQQuestion(qIndex, e)}
+                                        >
+                                            Remove Question
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className={styles.question_section}>
+                                    <InputField
+                                        label={`Question Text`}
+                                        type="text"
+                                        onChange={(e) => handleMCQQuestionChange(qIndex, e)}
+                                        value={mcq.questionText}
+                                        name="questionText"
+                                        id={`questionText-${qIndex}`}
+                                    />
+                                </div>
+
+                                <div className={styles.answers_section}>
+                                    <h4 className={styles.answers_title}>Answer Options</h4>
+
+                                    <div className={styles.answers_container}>
+                                        {mcq.answers.slice(0, 3).map((answer, aIndex) => (
+                                            <div key={aIndex} className={styles.answer_box}>
+
+
+                                                <div className={styles.answer_header}>
+                                                    <span className={styles.answer_number}>Answer {aIndex + 1}</span>
+                                                    <div className={styles.correct_checkbox}>
+                                                        <InputField label={`Correct`} type="checkbox" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} checked={answer.isCorrect} name="isCorrect" id={`isCorrect-${qIndex}-${aIndex}`} />
+                                                    </div>
+                                                </div>
+
+
+                                                <InputField
+                                                    // label={`Answer ${aIndex + 1}`} 
+                                                    type="text"
+                                                    onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)}
+                                                    value={answer.answerText}
+                                                    name="answerText"
+                                                    id={`answerText-${qIndex}-${aIndex}`}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        <button
+                            className={styles.add_button}
+                            onClick={(e) => addMCQQuestion(e)}
+                        >
+                            Add Another Question
+                        </button>
+                    </>
+                )}
+                {(activityType === 'assessmentWatchAndSpeak') && (
+                    <>
+                        <div className={styles.input_row}>
+                            <div className={styles.form_group}>
+                                <InputField label="Lesson Text" type="textarea" value={lessonText} onChange={handleTextEditorChange} name="lesson_text" id="lesson_text" />
+                            </div>
+                        </div>
+                        {wsQuestions.map((question, qIndex) => (
+                            <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.input_row}>
+                                    <InputField label={`Question ${qIndex + 1}`} type="text" onChange={e => handleWsQuestionChange(qIndex, e)} value={question.questionText} name="questionText" id={`questionText-${qIndex}`} />
+                                    <InputField label="Upload Video" type="file" onChange={e => handleWsQuestionChange(qIndex, e)} name="video" id={`video-${qIndex}`} fileInput />
+                                    {wsQuestions.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>Remove Question</button>}
+                                </div>
+                                <div className={styles.input_row}>
+                                    <InputField
+                                        label="Enable Image Upload"
+                                        type="checkbox"
+                                        onChange={e => handleWsQuestionChange(qIndex, e)}
+                                        checked={question.showImageUpload}
+                                        name="showImageUpload"
+                                        id={`showImageUpload-${qIndex}`}
+                                    />
+                                </div>
+                                {question.showImageUpload && (
+                                    <div className={styles.input_row}>
+                                        <InputField
+                                            label="Upload Image"
+                                            type="file"
+                                            onChange={e => handleWsQuestionChange(qIndex, e)}
+                                            name="image"
+                                            id={`image-${qIndex}`}
+                                            fileInput
+                                        />
+                                    </div>
+                                )}
+                                {question.answers.map((answer, aIndex) => (
+                                    <div key={aIndex} className={styles.input_row}>
+                                        <InputField label={`Answer ${aIndex + 1}`} type="text" onChange={e => handleWsAnswerChange(qIndex, aIndex, e)} value={answer.answerText} name="answerText" id={`answerText-${qIndex}-${aIndex}`} />
+                                        {question.answers.length > 1 && <button className={styles.remove_button} onClick={(e) => removeWsAnswer(qIndex, aIndex, e)}>Remove Answer</button>}
+                                    </div>
+                                ))}
+                                <button className={styles.add_button} onClick={(e) => addWsAnswer(qIndex, e)}>Add Another Answer</button>
+                            </div>
+                        ))}
+                        <button className={styles.add_button} onClick={(e) => addWsQuestion(e)}>Add Another Question</button>
                     </>
                 )}
                 <button type="submit" className={styles.submit_button}>{isLoading ? <div className="loader"></div> : "Create Lesson"}</button>
