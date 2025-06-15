@@ -3,8 +3,9 @@ import styles from './MCQsQuestionModal.module.css';
 
 const MCQsQuestionModal = ({ lesson, onClose }) => {
     const sortedQuestions = [...lesson.multipleChoiceQuestions].sort((a, b) => a.dataValues.QuestionNumber - b.dataValues.QuestionNumber);
-
+    
     useEffect(() => {
+         console.log("Sorted Questions:", lesson);
         const handleEscapeKey = (event) => {
             if (event.key === 'Escape') {
                 onClose();
@@ -16,7 +17,9 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
         return () => {
             document.removeEventListener('keydown', handleEscapeKey);
         };
+       
     }, [onClose]);
+
 
     return (
         <div className={styles.modalOverlay}>

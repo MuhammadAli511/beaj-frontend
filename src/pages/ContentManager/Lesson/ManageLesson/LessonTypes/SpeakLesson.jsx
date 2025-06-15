@@ -495,7 +495,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                         enableCustomFeedbackImage: false,
                         enableCustomFeedbackAudio: false,
                     };
-                } else if (activity === 'watchAndSpeak') {
+                } else if (activity === 'watchAndSpeak' || activity === 'assessmentWatchAndSpeak') {
                     baseQuestion = {
                         ...baseQuestion,
                         question: '',
@@ -568,7 +568,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 mediaType: 'audio',
             };
         }
-        else if (activity === 'watchAndSpeak') {
+        else if (activity === 'watchAndSpeak' || activity === 'assessmentWatchAndSpeak') {
             newQuestion = {
                 ...newQuestion,
                 question: '',
@@ -583,15 +583,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                 enableCustomFeedbackImage: false,
                 enableCustomFeedbackAudio: false,
             };
-        } else if (activity === 'assessmentWatchAndSpeak') {
-            newQuestion = {
-                ...newQuestion,
-                question: '',
-                mediaFile: null,
-                mediaFileSecond: null,
-                answer: [''],
-            };
-        } else if (activity === 'watchAndAudio') {
+        }  else if (activity === 'watchAndAudio') {
             newQuestion = {
                 ...newQuestion,
                 question: '',
