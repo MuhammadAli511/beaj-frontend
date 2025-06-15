@@ -1,13 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './MCQsQuestionModal.module.css';
 
 const MCQsQuestionModal = ({ lesson, onClose }) => {
     const sortedQuestions = [...lesson.multipleChoiceQuestions].sort((a, b) => a.dataValues.QuestionNumber - b.dataValues.QuestionNumber);
+    const [enlargedImage, setEnlargedImage] = useState(null);
 
     useEffect(() => {
         const handleEscapeKey = (event) => {
             if (event.key === 'Escape') {
-                onClose();
+                if (enlargedImage) {
+                    setEnlargedImage(null);
+                } else {
+                    onClose();
+                }
             }
         };
 
@@ -16,7 +21,15 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
         return () => {
             document.removeEventListener('keydown', handleEscapeKey);
         };
-    }, [onClose]);
+    }, [onClose, enlargedImage]);
+
+    const handleImageClick = (imageUrl) => {
+        setEnlargedImage(imageUrl);
+    };
+
+    const closeImageModal = () => {
+        setEnlargedImage(null);
+    };
 
     return (
         <div className={styles.modalOverlay}>
@@ -46,7 +59,13 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                                     <td style={{ width: "20%" }}>{question.dataValues.QuestionText}</td>
                                     {question.dataValues.QuestionImageUrl && (
                                         <td style={{ width: "20%" }}>
-                                            <img src={question.dataValues.QuestionImageUrl} alt="Question" className={styles.questionImage} />
+                                            <img 
+                                                src={question.dataValues.QuestionImageUrl} 
+                                                alt="Question" 
+                                                className={styles.questionImage} 
+                                                onClick={() => handleImageClick(question.dataValues.QuestionImageUrl)}
+                                                title="Click to enlarge"
+                                            />
                                         </td>
                                     ) || (
                                         <td style={{ width: "20%" }}>
@@ -101,7 +120,15 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                                     <td style={{ width: "15%" }}>
                                         {question.multipleChoiceQuestionAnswers.map((answer) => (
                                             <div key={answer.Id} className={styles.answer}>
-                                                {answer.CustomAnswerFeedbackImage && <img src={answer.CustomAnswerFeedbackImage} alt="Custom Answer Feedback" className={styles.answerImage} />}
+                                                {answer.CustomAnswerFeedbackImage && (
+                                                    <img 
+                                                        src={answer.CustomAnswerFeedbackImage} 
+                                                        alt="Custom Answer Feedback" 
+                                                        className={styles.answerImage} 
+                                                        onClick={() => handleImageClick(answer.CustomAnswerFeedbackImage)}
+                                                        title="Click to enlarge"
+                                                    />
+                                                )}
                                             </div>
                                         ))}
                                     </td>
@@ -118,6 +145,21 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                     </table>
                 </div>
             </div>
+            
+            {enlargedImage && (
+                <div className={styles.imageModalOverlay} onClick={closeImageModal}>
+                    <div className={styles.imageModalContent} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.imageCloseButton} onClick={closeImageModal}>
+                            Close
+                        </button>
+                        <img 
+                            src={enlargedImage} 
+                            alt="Enlarged view" 
+                            className={styles.enlargedImage}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

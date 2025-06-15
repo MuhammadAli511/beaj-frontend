@@ -15,10 +15,10 @@
   background-color: white;
   padding: 30px;
   border-radius: 12px;
-  width: 80%;
-  max-width: 800px;
+  width: 95%;
+  max-width: 1400px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  max-height: 80vh;
+  max-height: 90vh;
   overflow: hidden;
   animation: fadeIn 0.3s ease;
   position: relative;
@@ -210,9 +210,18 @@
 }
 
 .questionImage {
-  max-width: 100px;
-  max-height: 100px;
+  max-width: 150px;
+  max-height: 120px;
   object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.questionImage:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .questionVideo {
@@ -220,9 +229,18 @@
 }
 
 .answerImage {
-  max-width: 80px;
-  max-height: 80px;
+  max-width: 120px;
+  max-height: 100px;
   object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.answerImage:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .answerAudio {
@@ -257,4 +275,53 @@
   margin: 0 auto;
   display: block;
   min-width: 60px;
+}
+
+/* Image Modal Styles */
+.imageModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.imageModalContent {
+  max-width: 90vw;
+  max-height: 90vh;
+  position: relative;
+}
+
+.enlargedImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.imageCloseButton {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: #ff5252;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.imageCloseButton:hover {
+  background: #e63946;
+  transform: translateY(-2px);
 }
