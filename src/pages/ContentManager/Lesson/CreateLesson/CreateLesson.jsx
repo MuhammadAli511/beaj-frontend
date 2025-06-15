@@ -589,11 +589,11 @@ const CreateLesson = () => {
     // MCQs
     const [mcqs, setMcqs] = useState([
         {
-            questionType: 'text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
+            questionType: 'Text', questionText: '', questionAudio: null, questionImage: null, questionVideo: null,
             showCustomFeedback: false,
-            customFeedbackType: 'text',
+            customFeedbackType: 'Text',
             answers: Array(3).fill().map(() => ({
-                answerType: 'text',
+                answerType: 'Text',
                 answerText: '',
                 answerAudio: null,
                 answerImage: null,
