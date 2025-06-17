@@ -136,8 +136,24 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
             const lessonResponse = await getLessonById(lesson.LessonId);
             if (lessonResponse.status === 200) {
                 const fetchedQuestions = lessonResponse.data.speakActivityQuestionFiles || [];
+                
+                // Initialize mediaType based on existing files for listenAndSpeak activity
+                const questionsWithMediaType = fetchedQuestions.map(question => {
+                    if (activity === 'listenAndSpeak' && !question.mediaType) {
+                        // Detect media type from existing file
+                        const mediaType = question.mediaFile && typeof question.mediaFile === 'string' && question.mediaFile.endsWith('.mp4') ? 'video' : 'audio';
+                        return { ...question, mediaType };
+                    }
+                    return question;
+                });
+                
                 setLessonData(lessonResponse.data);
-                setQuestions(fetchedQuestions.sort((a, b) => a.questionNumber - b.questionNumber));
+                setQuestions(questionsWithMediaType.sort((a, b) => a.questionNumber - b.questionNumber));
+                
+                // Check if any questions have difficulty levels to set the toggle
+                const hasDifficultyLevels = questionsWithMediaType.some(q => q.difficultyLevel);
+                setEnableDifficultyLevel(hasDifficultyLevels);
+                
                 // Set instruction states based on lesson data
                 if (lessonResponse.data.textInstruction) {
                     setEnableTextInstruction(true);
@@ -516,7 +532,7 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
                         question: '',
                         mediaFile: null,
                         answer: [''],
-                        mediaType: '',
+                        mediaType: 'audio',
                         customFeedbackText: null,
                         customFeedbackImage: null,
                         customFeedbackAudio: null,
@@ -573,20 +589,20 @@ const EditSpeakLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => 
             isChanged: true,
         };
         if (['listenAndSpeak'].includes(activity)) {
-            newQuestion = {
-                ...newQuestion,
-                question: '',
-                mediaFile: null,
-                answer: [''],
-                mediaType: '',
-                customFeedbackText: null,
-                customFeedbackImage: null,
-                customFeedbackAudio: null,
-                difficultyLevel: null,
-                enableCustomFeedbackText: false,
-                enableCustomFeedbackImage: false,
-                enableCustomFeedbackAudio: false,
-            };
+                                    newQuestion = {
+                            ...newQuestion,
+                            question: '',
+                            mediaFile: null,
+                            answer: [''],
+                            mediaType: 'audio',
+                            customFeedbackText: null,
+                            customFeedbackImage: null,
+                            customFeedbackAudio: null,
+                            difficultyLevel: null,
+                            enableCustomFeedbackText: false,
+                            enableCustomFeedbackImage: false,
+                            enableCustomFeedbackAudio: false,
+                        };
         }
         else if (['feedbackAudio'].includes(activity)) {
             newQuestion = {

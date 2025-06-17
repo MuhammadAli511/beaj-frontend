@@ -19,6 +19,21 @@ const ListenAndSpeakEdit = ({
         difficultyLevel === 'medium' ? styles.badge_medium :
         difficultyLevel === 'hard' ? styles.badge_hard : '';
 
+    // Determine the current media type based on existing file
+    const getCurrentMediaType = () => {
+        if (question.mediaType) {
+            return question.mediaType;
+        }
+        // If no mediaType is set, detect from existing file
+        if (question.mediaFile && typeof question.mediaFile === 'string') {
+            return question.mediaFile.endsWith('.mp4') ? 'video' : 'audio';
+        }
+        // Default to audio
+        return 'audio';
+    };
+
+    const currentMediaType = getCurrentMediaType();
+
     return (
         <div className={showDifficultyBadge ? `${styles.difficulty_question_box} ${difficultyClass}` : ''}>
             {showDifficultyBadge && difficultyLevel && (
@@ -56,16 +71,58 @@ const ListenAndSpeakEdit = ({
             >
                 Add New Answer
             </button>
-            <label className={styles.answerEditLabel}>Upload Audio File</label>
-            <input
-                type="file"
-                accept="audio/*"
-                onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files)}
-            />
+
+            {/* Media Type Toggle */}
+            <div className={styles.media_toggle_container}>
+                <label className={styles.answerEditLabel}>Media Type</label>
+                <div className={styles.toggle_buttons}>
+                    <button
+                        type="button"
+                        className={`${styles.toggle_button} ${currentMediaType === 'audio' ? styles.active : ''}`}
+                        onClick={() => handleQuestionChange(index, 'mediaType', 'audio')}
+                    >
+                        Audio
+                    </button>
+                    <button
+                        type="button"
+                        className={`${styles.toggle_button} ${currentMediaType === 'video' ? styles.active : ''}`}
+                        onClick={() => handleQuestionChange(index, 'mediaType', 'video')}
+                    >
+                        Video
+                    </button>
+                </div>
+
+                {(currentMediaType === 'video') ? (
+                    <>
+                        <label className={styles.answerEditLabel}>Upload Video File</label>
+                        <input
+                            type="file"
+                            accept="video/*"
+                            onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files)}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <label className={styles.answerEditLabel}>Upload Audio File</label>
+                        <input
+                            type="file"
+                            accept="audio/*"
+                            onChange={(e) => handleQuestionChange(index, 'mediaFile', e.target.files)}
+                        />
+                    </>
+                )}
+            </div>
+
             {question.mediaFile && (
                 <div className={styles.mediaSection}>
-                    <label className={styles.answerEditLabel}>Current Audio File:</label>
-                    <audio controls src={question.mediaFile} className={styles.audio}></audio>
+                    <label className={styles.answerEditLabel}>Current Media File:</label>
+                    {question.mediaFile && typeof question.mediaFile === 'string' && question.mediaFile.endsWith('.mp4') ? (
+                        <video controls className={styles.video}>
+                            <source src={question.mediaFile} type="video/mp4" />
+                        </video>
+                    ) : (
+                        <audio controls src={question.mediaFile} className={styles.audio}></audio>
+                    )}
                 </div>
             )}
 
