@@ -60,28 +60,7 @@ const ManageLesson = () => {
                 course.CourseName !== 'Free Trial'
             )
             .sort((a, b) => {
-                // Extract level numbers if they exist
-                const levelA = a.CourseName.match(/Level (\d+)/);
-                const levelB = b.CourseName.match(/Level (\d+)/);
-
-                // If both have levels, sort by level number first
-                if (levelA && levelB) {
-                    const levelDiff = parseInt(levelA[1]) - parseInt(levelB[1]);
-                    if (levelDiff !== 0) return levelDiff;
-
-                    // For same level, sort T1 before T2
-                    const isT1A = a.CourseName.includes('T1');
-                    const isT1B = b.CourseName.includes('T1');
-                    if (isT1A && !isT1B) return -1;
-                    if (!isT1A && isT1B) return 1;
-                }
-
-                // If only A has level, it comes first
-                if (levelA) return -1;
-                // If only B has level, it comes first 
-                if (levelB) return 1;
-                // If neither has level, maintain original order
-                return 0;
+                return a.CourseName.localeCompare(b.CourseName);
             });
     };
 
