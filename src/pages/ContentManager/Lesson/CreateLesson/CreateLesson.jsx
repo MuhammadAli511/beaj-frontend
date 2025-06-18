@@ -2291,7 +2291,7 @@ const CreateLesson = () => {
                         </button>
                     </>
                 )}
-                {(activityType === 'assessmentMcqs') && (
+                {/* {(activityType === 'assessmentMcqs') && (
                     <>
                         {mcqs.map((mcq, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
@@ -2355,7 +2355,7 @@ const CreateLesson = () => {
                             Add Another Question
                         </button>
                     </>
-                )}
+                )} */}
                 {(activityType === 'assessmentWatchAndSpeak') && (
                     <>
                         <div className={styles.input_row}>
@@ -2402,6 +2402,64 @@ const CreateLesson = () => {
                             </div>
                         ))}
                         <button className={styles.add_button} onClick={(e) => addWsQuestion(e)}>Add Another Question</button>
+                    </>
+                )}
+                {(activityType === 'assessmentMcqs') && (
+                    <>
+                        {mcqs.map((mcq, qIndex) => (
+                            <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.question_header}>
+                                    <h3 className={styles.question_title}>Question {qIndex + 1}</h3>
+                                    {mcqs.length > 1 && <button className={styles.remove_button} onClick={(e) => removeMCQQuestion(qIndex, e)}>Remove Question</button>}
+                                </div>
+
+                                <div className={styles.question_section}>
+                                    <div className={styles.input_row}>
+                                        <SelectField label={`Question Type`} options={[
+                                            { value: '-1', label: 'Select Question Type' },
+                                            { value: 'Text', label: 'Text' },
+                                        ]} onChange={(e) => handleMCQQuestionChange(qIndex, e)} value={mcq.questionType} name="questionType" id={`questionType-${qIndex}`} />
+                                    </div>
+
+                                    <div className={styles.question_content}>
+                                        {mcq.questionType.includes('Text') && (
+                                            <InputField label={`Question Text`} type="text" onChange={(e) => handleMCQQuestionChange(qIndex, e)} value={mcq.questionText} name="questionText" id={`questionText-${qIndex}`} />
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className={styles.answers_section}>
+                                    <h4 className={styles.answers_title}>Answer Options</h4>
+
+                                    <div className={styles.answers_container}>
+                                        {mcq.answers.map((answer, aIndex) => (
+                                            <div key={aIndex} className={styles.answer_box}>
+                                                <div className={styles.answer_header}>
+                                                    <span className={styles.answer_number}>Answer {aIndex + 1}</span>
+                                                    <div className={styles.correct_checkbox}>
+                                                        <InputField label={`Correct`} type="checkbox" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} checked={answer.isCorrect} name="isCorrect" id={`isCorrect-${qIndex}-${aIndex}`} />
+                                                    </div>
+                                                </div>
+
+                                                <div className={styles.answer_content}>
+                                                    <div className={styles.answer_type_row}>
+                                                        <SelectField label={`Answer Type`} options={[
+                                                            { value: '-1', label: 'Select Answer Type' },
+                                                            { value: 'Text', label: 'Text' }
+                                                        ]} onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} value={answer.answerType} name="answerType" id={`answerType-${qIndex}-${aIndex}`} />
+                                                    </div>
+
+                                                    {answer.answerType.includes('Text') && (
+                                                        <InputField label={`Answer Text`} type="text" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} value={answer.answerText} name="answerText" id={`answerText-${qIndex}-${aIndex}`} />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        <button className={styles.add_button} onClick={(e) => addMCQQuestion(e)}>Add Another Question</button>
                     </>
                 )}
                 <button type="submit" className={styles.submit_button}>{isLoading ? <div className="loader"></div> : "Create Lesson"}</button>
