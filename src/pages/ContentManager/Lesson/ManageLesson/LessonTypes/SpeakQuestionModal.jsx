@@ -230,14 +230,16 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                                             <td style={{ width: "20%" }}>{question.question}</td>
                                             <td style={{ width: "35%" }}>{question.answer.join(', ')}</td>
                                             <td style={{ width: "100%" }}>
-                                                {question.mediaFile && question.mediaFile.endsWith('.mp4') ? (
+                                                {question.mediaFile && (typeof question.mediaFile === 'string' && question.mediaFile.endsWith('.mp4')) ? (
                                                     <video controls className={styles.video}>
                                                         <source src={question.mediaFile} type="video/mp4" />
                                                     </video>
-                                                ) : (
+                                                ) : question.mediaFile ? (
                                                     <audio controls>
                                                         <source src={question.mediaFile} type="audio/mp3" />
                                                     </audio>
+                                                ) : (
+                                                    <p>No Media</p>
                                                 )}
                                             </td>
                                             {hasCustomFeedback && (
