@@ -548,67 +548,112 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
 
 const UserProgress = () => {
   const { isSidebarOpen } = useSidebar();
+  
   // State for dropdown selections
-  const [targetGroup, setTargetGroup] = useState("");
-  const [cohort, setCohort] = useState("");
   const [botType, setBotType] = useState("teacher");
   const [rollout, setRollout] = useState("1");
-
+  const [targetGroup, setTargetGroup] = useState("");
+  const [level, setLevel] = useState("");
+  const [cohort, setCohort] = useState("");
+  
   // State for tabs and search
   const [activeTab, setActiveTab] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-
+  
   // Data states
   const [userData, setUserData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  const [cohortStartRange, setCohortStartRange] = useState('');
-  const [cohortEndRange, setCohortEndRange] = useState('');
-
+  
+  // Cohort range states
+  const [cohortStartRange, setCohortStartRange] = useState(1);
+  const [cohortEndRange, setCohortEndRange] = useState(20);
+  
   // Leaderboard states
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboardImage, setLeaderboardImage] = useState(null);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
-
   const [leaderboardBuffer, setLeaderboardBuffer] = useState('');
+  
+  // Activity chart state
   const [showActivityChart, setShowActivityChart] = useState(false);
-
-
-  let courseId1 = 106, courseId2 = 111, courseId3 = 118;
-
-
+  
+  // Course IDs (will be set based on selections)
+  const [courseIds, setCourseIds] = useState({
+    courseId1: 105,
+    courseId2: 110,
+    courseId3: 112
+  });
 
   // Generate cohort options
-  const cohortOptions = Array.from({ length: cohortEndRange - cohortStartRange + 1 }, (_, i) => `Cohort ${i + cohortStartRange}`);
+  const cohortOptions = Array.from({ length: cohortEndRange - cohortStartRange + 1 }, 
+    (_, i) => `Cohort ${i + cohortStartRange}`);
 
-  // Reset cohort when target group changes
+  // Reset cohort when target group or level changes
   useEffect(() => {
     setCohort("");
+  }, [targetGroup, level]);
 
-  }, [targetGroup]);
+  // Set course IDs based on selections
+  useEffect(() => {
+    if (botType === "teacher") {
+      if (targetGroup === "T1") {
+        setCourseIds({ courseId1: 106, courseId2: 111, courseId3: 118 });
+      } else if (targetGroup === "T2") {
+        setCourseIds({ courseId1: 105, courseId2: 110, courseId3: 112 });
+      }
+    }
+    // For students, we might need different course IDs based on level
+    else if (botType === "student") {
+      // Set course IDs based on level if needed
+      // Example:
+      // if (level === "class 1") { ... }
+    }
+  }, [botType, targetGroup, level]);
 
-  if (targetGroup == "T1" && botType == "teacher") {
-    courseId1 = 106; courseId2 = 111; courseId3 = 118;
-  }
-  else if (targetGroup == "T2" && botType == "teacher") {
+  // Set cohort ranges based on selections
+  useEffect(() => {
+    if (botType === "teacher") {
+      if (targetGroup === "T1") {
+        setCohortStartRange(1);
+        setCohortEndRange(20);
+      } else if (targetGroup === "T2") {
+        setCohortStartRange(25);
+        setCohortEndRange(44);
+      }
+    } else if (botType === "student") {
+      // Set cohort ranges for students
+      setCohortStartRange(1);
+      setCohortEndRange(20); // Adjust as needed
+    }
+  }, [botType, targetGroup]);
 
-    courseId1 = 105; courseId2 = 110; courseId3 = 112;
-  }
-
+  // Clear user data
   const clearUserState = () => {
     setUserData([]);
     setFilteredData([]);
-  }
+  };
 
-  // Fetch data when both dropdowns are filled
+  // Fetch data when required selections are made
   useEffect(() => {
     clearUserState();
-    if (targetGroup && cohort && activeTab && botType) {
+    
+    if ((botType === "teacher" && targetGroup && cohort && activeTab) ||
+        (botType === "student" && level && cohort && activeTab)) {
       const loadData = async () => {
         setLoading(true);
         try {
-          const response = await getAlluserProgressByModule(courseId1, courseId2, courseId3, targetGroup, activeTab, cohort);
+          const response = await getAlluserProgressByModule(
+            botType,
+            rollout,
+            level,
+            cohort,
+            targetGroup,
+            courseIds.courseId1,
+            courseIds.courseId2,
+            courseIds.courseId3,
+            activeTab
+          );
 
           if (response.status === 200) {
             setLeaderboardBuffer(response.data.data.leaderboard);
@@ -616,8 +661,7 @@ const UserProgress = () => {
             let rows = arrayList.map(row => [...row]);
             setUserData(rows);
             setFilteredData(rows);
-          }
-          else {
+          } else {
             console.error("Error fetching data:", response);
           }
         } catch (error) {
@@ -629,7 +673,7 @@ const UserProgress = () => {
 
       loadData();
     }
-  }, [targetGroup, cohort, activeTab, botType]);
+  }, [botType, rollout, targetGroup, level, cohort, activeTab, courseIds]);
 
   // Filter data based on search query
   useEffect(() => {
@@ -638,111 +682,105 @@ const UserProgress = () => {
     } else {
       const filtered = userData.filter(
         (user) =>
-          user[2]?.toLowerCase().includes(searchQuery.toLowerCase()) || // username (3rd column)
-          user[1]?.includes(searchQuery) // phoneNumber (2nd column)
+          user[2]?.toLowerCase().includes(searchQuery.toLowerCase()) || // username
+          user[1]?.includes(searchQuery) // phoneNumber
       );
       setFilteredData(filtered);
     }
   }, [searchQuery, userData]);
 
-  // Handle dropdown changes
-  const handleTargetGroupChange = (e) => {
-    setTargetGroup(e.target.value);
-    if (e.target.value === "T1" && botType === "teacher") {
-      setCohortEndRange(20); // Set range for T1
-      setCohortStartRange(1);
-    }
-    else if (e.target.value === "T2" && botType === "teacher") {
-      setCohortEndRange(44);
-      setCohortStartRange(25); // Set range for T2
-    }
-    else if (e.target.value === "T1" && botType === "student") {
-    }
-    else if (e.target.value === "T2" && botType === "student") {
-    }
-
+  // Handler functions
+  const handleBotTypeChange = (e) => {
+    setBotType(e.target.value);
+    setTargetGroup("");
+    setLevel("");
+    setCohort("");
+    setActiveTab("");
   };
 
   const handleRolloutChange = (e) => {
     setRollout(e.target.value);
-  }
-  const handleBotTypeChange = (e) => {
-    setBotType(e.target.value);
-  }
+    // Reset target group if changing from pilot to rollout or vice versa
+    if (botType === "teacher") {
+      setTargetGroup("");
+    }
+  };
+
+  const handleTargetGroupChange = (e) => {
+    setTargetGroup(e.target.value);
+  };
+
+  const handleLevelChange = (e) => {
+    setLevel(e.target.value);
+  };
 
   const handleCohortChange = (e) => {
     setCohort(e.target.value);
   };
 
-  // Handle tab changes
   const handleTabChange = (tabValue) => {
     setActiveTab(tabValue);
   };
 
-  // Handle leaderboard display
   const handleShowLeaderboard = async () => {
-    if (!targetGroup || !cohort) {
-      alert("Please select both target group and cohort first")
-      return
+    if ((botType === "teacher" && !targetGroup) || !cohort) {
+      alert("Please make all required selections first");
+      return;
     }
     if (filteredData.length <= 0) {
-      alert("No data available to display in leaderboard. Please try a different selection.")
-      return
+      alert("No data available to display in leaderboard");
+      return;
     }
 
-    setLoadingLeaderboard(true)
-    setShowLeaderboard(true)
+    setLoadingLeaderboard(true);
+    setShowLeaderboard(true);
 
     try {
-      // get leaderboard image buffer
       if (leaderboardBuffer) {
-        const base64Image = `data:image/png;base64,${leaderboardBuffer}`
-        setLeaderboardImage(base64Image)
+        const base64Image = `data:image/png;base64,${leaderboardBuffer}`;
+        setLeaderboardImage(base64Image);
       } else {
-        console.error("Failed to fetch leaderboard image")
-        alert("Failed to load leaderboard. Please try again.")
+        console.error("Failed to fetch leaderboard image");
+        alert("Failed to load leaderboard. Please try again.");
       }
     } catch (error) {
-      console.error("Error fetching leaderboard:", error)
-      alert("Error loading leaderboard. Please try again.")
+      console.error("Error fetching leaderboard:", error);
+      alert("Error loading leaderboard. Please try again.");
     } finally {
-      setLoadingLeaderboard(false)
+      setLoadingLeaderboard(false);
     }
-  }
+  };
 
-  // Close leaderboard modal
   const closeLeaderboard = () => {
-    setShowLeaderboard(false)
-  }
+    setShowLeaderboard(false);
+  };
 
-  // Inside your UserProgress component, add this function to handle showing the activity chart
   const handleShowActivityChart = () => {
-    if (!targetGroup || !cohort) {
-      alert("Please select both target group and cohort first")
-      return
+    if ((botType === "teacher" && !targetGroup) || !cohort) {
+      alert("Please make all required selections first");
+      return;
     }
-
     if (userData.length === 0) {
-      alert("No data available to display in chart. Please try a different selection.")
-      return
+      alert("No data available to display in chart");
+      return;
     }
+    setShowActivityChart(true);
+  };
 
-    setShowActivityChart(true)
-  }
-
-  // Add this function to close the activity chart
   const closeActivityChart = () => {
-    setShowActivityChart(false)
-  }
+    setShowActivityChart(false);
+  };
 
   // Render lesson view table
   const renderLessonTable = () => {
-    return (
+    if(botType === "teacher"){
+       return (
       <div className={styles.tableContainer}>
         <table className={styles.dataTable}>
           <thead>
             <tr>
               <th rowSpan={2}>Sr No.</th>
+              <th rowSpan={2}>Profile Id</th>
               <th rowSpan={2}>Phone Number</th>
               <th rowSpan={2}>Username</th>
               <th colSpan={5} className={styles.groupHeader}>Level 1</th>
@@ -775,8 +813,8 @@ const UserProgress = () => {
                   let cellClass = styles.centerText;
 
                   // Add specific classes based on the column index
-                  if (colIndex === 7 || colIndex === 12 || colIndex === 17) cellClass = styles.totalCell;
-                  else if (colIndex === 18) cellClass = styles.grandtotalCell;
+                  if (colIndex === 8 || colIndex === 13 || colIndex === 18) cellClass = styles.totalCell;
+                  else if (colIndex === 19) cellClass = styles.grandtotalCell;
 
                   return (
                     <td key={colIndex} className={cellClass}>
@@ -790,15 +828,58 @@ const UserProgress = () => {
         </table>
       </div>
     );
+    }
+    else if(botType === "student"){
+      return (
+      <div className={styles.tableContainer}>
+        <table className={styles.dataTable}>
+          <thead>
+            <tr>
+              <th rowSpan={2}>Sr No.</th>
+              <th rowSpan={2}>Profile Id</th>
+              <th rowSpan={2}>Phone Number</th>
+              <th rowSpan={2}>Username</th>
+              <th colSpan={5} className={styles.groupHeader}>{level}</th>
+            </tr>
+            <tr>
+              <th>Week1</th>
+              <th>Week2</th>
+              <th>Week3</th>
+              <th>Week4</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredData.map((row, rowIndex) => (
+              <tr key={rowIndex} className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}>
+                {row.map((cell, colIndex) => {
+                  let cellClass = styles.centerText;
+
+                  // Add specific classes based on the column index
+                  if (colIndex === 8) cellClass = styles.totalCell;
+
+                  return (
+                    <td key={colIndex} className={cellClass}>
+                      {cell ?? ''}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
   };
 
   // Render week view table
   const renderWeekTable = () => {
     // Define the column indices for each week in each level
     const weekColumns = {
-      level1: [3, 4, 5, 6], // Level 1: Week 1-4
-      level2: [7, 8, 9, 10], // Level 2: Week 1-4
-      level3: [11, 12, 13, 14], // Level 3: Week 1-4
+      level1: [4, 5, 6, 7], // Level 1: Week 1-4
+      level2: [8, 9, 10, 11], // Level 2: Week 1-4
+      level3: [12, 13, 14, 15], // Level 3: Week 1-4
     }
 
     // Function to get color based on rank
@@ -841,13 +922,14 @@ const UserProgress = () => {
         columnRankings[colIndex] = rankMap
       })
     })
-
+    if(botType === "teacher"){
     return (
       <div className={styles.tableContainer}>
         <table className={styles.dataTable}>
           <thead>
             <tr>
               <th rowSpan={2}>Sr No.</th>
+              <th rowSpan={2}>Profile Id</th>
               <th rowSpan={2}>Phone Number</th>
               <th rowSpan={2}>Username</th>
               <th colSpan={4} className={styles.groupHeader}>
@@ -908,15 +990,18 @@ const UserProgress = () => {
       </div>
     )
   }
+  }
 
   // Render activity view table
   const renderActivityTable = () => {
+    if(botType === "teacher"){
     return (
       <div className={styles.tableContainer}>
         <table className={styles.dataTable}>
           <thead>
             <tr>
               <th rowSpan={2}>Sr No.</th>
+               <th rowSpan={2}>Profile Id</th>
               <th rowSpan={2}>Phone Number</th>
               <th rowSpan={2}>Username</th>
               <th colSpan={5} className={styles.groupHeader}>Level 1</th>
@@ -949,8 +1034,8 @@ const UserProgress = () => {
                   let cellClass = styles.centerText;
 
                   // Add specific classes based on the column index
-                  if (colIndex === 7 || colIndex === 12 || colIndex === 17) cellClass = styles.totalCell;
-                  else if (colIndex === 18) cellClass = styles.grandtotalCell;
+                  if (colIndex === 8 || colIndex === 13 || colIndex === 18) cellClass = styles.totalCell;
+                  else if (colIndex === 19) cellClass = styles.grandtotalCell;
 
                   return (
                     <td key={colIndex} className={cellClass}>
@@ -964,6 +1049,151 @@ const UserProgress = () => {
         </table>
       </div>
     );
+  }
+  else if(botType === "student"){
+     return (
+      <div className={styles.tableContainer}>
+        <table className={styles.dataTable}>
+          <thead>
+            <tr>
+              <th rowSpan={2}>Sr No.</th>
+              <th rowSpan={2}>Profile Id</th>
+              <th rowSpan={2}>Phone Number</th>
+              <th rowSpan={2}>Username</th>
+              <th colSpan={5} className={styles.groupHeader}>{level}</th>
+            </tr>
+            <tr>
+              <th>Week1</th>
+              <th>Week2</th>
+              <th>Week3</th>
+              <th>Week4</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredData.map((row, rowIndex) => (
+              <tr key={rowIndex} className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}>
+                {row.map((cell, colIndex) => {
+                  let cellClass = styles.centerText;
+
+                  // Add specific classes based on the column index
+                  if (colIndex === 8) cellClass = styles.totalCell;
+
+                  return (
+                    <td key={colIndex} className={cellClass}>
+                      {cell ?? ''}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+  };
+
+    // Render activity view table
+  const renderAssessmentTable = () => {
+    if(botType === "teacher"){
+    return (
+      <div className={styles.tableContainer}>
+        <table className={styles.dataTable}>
+          <thead>
+            <tr>
+              <th rowSpan={2}>Sr No.</th>
+              <th rowSpan={2}>Profile Id</th>
+              <th rowSpan={2}>Phone Number</th>
+              <th rowSpan={2}>Username</th>
+              <th colSpan={5} className={styles.groupHeader}>Level 1</th>
+              <th colSpan={5} className={styles.groupHeader}>Level 2</th>
+              <th colSpan={5} className={styles.groupHeader}>Level 3</th>
+            </tr>
+            <tr>
+              <th>Week1</th>
+              <th>Week2</th>
+              <th>Week3</th>
+              <th>Week4</th>
+              <th>Total</th>
+              <th>Week1</th>
+              <th>Week2</th>
+              <th>Week3</th>
+              <th>Week4</th>
+              <th>Total</th>
+              <th>Week1</th>
+              <th>Week2</th>
+              <th>Week3</th>
+              <th>Week4</th>
+              <th>Total</th>
+              <th>Grand</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredData.map((row, rowIndex) => (
+              <tr key={rowIndex} className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}>
+                {row.map((cell, colIndex) => {
+                  let cellClass = styles.centerText;
+
+                  // Add specific classes based on the column index
+                  if (colIndex === 8 || colIndex === 13 || colIndex === 18) cellClass = styles.totalCell;
+                  else if (colIndex === 19) cellClass = styles.grandtotalCell;
+
+                  return (
+                    <td key={colIndex} className={cellClass}>
+                      {cell ?? ''}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+  else if(botType === "student"){
+     return (
+      <div className={styles.tableContainer}>
+        <table className={styles.dataTable}>
+          <thead>
+            <tr>
+              <th rowSpan={2}>Sr No.</th>
+              <th rowSpan={2}>Profile Id</th>
+              <th rowSpan={2}>Phone Number</th>
+              <th rowSpan={2}>Username</th>
+              <th colSpan={5} className={styles.groupHeader}>{level}</th>
+            </tr>
+            <tr>
+              <th>Week1</th>
+              <th>Week2</th>
+              <th>Week3</th>
+              <th>Week4</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredData.map((row, rowIndex) => (
+              <tr key={rowIndex} className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}>
+                {row.map((cell, colIndex) => {
+                  let cellClass = styles.centerText;
+
+                  // Add specific classes based on the column index
+                  if (colIndex === 8) cellClass = styles.totalCell;
+
+                  return (
+                    <td key={colIndex} className={cellClass}>
+                      {cell ?? ''}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
   };
 
   return (
@@ -974,70 +1204,83 @@ const UserProgress = () => {
         <h1>User Progress</h1>
         <div className={styles.container}>
           <div className={styles.filterSection}>
-
+            {/* Bot Type Dropdown */}
             <div className={styles.filterItem}>
               <label className={styles.filterLabel}>Bot Type</label>
               <select
                 className={styles.select}
                 value={botType}
                 onChange={handleBotTypeChange}
-                default={botType}
               >
-                <option value="">Select bot type</option>
                 <option value="teacher">Teacher</option>
                 <option value="student">Student</option>
               </select>
             </div>
 
-
+            {/* Rollout Dropdown */}
             <div className={styles.filterItem}>
               <label className={styles.filterLabel}>Rollout</label>
               <select
                 className={styles.select}
                 value={rollout}
                 onChange={handleRolloutChange}
-                default={rollout}
               >
-                <option value="">Select rollout</option>
                 <option value="1">Rollout - 1</option>
-                {(botType === "teacher") && (
-                  <option value="0">Pilot - 0</option>
-                )}
+                {botType === "teacher" && <option value="0">Pilot - 0</option>}
               </select>
             </div>
 
-            {botType !== "student" && (
+            {/* Conditional Dropdowns */}
+            {botType === "teacher" && rollout === "1" && (
               <div className={styles.filterItem}>
                 <label className={styles.filterLabel}>Target Group</label>
                 <select
                   className={styles.select}
                   value={targetGroup}
                   onChange={handleTargetGroupChange}
-                  disabled={!botType}
+                  disabled={!botType || rollout !== "1"}
                 >
-                  <option value="">
-                    {!botType ? "Select bot type first" : "Select target group"}
-                  </option>
+                  <option value="">Select target group</option>
                   <option value="T1">T1</option>
                   <option value="T2">T2</option>
-                  {/* <option value="Control">Control</option> */}
                 </select>
               </div>
             )}
 
+            {botType === "student" && (
+              <div className={styles.filterItem}>
+                <label className={styles.filterLabel}>Level</label>
+                <select
+                  className={styles.select}
+                  value={level}
+                  onChange={handleLevelChange}
+                >
+                  <option value="">Select level</option>
+                  <option value="class 1">Grade 1</option>
+                  <option value="class 2">Grade 2</option>
+                  <option value="class 3">Grade 3</option>
+                  <option value="class 4">Grade 4</option>
+                  <option value="class 5">Grade 5</option>
+                  <option value="class 6">Grade 6</option>
+                  <option value="class 7 and above">Grade 7</option>
+                  <option value="class 8">Grade 8</option>
+                </select>
+              </div>
+            )}
 
-            {/* Second dropdown - Cohort (enabled only when target group is selected) */}
+            {/* Cohort Dropdown */}
             <div className={styles.filterItem}>
               <label className={styles.filterLabel}>Cohort</label>
               <select
                 className={styles.select}
                 value={cohort}
                 onChange={handleCohortChange}
-                disabled={!targetGroup && botType == "teacher"}
+                disabled={
+                  (botType === "teacher" && (!targetGroup || rollout !== "1")) ||
+                  (botType === "student" && !level)
+                }
               >
-                <option value="">
-                  {(!targetGroup && botType == "teacher") ? "Select target group first" : "Select cohort"}
-                </option>
+                <option value="">Select cohort</option>
                 {cohortOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -1081,21 +1324,11 @@ const UserProgress = () => {
             </div>
           </div>
 
-          {/* Search bar and Leaderboard button */}
+          {/* Search bar and buttons */}
           <div className={styles.searchAndLeaderboard}>
             <div className={styles.searchContainer}>
               <div className={styles.searchIcon}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
@@ -1109,24 +1342,12 @@ const UserProgress = () => {
               />
             </div>
 
-            {targetGroup && cohort && !loading && activeTab == "week" && (
+            {cohort && !loading && activeTab === "week" && (
               <button
                 className={styles.leaderboardButton}
                 onClick={handleShowLeaderboard}
-                disabled={!targetGroup || !cohort}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={styles.leaderboardIcon}
-                >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.leaderboardIcon}>
                   <circle cx="12" cy="8" r="7"></circle>
                   <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
                 </svg>
@@ -1134,21 +1355,12 @@ const UserProgress = () => {
               </button>
             )}
 
-
-            {targetGroup && cohort && !loading && activeTab === "lesson" && (
-              <button className={styles.leaderboardButton} onClick={handleShowActivityChart} disabled={!targetGroup || !cohort}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={styles.leaderboardIcon}
-                >
+            {cohort && !loading && activeTab === "lesson" && (
+              <button 
+                className={styles.leaderboardButton} 
+                onClick={handleShowActivityChart}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.leaderboardIcon}>
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                   <line x1="3" y1="9" x2="21" y2="9"></line>
                   <line x1="9" y1="21" x2="9" y2="9"></line>
@@ -1160,8 +1372,10 @@ const UserProgress = () => {
 
           {/* Content area */}
           <div className={styles.contentArea}>
-            {!targetGroup || !cohort || !botType || activeTab == "" ? (
-              <div className={styles.emptyState}>Please select bot type, target group and cohort to view data</div>
+            {!cohort ? (
+              <div className={styles.emptyState}>
+                Please select {botType === "teacher" ? "bot type, rollout, target group" : "bot type, level"} and cohort to view data
+              </div>
             ) : loading ? (
               <div className={styles.loadingState}>
                 <div className={styles.spinner}></div>
@@ -1173,6 +1387,7 @@ const UserProgress = () => {
                 {activeTab === "lesson" && renderLessonTable()}
                 {activeTab === "week" && renderWeekTable()}
                 {activeTab === "activity" && renderActivityTable()}
+                {activeTab === "assessment" && renderAssessmentTable()}
               </>
             )}
           </div>

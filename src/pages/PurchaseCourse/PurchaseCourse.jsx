@@ -15,7 +15,7 @@ import {
 import { TailSpin } from "react-loader-spinner"
 import { useSidebar } from '../../components/SidebarContext';
 
-const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchase }) => {
+const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchase, allProfiles }) => {
   const [profiles, setProfiles] = useState([])
   const [selectedProfile, setSelectedProfile] = useState("")
   const [isLoading, setIsLoading] = useState(true)
@@ -24,22 +24,22 @@ const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchas
   useEffect(() => {
     const fetchPhoneNumberprofiles = async () => {
       try {
-        const response = await getMetadataByPhoneNumber(phoneNumber)
-        if (response.status === 200) {
-          const data = response.data
-          if (Array.isArray(data)) {
-            setProfiles(data)
-          } else if (typeof data === "object" && data !== null) {
-            setProfiles([data])
-          } else {
-            console.error("Unexpected data format for profiles:", data)
-            setProfiles([])
-          }
-        } else {
-          alert(response.data.message)
-        }
+        // const response = await getMetadataByPhoneNumber(phoneNumber)
+        // if (response.status === 200) {
+        //   const data = response.data
+        //   if (Array.isArray(data)) {
+        //     setProfiles(data)
+        //   } else if (typeof data === "object" && data !== null) {
+        //     setProfiles([data])
+        //   } else {
+        //     console.error("Unexpected data format for profiles:", data)
+        //     setProfiles([])
+        //   }
+        // } else {
+        //   alert(response.data.message)
+        // }
       } catch (error) {
-        alert("Failed to fetch phone number profiles.")
+        // alert("Failed to fetch phone number profiles.")
       } finally {
         setIsLoading(false)
       }
@@ -90,7 +90,7 @@ const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchas
                   onChange={(e) => setSelectedProfile(e.target.value)}
                 >
                   <option value="">Select a Profile</option>
-                  {profiles.map((profile) => (
+                  {allProfiles.map((profile) => (
                     <option key={profile.profile_id} value={profile.profile_id}>
                       {profile.name} (Profile ID: {profile.profile_id})
                     </option>
@@ -123,7 +123,7 @@ const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchas
   )
 }
 
-const TargetGroupModal = ({ isOpen, onClose, phoneNumber, onTargetGroup }) => {
+const TargetGroupModal = ({ isOpen, onClose, phoneNumber, onTargetGroup, allProfiles }) => {
   const [profiles, setProfiles] = useState([])
   const [selectedProfile, setSelectedProfile] = useState("")
   const [isLoading, setIsLoading] = useState(true)
@@ -137,24 +137,24 @@ const TargetGroupModal = ({ isOpen, onClose, phoneNumber, onTargetGroup }) => {
     const fetchPhoneNumberprofiles = async () => {
       try {
         setIsLoading(true)
-        const response = await getMetadataByPhoneNumber(phoneNumber)
+        // const response = await getMetadataByPhoneNumber(phoneNumber)
 
-        if (response.status === 200) {
-          const data = response.data
-          if (Array.isArray(data)) {
-            setProfiles(data)
-          } else if (typeof data === "object" && data !== null) {
-            setProfiles([data])
-          } else {
-            console.error("Unexpected data format for profiles:", data)
-            setProfiles([])
-          }
-        } else {
-          alert(response.data.message)
-        }
+        // if (response.status === 200) {
+        //   const data = response.data
+        //   if (Array.isArray(data)) {
+        //     setProfiles(data)
+        //   } else if (typeof data === "object" && data !== null) {
+        //     setProfiles([data])
+        //   } else {
+        //     console.error("Unexpected data format for profiles:", data)
+        //     setProfiles([])
+        //   }
+        // } else {
+        //   alert(response.data.message)
+        // }
       } catch (error) {
-        console.error("Error fetching profiles:", error)
-        alert("Failed to fetch phone number profiles.")
+        // console.error("Error fetching profiles:", error)
+        // alert("Failed to fetch phone number profiles.")
       } finally {
         setIsLoading(false)
       }
@@ -176,8 +176,8 @@ const TargetGroupModal = ({ isOpen, onClose, phoneNumber, onTargetGroup }) => {
 
       try {
         setIsProfileLoading(true);
-        setTargetGroup(profiles.find(profile => profile.profile_id == selectedProfile).targetGroup || "");
-        setProfileData(profiles.find(profile => profile.profile_id == selectedProfile));
+        setTargetGroup(allProfiles.find(profile => profile.profile_id == selectedProfile).targetGroup || "");
+        setProfileData(allProfiles.find(profile => profile.profile_id == selectedProfile));
       } catch (error) {
         console.error("Error fetching target group:", error)
         alert("Failed to fetch target group.")
@@ -252,7 +252,7 @@ const TargetGroupModal = ({ isOpen, onClose, phoneNumber, onTargetGroup }) => {
                   onChange={(e) => setSelectedProfile(e.target.value)}
                 >
                   <option value="">Select a Profile</option>
-                  {profiles.map((profile) => (
+                  {allProfiles.map((profile) => (
                     <option key={profile.profile_id} value={profile.profile_id}>
                       {profile.name || ""} (Profile ID: {profile.profile_id})
                     </option>
@@ -695,6 +695,7 @@ const PurchaseCourse = () => {
           phoneNumber={selectedPhoneNumber}
           courseId={selectedCourseId}
           onPurchase={handlePurchase}
+          allProfiles={allProfiles}
         />
       )}
 
@@ -705,6 +706,7 @@ const PurchaseCourse = () => {
           onClose={closeTargetModal}
           phoneNumber={selectedPhoneNumber}
           onTargetGroup={handleAssignTargetGroup}
+          allProfiles={allProfiles}
         />
       )}
     </div>
