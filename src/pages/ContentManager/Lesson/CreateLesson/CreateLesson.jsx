@@ -2418,12 +2418,90 @@ const CreateLesson = () => {
                                         <SelectField label={`Question Type`} options={[
                                             { value: '-1', label: 'Select Question Type' },
                                             { value: 'Text', label: 'Text' },
+                                            { value: 'Image', label: 'Image' },
+                                            { value: 'Text+Image', label: 'Text + Image' },
+                                            { value: 'Video', label: 'Video' },
+                                            { value: 'Text+Video', label: 'Text + Video' },
                                         ]} onChange={(e) => handleMCQQuestionChange(qIndex, e)} value={mcq.questionType} name="questionType" id={`questionType-${qIndex}`} />
                                     </div>
 
                                     <div className={styles.question_content}>
                                         {mcq.questionType.includes('Text') && (
                                             <InputField label={`Question Text`} type="text" onChange={(e) => handleMCQQuestionChange(qIndex, e)} value={mcq.questionText} name="questionText" id={`questionText-${qIndex}`} />
+                                        )}
+
+                                        <div className={styles.media_inputs}>
+                                            {mcq.questionType.includes('Image') && (
+                                                <InputField label={`Upload Question Image`} type="file" onChange={(e) => handleMCQQuestionChange(qIndex, e)} name="questionImage" id={`questionImage-${qIndex}`} fileInput />
+                                            )}
+                                            {mcq.questionType.includes('Audio') && (
+                                                <InputField label={`Upload Question Audio`} type="file" onChange={(e) => handleMCQQuestionChange(qIndex, e)} name="questionAudio" id={`questionAudio-${qIndex}`} fileInput />
+                                            )}
+                                            {mcq.questionType.includes('Video') && (
+                                                <InputField label={`Upload Question Video`} type="file" onChange={(e) => handleMCQQuestionChange(qIndex, e)} name="questionVideo" id={`questionVideo-${qIndex}`} fileInput />
+                                            )}
+                                        </div>
+
+                                        <div className={styles.custom_feedback_toggle}>
+                                            <InputField label={`Enable Custom Feedback`} type="checkbox" onChange={(e) => handleMCQQuestionChange(qIndex, e)} checked={mcq.showCustomFeedback} name="showCustomFeedback" id={`showCustomFeedback-${qIndex}`} />
+                                        </div>
+
+                                        {mcq.showCustomFeedback && (
+                                            <div className={styles.feedback_type_selector}>
+                                                <h5 className={styles.feedback_type_title}>Select Feedback Type</h5>
+                                                <div className={styles.radio_group}>
+                                                    <label className={styles.radio_label}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`customFeedbackType-${qIndex}`}
+                                                            value="text"
+                                                            checked={mcq.customFeedbackType === "text"}
+                                                            onChange={(e) => handleMCQQuestionChange(qIndex, { target: { name: "customFeedbackType", value: e.target.value } })}
+                                                        />
+                                                        <span>Only Text</span>
+                                                    </label>
+                                                    <label className={styles.radio_label}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`customFeedbackType-${qIndex}`}
+                                                            value="image"
+                                                            checked={mcq.customFeedbackType === "image"}
+                                                            onChange={(e) => handleMCQQuestionChange(qIndex, { target: { name: "customFeedbackType", value: e.target.value } })}
+                                                        />
+                                                        <span>Only Image</span>
+                                                    </label>
+                                                    <label className={styles.radio_label}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`customFeedbackType-${qIndex}`}
+                                                            value="audio"
+                                                            checked={mcq.customFeedbackType === "audio"}
+                                                            onChange={(e) => handleMCQQuestionChange(qIndex, { target: { name: "customFeedbackType", value: e.target.value } })}
+                                                        />
+                                                        <span>Only Audio</span>
+                                                    </label>
+                                                    <label className={styles.radio_label}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`customFeedbackType-${qIndex}`}
+                                                            value="text+image"
+                                                            checked={mcq.customFeedbackType === "text+image"}
+                                                            onChange={(e) => handleMCQQuestionChange(qIndex, { target: { name: "customFeedbackType", value: e.target.value } })}
+                                                        />
+                                                        <span>Text + Image</span>
+                                                    </label>
+                                                    <label className={styles.radio_label}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`customFeedbackType-${qIndex}`}
+                                                            value="text+audio"
+                                                            checked={mcq.customFeedbackType === "text+audio"}
+                                                            onChange={(e) => handleMCQQuestionChange(qIndex, { target: { name: "customFeedbackType", value: e.target.value } })}
+                                                        />
+                                                        <span>Text + Audio</span>
+                                                    </label>
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -2451,6 +2529,49 @@ const CreateLesson = () => {
 
                                                     {answer.answerType.includes('Text') && (
                                                         <InputField label={`Answer Text`} type="text" onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)} value={answer.answerText} name="answerText" id={`answerText-${qIndex}-${aIndex}`} />
+                                                    )}
+
+                                                    {mcq.showCustomFeedback && (
+                                                        <div className={styles.feedback_section}>
+                                                            <h5 className={styles.feedback_title}>Custom Feedback</h5>
+
+                                                            {(mcq.customFeedbackType === "text" ||
+                                                                mcq.customFeedbackType === "text+image" ||
+                                                                mcq.customFeedbackType === "text+audio") && (
+                                                                    <InputField
+                                                                        label={`Feedback Text`}
+                                                                        type="text"
+                                                                        onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)}
+                                                                        value={answer.customFeedbackText}
+                                                                        name="customFeedbackText"
+                                                                        id={`customFeedbackText-${qIndex}-${aIndex}`}
+                                                                    />
+                                                                )}
+
+                                                            {(mcq.customFeedbackType === "image" ||
+                                                                mcq.customFeedbackType === "text+image") && (
+                                                                    <InputField
+                                                                        label={`Feedback Image`}
+                                                                        type="file"
+                                                                        onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)}
+                                                                        name="customFeedbackImage"
+                                                                        id={`customFeedbackImage-${qIndex}-${aIndex}`}
+                                                                        fileInput
+                                                                    />
+                                                                )}
+
+                                                            {(mcq.customFeedbackType === "audio" ||
+                                                                mcq.customFeedbackType === "text+audio") && (
+                                                                    <InputField
+                                                                        label={`Feedback Audio`}
+                                                                        type="file"
+                                                                        onChange={(e) => handleMCQAnswerChange(qIndex, aIndex, e)}
+                                                                        name="customFeedbackAudio"
+                                                                        id={`customFeedbackAudio-${qIndex}-${aIndex}`}
+                                                                        fileInput
+                                                                    />
+                                                                )}
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
