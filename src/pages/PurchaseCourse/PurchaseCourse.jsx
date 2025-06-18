@@ -10,45 +10,13 @@ import {
   getUnpurchasedCoursesByPhoneNumber,
   getCompletedCourses,
   purchaseCourse,
-  getTargetGroupByPhoneNumber,
 } from "../../helper"
 import { TailSpin } from "react-loader-spinner"
 import { useSidebar } from '../../components/SidebarContext';
 
 const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchase, allProfiles }) => {
-  const [profiles, setProfiles] = useState([])
   const [selectedProfile, setSelectedProfile] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
   const [isPurchasing, setIsPurchasing] = useState(false)
-
-  useEffect(() => {
-    const fetchPhoneNumberprofiles = async () => {
-      try {
-        // const response = await getMetadataByPhoneNumber(phoneNumber)
-        // if (response.status === 200) {
-        //   const data = response.data
-        //   if (Array.isArray(data)) {
-        //     setProfiles(data)
-        //   } else if (typeof data === "object" && data !== null) {
-        //     setProfiles([data])
-        //   } else {
-        //     console.error("Unexpected data format for profiles:", data)
-        //     setProfiles([])
-        //   }
-        // } else {
-        //   alert(response.data.message)
-        // }
-      } catch (error) {
-        // alert("Failed to fetch phone number profiles.")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    if (isOpen) {
-      setIsLoading(true)
-      fetchPhoneNumberprofiles()
-    }
-  }, [isOpen, phoneNumber])
 
   const handleCoursePurchase = async () => {
     if (!selectedProfile) {
@@ -57,7 +25,6 @@ const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchas
     }
 
     setIsPurchasing(true)
-
     try {
       await onPurchase(phoneNumber, selectedProfile, courseId)
       onClose()
@@ -74,11 +41,6 @@ const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchas
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h2 className={styles.modal_heading}>Purchase Course</h2>
-            {isLoading ? (
-              <div className={styles.loader}>
-                <TailSpin color="#51bbcc" height={30} width={30} />
-              </div>
-            ) : (
               <div className={styles.form_group}>
                 <label className={styles.label} htmlFor="profile_select">
                   Select Profile
@@ -97,12 +59,11 @@ const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchas
                   ))}
                 </select>
               </div>
-            )}
             <div className={styles.form_group_row}>
               <button
                 className={`${styles.submit_button} ${styles.purchase_modal_button}`}
                 onClick={handleCoursePurchase}
-                disabled={isLoading || isPurchasing || !selectedProfile}
+                disabled={isPurchasing || !selectedProfile}
               >
                 {isPurchasing ? (
                   <div className={styles.button_loader}>
@@ -124,46 +85,11 @@ const CoursePurchaseModal = ({ isOpen, onClose, phoneNumber, courseId, onPurchas
 }
 
 const TargetGroupModal = ({ isOpen, onClose, phoneNumber, onTargetGroup, allProfiles }) => {
-  const [profiles, setProfiles] = useState([])
   const [selectedProfile, setSelectedProfile] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
   const [isProfileLoading, setIsProfileLoading] = useState(false)
   const [isTargeting, setIsTargeting] = useState(false)
   const [targetGroup, setTargetGroup] = useState("")
   const [profileData, setProfileData] = useState(null)
-
-  // Fetch all profiles for this phone number when modal opens
-  useEffect(() => {
-    const fetchPhoneNumberprofiles = async () => {
-      try {
-        setIsLoading(true)
-        // const response = await getMetadataByPhoneNumber(phoneNumber)
-
-        // if (response.status === 200) {
-        //   const data = response.data
-        //   if (Array.isArray(data)) {
-        //     setProfiles(data)
-        //   } else if (typeof data === "object" && data !== null) {
-        //     setProfiles([data])
-        //   } else {
-        //     console.error("Unexpected data format for profiles:", data)
-        //     setProfiles([])
-        //   }
-        // } else {
-        //   alert(response.data.message)
-        // }
-      } catch (error) {
-        // console.error("Error fetching profiles:", error)
-        // alert("Failed to fetch phone number profiles.")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    if (isOpen && phoneNumber) {
-      fetchPhoneNumberprofiles()
-    }
-  }, [isOpen, phoneNumber])
 
   // Fetch target group when a profile is selected
   useEffect(() => {
@@ -236,11 +162,6 @@ const TargetGroupModal = ({ isOpen, onClose, phoneNumber, onTargetGroup, allProf
             <h2 className={styles.modal_heading}>Target Group</h2>
 
             {/* Profile selection */}
-            {isLoading ? (
-              <div className={styles.loader}>
-                <TailSpin color="#51bbcc" height={30} width={30} />
-              </div>
-            ) : (
               <div className={styles.form_group}>
                 <label className={styles.label} htmlFor="profile_select">
                   Select Profile
@@ -259,14 +180,9 @@ const TargetGroupModal = ({ isOpen, onClose, phoneNumber, onTargetGroup, allProf
                   ))}
                 </select>
               </div>
-            )}
 
             {/* Target group selection */}
-            {isProfileLoading ? (
-              <div className={styles.loader}>
-                <TailSpin color="#51bbcc" height={30} width={30} />
-              </div>
-            ) : selectedProfile ? (
+            {selectedProfile ? (
               <div className={styles.form_group}>
                 <div className={styles.target_group_section}>
                   {profileData && profileData.targetGroup ? (
@@ -457,10 +373,7 @@ const PurchaseCourse = () => {
           : [refreshedProfiles.data];
         setAllProfiles(profilesData);
 
-        // Refresh all data to ensure UI is updated
-        // await fetchPhoneNumbers();
 
-        // If the current phone number is the one being updated, refresh its details
         if (selectedPhoneNumber === phoneNumber) {
 
           // Refresh user data
@@ -468,9 +381,6 @@ const PurchaseCourse = () => {
           if (updatedUserResponse.status === 200) {
             setSelectedUserData(updatedUserResponse.data);
           }
-
-          // Update the allProfiles state to reflect the changes
-        //   setAllProfiles(allNumbers.filter((user) => user.phoneNumber === phoneNumber))
         }
 
         return true
