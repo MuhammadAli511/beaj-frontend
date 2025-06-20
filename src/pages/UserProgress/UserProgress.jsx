@@ -12,80 +12,129 @@ import ChartDataLabels from "chartjs-plugin-datalabels"
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ChartDataLabels)
 
 
-const LeaderboardModal = ({ isOpen, onClose, targetGroup, cohort, viewType, imageData, loading }) => {
-  if (!isOpen) return null
+const LeaderboardModal = ({ isOpen, onClose, targetGroup, cohort, viewType, leaderboardImages = [], loading }) => {
+  const [selectedIndex, setSelectedIndex] = useState(leaderboardImages[0]?.columnIndex || null);
+
+    useEffect(() => {
+    if (leaderboardImages.length > 0) {
+      setSelectedIndex(leaderboardImages[0].columnIndex);
+    }
+  }, [leaderboardImages]);
+
+  if (!isOpen) return null;
+
+  const getColumnLabel = (index) => {
+  const week = ((index - 4) % 4) + 1;
+  const level = Math.floor((index - 4) / 4) + 1;
+  return `W${week} L${level}`;
+};
+
+  const selectedImage = leaderboardImages.find(item => item.columnIndex === selectedIndex)?.imageBase64;
 
   const handleDownload = () => {
-    if (!imageData) return
-
-    const link = document.createElement("a")
-    link.href = imageData
-    link.download = `leaderboard-${targetGroup}-${cohort}-${viewType}.png`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+    if (!selectedImage) return;
+    const link = document.createElement("a");
+    link.href = `data:image/png;base64,${selectedImage}`;
+    link.download = `leaderboard-${targetGroup}-${cohort}-${viewType}-${getColumnLabel(selectedIndex)}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleCopy = async () => {
-    if (!imageData) return
-
+    if (!selectedImage) return;
     try {
-      const response = await fetch(imageData)
-      const blob = await response.blob()
-      const item = new ClipboardItem({ 'image/png': blob })
-      await navigator.clipboard.write([item])
-
-      alert('Image copied to clipboard! You can now paste it anywhere.')
+      const response = await fetch(`data:image/png;base64,${selectedImage}`);
+      const blob = await response.blob();
+      const item = new ClipboardItem({ 'image/png': blob });
+      await navigator.clipboard.write([item]);
+      alert('Image copied to clipboard!');
     } catch (error) {
-      console.error('Failed to copy image:', error)
-      alert('Failed to copy image to clipboard. Your browser may not support this feature.')
+      console.error('Failed to copy image:', error);
+      alert('Your browser may not support this feature.');
     }
-  }
+  };
+
+  // const handleDownload = () => {
+  //   if (!imageData) return
+
+  //   const link = document.createElement("a")
+  //   link.href = imageData
+  //   link.download = `leaderboard-${targetGroup}-${cohort}-${viewType}.png`
+  //   document.body.appendChild(link)
+  //   link.click()
+  //   document.body.removeChild(link)
+  // }
+
+  // const handleCopy = async () => {
+  //   if (!imageData) return
+
+  //   try {
+  //     const response = await fetch(imageData);
+  //     const blob = await response.blob();
+  //     const item = new ClipboardItem({ 'image/png': blob });
+  //     await navigator.clipboard.write([item]);
+
+  //     alert('Image copied to clipboard! You can now paste it anywhere.')
+  //   } catch (error) {
+  //     console.error('Failed to copy image:', error)
+  //     alert('Failed to copy image to clipboard. Your browser may not support this feature.')
+  //   }
+  // }
 
   return (
     <div className={styles.overlay_leader} onClick={onClose}>
       <div className={styles.modal_leader} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header_leader}>
-          <h2>
-            Leaderboard - {targetGroup} {cohort}
-          </h2>
+          <h2>Leaderboard - {targetGroup} {cohort}</h2>
           <div className={styles.actions_leader}>
-            {imageData && (
+            {selectedImage && (
               <>
-                <button className={styles.downloadButton_leader} onClick={handleDownload}>
-                  <span>📥</span>
-                  Download
-                </button>
-                <button className={styles.copyButton_leader} onClick={handleCopy}>
-                  <span>📋</span>
-                  Copy
-                </button>
+                <button className={styles.downloadButton_leader} onClick={handleDownload}>📥 Download</button>
+                <button className={styles.copyButton_leader} onClick={handleCopy}>📋 Copy</button>
               </>
             )}
-            <button className={styles.closeButton_leader} onClick={onClose}>
-              {/* × */}
-              ❌
-            </button>
+            <button className={styles.closeButton_leader} onClick={onClose}>❌</button>
           </div>
         </div>
+       <div className={styles.chartControls}>
+        <div className={styles.dropdownContainer}>
+          {/* <label>Select Week: </label> */}
+          {leaderboardImages.length > 0 && (
+            <select
+            className={styles.chartTypeSelect}
+              // className={styles.select_leader}
+              value={selectedIndex}
+              onChange={(e) => setSelectedIndex(Number(e.target.value))}
+            >
+              {leaderboardImages.map(img => (
+                <option key={img.columnIndex} value={img.columnIndex}>
+                  {getColumnLabel(img.columnIndex)}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+        </div>
+
         <div className={styles.content_leader}>
           {loading ? (
             <div className={styles.loading_leader}>
               <TailSpin color="#51bbcc" height={50} width={50} />
               <p>Loading leaderboard...</p>
             </div>
-          ) : imageData ? (
-            <img src={imageData || "/placeholder.svg"} alt="Leaderboard" className={styles.image_leader} />
+          ) : selectedImage ? (
+            <img src={`data:image/png;base64,${selectedImage}`} alt="Leaderboard" className={styles.image_leader} />
           ) : (
             <div className={styles.error_leader}>
-              <p>Failed to load leaderboard image.</p>
+              <p>No leaderboard image found.</p>
             </div>
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) => {
   const [chartType, setChartType] = useState("L1")
@@ -122,10 +171,10 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
   useEffect(() => {
     if (isOpen && userData && userData.length > 0) {
       const columnIndices = {
-        L1: 7,
-        L2: 12,
-        L3: 17,
-        Grand: 18,
+        L1: 8,
+        L2: 13,
+        L3: 18,
+        Grand: 19,
       }
 
       const valueColumnIndex = columnIndices[chartType]
@@ -158,19 +207,19 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
     try {
       // Map chart types to their corresponding column indices
       const columnIndices = {
-        L1: 7, // L1 total is column 7
-        L2: 12, // L2 total is column 12
-        L3: 17, // L3 total is column 17
-        Grand: 18, // Grand total is column 18
+        L1: 8, // L1 total is column 7
+        L2: 13, // L2 total is column 12
+        L3: 18, // L3 total is column 17
+        Grand: 19, // Grand total is column 18
       }
 
       // Get the column index for the selected chart type
       const valueColumnIndex = columnIndices[chartType]
       const title = chartTypeIndices[chartType].title
 
-      // Get usernames (column 2) and data for the selected level
+      // Get usernames (column 3) and data for the selected level
       let processedData = userData.map((row) => {
-        const username = row[2] || ""
+        const username = row[3] || ""
         const value = Number.parseInt(row[valueColumnIndex] || "")
 
         return {
@@ -551,7 +600,7 @@ const UserProgress = () => {
   
   // State for dropdown selections
   const [botType, setBotType] = useState("teacher");
-  const [rollout, setRollout] = useState("1");
+  const [rollout, setRollout] = useState("2");
   const [targetGroup, setTargetGroup] = useState("");
   const [level, setLevel] = useState("");
   const [cohort, setCohort] = useState("");
@@ -574,15 +623,18 @@ const UserProgress = () => {
   const [leaderboardImage, setLeaderboardImage] = useState(null);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
   const [leaderboardBuffer, setLeaderboardBuffer] = useState('');
+  const [leaderboardImages, setLeaderboardImages] = useState([]);
   
   // Activity chart state
   const [showActivityChart, setShowActivityChart] = useState(false);
   
   // Course IDs (will be set based on selections)
   const [courseIds, setCourseIds] = useState({
-    courseId1: 105,
-    courseId2: 110,
-    courseId3: 112
+    courseId1: null,
+    courseId2: null,
+    courseId3: null,
+    courseId4: null,
+    courseId5: null
   });
 
   // Generate cohort options
@@ -597,19 +649,31 @@ const UserProgress = () => {
   // Set course IDs based on selections
   useEffect(() => {
     if (botType === "teacher") {
-      if (targetGroup === "T1") {
-        setCourseIds({ courseId1: 106, courseId2: 111, courseId3: 118 });
-      } else if (targetGroup === "T2") {
-        setCourseIds({ courseId1: 105, courseId2: 110, courseId3: 112 });
+      if (rollout === "2"){
+        //  setCourseIds({ courseId1: 134, courseId2: 135, courseId3: 136, courseId4: 139, courseId5: 140 });
+          setCourseIds({ courseId1: 106, courseId2: 111, courseId3: 118, courseId4: 106, courseId5: 111 });
+      }
+      else if (targetGroup === "T1" && rollout === "1") {
+        setCourseIds({ courseId1: 106, courseId2: 111, courseId3: 118, courseId4: 106, courseId5: 111 });
+      } else if (targetGroup === "T2" && rollout === "1") {
+        setCourseIds({ courseId1: 105, courseId2: 110, courseId3: 112, courseId4: 105, courseId5: 110 });
+      }
+      else if(targetGroup === "T1" && rollout === "0"){
+         setCourseIds({ courseId1: 98, courseId2: 104, courseId3: 109, courseId4: null, courseId5: null });
+      }
+      else if(targetGroup === "T2" && rollout === "0"){
+        setCourseIds({ courseId1: 99, courseId2: 103, courseId3: 108, courseId4: null, courseId5: null });
       }
     }
     // For students, we might need different course IDs based on level
-    else if (botType === "student") {
-      // Set course IDs based on level if needed
-      // Example:
-      // if (level === "class 1") { ... }
+    else if (botType === "student" && rollout === "1") {
+      if (level === "class 1") {
+        setCourseIds({ courseId1: 106, courseId2: 111, courseId3: 118, courseId4: 106, courseId5: 111 });
+      } else if (level === "class 2") {
+        setCourseIds({ courseId1: 105, courseId2: 110, courseId3: 112, courseId4: 105, courseId5: 110 });
+      }
     }
-  }, [botType, targetGroup, level]);
+  }, [botType, targetGroup, level, cohort, rollout, activeTab]);
 
   // Set cohort ranges based on selections
   useEffect(() => {
@@ -638,8 +702,8 @@ const UserProgress = () => {
   useEffect(() => {
     clearUserState();
     
-    if ((botType === "teacher" && targetGroup && cohort && activeTab) ||
-        (botType === "student" && level && cohort && activeTab)) {
+    if ((botType === "teacher" && rollout && targetGroup && cohort && activeTab) || (botType === "teacher" && rollout === "2" && cohort && activeTab)  ||
+        (botType === "student" && rollout && level && cohort && activeTab)) {
       const loadData = async () => {
         setLoading(true);
         try {
@@ -652,11 +716,15 @@ const UserProgress = () => {
             courseIds.courseId1,
             courseIds.courseId2,
             courseIds.courseId3,
+            courseIds.courseId4,
+            courseIds.courseId5,
             activeTab
           );
 
           if (response.status === 200) {
-            setLeaderboardBuffer(response.data.data.leaderboard);
+            const leaderboardArray = response.data.data.leaderboard || [];
+            setLeaderboardImages(leaderboardArray);
+            setLeaderboardBuffer(leaderboardArray[0]?.imageBase64 || null);
             let arrayList = response.data.data.array_list;
             let rows = arrayList.map(row => [...row]);
             setUserData(rows);
@@ -675,19 +743,34 @@ const UserProgress = () => {
     }
   }, [botType, rollout, targetGroup, level, cohort, activeTab, courseIds]);
 
-  // Filter data based on search query
-  useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setFilteredData(userData);
-    } else {
-      const filtered = userData.filter(
-        (user) =>
-          user[2]?.toLowerCase().includes(searchQuery.toLowerCase()) || // username
-          user[1]?.includes(searchQuery) // phoneNumber
+useEffect(() => {
+  if (searchQuery.trim() === "") {
+    setFilteredData(userData);
+  } else {
+    const query = searchQuery.toLowerCase().trim();
+    
+    const filtered = userData.filter((user, index) => {
+      // Skip the total row in assessment view (first row)
+      if (activeTab === "assessment" && index === 0) {
+        return true; // Keep the total row in filtered data
+      }
+      
+      // Safely convert and search each field
+      const profileId = (user[1] || "").toString().toLowerCase();
+      const phoneNumber = (user[2] || "").toString().toLowerCase();
+      const username = (user[3] || "").toString().toLowerCase();
+      
+      return (
+        profileId.includes(query) ||
+        phoneNumber.includes(query) ||
+        username.includes(query)
       );
-      setFilteredData(filtered);
-    }
-  }, [searchQuery, userData]);
+    });
+    
+    setFilteredData(filtered);
+  }
+}, [searchQuery, userData, activeTab]);
+
 
   // Handler functions
   const handleBotTypeChange = (e) => {
@@ -723,6 +806,13 @@ const UserProgress = () => {
   };
 
   const handleShowLeaderboard = async () => {
+
+    if (leaderboardImages.length > 0) {
+        setShowLeaderboard(true);
+      } else {
+        alert("No leaderboard images available");
+      }
+
     if ((botType === "teacher" && !targetGroup) || !cohort) {
       alert("Please make all required selections first");
       return;
@@ -1094,107 +1184,135 @@ const UserProgress = () => {
   }
   };
 
-    // Render activity view table
-  const renderAssessmentTable = () => {
-    if(botType === "teacher"){
-    return (
-      <div className={styles.tableContainer}>
-        <table className={styles.dataTable}>
-          <thead>
-            <tr>
-              <th rowSpan={2}>Sr No.</th>
-              <th rowSpan={2}>Profile Id</th>
-              <th rowSpan={2}>Phone Number</th>
-              <th rowSpan={2}>Username</th>
-              <th colSpan={5} className={styles.groupHeader}>Level 1</th>
-              <th colSpan={5} className={styles.groupHeader}>Level 2</th>
-              <th colSpan={5} className={styles.groupHeader}>Level 3</th>
-            </tr>
-            <tr>
-              <th>Week1</th>
-              <th>Week2</th>
-              <th>Week3</th>
-              <th>Week4</th>
-              <th>Total</th>
-              <th>Week1</th>
-              <th>Week2</th>
-              <th>Week3</th>
-              <th>Week4</th>
-              <th>Total</th>
-              <th>Week1</th>
-              <th>Week2</th>
-              <th>Week3</th>
-              <th>Week4</th>
-              <th>Total</th>
-              <th>Grand</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.map((row, rowIndex) => (
-              <tr key={rowIndex} className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}>
-                {row.map((cell, colIndex) => {
-                  let cellClass = styles.centerText;
+//     // Render activity view table
+//   const renderAssessmentTable = () => {
+//     return (
+//   <div className={styles.tableContainer}>
+//     <table className={styles.dataTable}>
+//       <thead>
+//         <tr>
+//           <th rowSpan={2}>Sr No.</th>
+//           <th rowSpan={2}>Profile Id</th>
+//           <th rowSpan={2}>Phone Number</th>
+//           <th rowSpan={2}>Username</th>
+//           <th colSpan={2} className={styles.groupHeader}>Pre-Assessment</th>
+//           <th colSpan={2} className={styles.groupHeader}></th>
+//           <th colSpan={2} className={styles.groupHeader}>Post-Assessment</th>
+//         </tr>
+//         <tr>
+//           <th>MCQs</th>
+//           <th>WatchAndSpeak</th>
+//           <th></th>
+//           <th></th>
+//           <th>MCQs</th>
+//           <th>WatchAndSpeak</th>
+//         </tr>
+//       </thead>
+//       <tbody>
+//         {filteredData.map((row, rowIndex) => (
+//           <tr
+//             key={rowIndex}
+//             className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}
+//           >
+//             {row.map((cell, colIndex) => {
+//               let cellClass = styles.centerText;
 
-                  // Add specific classes based on the column index
-                  if (colIndex === 8 || colIndex === 13 || colIndex === 18) cellClass = styles.totalCell;
-                  else if (colIndex === 19) cellClass = styles.grandtotalCell;
+//               // Add specific classes based on the column index
+//               if (colIndex === 6 || colIndex === 7 || colIndex === 8 || colIndex === 9) {
+//                 cellClass = styles.totalCell;
+//               }
 
-                  return (
-                    <td key={colIndex} className={cellClass}>
-                      {cell ?? ''}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-  else if(botType === "student"){
-     return (
-      <div className={styles.tableContainer}>
-        <table className={styles.dataTable}>
-          <thead>
-            <tr>
-              <th rowSpan={2}>Sr No.</th>
-              <th rowSpan={2}>Profile Id</th>
-              <th rowSpan={2}>Phone Number</th>
-              <th rowSpan={2}>Username</th>
-              <th colSpan={5} className={styles.groupHeader}>{level}</th>
+//               return (
+//                 <td key={colIndex} className={cellClass}>
+//                   {cell ?? ''}
+//                 </td>
+//               );
+//             })}
+//           </tr>
+//         ))}
+//       </tbody>
+//     </table>
+//   </div>
+// );
+// };
+
+const renderAssessmentTable = () => {
+  // Get total scores from first row of filteredData
+  const totalScores = filteredData.length > 0 ? filteredData[0] : [];
+
+  return (
+    <div className={styles.tableContainer}>
+      <table className={styles.dataTable}>
+        <thead>
+          <tr>
+            <th rowSpan={2}>Sr No.</th>
+            <th rowSpan={2}>Profile Id</th>
+            <th rowSpan={2}>Phone Number</th>
+            <th rowSpan={2}>Username</th>
+            <th colSpan={2} className={styles.groupHeader}>
+              Pre-Assessment
+            </th>
+            <th className={styles.spacerColumn}></th>
+            <th colSpan={2} className={styles.groupHeader}>
+              Post-Assessment
+            </th>
+          </tr>
+          <tr>
+            <th className={styles.activityHeader}>
+              MCQs
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[4] ?? 0}</span>
+            </th>
+            <th className={styles.activityHeader}>
+              WatchAndSpeak
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[5] ?? 0}</span>
+            </th>
+            <th className={styles.spacerColumn}></th>
+            <th className={styles.activityHeader}>
+              MCQs
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[7] ?? 0}</span>
+            </th>
+            <th className={styles.activityHeader}>
+              WatchAndSpeak
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[8] ?? 0}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredData.slice(1).map((row, rowIndex) => (
+            <tr
+              key={rowIndex}
+              className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}
+            >
+              {row.map((cell, colIndex) => {
+                // Spacer column
+                if (colIndex === 6) {
+                  return <td key={colIndex} className={styles.spacerColumn}></td>;
+                }
+
+                // Style score columns
+                const isScore = [4, 5, 7, 8].includes(colIndex);
+                const cellClass = `${styles.centerText} ${
+                  isScore ? styles.scoreCell : ''
+                }`;
+
+                return (
+                  <td key={colIndex} className={cellClass}>
+                    {cell ?? ''}
+                  </td>
+                );
+              })}
             </tr>
-            <tr>
-              <th>Week1</th>
-              <th>Week2</th>
-              <th>Week3</th>
-              <th>Week4</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.map((row, rowIndex) => (
-              <tr key={rowIndex} className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}>
-                {row.map((cell, colIndex) => {
-                  let cellClass = styles.centerText;
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
-                  // Add specific classes based on the column index
-                  if (colIndex === 8) cellClass = styles.totalCell;
-
-                  return (
-                    <td key={colIndex} className={cellClass}>
-                      {cell ?? ''}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-  };
 
   return (
     <div className={styles.main_page}>
@@ -1225,20 +1343,21 @@ const UserProgress = () => {
                 value={rollout}
                 onChange={handleRolloutChange}
               >
+                {botType === "teacher" && <option value="2">Rollout - 2</option>}
                 <option value="1">Rollout - 1</option>
                 {botType === "teacher" && <option value="0">Pilot - 0</option>}
               </select>
             </div>
 
             {/* Conditional Dropdowns */}
-            {botType === "teacher" && rollout === "1" && (
+            {botType === "teacher" && (rollout === "1" || rollout === "0") && (
               <div className={styles.filterItem}>
                 <label className={styles.filterLabel}>Target Group</label>
                 <select
                   className={styles.select}
                   value={targetGroup}
                   onChange={handleTargetGroupChange}
-                  disabled={!botType || rollout !== "1"}
+                  disabled={!botType || !rollout}
                 >
                   <option value="">Select target group</option>
                   <option value="T1">T1</option>
@@ -1275,24 +1394,41 @@ const UserProgress = () => {
                 className={styles.select}
                 value={cohort}
                 onChange={handleCohortChange}
-                disabled={
-                  (botType === "teacher" && (!targetGroup || rollout !== "1")) ||
-                  (botType === "student" && !level)
-                }
+               disabled={
+                    (botType === "student" && !level) ||
+                    (botType === "teacher" && (
+                      ((rollout === "0" || rollout === "1") && !targetGroup) ||
+                      (rollout !== "0" && rollout !== "1" && rollout !== "2")
+                    ))
+                  }
               >
                 <option value="">Select cohort</option>
+                {botType === "teacher" && rollout === "0" ? (
+                  <option value="pilot">Pilot</option>
+                ) : (
+                  <>
                 {cohortOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
                   </option>
                 ))}
+                   </>)}
+
               </select>
             </div>
           </div>
 
           {/* Tabs for different views */}
           <div className={styles.tabsContainer}>
-            <div className={styles.tabs}>
+            <div
+                  className={
+                    botType === "student"
+                    ? styles.tabss
+                    : botType === "teacher" && rollout === "2"
+                    ? styles.tabss
+                    : styles.tabs
+                  }
+                >
               <button
                 className={`${styles.tabButton} ${activeTab === "lesson" ? styles.activeTab : ""}`}
                 onClick={() => handleTabChange("lesson")}
@@ -1300,6 +1436,7 @@ const UserProgress = () => {
               >
                 Lesson View
               </button>
+              {(botType === "teacher") && (
               <button
                 className={`${styles.tabButton} ${activeTab === "week" ? styles.activeTab : ""}`}
                 onClick={() => handleTabChange("week")}
@@ -1307,6 +1444,7 @@ const UserProgress = () => {
               >
                 Week View
               </button>
+              )}
               <button
                 className={`${styles.tabButton} ${activeTab === "activity" ? styles.activeTab : ""}`}
                 onClick={() => handleTabChange("activity")}
@@ -1314,18 +1452,23 @@ const UserProgress = () => {
               >
                 Activity View
               </button>
-              <button
-                className={`${styles.tabButton} ${activeTab === "assessment" ? styles.activeTab : ""}`}
-                onClick={() => handleTabChange("assessment")}
-                disabled={!cohort}
-              >
-                Assessment View
-              </button>
+              {((botType === "teacher" && rollout === "2") || botType === "student") && (
+                <button
+                  className={`${styles.tabButton} ${activeTab === "assessment" ? styles.activeTab : ""}`}
+                  onClick={() => handleTabChange("assessment")}
+                  disabled={!cohort}
+                >
+                  Assessment View
+                </button>
+              )}
+
             </div>
           </div>
 
           {/* Search bar and buttons */}
+          
           <div className={styles.searchAndLeaderboard}>
+            {activeTab && (
             <div className={styles.searchContainer}>
               <div className={styles.searchIcon}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1336,11 +1479,12 @@ const UserProgress = () => {
               <input
                 type="text"
                 className={styles.searchInput}
-                placeholder="Search by username or phone number..."
+                placeholder="Search by username, profile id or phone number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
+            )}
 
             {cohort && !loading && activeTab === "week" && (
               <button
@@ -1402,7 +1546,7 @@ const UserProgress = () => {
           targetGroup={targetGroup}
           cohort={cohort}
           viewType={activeTab}
-          imageData={leaderboardImage}
+          leaderboardImages={leaderboardImages}
           loading={loadingLeaderboard}
         />
       )}

@@ -79,12 +79,22 @@
 
 .tabs {
   display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  border: 1px solid #b3b7bd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tabss {
+  display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2px;
   border: 1px solid #b3b7bd;
   border-radius: 4px;
   overflow: hidden;
 }
+
 
 .tabButton {
   padding: 10px;
@@ -743,3 +753,30 @@
 .chartIcon {
   color: white;
 }
+
+.activityHeader {
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px;
+}
+
+.headingLabel {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.totalLabel {
+  color: #6c757d; /* or any custom color like #007BFF, #888, etc. */
+  font-size: 0.99em;
+  display: block;
+  margin-top: 2px;
+  font-weight:bolder;
+}
+
+.spacerColumn {
+  width: 40px; /* Adjust the width as needed */
+  background-color:#81edd0; /* Optional: set a background color */
+  flex-shrink: 0; /* Prevents the column from shrinking */
+}
+
