@@ -906,9 +906,9 @@ export const createAudioChatLog = async (userAudio, prompt) => {
 };
 
 // GET api/userProgress/getAllUserProgressData
-export const getAlluserProgressByModule = async (botType, rollout, level, cohort, targetGroup, courseId1, courseId2, courseId3, module) => {
+export const getAlluserProgressByModule = async (botType, rollout, level, cohort, targetGroup, courseId1, courseId2, courseId3, courseId4, courseId5, module) => {
     const queryParams = new URLSearchParams({
-        botType, rollout, level, cohort, targetGroup, courseId1, courseId2, courseId3, module
+        botType, rollout, level, cohort, targetGroup, courseId1, courseId2, courseId3, courseId4, courseId5, module
     }).toString();
 
     const response = await fetch(`${API_URL}/userProgress/getAllUserProgressData?${queryParams}`, {
