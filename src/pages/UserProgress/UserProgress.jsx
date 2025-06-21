@@ -1249,13 +1249,9 @@ const renderAssessmentTable = () => {
             <th rowSpan={2}>Profile Id</th>
             <th rowSpan={2}>Phone Number</th>
             <th rowSpan={2}>Username</th>
-            <th colSpan={2} className={styles.groupHeader}>
-              Pre-Assessment
-            </th>
+            <th colSpan={3} className={styles.groupHeader}>Pre-Assessment</th>
             <th className={styles.spacerColumn}></th>
-            <th colSpan={2} className={styles.groupHeader}>
-              Post-Assessment
-            </th>
+            <th colSpan={3} className={styles.groupHeader}>Post-Assessment</th>
           </tr>
           <tr>
             <th className={styles.activityHeader}>
@@ -1268,16 +1264,24 @@ const renderAssessmentTable = () => {
               <br />
               <span className={styles.totalLabel}>Total: {totalScores[5] ?? 0}</span>
             </th>
+            <th className={styles.activityHeader}>
+              Total Score
+            </th>
+
             <th className={styles.spacerColumn}></th>
+
             <th className={styles.activityHeader}>
               MCQs
               <br />
-              <span className={styles.totalLabel}>Total: {totalScores[7] ?? 0}</span>
+              <span className={styles.totalLabel}>Total: {totalScores[8] ?? 0}</span>
             </th>
             <th className={styles.activityHeader}>
               WatchAndSpeak
               <br />
-              <span className={styles.totalLabel}>Total: {totalScores[8] ?? 0}</span>
+              <span className={styles.totalLabel}>Total: {totalScores[9] ?? 0}</span>
+            </th>
+            <th className={styles.activityHeader}>
+              Total Score
             </th>
           </tr>
         </thead>
@@ -1289,16 +1293,19 @@ const renderAssessmentTable = () => {
             >
               {row.map((cell, colIndex) => {
                 // Spacer column
-                if (colIndex === 6) {
+                if (colIndex === 7) {
                   return <td key={colIndex} className={styles.spacerColumn}></td>;
                 }
 
                 // Style score columns
-                const isScore = [4, 5, 7, 8].includes(colIndex);
-                const cellClass = `${styles.centerText} ${
+                const isScore = [4, 5, 8, 9].includes(colIndex);
+                let cellClass = `${styles.centerText} ${
                   isScore ? styles.scoreCell : ''
                 }`;
 
+                if(colIndex === 6 || colIndex === 10){
+                  cellClass = `${styles.totalScoreCell}`
+                }
                 return (
                   <td key={colIndex} className={cellClass}>
                     {cell ?? ''}
@@ -1423,7 +1430,7 @@ const renderAssessmentTable = () => {
             <div
                   className={
                     botType === "student"
-                    ? styles.tabss
+                    ? styles.tabs
                     : botType === "teacher" && rollout === "2"
                     ? styles.tabss
                     : styles.tabs
