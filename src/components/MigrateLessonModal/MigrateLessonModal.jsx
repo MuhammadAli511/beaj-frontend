@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getAllCoursesfromProduction } from "../../helper";
 import styles from "./MigrateLessonModal.module.css";
 
-const MigrateLessonModal = ({ isOpen, onClose, lesson, onMigrate }) => {
+const MigrateLessonModal = ({ isOpen, onClose, lesson, onMigrate, modalTitle = "Migrate Lesson", buttonText = "Migrate" }) => {
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState("");
     const [isLoading, setIsLoading] = useState(true);
@@ -52,7 +52,7 @@ const MigrateLessonModal = ({ isOpen, onClose, lesson, onMigrate }) => {
             {isOpen && (
                 <div className={styles.modal}>
                     <div className={styles.modalContent}>
-                        <h2 className={styles.modal_heading}>Migrate Lesson</h2>
+                        <h2 className={styles.modal_heading}>{modalTitle}</h2>
                         {isLoading ? (
                             <div>Loading courses...</div>
                         ) : (
@@ -81,7 +81,7 @@ const MigrateLessonModal = ({ isOpen, onClose, lesson, onMigrate }) => {
                                 onClick={handleMigrate}
                                 disabled={isLoading || isMigrating}
                             >
-                                {isMigrating ? <div className="loader"></div> : "Migrate"}
+                                {isMigrating ? <div className="loader"></div> : buttonText}
                             </button>
                             <button className={styles.cancel_button} onClick={onClose}>
                                 Cancel

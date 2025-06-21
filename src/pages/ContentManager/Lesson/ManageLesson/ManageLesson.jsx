@@ -35,6 +35,7 @@ const ManageLesson = () => {
     const [lessons, setLessons] = useState([]);
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
+    const [isDuplicateLessonModalOpen, setIsDuplicateLessonModalOpen] = useState(false);
     const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT == "DEV";
     const [weeks, setWeeks] = useState([]);
     const [days, setDays] = useState([]);
@@ -210,6 +211,16 @@ const ManageLesson = () => {
         setIsMigrateLessonModalOpen(false);
     };
 
+    const openDuplicateLessonModal = (lesson) => {
+        setSelectedLesson(lesson);
+        setIsDuplicateLessonModalOpen(true);
+    };
+
+    const closeDuplicateLessonModal = () => {
+        setSelectedLesson(null);
+        setIsDuplicateLessonModalOpen(false);
+    };
+
     const handleMigrateLesson = async (lesson, selectedCourseId) => {
         try {
             const migrateResponse = await migrateLesson(lesson.LessonId, selectedCourseId);
@@ -223,6 +234,21 @@ const ManageLesson = () => {
             alert(error);
         }
         closeMigrateLessonModal();
+    };
+
+    const handleDuplicateLesson = async (lesson, selectedCourseId) => {
+        try {
+            const duplicateResponse = await migrateLesson(lesson.LessonId, selectedCourseId);
+            if (duplicateResponse.status !== 200) {
+                alert(duplicateResponse.data.message);
+            } else {
+                alert("Lesson duplicated successfully.");
+                fetchLessons(activeTab === 'All' ? '' : activeTab.toLowerCase());
+            }
+        } catch (error) {
+            alert(error);
+        }
+        closeDuplicateLessonModal();
     };
 
     const handleWeekChange = (e) => {
@@ -275,6 +301,7 @@ const ManageLesson = () => {
                                     <th className={styles.table_heading}>Activity Alias</th>
                                     <th className={styles.table_heading}>Status</th>
                                     {isDevEnvironment && <th className={styles.table_heading}>Migrate</th>}
+                                    {isDevEnvironment && <th className={styles.table_heading}>Duplicate</th>}
                                 </tr>
                             </thead>
                             <tbody className={styles.table_body}>
@@ -298,6 +325,16 @@ const ManageLesson = () => {
                                                     onClick={() => openMigrateLessonModal(lesson)}
                                                 >
                                                     Migrate
+                                                </button>
+                                            </td>
+                                        )}
+                                        {isDevEnvironment && (
+                                            <td style={{ width: "10%" }}>
+                                                <button
+                                                    className={styles.migrate_button}
+                                                    onClick={() => openDuplicateLessonModal(lesson)}
+                                                >
+                                                    Duplicate
                                                 </button>
                                             </td>
                                         )}
@@ -421,6 +458,14 @@ const ManageLesson = () => {
                 onClose={closeMigrateLessonModal}
                 lesson={selectedLesson}
                 onMigrate={handleMigrateLesson}
+            />
+            <MigrateLessonModal
+                isOpen={isDuplicateLessonModalOpen}
+                onClose={closeDuplicateLessonModal}
+                lesson={selectedLesson}
+                onMigrate={handleDuplicateLesson}
+                modalTitle="Duplicate Lesson"
+                buttonText="Duplicate"
             />
         </div>
     );
