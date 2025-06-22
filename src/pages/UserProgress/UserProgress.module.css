@@ -780,3 +780,8 @@
   flex-shrink: 0; /* Prevents the column from shrinking */
 }
 
+.totalScoreCell {
+  background-color:antiquewhite;
+  width: 50px; /* Light yellow or any distinct color */
+  /* font-weight: bold; */
+}
