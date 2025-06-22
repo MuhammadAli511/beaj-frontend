@@ -300,8 +300,9 @@ const ManageLesson = () => {
                                     <th className={styles.table_heading}>Activity</th>
                                     <th className={styles.table_heading}>Activity Alias</th>
                                     <th className={styles.table_heading}>Status</th>
+                                    <th className={styles.table_heading}>Duplicate</th>
                                     {isDevEnvironment && <th className={styles.table_heading}>Migrate</th>}
-                                    {isDevEnvironment && <th className={styles.table_heading}>Duplicate</th>}
+
                                 </tr>
                             </thead>
                             <tbody className={styles.table_body}>
@@ -318,6 +319,14 @@ const ManageLesson = () => {
                                                 {lesson.status || "Not Available"}
                                             </span>
                                         </td>
+                                        <td style={{ width: "10%" }}>
+                                            <button
+                                                className={styles.migrate_button}
+                                                onClick={() => openDuplicateLessonModal(lesson)}
+                                            >
+                                                Duplicate
+                                            </button>
+                                        </td>
                                         {isDevEnvironment && (
                                             <td style={{ width: "10%" }}>
                                                 <button
@@ -325,16 +334,6 @@ const ManageLesson = () => {
                                                     onClick={() => openMigrateLessonModal(lesson)}
                                                 >
                                                     Migrate
-                                                </button>
-                                            </td>
-                                        )}
-                                        {isDevEnvironment && (
-                                            <td style={{ width: "10%" }}>
-                                                <button
-                                                    className={styles.migrate_button}
-                                                    onClick={() => openDuplicateLessonModal(lesson)}
-                                                >
-                                                    Duplicate
                                                 </button>
                                             </td>
                                         )}
