@@ -1157,3 +1157,16 @@ export const updatePaymentStatusByProfileId = async (profileId, paymentStatus) =
     const data = await response.json();
     return { status: response.status, data };
 };
+
+// GET api/chatbot/combined-user-data
+export const getCombinedUserData = async () => {
+    const response = await fetch(`${API_URL}/chatbot/combined-user-data`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    const data = await response.json();
+    return { status: response.status, data };
+};

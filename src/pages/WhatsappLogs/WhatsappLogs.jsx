@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Navbar, Sidebar } from "../../components";
 import styles from './WhatsappLogs.module.css';
-import { getAllMetadata, getActivityLogsByPhoneNumber, getLastMessageTime } from "../../helper";
+import { getCombinedUserData, getActivityLogsByPhoneNumber } from "../../helper";
 import { useSidebar } from '../../components/SidebarContext';
 import { TailSpin } from 'react-loader-spinner';
 import Select from 'react-select';
@@ -97,41 +97,23 @@ const WhatsappLogs = () => {
         const fetchData = async () => {
             setUsersLoading(true);
             try {
-                const [metadataResponse, lastMessageTimeResponse] = await Promise.all([
-                    getAllMetadata(),
-                    getLastMessageTime() // Get last message time data for all users
-                ]);
-
-                if (metadataResponse.data && Array.isArray(metadataResponse.data)) {
-                    // Create a map of phone numbers to last message time data
-                    const lastMessageTimeMap = {};
-                    lastMessageTimeResponse.data.forEach(user => {
-                        const timestamp = user.timestamp;
+                const combinedResponse = await getCombinedUserData();
+    
+                if (combinedResponse.data && Array.isArray(combinedResponse.data)) {
+                    const usersWithActivity = combinedResponse.data.map(user => {
+                        const timestamp = user.last_message_timestamp;
                         const now = new Date();
                         const lastMessageDate = new Date(timestamp);
                         const diffTime = Math.abs(now - lastMessageDate);
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                         
-                        lastMessageTimeMap[user.phoneNumber] = {
+                        return {
+                            ...user,
                             lastMessageTimestamp: timestamp,
                             inactiveDays: diffDays
                         };
                     });
-
-                    const uniqueUserMap = new Map();
-                    metadataResponse.data.forEach(user => {
-                        if (!uniqueUserMap.has(user.phoneNumber)) {
-                            uniqueUserMap.set(user.phoneNumber, user);
-                        }
-                    });
-                    const uniqueUsers = Array.from(uniqueUserMap.values());
-
-                    //  Merge metadata with inactivity data
-                    const usersWithActivity = uniqueUsers.map(user => ({
-                        ...user,
-                        ...lastMessageTimeMap[user.phoneNumber]
-                    }));
-
+    
                     setPhoneNumbers(usersWithActivity);
                 }
             } catch (error) {
