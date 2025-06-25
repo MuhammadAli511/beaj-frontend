@@ -55,33 +55,6 @@ const LeaderboardModal = ({ isOpen, onClose, targetGroup, cohort, viewType, lead
     }
   };
 
-  // const handleDownload = () => {
-  //   if (!imageData) return
-
-  //   const link = document.createElement("a")
-  //   link.href = imageData
-  //   link.download = `leaderboard-${targetGroup}-${cohort}-${viewType}.png`
-  //   document.body.appendChild(link)
-  //   link.click()
-  //   document.body.removeChild(link)
-  // }
-
-  // const handleCopy = async () => {
-  //   if (!imageData) return
-
-  //   try {
-  //     const response = await fetch(imageData);
-  //     const blob = await response.blob();
-  //     const item = new ClipboardItem({ 'image/png': blob });
-  //     await navigator.clipboard.write([item]);
-
-  //     alert('Image copied to clipboard! You can now paste it anywhere.')
-  //   } catch (error) {
-  //     console.error('Failed to copy image:', error)
-  //     alert('Failed to copy image to clipboard. Your browser may not support this feature.')
-  //   }
-  // }
-
   return (
     <div className={styles.overlay_leader} onClick={onClose}>
       <div className={styles.modal_leader} onClick={(e) => e.stopPropagation()}>
