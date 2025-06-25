@@ -599,7 +599,7 @@ const UserProgress = () => {
   const { isSidebarOpen } = useSidebar();
   
   // State for dropdown selections
-  const [botType, setBotType] = useState("teacher");
+  const [botType, setBotType] = useState("student");
   const [rollout, setRollout] = useState("2");
   const [targetGroup, setTargetGroup] = useState("");
   const [level, setLevel] = useState("");
@@ -637,25 +637,92 @@ const UserProgress = () => {
     courseId5: null
   });
 
-  // Generate cohort options
-  const cohortOptions = Array.from({ length: cohortEndRange - cohortStartRange + 1 }, 
-    (_, i) => `Cohort ${i + cohortStartRange}`);
+const cohortOptions =
+  cohortStartRange && cohortEndRange
+    ? Array.from(
+        { length: cohortEndRange - cohortStartRange + 1 },
+        (_, i) => `Cohort ${i + cohortStartRange}`
+      )
+    : rollout === "0" && botType === "teacher"
+    ? ["pilot"]
+    : [];
+
+    useEffect(() => {
+  setCohort("");
+}, [targetGroup, level]);
+
 
   // Reset cohort when target group or level changes
   useEffect(() => {
     setCohort("");
   }, [targetGroup, level]);
 
+  useEffect(() => {
+  if (botType === "teacher") {
+    if (rollout === "0") {
+      // Pilot rollout: show only "pilot"
+      setCohortStartRange(null);
+      setCohortEndRange(null);
+    } else if (rollout === "1") {
+      if (targetGroup === "T1") {
+        setCohortStartRange(1);
+        setCohortEndRange(20);
+      } else if (targetGroup === "T2") {
+        setCohortStartRange(25);
+        setCohortEndRange(44);
+      } else {
+        setCohortStartRange(null);
+        setCohortEndRange(null);
+      }
+    } else if (rollout === "2") {
+      // No cohorts in teacher rollout 2
+      setCohortStartRange(null);
+      setCohortEndRange(null);
+    }
+  } else if (botType === "student" && rollout === "2") {
+    switch (level) {
+      case "grade 1":
+      case "grade 2":
+      case "grade 3":
+        setCohortStartRange(1);
+        setCohortEndRange(5);
+        break;
+      case "grade 4":
+        setCohortStartRange(1);
+        setCohortEndRange(6);
+        break;
+      case "grade 5":
+        setCohortStartRange(1);
+        setCohortEndRange(4);
+        break;
+      case "grade 6":
+        setCohortStartRange(1);
+        setCohortEndRange(8);
+        break;
+      case "grade 7":
+        setCohortStartRange(1);
+        setCohortEndRange(18);
+        break;
+      default:
+        setCohortStartRange(null);
+        setCohortEndRange(null);
+    }
+  } else {
+    setCohortStartRange(null);
+    setCohortEndRange(null);
+  }
+}, [botType, rollout, targetGroup, level]);
+
+
   // Set course IDs based on selections
   useEffect(() => {
     if (botType === "teacher") {
       if (rollout === "2"){
-        //  setCourseIds({ courseId1: 134, courseId2: 135, courseId3: 136, courseId4: 139, courseId5: 140 });
-          setCourseIds({ courseId1: 106, courseId2: 111, courseId3: 118, courseId4: 106, courseId5: 111 });
+         setCourseIds({ courseId1: 134, courseId2: 135, courseId3: 136, courseId4: 142, courseId5: 147 });
       }
       else if (targetGroup === "T1" && rollout === "1") {
         setCourseIds({ courseId1: 106, courseId2: 111, courseId3: 118, courseId4: 106, courseId5: 111 });
-      } else if (targetGroup === "T2" && rollout === "1") {
+      } else if (targetGroup === "T2" && rollout === "1"){
         setCourseIds({ courseId1: 105, courseId2: 110, courseId3: 112, courseId4: 105, courseId5: 110 });
       }
       else if(targetGroup === "T1" && rollout === "0"){
@@ -666,31 +733,46 @@ const UserProgress = () => {
       }
     }
     // For students, we might need different course IDs based on level
-    else if (botType === "student" && rollout === "1") {
-      if (level === "class 1") {
-        setCourseIds({ courseId1: 106, courseId2: 111, courseId3: 118, courseId4: 106, courseId5: 111 });
-      } else if (level === "class 2") {
-        setCourseIds({ courseId1: 105, courseId2: 110, courseId3: 112, courseId4: 105, courseId5: 110 });
+    else if (botType === "student" && rollout === "2") {
+      if (level === "grade 1") {
+        setCourseIds({ courseId1: 119, courseId2: null, courseId3: null, courseId4: 139, courseId5: 144 });
+      } else if (level === "grade 2") {
+         setCourseIds({ courseId1: 120, courseId2: null, courseId3: null, courseId4: 139, courseId5: 144 });
+      }
+      else if (level === "grade 3") {
+         setCourseIds({ courseId1: 121, courseId2: null, courseId3: null, courseId4: 140, courseId5: 145 });
+      }
+      else if (level === "grade 4") {
+         setCourseIds({ courseId1: 122, courseId2: null, courseId3: null, courseId4: 140, courseId5: 145 });
+      }
+      else if (level === "grade 5") {
+        setCourseIds({ courseId1: 123, courseId2: null, courseId3: null, courseId4: 141, courseId5: 146 });
+      }
+      else if (level === "grade 6") {
+         setCourseIds({ courseId1: 124, courseId2: null, courseId3: null, courseId4: 141, courseId5: 146 });
+      }
+      else if (level === "grade 7") {
+         setCourseIds({ courseId1: 143, courseId2: null, courseId3: null, courseId4: 142, courseId5: 147 });
       }
     }
   }, [botType, targetGroup, level, cohort, rollout, activeTab]);
 
   // Set cohort ranges based on selections
-  useEffect(() => {
-    if (botType === "teacher") {
-      if (targetGroup === "T1") {
-        setCohortStartRange(1);
-        setCohortEndRange(20);
-      } else if (targetGroup === "T2") {
-        setCohortStartRange(25);
-        setCohortEndRange(44);
-      }
-    } else if (botType === "student") {
-      // Set cohort ranges for students
-      setCohortStartRange(1);
-      setCohortEndRange(20); // Adjust as needed
-    }
-  }, [botType, targetGroup]);
+  // useEffect(() => {
+  //   if (botType === "teacher") {
+  //     if (targetGroup === "T1") {
+  //       setCohortStartRange(1);
+  //       setCohortEndRange(20);
+  //     } else if (targetGroup === "T2") {
+  //       setCohortStartRange(25);
+  //       setCohortEndRange(44);
+  //     }
+  //   } else if (botType === "student") {
+  //     // Set cohort ranges for students
+  //     setCohortStartRange(1);
+  //     setCohortEndRange(20); // Adjust as needed
+  //   }
+  // }, [botType, targetGroup]);
 
   // Clear user data
   const clearUserState = () => {
@@ -1238,9 +1320,17 @@ useEffect(() => {
 
 const renderAssessmentTable = () => {
   // Get total scores from first row of filteredData
+  let watch_speak_heading = '';
+  if (filteredData.length === 0) return null;
   const totalScores = filteredData.length > 0 ? filteredData[0] : [];
-
-  return (
+ if(level === 'grade 7' && botType === 'student'){
+       watch_speak_heading = 'SpeakingPractice';
+ }
+ else{
+   watch_speak_heading = 'WatchAndSpeak';
+ }
+  
+return (
     <div className={styles.tableContainer}>
       <table className={styles.dataTable}>
         <thead>
@@ -1260,12 +1350,13 @@ const renderAssessmentTable = () => {
               <span className={styles.totalLabel}>Total: {totalScores[4] ?? 0}</span>
             </th>
             <th className={styles.activityHeader}>
-              WatchAndSpeak
+              {watch_speak_heading}
               <br />
               <span className={styles.totalLabel}>Total: {totalScores[5] ?? 0}</span>
             </th>
             <th className={styles.activityHeader}>
-              Total Score
+              Total Score <br /> 
+              <span className={styles.totalLabel}> {totalScores[6] ?? 0}</span>
             </th>
 
             <th className={styles.spacerColumn}></th>
@@ -1276,12 +1367,14 @@ const renderAssessmentTable = () => {
               <span className={styles.totalLabel}>Total: {totalScores[8] ?? 0}</span>
             </th>
             <th className={styles.activityHeader}>
-              WatchAndSpeak
+              {watch_speak_heading}
               <br />
               <span className={styles.totalLabel}>Total: {totalScores[9] ?? 0}</span>
             </th>
             <th className={styles.activityHeader}>
-              Total Score
+              Total Score <br /> 
+              <span className={styles.totalLabel}> {totalScores[10] ?? 0}</span>
+             
             </th>
           </tr>
         </thead>
@@ -1318,6 +1411,7 @@ const renderAssessmentTable = () => {
       </table>
     </div>
   );
+ 
 };
 
 
@@ -1350,8 +1444,8 @@ const renderAssessmentTable = () => {
                 value={rollout}
                 onChange={handleRolloutChange}
               >
-                {botType === "teacher" && <option value="2">Rollout - 2</option>}
-                <option value="1">Rollout - 1</option>
+                {botType === "teacher" && <option value="1">Rollout - 1</option>}
+                <option value="2">Rollout - 2</option>
                 {botType === "teacher" && <option value="0">Pilot - 0</option>}
               </select>
             </div>
@@ -1382,14 +1476,14 @@ const renderAssessmentTable = () => {
                   onChange={handleLevelChange}
                 >
                   <option value="">Select level</option>
-                  <option value="class 1">Grade 1</option>
-                  <option value="class 2">Grade 2</option>
-                  <option value="class 3">Grade 3</option>
-                  <option value="class 4">Grade 4</option>
-                  <option value="class 5">Grade 5</option>
-                  <option value="class 6">Grade 6</option>
-                  <option value="class 7 and above">Grade 7</option>
-                  <option value="class 8">Grade 8</option>
+                  <option value="grade 1">Grade 1</option>
+                  <option value="grade 2">Grade 2</option>
+                  <option value="grade 3">Grade 3</option>
+                  <option value="grade 4">Grade 4</option>
+                  <option value="grade 5">Grade 5</option>
+                  <option value="grade 6">Grade 6</option>
+                  <option value="grade 7">Grade 7</option>
+                  {/* <option value="class 8">Grade 8</option> */}
                 </select>
               </div>
             )}
@@ -1408,6 +1502,14 @@ const renderAssessmentTable = () => {
                       (rollout !== "0" && rollout !== "1" && rollout !== "2")
                     ))
                   }
+
+//               disabled={
+//   (botType === "student" && !level) ||
+//   (botType === "teacher" && (
+//     ((rollout === "0" || rollout === "1") && !targetGroup) ||
+//     (rollout === "2")
+//   ))
+// }
               >
                 <option value="">Select cohort</option>
                 {botType === "teacher" && rollout === "0" ? (
