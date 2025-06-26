@@ -17,12 +17,8 @@ const SpeakingPracticeEdit = ({
         difficultyLevel === 'hard' ? styles.badge_hard : '';
 
     return (
-        <div className={showDifficultyBadge ? `${styles.difficulty_question_box} ${difficultyClass}` : ''}>
-            {showDifficultyBadge && difficultyLevel && (
-                <div className={`${styles.difficulty_badge} ${badgeClass}`}>
-                    {difficultyLevel}
-                </div>
-            )}
+        <div>
+            {/* Difficulty badge is handled by parent component, not here */}
             <label className={styles.answerEditLabel}>Question Audio</label>
             <input
                 type="file"

@@ -105,7 +105,7 @@ export const createListenAndSpeakLesson = async (course, sequenceNumber, alias, 
                 null,
                 answersArray,
                 lessonId,
-                (index + 1).toString(),
+                question.questionNumber ? question.questionNumber.toString() : (index + 1).toString(),
                 activityType,
                 question.customFeedbackText || null,
                 question.customFeedbackImage || null,
@@ -153,7 +153,7 @@ export const createWatchAndSpeakLesson = async (course, sequenceNumber, alias, a
                 question.mediaSecond,
                 answersArray,
                 lessonId,
-                (index + 1).toString(),
+                question.questionNumber ? question.questionNumber.toString() : (index + 1).toString(),
                 activityType,
                 question.customFeedbackText || null,
                 question.customFeedbackImage || null,
@@ -272,7 +272,7 @@ export const createSpeakingPracticeLesson = async (course, sequenceNumber, alias
                 null,
                 null,
                 lessonId,
-                (index + 1).toString(),
+                question.questionNumber ? question.questionNumber.toString() : (index + 1).toString(),
                 activityType
             )
         })
