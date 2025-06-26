@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Navbar, Sidebar } from "../../components";
 import styles from './WhatsappLogs.module.css';
-import { getCombinedUserData, getActivityLogsByPhoneNumber } from "../../helper";
+import { getCombinedUserData, getActivityLogsByPhoneNumber, getMetadataByPhoneNumber, getActiveSessionByPhoneNumberAndBotPhoneNumberId } from "../../helper";
 import { useSidebar } from '../../components/SidebarContext';
 import { TailSpin } from 'react-loader-spinner';
 import Select from 'react-select';
@@ -29,6 +29,10 @@ const WhatsappLogs = () => {
     const [selectedCohorts, setSelectedCohorts] = useState(['All']);
 
     const [selectedBotPhone, setSelectedBotPhone] = useState(null);
+    const [profilesData, setProfilesData] = useState([]);
+    const [activeSession, setActiveSession] = useState(null);
+    const [profilesLoading, setProfilesLoading] = useState(false);
+    const [activeSessionLoading, setActiveSessionLoading] = useState(false);
 
     const BOT_PHONE_NUMBERS = [
         { label: "Teacher Bot", value: "410117285518514" },
@@ -130,6 +134,9 @@ const WhatsappLogs = () => {
         setSelectedBotPhone(null);
         // Reset activity logs
         setActivityLogs([]);
+        // Reset profiles and active session data
+        setProfilesData([]);
+        setActiveSession(null);
       }, [selectedPhoneNumber]);
 
     const fetchLogs = async (phoneNumber,botPhoneNumber, currentPage) => {
@@ -148,8 +155,49 @@ const WhatsappLogs = () => {
         }
     };
 
+    const fetchProfilesData = async (phoneNumber) => {
+        try {
+            setProfilesLoading(true);
+            const response = await getMetadataByPhoneNumber(phoneNumber);
+            if (response.data && Array.isArray(response.data)) {
+                // Filter for students with non-null/non-empty class level
+                const studentProfiles = response.data.filter(profile => 
+                    profile.classLevel && 
+                    profile.classLevel.trim() !== '' &&
+                    profile.classLevel !== null
+                );
+                setProfilesData(studentProfiles);
+            }
+        } catch (error) {
+            console.error("Error fetching profiles:", error);
+        } finally {
+            setProfilesLoading(false);
+        }
+    };
+
+    const fetchActiveSession = async (phoneNumber, botPhoneNumberId) => {
+        try {
+            setActiveSessionLoading(true);
+            const response = await getActiveSessionByPhoneNumberAndBotPhoneNumberId(phoneNumber, botPhoneNumberId);
+            if (response.data) {
+                setActiveSession(response.data);
+            } else {
+                setActiveSession(null);
+            }
+        } catch (error) {
+            console.error("Error fetching active session:", error);
+            setActiveSession(null);
+        } finally {
+            setActiveSessionLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (!selectedPhoneNumber) return;
+        
+        // Fetch profiles data when phone number is selected
+        fetchProfilesData(selectedPhoneNumber);
+        
         if (!selectedBotPhone) return;
 
         // Reset states before fetching new logs
@@ -164,8 +212,10 @@ const WhatsappLogs = () => {
                 setActivityLogs(logs.reverse());
                 setHasMore(logs.length === PAGE_SIZE);
 
-
                 setSelectedUserName(selectedPhoneNumber);
+
+                // Fetch active session data
+                await fetchActiveSession(selectedPhoneNumber, selectedBotPhone);
 
                 setTimeout(() => {
                     if (chatContainerRef.current) {
@@ -294,24 +344,72 @@ const WhatsappLogs = () => {
 
                     {/* Right Panel for Activity Logs */}
                     <div className={styles.activity_logs}>
-                        <h3>Messages with {selectedUserName || "Select a contact"}</h3>
-
-                        {/* Bot phone selection UI */}
+                        {/* Compact unified row with profiles, active session, and bot selection */}
                         {selectedPhoneNumber && (
-                            <div className={styles.bot_phone_selector}>
-                                <h4>Select Bot Number to View Logs</h4>
-                                <div className={styles.bot_phone_buttons}>
-                                {BOT_PHONE_NUMBERS.map((bot) => (
-                                    <button
-                                        key={bot.value}
-                                        className={`${styles.bot_phone_button} ${
-                                            selectedBotPhone === bot.value ? styles.active_bot_phone : ''
-                                        }`}
-                                        onClick={() => handleBotPhoneSelect(bot.value)}
-                                    >
-                                        {bot.label}
-                                    </button>
-                                ))}
+                            <div className={styles.unified_control_bar}>
+                                {/* Active Session Badge */}
+                                {selectedBotPhone && (
+                                    <div className={styles.active_session_compact}>
+                                        {activeSessionLoading ? (
+                                            <div className={styles.loader_tiny}>
+                                                <TailSpin color="#2e7d32" height={16} width={16} />
+                                            </div>
+                                        ) : activeSession && profilesData.length > 0 ? (
+                                            <>
+                                                <span className={styles.active_indicator}>●</span>
+                                                <span className={styles.active_text}>
+                                                    Active: {(() => {
+                                                        const activeProfile = profilesData.find(p => p.profile_id === activeSession.profile_id);
+                                                        return activeProfile ? (activeProfile.studentName || activeProfile.name || 'Unknown') : activeSession.profile_id;
+                                                    })()}
+                                                </span>
+                                            </>
+                                        ) : null}
+                                    </div>
+                                )}
+
+                                {/* Student Profiles */}
+                                {profilesData.length > 0 && (
+                                    <div className={styles.profiles_compact}>
+                                        {profilesLoading ? (
+                                            <div className={styles.loader_tiny}>
+                                                <TailSpin color="#51bbcc" height={16} width={16} />
+                                            </div>
+                                        ) : (
+                                            profilesData.map((profile, index) => {
+                                                const isActive = activeSession && activeSession.profile_id === profile.profile_id;
+                                                return (
+                                                    <div 
+                                                        key={profile.profile_id || index} 
+                                                        className={`${styles.profile_compact} ${isActive ? styles.profile_active : ''}`}
+                                                    >
+                                                        <span className={styles.profile_name_compact}>
+                                                            {profile.studentName || profile.name || 'Unknown Name'}
+                                                            {isActive && <span className={styles.active_dot}>●</span>}
+                                                        </span>
+                                                        <span className={styles.profile_class_compact}>
+                                                            Class: {profile.classLevel}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Bot Selection */}
+                                <div className={styles.bot_selector_compact}>
+                                    {BOT_PHONE_NUMBERS.map((bot) => (
+                                        <button
+                                            key={bot.value}
+                                            className={`${styles.bot_button_compact} ${
+                                                selectedBotPhone === bot.value ? styles.active_bot_compact : ''
+                                            }`}
+                                            onClick={() => handleBotPhoneSelect(bot.value)}
+                                        >
+                                            {bot.label}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
                         )}

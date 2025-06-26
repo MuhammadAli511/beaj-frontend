@@ -430,3 +430,184 @@
   border-color: #51bbcc;
   box-shadow: 0 2px 5px rgba(81, 187, 204, 0.3);
 }
+
+/* Unified Compact Control Bar */
+.unified_control_bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+  min-height: 50px;
+}
+
+/* Active Session Compact */
+.active_session_compact {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #e8f5e8;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  border: 1px solid #c8e6c9;
+  flex-shrink: 0;
+}
+
+.active_indicator {
+  color: #4caf50;
+  font-size: 8px;
+  animation: pulse-green 2s infinite;
+}
+
+.active_text {
+  color: #2e7d32;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Profiles Compact */
+.profiles_compact {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.profile_compact {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 80px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.profile_compact:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.profile_active {
+  border-color: #4caf50;
+  background-color: #f1f8e9;
+  box-shadow: 0 1px 4px rgba(76, 175, 80, 0.2);
+}
+
+.profile_name_compact {
+  font-weight: 600;
+  color: #333;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 2px;
+}
+
+.active_dot {
+  color: #4caf50;
+  font-size: 6px;
+  animation: pulse-green 2s infinite;
+}
+
+.profile_class_compact {
+  font-size: 9px;
+  color: #666;
+  background-color: #e3f2fd;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+/* Bot Selector Compact */
+.bot_selector_compact {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.bot_button_compact {
+  padding: 4px 10px;
+  border: 1px solid #76e1f0;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #333;
+  white-space: nowrap;
+}
+
+.bot_button_compact:hover {
+  background-color: #e9f5f7;
+  border-color: #7ec3ce;
+}
+
+.active_bot_compact {
+  background-color: #51bbcc;
+  color: white;
+  border-color: #51bbcc;
+  box-shadow: 0 1px 3px rgba(81, 187, 204, 0.3);
+}
+
+.loader_tiny {
+  display: flex;
+  align-items: center;
+}
+
+@keyframes pulse-green {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1000px) {
+  .unified_control_bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 15px;
+  }
+  
+  .bot_selector_compact {
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+  
+  .profiles_compact {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bot_button_compact {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+  
+  .profile_compact {
+    min-width: 70px;
+    padding: 3px 6px;
+  }
+  
+  .profile_name_compact {
+    font-size: 10px;
+  }
+  
+  .profile_class_compact {
+    font-size: 8px;
+  }
+}
