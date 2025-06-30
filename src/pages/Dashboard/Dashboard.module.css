@@ -9,7 +9,7 @@
 
 .content {
   margin-left: 265px;
-  padding: 25px;
+  padding: 20px;
   flex-grow: 1;
   background: #f1f3f4;
   height: 100%;
@@ -20,17 +20,17 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding-bottom: 20px;
+  padding-bottom: 15px;
   background-color: #fff;
-  padding: 15px 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
+  padding: 12px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  margin-bottom: 15px;
 }
 
 .botStatusHeading {
-  margin-right: 10px;
-  font-size: 16px;
+  margin-right: 8px;
+  font-size: 14px;
   font-weight: 600;
   color: #444;
 }
@@ -38,28 +38,28 @@
 .botStatus {
   display: flex;
   align-items: center;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: #333;
 }
 
 .greenDot,
 .redDot {
-  height: 10px;
-  width: 10px;
+  height: 8px;
+  width: 8px;
   border-radius: 50%;
-  margin-right: 8px;
+  margin-right: 6px;
   animation: blink 1.5s infinite;
 }
 
 .greenDot {
   background-color: #4CAF50;
-  box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+  box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
 }
 
 .redDot {
   background-color: #f44336;
-  box-shadow: 0 0 5px rgba(244, 67, 54, 0.5);
+  box-shadow: 0 0 4px rgba(244, 67, 54, 0.5);
 }
 
 @keyframes blink {
@@ -130,15 +130,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 150px;
+  height: 120px;
   margin: 0 auto;
 }
 
 .error {
   text-align: center;
   color: #f44336;
-  font-size: 16px;
-  margin: 20px 0;
+  font-size: 14px;
+  margin: 15px 0;
 }
 
 .feedbackSection {
@@ -259,5 +259,289 @@
   
   .value {
     font-size: 28px;
+  }
+}
+
+/* Course Statistics Styles */
+.courseStatsSection {
+  margin-top: 15px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.mainSectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #51BBCC 0%, #4ECDC4 100%);
+  text-align: center;
+  border-bottom: 1px solid #e1e8ed;
+}
+
+.statsContainer {
+  padding: 15px;
+  background: #fafbfc;
+}
+
+/* Overall Stats */
+.overallStats {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.overallTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  text-align: center;
+  position: relative;
+}
+
+.overallTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: #51BBCC;
+  border-radius: 2px;
+}
+
+.overallGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.overallCard {
+  background: linear-gradient(135deg, #51BBCC 0%, #4ECDC4 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 3px 12px rgba(81, 187, 204, 0.25);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.overallCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.overallCard:hover::before {
+  transform: translateX(100%);
+}
+
+.overallCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(81, 187, 204, 0.35);
+}
+
+.overallCount {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.overallLabel {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.95;
+  letter-spacing: 0.2px;
+}
+
+/* Section Stats */
+.statSection {
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border-left: 3px solid #51BBCC;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 15px;
+}
+
+.statCard {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.statCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  border-color: #51BBCC;
+}
+
+.statTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statCount {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 8px 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.statSubtitle {
+  font-size: 9px;
+  font-weight: 500;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 6px;
+  padding: 3px 6px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+/* Funnel Chart at bottom */
+.funnelChart {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 280px;
+  margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .content {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainSectionTitle {
+    font-size: 18px;
+    padding: 12px 15px;
+  }
+
+  .statsContainer {
+    padding: 12px;
+  }
+
+  .sectionTitle {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .overallCard {
+    padding: 12px;
+  }
+
+  .overallCount {
+    font-size: 22px;
+  }
+
+  .statCount {
+    font-size: 18px;
+  }
+
+  .funnelChart {
+    height: 220px;
+    padding: 12px;
+  }
+
+  .overallGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 10px;
+  }
+
+  .courseStatsSection {
+    border-radius: 8px;
+  }
+
+  .statCard {
+    padding: 10px;
+  }
+
+  .statTitle {
+    font-size: 11px;
+    min-height: 26px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  }
+
+  .statCount {
+    font-size: 16px;
+  }
+
+  .funnelChart {
+    height: 200px;
   }
 }

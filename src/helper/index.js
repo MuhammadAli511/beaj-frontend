@@ -1174,7 +1174,17 @@ export const getCombinedUserData = async () => {
 
 // ACTIVE SESSION
 export const getActiveSessionByPhoneNumberAndBotPhoneNumberId = async (phoneNumber, botPhoneNumberId) => {
-    const response = await fetch(`${API_URL}/waActiveSession/getByPhoneNumberAndBotPhoneNumberId/${phoneNumber}/${botPhoneNumberId}`, {
+    const response = await fetch(`${API_URL}/sessions/getActiveSession/${phoneNumber}/${botPhoneNumberId}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// API call to get student course statistics
+export const getStudentCourseStats = async () => {
+    const response = await fetch(`${API_URL}/stats/studentCourseStats`, {
         headers: getHeaders(),
     });
 
