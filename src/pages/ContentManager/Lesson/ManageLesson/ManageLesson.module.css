@@ -212,7 +212,53 @@
   }
   
   .migrate_button {
-    padding: 6px 10px;
+    padding: 6px 12px;
     font-size: 12px;
+    min-width: 70px;
+  }
+}
+
+.clear_cache_section {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  padding: 15px 0;
+}
+
+.clear_cache_button {
+  padding: 12px 24px;
+  background-color: #ff6b35;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+}
+
+.clear_cache_button:hover:not(:disabled) {
+  background-color: #e55a2b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.clear_cache_button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 1000px) {
+  .clear_cache_section {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  
+  .clear_cache_button {
+    padding: 10px 20px;
+    font-size: 13px;
   }
 }

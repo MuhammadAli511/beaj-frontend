@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ManageLesson.module.css';
-import { getAllCategories, getCoursesByCategoryId, getLessonsByCourse, migrateLesson } from '../../../../helper';
+import { getAllCategories, getCoursesByCategoryId, getLessonsByCourse, migrateLesson, clearCache } from '../../../../helper';
 
 import WatchLesson from './LessonTypes/WatchLesson';
 import ReadLesson from './LessonTypes/ReadLesson';
@@ -271,6 +271,22 @@ const ManageLesson = () => {
         setSelectedDay(e.target.value);
     };
 
+    const handleClearCache = async () => {
+        try {
+            setIsLoading(true);
+            const response = await clearCache();
+            if (response.status === 200) {
+                alert("Cache cleared successfully!");
+            } else {
+                alert(`Error clearing cache: ${response.data.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            alert(`Error clearing cache: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const getFilteredLessons = () => {
         let filtered = [...lessons];
 
@@ -440,6 +456,15 @@ const ManageLesson = () => {
                     />
                 </div>
             )}
+            <div className={styles.clear_cache_section}>
+                <button
+                    className={styles.clear_cache_button}
+                    onClick={handleClearCache}
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Clearing...' : 'Clear Cache'}
+                </button>
+            </div>
             <div className={styles.tabs}>
                 {getLessonTypes().map((type) => (
                     <button

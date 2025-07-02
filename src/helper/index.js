@@ -1191,3 +1191,14 @@ export const getStudentCourseStats = async () => {
     const data = await response.json();
     return { status: response.status, data };
 };
+
+// API call to clear cache
+export const clearCache = async () => {
+    const response = await fetch(`${API_URL}/stats/clearingCache`, {
+        method: "POST",
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
