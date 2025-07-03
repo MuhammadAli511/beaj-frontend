@@ -1174,7 +1174,7 @@ export const getCombinedUserData = async () => {
 
 // ACTIVE SESSION
 export const getActiveSessionByPhoneNumberAndBotPhoneNumberId = async (phoneNumber, botPhoneNumberId) => {
-    const response = await fetch(`${API_URL}/sessions/getActiveSession/${phoneNumber}/${botPhoneNumberId}`, {
+    const response = await fetch(`${API_URL}/waActiveSession/getByPhoneNumberAndBotPhoneNumberId/${phoneNumber}/${botPhoneNumberId}`, {
         headers: getHeaders(),
     });
 
