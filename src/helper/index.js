@@ -1088,7 +1088,16 @@ export const getStudentTrialUserJourneyStats = async (date) => {
     return { status: response.status, data };
 };
 
+export const getstudentAnalyticsStats = async (courseId, grade, cohort, graphType) => {
+    const response = await fetch(`${API_URL}/stats/studentAnalyticsStats`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ courseId, grade, cohort, graphType }),
+    });
 
+    const data = await response.json();
+    return { status: response.status, data };
+};
 // ADD USERS
 // POST api/chatbot/upload-user-data
 export const uploadUserData = async (users) => {
