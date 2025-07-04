@@ -309,11 +309,11 @@ const UsersData = () => {
             }))
             break
           case "graph3":
-            if (response.data.performanceData) {
-              labels = response.data.performanceData.map((item) => item.subject)
-              data = response.data.performanceData.map((item) => {
-                const val = Number.parseInt(item.score)
-                return isNaN(val) ? 0 : val
+            if (response.data.lastLesson) {
+              labels = response.data.lastLesson.map((item) => item.cohort)
+              data = response.data.lastLesson.map((item) => {
+                const val = Number.parseInt(item.count)
+                return isNaN(val) ? null : val
               })
             }
             break
@@ -365,7 +365,7 @@ const UsersData = () => {
 
 // Fetch all graphs data with default values when analytics tab is clicked
   const fetchAllGraphsData = async () => {
-    const graphTypes = ["graph1", "graph2"]
+    const graphTypes = ["graph1", "graph2", "graph3"]
 
     for (const graphType of graphTypes) {
       updateCohortRange(graphType, 'grade 1');
@@ -2088,135 +2088,7 @@ const UsersData = () => {
                 </div>
               </div>
 
-              {/* Graph 3 - Performance Analysis */}
-              {/* <div className={styles.analytics_card}>
-                <div className={styles.card_header}>
-                  <div className={styles.card_title_section}>
-                    <h3>Performance Analysis</h3>
-                    <p>Student performance metrics by subject</p>
-                  </div>
-                  <div className={styles.card_filters}>
-                    <div className={styles.filter_group}>
-                      <label className={styles.filter_label}>Grade</label>
-                      <Select
-                        className={styles.select}
-                        options={gradeOptions}
-                        value={analyticsFilters.graph3.grade}
-                        onChange={(option) => handleGradeChange("graph3", option)}
-                        isClearable
-                        placeholder="Select Grade"
-                      />
-                    </div>
-                    <div className={styles.filter_group}>
-                      <label className={styles.filter_label}>Cohort</label>
-                      <Select
-                        className={styles.select}
-                        options={getCohortOptions("graph3")}
-                        value={analyticsFilters.graph3.cohort}
-                        onChange={(option) => handleCohortChange("graph3", option)}
-                        isDisabled={!analyticsFilters.graph3.grade}
-                        isClearable
-                        placeholder="Select Cohort"
-                      />
-                    </div>
-                    <button className={styles.clear_filters_button} onClick={() => clearAnalyticsFilters("graph3")}>
-                      Clear
-                    </button>
-                  </div>
-                </div>
-                <div className={styles.chart_wrapper}>
-                  {graphLoadingStates.graph3 ? (
-                    <div className={styles.graph_loader}>
-                      <TailSpin color="#51bbcc" height={40} width={40} />
-                      <p>Loading graph data...</p>
-                    </div>
-                  ) : (
-                    <Line
-                      data={{
-                        labels: analyticsData.graph3.labels,
-                        datasets: [
-                          {
-                            label: "Performance Score",
-                            data: analyticsData.graph3.data,
-                            borderColor: "rgba(81, 187, 204, 1)",
-                            backgroundColor: "rgba(81, 187, 204, 0.1)",
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4,
-                            pointBackgroundColor: "rgba(81, 187, 204, 1)",
-                            pointBorderColor: "#fff",
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                          },
-                        ],
-                      }}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            display: false,
-                          },
-                          tooltip: {
-                            backgroundColor: "rgba(0, 0, 0, 0.8)",
-                            titleColor: "#fff",
-                            bodyColor: "#fff",
-                            borderColor: "#51bbcc",
-                            borderWidth: 1,
-                            callbacks: {
-                              label: (context) => `Score: ${context.raw}`,
-                            },
-                          },
-                        },
-                        scales: {
-                          y: {
-                            beginAtZero: true,
-                            grid: {
-                              color: "rgba(0, 0, 0, 0.1)",
-                            },
-                            ticks: {
-                              color: "#666",
-                              font: {
-                                size: 12,
-                              },
-                            },
-                            title: {
-                              display: true,
-                              text: "Performance Score",
-                              color: "#333",
-                              font: {
-                                size: 14,
-                                weight: "bold",
-                              },
-                            },
-                          },
-                          x: {
-                            grid: {
-                              display: false,
-                            },
-                            ticks: {
-                              color: "#666",
-                              font: {
-                                size: 12,
-                              },
-                            },
-                            title: {
-                              display: true,
-                              text: "Subject",
-                              color: "#333",
-                              font: {
-                                size: 14,
-                                weight: "bold",
-                              },
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  )}
-                </div>
-              </div> */}
+              
 
               {/* Graph 4 - Engagement Trends */}
               {/* <div className={styles.analytics_card}>
@@ -2449,6 +2321,138 @@ const UsersData = () => {
                 </div>
               </div> */}
               </div>
+             <div className={styles.analytics_grid}>
+            {/* Graph 3 - Performance Analysis */}
+              <div className={styles.analytics_card}>
+                <div className={styles.card_header}>
+                  <div className={styles.card_title_section}>
+                    <h3>Performance Analysis</h3>
+                    <p>Student performance metrics by subject</p>
+                  </div>
+                  <div className={styles.card_filters}>
+                    <div className={styles.filter_group}>
+                      <label className={styles.filter_label}>Grade</label>
+                      <Select
+                        className={styles.select}
+                        options={gradeOptions}
+                        value={analyticsFilters.graph3.grade}
+                        onChange={(option) => handleGradeChange("graph3", option)}
+                        isClearable
+                        placeholder="Select Grade"
+                      />
+                    </div>
+                    <div className={styles.filter_group}>
+                      <label className={styles.filter_label}>Cohort</label>
+                      <Select
+                        className={styles.select}
+                        options={getCohortOptions("graph3")}
+                        value={analyticsFilters.graph3.cohort}
+                        onChange={(option) => handleCohortChange("graph3", option)}
+                        isDisabled={!analyticsFilters.graph3.grade}
+                        isClearable
+                        placeholder="Select Cohort"
+                      />
+                    </div>
+                   
+                  </div>
+                </div>
+                <div className={styles.chart_wrapper}>
+                  {graphLoadingStates.graph3 ? (
+                    <div className={styles.graph_loader}>
+                      <TailSpin color="#51bbcc" height={40} width={40} />
+                      <p>Loading graph data...</p>
+                    </div>
+                  ) : (
+                    <Line
+                      data={{
+                        labels: analyticsData.graph3.labels,
+                        datasets: [
+                          {
+                            label: "Performance Score",
+                            data: analyticsData.graph3.data,
+                            borderColor: "rgba(81, 187, 204, 1)",
+                            backgroundColor: "rgba(81, 187, 204, 0.1)",
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: "rgba(81, 187, 204, 1)",
+                            pointBorderColor: "#fff",
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                          tooltip: {
+                            backgroundColor: "rgba(0, 0, 0, 0.8)",
+                            titleColor: "#fff",
+                            bodyColor: "#fff",
+                            borderColor: "#51bbcc",
+                            borderWidth: 1,
+                            callbacks: {
+                              label: (context) => `Score: ${context.raw}`,
+                            },
+                          },
+                        },
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            grid: {
+                              color: "rgba(0, 0, 0, 0.1)",
+                            },
+                            ticks: {
+                              color: "#666",
+                              font: {
+                                size: 12,
+                              },
+                            },
+                            title: {
+                              display: true,
+                              text: "Performance Score",
+                              color: "#333",
+                              font: {
+                                size: 14,
+                                weight: "bold",
+                              },
+                            },
+                          },
+                          x: {
+                            grid: {
+                              display: false,
+                            },
+                            ticks: {
+                              color: "#666",
+                              font: {
+                                size: 12,
+                              },
+                            },
+                            title: {
+                              display: true,
+                              text: "Subject",
+                              color: "#333",
+                              font: {
+                                size: 14,
+                                weight: "bold",
+                              },
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+
+
+             </div>
+              
             
           </>
                 )}
