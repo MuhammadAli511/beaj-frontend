@@ -785,3 +785,8 @@
   width: 50px; /* Light yellow or any distinct color */
   /* font-weight: bold; */
 }
+.totalScoreCell1 {
+  background-color:rgb(215, 235, 173);
+  width: 50px; /* Light yellow or any distinct color */
+  /* font-weight: bold; */
+}
