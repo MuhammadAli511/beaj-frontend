@@ -2501,7 +2501,7 @@ const UsersData = () => {
                             labels: analyticsData.graph5.labels,
                             datasets: [
                               {
-                                label: "Daily Completion Percentage",
+                                label: "Daily Completion Count",
                                 data: analyticsData.graph5.data,
                                 backgroundColor: [
                                "rgba(79, 234, 234, 0.8)",
@@ -2528,8 +2528,8 @@ const UsersData = () => {
                                 display: false,
                               },
                               datalabels: {
-                                anchor: "end",
-                                align: "right",
+                                // anchor: "end",
+                                // align: "",
                                 color: "#000",
                                 font: {
                                   weight: "bold",
@@ -2543,7 +2543,7 @@ const UsersData = () => {
                                 borderColor: "#51bbcc",
                                 borderWidth: 1,
                                 callbacks: {
-                                  label: (context) => `%: ${context.raw}`,
+                                  label: (context) => `Users: ${context.raw}`,
                                 },
                               },
                             },
@@ -2561,7 +2561,7 @@ const UsersData = () => {
                                 },
                                 title: {
                                   display: true,
-                                  text: "Percentage (%)",
+                                  text: "No. of people",
                                   color: "#333",
                                   font: {
                                     size: 14,
