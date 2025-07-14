@@ -919,7 +919,18 @@ export const getAlluserProgressByModule = async (botType, rollout, level, cohort
     return { status: response.status, data };
 }
 
+export const getcohortList = async ( botType,rollout,level,targetGroup) => {
+    const queryParams = new URLSearchParams({
+        botType,rollout,level,targetGroup
+    }).toString();
 
+    const response = await fetch(`${API_URL}/userProgress/getcohortList?${queryParams}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+}
 
 // METADATA
 // GET  api/waUserMetaData/getAll

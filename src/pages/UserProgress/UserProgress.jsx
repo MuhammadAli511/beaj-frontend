@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Navbar, Sidebar } from "../../components";
 import styles from './UserProgress.module.css';
 import { useSidebar } from '../../components/SidebarContext';
-import { getAlluserProgressByModule } from '../../helper/index';
+import { getAlluserProgressByModule, getcohortList } from '../../helper/index';
 import { TailSpin } from 'react-loader-spinner';
 import { Bar } from "react-chartjs-2"
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js"
@@ -109,6 +109,465 @@ const LeaderboardModal = ({ isOpen, onClose, targetGroup, cohort, viewType, lead
   );
 };
 
+// const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) => {
+//   const [chartType, setChartType] = useState("L1")
+//   const [loading, setLoading] = useState(false)
+//   const [chartData, setChartData] = useState(null)
+//   const [chartOptions, setChartOptions] = useState(null)
+//   const chartRef = useRef(null)
+//   const chartContainerRef = useRef(null)
+//   const [optionFilter, setOptionFilter] = useState("all")
+//   const [thresholdValue, setThresholdValue] = useState(null)
+//   const [maxTotalLessons, setMaxTotalLessons] = useState(null)
+//   const [filteredCount, setFilteredCount] = useState(0)
+//   const [totalCount, setTotalCount] = useState(0)
+
+//   // Column indices for different chart types
+//   const chartTypeIndices = {
+//     L1: { title: "Level 1 Progress" },
+//     L2: { title: "Level 2 Progress" },
+//     L3: { title: "Level 3 Progress" },
+//     Grand: { title: "Grand Total Progress" },
+//   }
+
+//   // Function to determine the "Total Lessons" value based on the highest value in the dataset
+//   const getTotalLessonsValue = (maxValue) => {
+//     if (maxValue <= 6) return 6
+//     if (maxValue <= 12) return 12
+//     if (maxValue <= 18) return 18
+//     if (maxValue <= 24) return 24
+//     if (maxValue <= 48) return 48
+//     return 72
+//   }
+
+//   // Initialize threshold when modal opens or chart type changes
+//   useEffect(() => {
+//     if (isOpen && userData && userData.length > 0) {
+//       const columnIndices = {
+//         L1: 8,
+//         L2: 13,
+//         L3: 18,
+//         Grand: 19,
+//       }
+
+//       const valueColumnIndex = columnIndices[chartType]
+
+//       // Get all valid values for the current chart type
+//       const validValues = userData
+//         .map((row) => {
+//           const value = Number.parseInt(row[valueColumnIndex] || "")
+//           return isNaN(value) ? 0 : value
+//         })
+//         .filter((value) => value !== null)
+
+//       const maxValue = Math.max(...validValues, 6)
+//       const totalLessons = getTotalLessonsValue(maxValue)
+
+//       setMaxTotalLessons(totalLessons)
+//       setTotalCount(userData.length)
+
+//       // Set initial threshold to max total lessons if not already set
+//       if (thresholdValue === null) {
+//         setThresholdValue(totalLessons)
+//       }
+//     }
+//   }, [isOpen, chartType, userData])
+
+//   // Generate chart data and options
+//   const generateChart = () => {
+//     setLoading(true)
+
+//     try {
+//       // Map chart types to their corresponding column indices
+//       const columnIndices = {
+//         L1: 8, // L1 total is column 7
+//         L2: 13, // L2 total is column 12
+//         L3: 18, // L3 total is column 17
+//         Grand: 19, // Grand total is column 18
+//       }
+
+//       // Get the column index for the selected chart type
+//       const valueColumnIndex = columnIndices[chartType]
+//       const title = chartTypeIndices[chartType].title
+
+//       // Get usernames (column 3) and data for the selected level
+//       let processedData = userData.map((row) => {
+//         const username = row[3] || ""
+//         const value = Number.parseInt(row[valueColumnIndex] || "")
+
+//         return {
+//           name: username,
+//           value: isNaN(value) ? null : value,
+//         }
+//       })
+
+//       // Remove entries with null/undefined names
+//       processedData = processedData.filter((item) => item.name && item.name.trim() !== "")
+
+//       // Store original count
+//       const originalCount = processedData.length
+
+//       // Apply filtering based on threshold and option filter
+//       if (thresholdValue !== null && thresholdValue > 0) {
+//         processedData = processedData.filter((item) => {
+//           switch (optionFilter) {
+//             case "all":
+//               return item.value <= thresholdValue
+//             case "update":
+//               return item.value === thresholdValue
+//             case "lagging":
+//               return item.value < thresholdValue
+//             default:
+//               return true
+//           }
+//         })
+//       }
+
+//       // Update filtered count
+//       setFilteredCount(processedData.length)
+
+//       // Find the maximum value for setting the scale
+//       const maxValue = Math.max(...processedData.map((item) => item.value), 6)
+//       const totalLessonsValue = maxTotalLessons || getTotalLessonsValue(maxValue)
+
+//       // Add "Total Lessons" as the first item
+//       processedData.unshift({
+//         name: "Total Lessons",
+//         value: thresholdValue,
+//         isTotal: true,
+//       })
+
+//       // Create chart data object with consistent styling
+//       const data = {
+//         labels: processedData.map((item) => item.name),
+//         datasets: [
+//           {
+//             label: "Lessons Completed",
+//             data: processedData.map((item) => item.value),
+//             backgroundColor: processedData.map((item) => {
+//               if (item.name === "Total Lessons") return "#4CD964" // Green for Total Lessons
+//               if (item.isEmpty) return "#ff6b6b" // Red for empty state
+//               return "#51bbcc" // Blue for others
+//             }),
+//             borderColor: processedData.map((item) => {
+//               if (item.name === "Total Lessons") return "#3CB371"
+//               if (item.isEmpty) return "#ff5252"
+//               return "#3da7b8"
+//             }),
+//             borderWidth: 1,
+//             barPercentage: 0.8,
+//             categoryPercentage: 0.8,
+//           },
+//         ],
+//       }
+
+//       // Create chart options object with consistent formatting
+//       const options = {
+//         indexAxis: "y", // This makes the bar chart horizontal
+//         responsive: true,
+//         maintainAspectRatio: false,
+//         layout: {
+//           padding: {
+//             right: 50, // Add padding for value labels
+//           },
+//         },
+//         plugins: {
+//           legend: {
+//             display: false, // Hide legend
+//           },
+//           title: {
+//             display: true,
+//             text: `${title}`,
+//             font: {
+//               size: 18,
+//               weight: "bold",
+//             },
+//             padding: {
+//             },
+//           },
+//           subtitle: {
+//             display: true,
+//             text: `Showing ${filteredCount} of ${totalCount} users | Threshold: ${thresholdValue || "None"} | Filter: ${optionFilter}`,
+//             font: {
+//               size: 14,
+//               // style: "italic",
+//             },
+//             color: "#666",
+//             padding: {
+//             },
+//           },
+//           tooltip: {
+//             callbacks: {
+//               label: (context) => `Lessons: ${context.raw}`,
+//             },
+//           },
+//           datalabels: {
+//             display: true,
+//             align: "end",
+//             anchor: "end",
+//             color: "#333",
+//             font: {
+//               weight: "bold",
+//               size: 12,
+//             },
+//             formatter: (value) => value,
+//             padding: {
+//               left: 10,
+//             },
+//             clamp: true,
+//             clip: false,
+//           },
+//         },
+//         scales: {
+//           y: {
+//             title: {
+//               display: true,
+//               text: "Names",
+//               font: {
+//                 weight: "bold",
+//               },
+//               padding: {
+//                 bottom: 10,
+//               },
+//             },
+//             ticks: {
+//               font: {
+//                 size: 11,
+//               },
+//               autoSkip: false,
+//               maxRotation: 0,
+//             },
+//             grid: {
+//               display: false,
+//             },
+//           },
+//           x: {
+//             title: {
+//               display: true,
+//               text: "Lessons Completed",
+//               font: {
+//                 weight: "bold",
+//               },
+//               padding: {
+//                 top: 10,
+//               },
+//             },
+//             beginAtZero: true,
+//             max: thresholdValue, // Consistent max value
+//             grid: {
+//               display: true,
+//               drawBorder: true,
+//               drawOnChartArea: true,
+//               drawTicks: true,
+//               color: "#e5e7eb",
+//             },
+//             ticks: {
+//               stepSize: thresholdValue <= 24 ? 5 : 12, // Consistent step size
+//             },
+//           },
+//         },
+//       }
+
+//       // Update state with chart data and options
+//       setChartData(data)
+//       setChartOptions(options)
+//     } catch (error) {
+//       console.error("Error generating chart:", error)
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   const handleOptionFilterChange = (e) => {
+//     setOptionFilter(e.target.value)
+//   }
+
+//   const handleChartTypeChange = (e) => {
+//     setChartType(e.target.value)
+//     // Reset threshold when chart type changes
+//     setThresholdValue(null)
+//   }
+
+//   const handleThresholdChange = (e) => {
+//     const value = e.target.value
+//     if (/^\d*$/.test(value)) {
+//       setThresholdValue(value ? Number.parseInt(value) : null)
+//     }
+//   }
+
+//   const handleDownload = () => {
+//     if (!chartRef.current) return
+
+//     try {
+//       const chartCanvas = chartRef.current.canvas
+//       if (!chartCanvas) {
+//         console.error("Canvas not found")
+//         alert("Unable to download chart. Canvas not found.")
+//         return
+//       }
+
+//       const tempCanvas = document.createElement("canvas")
+//       const tempCtx = tempCanvas.getContext("2d")
+
+//       tempCanvas.width = chartCanvas.width
+//       tempCanvas.height = chartCanvas.height
+
+//       tempCtx.fillStyle = "white"
+//       tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
+
+//       tempCtx.drawImage(chartCanvas, 0, 0)
+
+//       const imageUrl = tempCanvas.toDataURL("image/png", 1.0)
+
+//       const link = document.createElement("a")
+//       link.href = imageUrl
+//       link.download = `${chartTypeIndices[chartType].title}-${targetGroup}-${cohort}-${optionFilter}-${thresholdValue || "all"}.png`
+//       document.body.appendChild(link)
+//       link.click()
+//       document.body.removeChild(link)
+//     } catch (error) {
+//       console.error("Error downloading chart:", error)
+//       alert("Failed to download chart. Please try again.")
+//     }
+//   }
+
+//   function drawRoundedRect(ctx, x, y, width, height, radius) {
+//     ctx.beginPath()
+//     ctx.moveTo(x + radius, y)
+//     ctx.lineTo(x + width - radius, y)
+//     ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
+//     ctx.lineTo(x + width, y + height - radius)
+//     ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
+//     ctx.lineTo(x + radius, y + height)
+//     ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
+//     ctx.lineTo(x, y + radius)
+//     ctx.quadraticCurveTo(x, y, x + radius, y)
+//     ctx.closePath()
+//   }
+
+//   const handleCopy = async () => {
+//     if (!chartRef.current) return
+
+//     try {
+//       const chartCanvas = chartRef.current.canvas
+//       if (!chartCanvas) {
+//         console.error("Canvas not found")
+//         alert("Unable to copy chart. Canvas not found.")
+//         return
+//       }
+
+//       const tempCanvas = document.createElement("canvas")
+//       const tempCtx = tempCanvas.getContext("2d")
+
+//       tempCanvas.width = chartCanvas.width
+//       tempCanvas.height = chartCanvas.height
+
+//       tempCtx.fillStyle = "white"
+//       tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
+
+//       tempCtx.drawImage(chartCanvas, 0, 0)
+
+//       const imageUrl = tempCanvas.toDataURL("image/png", 1.0)
+
+//       const blob = await (await fetch(imageUrl)).blob()
+//       await navigator.clipboard.write([
+//         new ClipboardItem({
+//           "image/png": blob,
+//         }),
+//       ])
+
+//       alert("Chart copied to clipboard! You can now paste it anywhere.")
+//     } catch (error) {
+//       console.error("Error copying chart:", error)
+//       alert("Failed to copy chart. Please try again.")
+//     }
+//   }
+
+//   // Generate chart when dependencies change
+//   useEffect(() => {
+//     if (isOpen && userData && userData.length > 0 && maxTotalLessons !== null) {
+//       generateChart()
+//     }
+//   }, [isOpen, chartType, userData, optionFilter, thresholdValue, maxTotalLessons])
+
+//   // Early return if modal is not open
+//   if (!isOpen) return null
+
+//   return (
+//     <div className={styles.overlay_chart} onClick={onClose}>
+//       <div className={styles.modal_chart} onClick={(e) => e.stopPropagation()}>
+//         <div className={styles.header_chart}>
+//           <h2>
+//             Progress Chart - {targetGroup} {cohort}
+//           </h2>
+//           <div className={styles.actions_chart}>
+//             {chartData && (
+//               <>
+//                 <button className={styles.downloadButton_chart} onClick={handleDownload}>
+//                   <span>📥</span>
+//                   Download
+//                 </button>
+//                 <button className={styles.copyButton_chart} onClick={handleCopy}>
+//                   <span>📋</span>
+//                   Copy
+//                 </button>
+//               </>
+//             )}
+//             <button className={styles.closeButton_chart} onClick={onClose}>
+//               ❌
+//             </button>
+//           </div>
+//           <div className={styles.chartControls}>
+//             <input
+//               type="number"
+//               className={styles.searchInput}
+//               placeholder={`Max threshold (${maxTotalLessons || "Loading..."})`}
+//               min="1"
+//               max={maxTotalLessons || 72}
+//               step="1"
+//               value={thresholdValue || ""}
+//               onChange={handleThresholdChange}
+//             />
+//             <select className={styles.chartTypeSelect} value={chartType} onChange={handleChartTypeChange}>
+//               <option value="L1">L1 Progress Chart</option>
+//               <option value="L2">L2 Progress Chart</option>
+//               <option value="L3">L3 Progress Chart</option>
+//               <option value="Grand">Grand Total Chart</option>
+//             </select>
+//             <select className={styles.chartTypeSelect} value={optionFilter} onChange={handleOptionFilterChange}>
+//               <option value="all">All</option>
+//               <option value="update">Up-to-date</option>
+//               <option value="lagging">Lagging Behind</option>
+//             </select>
+//           </div>
+//         </div>
+//         <div className={styles.content_chart}>
+//           {loading ? (
+//             <div className={styles.loading_chart}>
+//               <TailSpin color="#51bbcc" height={50} width={50} />
+//               <p>Generating chart...</p>
+//             </div>
+//           ) : chartData && chartOptions ? (
+//             <div className={styles.chartContainer} ref={chartContainerRef}>
+//               <Bar
+//                 data={chartData}
+//                 options={chartOptions}
+//                 ref={chartRef}
+//                 height={600}
+//                 width={800}
+//               />
+//             </div>
+//           ) : (
+//             <div className={styles.noChartData}>
+//               <p>No chart data available. Please check your data or try a different selection.</p>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
 const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) => {
   const [chartType, setChartType] = useState("L1")
   const [loading, setLoading] = useState(false)
@@ -121,6 +580,12 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
   const [maxTotalLessons, setMaxTotalLessons] = useState(null)
   const [filteredCount, setFilteredCount] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
+
+  // New state for chunk management
+  const [currentChunk, setCurrentChunk] = useState(0)
+  const [totalChunks, setTotalChunks] = useState(1)
+  const [chunkSize] = useState(50) // Maximum users per chart
+  const [chunkedUserData, setChunkedUserData] = useState([])
 
   // Column indices for different chart types
   const chartTypeIndices = {
@@ -140,31 +605,63 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
     return 72
   }
 
-  // Initialize threshold when modal opens or chart type changes
+  // Function to divide users into chunks
+  const divideIntoChunks = (data, maxChunkSize) => {
+    if (data.length <= maxChunkSize) {
+      return [data]
+    }
+
+    const totalUsers = data.length
+    const optimalChunkSize = Math.ceil(totalUsers / Math.ceil(totalUsers / maxChunkSize))
+    const chunks = []
+
+    for (let i = 0; i < data.length; i += optimalChunkSize) {
+      chunks.push(data.slice(i, i + optimalChunkSize))
+    }
+
+    return chunks
+  }
+
+  // Initialize chunks and threshold when modal opens or data changes
   useEffect(() => {
     if (isOpen && userData && userData.length > 0) {
+      // Remove entries with null/undefined names first
+      const cleanedData = userData
+        .map((row) => {
+          const username = row[3] || ""
+          return {
+            originalRow: row,
+            name: username,
+          }
+        })
+        .filter((item) => item.name && item.name.trim() !== "")
+
+      // Divide into chunks
+      const chunks = divideIntoChunks(cleanedData, chunkSize)
+      setChunkedUserData(chunks)
+      setTotalChunks(chunks.length)
+      setCurrentChunk(0) // Reset to first chunk
+      setTotalCount(cleanedData.length)
+
+      // Calculate threshold based on all data
       const columnIndices = {
         L1: 8,
         L2: 13,
         L3: 18,
         Grand: 19,
       }
-
       const valueColumnIndex = columnIndices[chartType]
 
-      // Get all valid values for the current chart type
-      const validValues = userData
-        .map((row) => {
-          const value = Number.parseInt(row[valueColumnIndex] || "")
+      const validValues = cleanedData
+        .map((item) => {
+          const value = Number.parseInt(item.originalRow[valueColumnIndex] || "")
           return isNaN(value) ? 0 : value
         })
         .filter((value) => value !== null)
 
       const maxValue = Math.max(...validValues, 6)
       const totalLessons = getTotalLessonsValue(maxValue)
-
       setMaxTotalLessons(totalLessons)
-      setTotalCount(userData.length)
 
       // Set initial threshold to max total lessons if not already set
       if (thresholdValue === null) {
@@ -176,36 +673,38 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
   // Generate chart data and options
   const generateChart = () => {
     setLoading(true)
-
     try {
+      if (chunkedUserData.length === 0 || currentChunk >= chunkedUserData.length) {
+        setLoading(false)
+        return
+      }
+
       // Map chart types to their corresponding column indices
       const columnIndices = {
-        L1: 8, // L1 total is column 7
-        L2: 13, // L2 total is column 12
-        L3: 18, // L3 total is column 17
-        Grand: 19, // Grand total is column 18
+        L1: 8,
+        L2: 13,
+        L3: 18,
+        Grand: 19,
       }
 
       // Get the column index for the selected chart type
       const valueColumnIndex = columnIndices[chartType]
       const title = chartTypeIndices[chartType].title
 
-      // Get usernames (column 3) and data for the selected level
-      let processedData = userData.map((row) => {
-        const username = row[3] || ""
-        const value = Number.parseInt(row[valueColumnIndex] || "")
+      // Get current chunk data
+      const currentChunkData = chunkedUserData[currentChunk] || []
 
+      // Process current chunk data
+      let processedData = currentChunkData.map((item) => {
+        const value = Number.parseInt(item.originalRow[valueColumnIndex] || "")
         return {
-          name: username,
+          name: item.name,
           value: isNaN(value) ? null : value,
         }
       })
 
-      // Remove entries with null/undefined names
-      processedData = processedData.filter((item) => item.name && item.name.trim() !== "")
-
-      // Store original count
-      const originalCount = processedData.length
+      // Store original count for current chunk
+      const originalChunkCount = processedData.length
 
       // Apply filtering based on threshold and option filter
       if (thresholdValue !== null && thresholdValue > 0) {
@@ -223,7 +722,7 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
         })
       }
 
-      // Update filtered count
+      // Update filtered count for current chunk
       setFilteredCount(processedData.length)
 
       // Find the maximum value for setting the scale
@@ -245,9 +744,9 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
             label: "Lessons Completed",
             data: processedData.map((item) => item.value),
             backgroundColor: processedData.map((item) => {
-              if (item.name === "Total Lessons") return "#4CD964" // Green for Total Lessons
-              if (item.isEmpty) return "#ff6b6b" // Red for empty state
-              return "#51bbcc" // Blue for others
+              if (item.name === "Total Lessons") return "#4CD964"
+              if (item.isEmpty) return "#ff6b6b"
+              return "#51bbcc"
             }),
             borderColor: processedData.map((item) => {
               if (item.name === "Total Lessons") return "#3CB371"
@@ -261,40 +760,43 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
         ],
       }
 
-      // Create chart options object with consistent formatting
+      // Create chart options object with updated title showing chunk info
+      const chunkInfo = totalChunks > 1 ? ` (Chart ${currentChunk + 1} of ${totalChunks})` : ""
+      const userRange =
+        totalChunks > 1
+          ? ` | Users ${currentChunk * chunkSize + 1}-${Math.min((currentChunk + 1) * chunkSize, totalCount)}`
+          : ""
+
       const options = {
-        indexAxis: "y", // This makes the bar chart horizontal
+        indexAxis: "y",
         responsive: true,
         maintainAspectRatio: false,
         layout: {
           padding: {
-            right: 50, // Add padding for value labels
+            right: 50,
           },
         },
         plugins: {
           legend: {
-            display: false, // Hide legend
+            display: false,
           },
           title: {
             display: true,
-            text: `${title}`,
+            text: `${title}${chunkInfo}`,
             font: {
               size: 18,
               weight: "bold",
             },
-            padding: {
-            },
+            padding: {},
           },
           subtitle: {
             display: true,
-            text: `Showing ${filteredCount} of ${totalCount} users | Threshold: ${thresholdValue || "None"} | Filter: ${optionFilter}`,
+            text: `Showing ${filteredCount} of ${originalChunkCount} users in current chart${userRange} | Total Users: ${totalCount} | Threshold: ${thresholdValue || "None"} | Filter: ${optionFilter}`,
             font: {
               size: 14,
-              // style: "italic",
             },
             color: "#666",
-            padding: {
-            },
+            padding: {},
           },
           tooltip: {
             callbacks: {
@@ -353,7 +855,7 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
               },
             },
             beginAtZero: true,
-            max: thresholdValue, // Consistent max value
+            max: thresholdValue,
             grid: {
               display: true,
               drawBorder: true,
@@ -362,7 +864,7 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
               color: "#e5e7eb",
             },
             ticks: {
-              stepSize: thresholdValue <= 24 ? 5 : 12, // Consistent step size
+              stepSize: thresholdValue <= 24 ? 5 : 12,
             },
           },
         },
@@ -384,7 +886,6 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
 
   const handleChartTypeChange = (e) => {
     setChartType(e.target.value)
-    // Reset threshold when chart type changes
     setThresholdValue(null)
   }
 
@@ -395,9 +896,12 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
     }
   }
 
+  const handleChunkChange = (e) => {
+    setCurrentChunk(Number.parseInt(e.target.value))
+  }
+
   const handleDownload = () => {
     if (!chartRef.current) return
-
     try {
       const chartCanvas = chartRef.current.canvas
       if (!chartCanvas) {
@@ -408,20 +912,17 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
 
       const tempCanvas = document.createElement("canvas")
       const tempCtx = tempCanvas.getContext("2d")
-
       tempCanvas.width = chartCanvas.width
       tempCanvas.height = chartCanvas.height
-
       tempCtx.fillStyle = "white"
       tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
-
       tempCtx.drawImage(chartCanvas, 0, 0)
 
       const imageUrl = tempCanvas.toDataURL("image/png", 1.0)
-
       const link = document.createElement("a")
+      const chunkSuffix = totalChunks > 1 ? `-chunk${currentChunk + 1}of${totalChunks}` : ""
       link.href = imageUrl
-      link.download = `${chartTypeIndices[chartType].title}-${targetGroup}-${cohort}-${optionFilter}-${thresholdValue || "all"}.png`
+      link.download = `${chartTypeIndices[chartType].title}-${targetGroup}-${cohort}-${optionFilter}-${thresholdValue || "all"}${chunkSuffix}.png`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -431,23 +932,8 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
     }
   }
 
-  function drawRoundedRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath()
-    ctx.moveTo(x + radius, y)
-    ctx.lineTo(x + width - radius, y)
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
-    ctx.lineTo(x + width, y + height - radius)
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
-    ctx.lineTo(x + radius, y + height)
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
-    ctx.lineTo(x, y + radius)
-    ctx.quadraticCurveTo(x, y, x + radius, y)
-    ctx.closePath()
-  }
-
   const handleCopy = async () => {
     if (!chartRef.current) return
-
     try {
       const chartCanvas = chartRef.current.canvas
       if (!chartCanvas) {
@@ -458,24 +944,19 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
 
       const tempCanvas = document.createElement("canvas")
       const tempCtx = tempCanvas.getContext("2d")
-
       tempCanvas.width = chartCanvas.width
       tempCanvas.height = chartCanvas.height
-
       tempCtx.fillStyle = "white"
       tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
-
       tempCtx.drawImage(chartCanvas, 0, 0)
 
       const imageUrl = tempCanvas.toDataURL("image/png", 1.0)
-
       const blob = await (await fetch(imageUrl)).blob()
       await navigator.clipboard.write([
         new ClipboardItem({
           "image/png": blob,
         }),
       ])
-
       alert("Chart copied to clipboard! You can now paste it anywhere.")
     } catch (error) {
       console.error("Error copying chart:", error)
@@ -485,10 +966,10 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
 
   // Generate chart when dependencies change
   useEffect(() => {
-    if (isOpen && userData && userData.length > 0 && maxTotalLessons !== null) {
+    if (isOpen && chunkedUserData.length > 0 && maxTotalLessons !== null) {
       generateChart()
     }
-  }, [isOpen, chartType, userData, optionFilter, thresholdValue, maxTotalLessons])
+  }, [isOpen, chartType, chunkedUserData, currentChunk, optionFilter, thresholdValue, maxTotalLessons])
 
   // Early return if modal is not open
   if (!isOpen) return null
@@ -539,6 +1020,19 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
               <option value="update">Up-to-date</option>
               <option value="lagging">Lagging Behind</option>
             </select>
+            {totalChunks > 1 && (
+              <select className={styles.chartTypeSelect} value={currentChunk} onChange={handleChunkChange}>
+                {Array.from({ length: totalChunks }, (_, index) => {
+                  const startUser = index * chunkSize + 1
+                  const endUser = Math.min((index + 1) * chunkSize, totalCount)
+                  return (
+                    <option key={index} value={index}>
+                      Chart {index + 1} (Users {startUser}-{endUser})
+                    </option>
+                  )
+                })}
+              </select>
+            )}
           </div>
         </div>
         <div className={styles.content_chart}>
@@ -549,13 +1043,7 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
             </div>
           ) : chartData && chartOptions ? (
             <div className={styles.chartContainer} ref={chartContainerRef}>
-              <Bar
-                data={chartData}
-                options={chartOptions}
-                ref={chartRef}
-                height={600}
-                width={800}
-              />
+              <Bar data={chartData} options={chartOptions} ref={chartRef} height={600} width={800} />
             </div>
           ) : (
             <div className={styles.noChartData}>
@@ -590,6 +1078,8 @@ const UserProgress = () => {
   // Cohort range states
   const [cohortStartRange, setCohortStartRange] = useState(1);
   const [cohortEndRange, setCohortEndRange] = useState(20);
+
+  const [cohortValues, setCohortValues] = useState([]);
   
   // Leaderboard states
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -603,6 +1093,7 @@ const UserProgress = () => {
   const [showActivityChart, setShowActivityChart] = useState(false);
   
   // Course IDs (will be set based on selections)
+  
   const [courseIds, setCourseIds] = useState({
     courseId1: null,
     courseId2: null,
@@ -611,88 +1102,124 @@ const UserProgress = () => {
     courseId5: null
   });
 
-const cohortOptions =
-  cohortStartRange && cohortEndRange
-    ? Array.from(
-        { length: cohortEndRange - cohortStartRange + 1 },
-        (_, i) => `Cohort ${i + cohortStartRange}`
-      )
-    : rollout === "0" && botType === "teacher"
-    ? ["pilot"]
-    : [];
+// let cohortOptions =
+//   cohortStartRange && cohortEndRange
+//     ? Array.from(
+//         { length: cohortEndRange - cohortStartRange + 1 },
+//         (_, i) => `Cohort ${i + cohortStartRange}`
+//       )
+//     : rollout === "0" && botType === "teacher"
+//     ? ["pilot"]
+//     : [];
 
     useEffect(() => {
   setCohort("");
 }, [targetGroup, level]);
 
 
+    useEffect(() => {
+       const loadData = async (a,b) => {
+        setLoading(true);
+        try {
+          const response = await getcohortList(botType,rollout,a,b);
+          if (response.status === 200) {
+            setCohortValues(response.data.data);
+          } else {
+            console.error("Error fetching data:", response);
+          }
+        } catch (error) {
+          console.error("Failed to fetch cohort:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+     let a = '', b = '';
+        if(rollout == "2" && botType == 'teacher'){
+          a='';
+          b='';
+        }
+        if(rollout == "2" && botType == 'student'){
+          a=level;
+          b='';
+        }
+        if((rollout == "1" || rollout == "0") && botType == 'teacher'){
+          a='';
+          b=targetGroup;
+        }
+        loadData(a,b);
+
+      
+}, [rollout, targetGroup, level, botType, level]);
+
   // Reset cohort when target group or level changes
   useEffect(() => {
     setCohort("");
   }, [targetGroup, level]);
 
-  useEffect(() => {
-  if (botType === "teacher") {
-    if (rollout === "0") {
-      // Pilot rollout: show only "pilot"
-      setCohortStartRange(null);
-      setCohortEndRange(null);
-    } else if (rollout === "1") {
-      if (targetGroup === "T1") {
-        setCohortStartRange(1);
-        setCohortEndRange(20);
-      } else if (targetGroup === "T2") {
-        setCohortStartRange(25);
-        setCohortEndRange(44);
-      } else {
-        setCohortStartRange(null);
-        setCohortEndRange(null);
-      }
-    } else if (rollout === "2") {
-      // No cohorts in teacher rollout 2
-      setCohortStartRange(null);
-      setCohortEndRange(null);
-    }
-  } else if (botType === "student" && rollout === "2") {
-    switch (level) {
-      case "grade 1":
-      case "grade 2":
-      case "grade 3":
-        setCohortStartRange(1);
-        setCohortEndRange(5);
-        break;
-      case "grade 4":
-        setCohortStartRange(1);
-        setCohortEndRange(6);
-        break;
-      case "grade 5":
-        setCohortStartRange(1);
-        setCohortEndRange(4);
-        break;
-      case "grade 6":
-        setCohortStartRange(1);
-        setCohortEndRange(8);
-        break;
-      case "grade 7":
-        setCohortStartRange(1);
-        setCohortEndRange(18);
-        break;
-      default:
-        setCohortStartRange(null);
-        setCohortEndRange(null);
-    }
-  } else {
-    setCohortStartRange(null);
-    setCohortEndRange(null);
-  }
-}, [botType, rollout, targetGroup, level]);
+//   useEffect(() => {
+//   if (botType === "teacher") {
+//     if (rollout === "0") {
+//       // Pilot rollout: show only "pilot"
+//       setCohortStartRange(null);
+//       setCohortEndRange(null);
+//     } else if (rollout === "1") {
+//       if (targetGroup === "T1") {
+//         setCohortStartRange(1);
+//         setCohortEndRange(20);
+//       } else if (targetGroup === "T2") {
+//         setCohortStartRange(25);
+//         setCohortEndRange(44);
+//       } else {
+//         setCohortStartRange(null);
+//         setCohortEndRange(null);
+//       }
+//     } else if (rollout === "2") {
+//       // No cohorts in teacher rollout 2
+//       setCohortStartRange(null);
+//       setCohortEndRange(null);
+//     }
+//   } else if (botType === "student" && rollout === "2") {
+//     switch (level) {
+//       case "grade 1":
+//       case "grade 2":
+//       case "grade 3":
+//         setCohortStartRange(1);
+//         setCohortEndRange(5);
+//         break;
+//       case "grade 4":
+//         setCohortStartRange(1);
+//         setCohortEndRange(6);
+//         break;
+//       case "grade 5":
+//         setCohortStartRange(1);
+//         setCohortEndRange(4);
+//         break;
+//       case "grade 6":
+//         setCohortStartRange(1);
+//         setCohortEndRange(8);
+//         break;
+//       case "grade 7":
+//         setCohortStartRange(1);
+//         setCohortEndRange(18);
+//         break;
+//       default:
+//         setCohortStartRange(null);
+//         setCohortEndRange(null);
+//     }
+//   } 
+//   // else {
+//   //   setCohortStartRange(null);
+//   //   setCohortEndRange(null);
+//   // }
+// }, [botType, rollout, targetGroup, level]);
 
 
   // Set course IDs based on selections
+  
   useEffect(() => {
     if (botType === "teacher") {
       if (rollout === "2"){
-         setCourseIds({ courseId1: 134, courseId2: 135, courseId3: 136, courseId4: 142, courseId5: 147 });
+         setCourseIds({ courseId1: 134, courseId2: 135, courseId3: 136, courseId4: 148, courseId5: 149 });
       }
       else if (targetGroup === "T1" && rollout === "1") {
         setCourseIds({ courseId1: 106, courseId2: 111, courseId3: 118, courseId4: 106, courseId5: 111 });
@@ -851,9 +1378,10 @@ useEffect(() => {
         setShowLeaderboard(true);
       } else {
         alert("No leaderboard images available");
+        return;
       }
 
-    if ((botType === "teacher" && !targetGroup) || !cohort) {
+    if ( !cohort) {
       alert("Please make all required selections first");
       return;
     }
@@ -872,6 +1400,7 @@ useEffect(() => {
       } else {
         console.error("Failed to fetch leaderboard image");
         alert("Failed to load leaderboard. Please try again.");
+         return;
       }
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
@@ -884,21 +1413,9 @@ useEffect(() => {
   const closeLeaderboard = () => {
     setShowLeaderboard(false);
   };
-  
-// const handleAssessmentWiseChange = () => {
-//     if ((botType === "assessment" && rollout && cohort)) {
-//       alert("Please select ");
-//       return;
-//     }
-//     if (userData.length === 0) {
-//       alert("No data available to display in chart");
-//       return;
-//     }
-//     setShowActivityChart(true);
-//   };
 
   const handleShowActivityChart = () => {
-    if ((botType === "teacher" && !targetGroup) || !cohort) {
+    if ((botType === "teacher" && !targetGroup && rollout != "2") || !cohort) {
       alert("Please make all required selections first");
       return;
     }
@@ -1236,64 +1753,12 @@ useEffect(() => {
   }
   };
 
-//     // Render activity view table
-//   const renderAssessmentTable = () => {
-//     return (
-//   <div className={styles.tableContainer}>
-//     <table className={styles.dataTable}>
-//       <thead>
-//         <tr>
-//           <th rowSpan={2}>Sr No.</th>
-//           <th rowSpan={2}>Profile Id</th>
-//           <th rowSpan={2}>Phone Number</th>
-//           <th rowSpan={2}>Username</th>
-//           <th colSpan={2} className={styles.groupHeader}>Pre-Assessment</th>
-//           <th colSpan={2} className={styles.groupHeader}></th>
-//           <th colSpan={2} className={styles.groupHeader}>Post-Assessment</th>
-//         </tr>
-//         <tr>
-//           <th>MCQs</th>
-//           <th>WatchAndSpeak</th>
-//           <th></th>
-//           <th></th>
-//           <th>MCQs</th>
-//           <th>WatchAndSpeak</th>
-//         </tr>
-//       </thead>
-//       <tbody>
-//         {filteredData.map((row, rowIndex) => (
-//           <tr
-//             key={rowIndex}
-//             className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}
-//           >
-//             {row.map((cell, colIndex) => {
-//               let cellClass = styles.centerText;
-
-//               // Add specific classes based on the column index
-//               if (colIndex === 6 || colIndex === 7 || colIndex === 8 || colIndex === 9) {
-//                 cellClass = styles.totalCell;
-//               }
-
-//               return (
-//                 <td key={colIndex} className={cellClass}>
-//                   {cell ?? ''}
-//                 </td>
-//               );
-//             })}
-//           </tr>
-//         ))}
-//       </tbody>
-//     </table>
-//   </div>
-// );
-// };
-
 const renderAssessmentTable = () => {
   // Get total scores from first row of filteredData
   let watch_speak_heading = '';
   if (filteredData.length === 0) return null;
   const totalScores = filteredData.length > 0 ? filteredData[0] : [];
- if(level === 'grade 7' && botType === 'student'){
+ if((level === 'grade 7' && botType === 'student') || botType === 'teacher'){
        watch_speak_heading = 'SpeakingPractice';
  }
  else{
@@ -1301,87 +1766,87 @@ const renderAssessmentTable = () => {
  }
  if(module === 'week'){
   
-return (
-    <div className={styles.tableContainer}>
-      <table className={styles.dataTable}>
-        <thead>
-          <tr>
-            <th rowSpan={2}>Sr No.</th>
-            <th rowSpan={2}>Profile Id</th>
-            <th rowSpan={2}>Phone Number</th>
-            <th rowSpan={2}>Username</th>
-            <th colSpan={3} className={styles.groupHeader}>Pre-Assessment</th>
-            <th className={styles.spacerColumn}></th>
-            <th colSpan={3} className={styles.groupHeader}>Post-Assessment</th>
-          </tr>
-          <tr>
-            <th className={styles.activityHeader}>
-              MCQs
-              <br />
-              <span className={styles.totalLabel}>Total: {totalScores[4] ?? 0}</span>
-            </th>
-            <th className={styles.activityHeader}>
-              {watch_speak_heading}
-              <br />
-              <span className={styles.totalLabel}>Total: {totalScores[5] ?? 0}</span>
-            </th>
-            <th className={styles.activityHeader}>
-              Total Score <br /> 
-              <span className={styles.totalLabel}> {totalScores[6] ?? 0}</span>
-            </th>
-
-            <th className={styles.spacerColumn}></th>
-
-            <th className={styles.activityHeader}>
-              MCQs
-              <br />
-              <span className={styles.totalLabel}>Total: {totalScores[8] ?? 0}</span>
-            </th>
-            <th className={styles.activityHeader}>
-              {watch_speak_heading}
-              <br />
-              <span className={styles.totalLabel}>Total: {totalScores[9] ?? 0}</span>
-            </th>
-            <th className={styles.activityHeader}>
-              Total Score <br /> 
-              <span className={styles.totalLabel}> {totalScores[10] ?? 0}</span>
-             
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredData.slice(1).map((row, rowIndex) => (
-            <tr
-              key={rowIndex}
-              className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}
-            >
-              {row.map((cell, colIndex) => {
-                // Spacer column
-                if (colIndex === 7) {
-                  return <td key={colIndex} className={styles.spacerColumn}></td>;
-                }
-
-                // Style score columns
-                const isScore = [4, 5, 8, 9].includes(colIndex);
-                let cellClass = `${styles.centerText} ${
-                  isScore ? styles.scoreCell : ''
-                }`;
-
-                if(colIndex === 6 || colIndex === 10){
-                  cellClass = `${styles.totalScoreCell}`
-                }
-                return (
-                  <td key={colIndex} className={cellClass}>
-                    {cell ?? ''}
-                  </td>
-                );
-              })}
+  return (
+      <div className={styles.tableContainer}>
+        <table className={styles.dataTable}>
+          <thead>
+            <tr>
+              <th rowSpan={2}>Sr No.</th>
+              <th rowSpan={2}>Profile Id</th>
+              <th rowSpan={2}>Phone Number</th>
+              <th rowSpan={2}>Username</th>
+              <th colSpan={3} className={styles.groupHeader}>Pre-Assessment</th>
+              <th className={styles.spacerColumn}></th>
+              <th colSpan={3} className={styles.groupHeader}>Post-Assessment</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+            <tr>
+              <th className={styles.activityHeader}>
+                MCQs
+                <br />
+                <span className={styles.totalLabel}>Total: {totalScores[4] ?? 0}</span>
+              </th>
+              <th className={styles.activityHeader}>
+                {watch_speak_heading}
+                <br />
+                <span className={styles.totalLabel}>Total: {totalScores[5] ?? 0}</span>
+              </th>
+              <th className={styles.activityHeader}>
+                Total Score <br /> 
+                <span className={styles.totalLabel}> {totalScores[6] ?? 0}</span>
+              </th>
+
+              <th className={styles.spacerColumn}></th>
+
+              <th className={styles.activityHeader}>
+                MCQs
+                <br />
+                <span className={styles.totalLabel}>Total: {totalScores[8] ?? 0}</span>
+              </th>
+              <th className={styles.activityHeader}>
+                {watch_speak_heading}
+                <br />
+                <span className={styles.totalLabel}>Total: {totalScores[9] ?? 0}</span>
+              </th>
+              <th className={styles.activityHeader}>
+                Total Score <br /> 
+                <span className={styles.totalLabel}> {totalScores[10] ?? 0}</span>
+              
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredData.slice(1).map((row, rowIndex) => (
+              <tr
+                key={rowIndex}
+                className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}
+              >
+                {row.map((cell, colIndex) => {
+                  // Spacer column
+                  if (colIndex === 7) {
+                    return <td key={colIndex} className={styles.spacerColumn}></td>;
+                  }
+
+                  // Style score columns
+                  const isScore = [4, 5, 8, 9].includes(colIndex);
+                  let cellClass = `${styles.centerText} ${
+                    isScore ? styles.scoreCell : ''
+                  }`;
+
+                  if(colIndex === 6 || colIndex === 10){
+                    cellClass = `${styles.totalScoreCell}`
+                  }
+                  return (
+                    <td key={colIndex} className={cellClass}>
+                      {cell ?? ''}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
 }
  else{
   return (
@@ -1504,269 +1969,267 @@ return (
  }
 };
 
-
-  return (
-    <div className={styles.main_page}>
-      <Navbar />
-      {isSidebarOpen && <Sidebar />}
-      <div className={styles.content}>
-        <h1>User Progress</h1>
-        <div className={styles.container}>
-          <div className={styles.filterSection}>
-            {/* Bot Type Dropdown */}
-            <div className={styles.filterItem}>
-              <label className={styles.filterLabel}>Bot Type</label>
-              <select
-                className={styles.select}
-                value={botType}
-                onChange={handleBotTypeChange}
-              >
-                <option value="teacher">Teacher</option>
-                <option value="student">Student</option>
-              </select>
-            </div>
-
-            {/* Rollout Dropdown */}
-            <div className={styles.filterItem}>
-              <label className={styles.filterLabel}>Rollout</label>
-              <select
-                className={styles.select}
-                value={rollout}
-                onChange={handleRolloutChange}
-              >
-                {botType === "teacher" && <option value="1">Rollout - 1</option>}
-                <option value="2">Rollout - 2</option>
-                {botType === "teacher" && <option value="0">Pilot - 0</option>}
-              </select>
-            </div>
-
-            {/* Conditional Dropdowns */}
-            {botType === "teacher" && (rollout === "1" || rollout === "0") && (
-              <div className={styles.filterItem}>
-                <label className={styles.filterLabel}>Target Group</label>
-                <select
-                  className={styles.select}
-                  value={targetGroup}
-                  onChange={handleTargetGroupChange}
-                  disabled={!botType || !rollout}
-                >
-                  <option value="">Select target group</option>
-                  <option value="T1">T1</option>
-                  <option value="T2">T2</option>
-                </select>
-              </div>
-            )}
-
-            {botType === "student" && (
-              <div className={styles.filterItem}>
-                <label className={styles.filterLabel}>Level</label>
-                <select
-                  className={styles.select}
-                  value={level}
-                  onChange={handleLevelChange}
-                >
-                  <option value="">Select level</option>
-                  <option value="grade 1">Grade 1</option>
-                  <option value="grade 2">Grade 2</option>
-                  <option value="grade 3">Grade 3</option>
-                  <option value="grade 4">Grade 4</option>
-                  <option value="grade 5">Grade 5</option>
-                  <option value="grade 6">Grade 6</option>
-                  <option value="grade 7">Grade 7</option>
-                  {/* <option value="class 8">Grade 8</option> */}
-                </select>
-              </div>
-            )}
-
-            {/* Cohort Dropdown */}
-            <div className={styles.filterItem}>
-              <label className={styles.filterLabel}>Cohort</label>
-              <select
-                className={styles.select}
-                value={cohort}
-                onChange={handleCohortChange}
-               disabled={
-                    (botType === "student" && !level) ||
-                    (botType === "teacher" && (
-                      ((rollout === "0" || rollout === "1") && !targetGroup) ||
-                      (rollout !== "0" && rollout !== "1" && rollout !== "2")
-                    ))
-                  }
-              >
-                <option value="">Select cohort</option>
-                {botType === "teacher" && rollout === "0" ? (
-                  <option value="pilot">Pilot</option>
-                ) : (
-                  <>
-                {cohortOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-                   </>)}
-
-              </select>
-            </div>
+return (
+  <div className={styles.main_page}>
+    <Navbar />
+    {isSidebarOpen && <Sidebar />}
+    <div className={styles.content}>
+      <h1>User Progress</h1>
+      <div className={styles.container}>
+        <div className={styles.filterSection}>
+          {/* Bot Type Dropdown */}
+          <div className={styles.filterItem}>
+            <label className={styles.filterLabel}>Bot Type</label>
+            <select
+              className={styles.select}
+              value={botType}
+              onChange={handleBotTypeChange}
+            >
+              <option value="teacher">Teacher</option>
+              <option value="student">Student</option>
+            </select>
           </div>
 
-          {/* Tabs for different views */}
-          <div className={styles.tabsContainer}>
-            <div
-              className={
-                botType === "student"
-                ? styles.tabs
-                : botType === "teacher" && rollout === "2"
-                ? styles.tabss
-                : styles.tabs
-              }
-                >
-              <button
-                className={`${styles.tabButton} ${activeTab === "lesson" ? styles.activeTab : ""}`}
-                onClick={() => handleTabChange("lesson")}
-                disabled={!cohort}
-              >
-                Lesson View
-              </button>
-              {(botType === "teacher") && (
-              <button
-                className={`${styles.tabButton} ${activeTab === "week" ? styles.activeTab : ""}`}
-                onClick={() => handleTabChange("week")}
-                disabled={!cohort}
-              >
-                Week View
-              </button>
-              )}
-              <button
-                className={`${styles.tabButton} ${activeTab === "activity" ? styles.activeTab : ""}`}
-                onClick={() => handleTabChange("activity")}
-                disabled={!cohort}
-              >
-                Activity View
-              </button>
-              {((botType === "teacher" && rollout === "2") || botType === "student") && (
-                <button
-                  className={`${styles.tabButton} ${activeTab === "assessment" ? styles.activeTab : ""}`}
-                  onClick={() => handleTabChange("assessment")}
-                  disabled={!cohort}
-                >
-                  Assessment View
-                </button>
-              )}
-
-            </div>
+          {/* Rollout Dropdown */}
+          <div className={styles.filterItem}>
+            <label className={styles.filterLabel}>Rollout</label>
+            <select
+              className={styles.select}
+              value={rollout}
+              onChange={handleRolloutChange}
+            >
+              {botType === "teacher" && <option value="1">Rollout - 1</option>}
+              <option value="2">Rollout - 2</option>
+              {botType === "teacher" && <option value="0">Pilot - 0</option>}
+            </select>
           </div>
 
-          {/* Search bar and buttons */}
-          
-          <div className={styles.searchAndLeaderboard}>
-            {activeTab && (
-            <div className={styles.searchContainer}>
-              <div className={styles.searchIcon}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-              </div>
-              <input
-                type="text"
-                className={styles.searchInput}
-                placeholder="Search by username, profile id or phone number..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          {/* Conditional Dropdowns */}
+          {botType === "teacher" && (rollout === "1" || rollout === "0") && (
+            <div className={styles.filterItem}>
+              <label className={styles.filterLabel}>Target Group</label>
+              <select
+                className={styles.select}
+                value={targetGroup}
+                onChange={handleTargetGroupChange}
+                disabled={!botType || !rollout}
+              >
+                <option value="">Select target group</option>
+                <option value="T1">T1</option>
+                <option value="T2">T2</option>
+              </select>
             </div>
-            )}
+          )}
 
-            {cohort && !loading && activeTab === "week" && (
-              <button
-                className={styles.leaderboardButton}
-                onClick={handleShowLeaderboard}
+          {botType === "student" && (
+            <div className={styles.filterItem}>
+              <label className={styles.filterLabel}>Level</label>
+              <select
+                className={styles.select}
+                value={level}
+                onChange={handleLevelChange}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.leaderboardIcon}>
-                  <circle cx="12" cy="8" r="7"></circle>
-                  <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-                </svg>
-                Leaderboard
-              </button>
-            )}
+                <option value="">Select level</option>
+                <option value="grade 1">Grade 1</option>
+                <option value="grade 2">Grade 2</option>
+                <option value="grade 3">Grade 3</option>
+                <option value="grade 4">Grade 4</option>
+                <option value="grade 5">Grade 5</option>
+                <option value="grade 6">Grade 6</option>
+                <option value="grade 7">Grade 7</option>
+                {/* <option value="class 8">Grade 8</option> */}
+              </select>
+            </div>
+          )}
 
-            {cohort && !loading && activeTab === "lesson" && (
-              <button 
-                className={styles.leaderboardButton} 
-                onClick={handleShowActivityChart}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.leaderboardIcon}>
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="3" y1="9" x2="21" y2="9"></line>
-                  <line x1="9" y1="21" x2="9" y2="9"></line>
-                </svg>
-                Progress Chart
-              </button>
-            )}
-            {cohort && activeTab === "assessment" && (
-              <div>
-                <select
-                  className={styles.select}
-                  value={module}
-                  onChange={(e) => setModule(e.target.value)}
-                  disabled={!botType || !rollout || !cohort || !level}
-                >
-                  <option value="day">Day View</option>
-                  <option value="week">Week View</option>
-                  
-                </select>
-              </div>
-            )}
-          </div>
-
-          {/* Content area */}
-          <div className={styles.contentArea}>
-            {!cohort ? (
-              <div className={styles.emptyState}>
-                Please select {botType === "teacher" ? "bot type, rollout, target group" : "bot type, level"} and cohort to view data
-              </div>
-            ) : loading ? (
-              <div className={styles.loadingState}>
-                <div className={styles.spinner}></div>
-              </div>
-            ) : filteredData.length === 0 ? (
-              <div className={styles.emptyState}>No data found for the selected criteria</div>
-            ) : (
-              <>
-                {activeTab === "lesson" && renderLessonTable()}
-                {activeTab === "week" && renderWeekTable()}
-                {activeTab === "activity" && renderActivityTable()}
-                {activeTab === "assessment" && renderAssessmentTable()}
-              </>
-            )}
+          {/* Cohort Dropdown */}
+          <div className={styles.filterItem}>
+            <label className={styles.filterLabel}>Cohort</label>
+            <select
+              className={styles.select}
+              value={cohort}
+              onChange={handleCohortChange}
+              disabled={
+                  (botType === "student" && !level) ||
+                  (botType === "teacher" && (
+                    ((rollout === "0" || rollout === "1") && !targetGroup) ||
+                    (rollout !== "0" && rollout !== "1" && rollout !== "2")
+                  ))
+                }
+            >
+              <option value="">Select cohort</option>
+              {botType === "teacher" && rollout === "0" ? (
+                <option value="pilot">Pilot</option>
+              ) : (
+                <>
+              {cohortValues.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+                  </>)}
+            </select>
           </div>
         </div>
-      </div>
 
-      {/* Leaderboard Modal */}
-      {showLeaderboard && (
-        <LeaderboardModal
-          isOpen={showLeaderboard}
-          onClose={closeLeaderboard}
-          targetGroup={targetGroup}
-          cohort={cohort}
-          viewType={activeTab}
-          leaderboardImages={leaderboardImages}
-          loading={loadingLeaderboard}
-        />
-      )}
-      {/* Activity Chart Modal */}
-      {showActivityChart && (
-        <ActivityChartModal
-          isOpen={showActivityChart}
-          onClose={closeActivityChart}
-          targetGroup={targetGroup}
-          cohort={cohort}
-          userData={userData}
-        />
-      )}
+        {/* Tabs for different views */}
+        <div className={styles.tabsContainer}>
+          <div
+            className={
+              botType === "student"
+              ? styles.tabs
+              : botType === "teacher" && rollout === "2"
+              ? styles.tabss
+              : styles.tabs
+            }
+              >
+            <button
+              className={`${styles.tabButton} ${activeTab === "lesson" ? styles.activeTab : ""}`}
+              onClick={() => handleTabChange("lesson")}
+              disabled={!cohort}
+            >
+              Lesson View
+            </button>
+            {(botType === "teacher") && (
+            <button
+              className={`${styles.tabButton} ${activeTab === "week" ? styles.activeTab : ""}`}
+              onClick={() => handleTabChange("week")}
+              disabled={!cohort}
+            >
+              Week View
+            </button>
+            )}
+            <button
+              className={`${styles.tabButton} ${activeTab === "activity" ? styles.activeTab : ""}`}
+              onClick={() => handleTabChange("activity")}
+              disabled={!cohort}
+            >
+              Activity View
+            </button>
+            {((botType === "teacher" && rollout === "2") || botType === "student") && (
+              <button
+                className={`${styles.tabButton} ${activeTab === "assessment" ? styles.activeTab : ""}`}
+                onClick={() => handleTabChange("assessment")}
+                disabled={!cohort}
+              >
+                Assessment View
+              </button>
+            )}
+
+          </div>
+        </div>
+
+        {/* Search bar and buttons */}
+        
+        <div className={styles.searchAndLeaderboard}>
+          {activeTab && (
+          <div className={styles.searchContainer}>
+            <div className={styles.searchIcon}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Search by username, profile id or phone number..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          )}
+
+          {cohort && !loading && activeTab === "week" && (
+            <button
+              className={styles.leaderboardButton}
+              onClick={handleShowLeaderboard}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.leaderboardIcon}>
+                <circle cx="12" cy="8" r="7"></circle>
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+              </svg>
+              Leaderboard
+            </button>
+          )}
+
+          {cohort && !loading && activeTab === "lesson" && (
+            <button 
+              className={styles.leaderboardButton} 
+              onClick={handleShowActivityChart}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.leaderboardIcon}>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="9" y1="21" x2="9" y2="9"></line>
+              </svg>
+              Progress Chart
+            </button>
+          )}
+          {cohort && activeTab === "assessment" && (
+            <div>
+              <select
+                className={styles.select}
+                value={module}
+                onChange={(e) => setModule(e.target.value)}
+                disabled={!botType || !rollout || !cohort}
+              >
+                <option value="day">Day View</option>
+                <option value="week">Week View</option>
+                
+              </select>
+            </div>
+          )}
+        </div>
+
+        {/* Content area */}
+        <div className={styles.contentArea}>
+          {!cohort ? (
+            <div className={styles.emptyState}>
+              Please select {botType === "teacher" ? "bot type, rollout, target group" : "bot type, level"} and cohort to view data
+            </div>
+          ) : loading ? (
+            <div className={styles.loadingState}>
+              <div className={styles.spinner}></div>
+            </div>
+          ) : filteredData.length === 0 ? (
+            <div className={styles.emptyState}>No data found for the selected criteria</div>
+          ) : (
+            <>
+              {activeTab === "lesson" && renderLessonTable()}
+              {activeTab === "week" && renderWeekTable()}
+              {activeTab === "activity" && renderActivityTable()}
+              {activeTab === "assessment" && renderAssessmentTable()}
+            </>
+          )}
+        </div>
+      </div>
     </div>
-  );
+
+    {/* Leaderboard Modal */}
+    {showLeaderboard && (
+      <LeaderboardModal
+        isOpen={showLeaderboard}
+        onClose={closeLeaderboard}
+        targetGroup={targetGroup}
+        cohort={cohort}
+        viewType={activeTab}
+        leaderboardImages={leaderboardImages}
+        loading={loadingLeaderboard}
+      />
+    )}
+    {/* Activity Chart Modal */}
+    {showActivityChart && (
+      <ActivityChartModal
+        isOpen={showActivityChart}
+        onClose={closeActivityChart}
+        targetGroup={targetGroup}
+        cohort={cohort}
+        userData={userData}
+      />
+    )}
+  </div>
+);
 };
 
 export default UserProgress;
