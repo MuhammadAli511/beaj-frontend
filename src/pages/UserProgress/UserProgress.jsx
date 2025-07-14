@@ -597,7 +597,8 @@ const UserProgress = () => {
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
   const [leaderboardBuffer, setLeaderboardBuffer] = useState('');
   const [leaderboardImages, setLeaderboardImages] = useState([]);
-  
+  const [module, setModule] = useState('week');
+
   // Activity chart state
   const [showActivityChart, setShowActivityChart] = useState(false);
   
@@ -728,24 +729,7 @@ const cohortOptions =
          setCourseIds({ courseId1: 143, courseId2: null, courseId3: null, courseId4: 142, courseId5: 147 });
       }
     }
-  }, [botType, targetGroup, level, cohort, rollout, activeTab]);
-
-  // Set cohort ranges based on selections
-  // useEffect(() => {
-  //   if (botType === "teacher") {
-  //     if (targetGroup === "T1") {
-  //       setCohortStartRange(1);
-  //       setCohortEndRange(20);
-  //     } else if (targetGroup === "T2") {
-  //       setCohortStartRange(25);
-  //       setCohortEndRange(44);
-  //     }
-  //   } else if (botType === "student") {
-  //     // Set cohort ranges for students
-  //     setCohortStartRange(1);
-  //     setCohortEndRange(20); // Adjust as needed
-  //   }
-  // }, [botType, targetGroup]);
+  }, [botType, targetGroup, level, cohort, rollout, activeTab, module]);
 
   // Clear user data
   const clearUserState = () => {
@@ -773,7 +757,8 @@ const cohortOptions =
             courseIds.courseId3,
             courseIds.courseId4,
             courseIds.courseId5,
-            activeTab
+            activeTab,
+            module,
           );
 
           if (response.status === 200) {
@@ -796,7 +781,7 @@ const cohortOptions =
 
       loadData();
     }
-  }, [botType, rollout, targetGroup, level, cohort, activeTab, courseIds]);
+  }, [botType, rollout, targetGroup, level, cohort, activeTab, courseIds, module]);
 
 useEffect(() => {
   if (searchQuery.trim() === "") {
@@ -899,6 +884,18 @@ useEffect(() => {
   const closeLeaderboard = () => {
     setShowLeaderboard(false);
   };
+  
+// const handleAssessmentWiseChange = () => {
+//     if ((botType === "assessment" && rollout && cohort)) {
+//       alert("Please select ");
+//       return;
+//     }
+//     if (userData.length === 0) {
+//       alert("No data available to display in chart");
+//       return;
+//     }
+//     setShowActivityChart(true);
+//   };
 
   const handleShowActivityChart = () => {
     if ((botType === "teacher" && !targetGroup) || !cohort) {
@@ -1302,6 +1299,7 @@ const renderAssessmentTable = () => {
  else{
    watch_speak_heading = 'WatchAndSpeak';
  }
+ if(module === 'week'){
   
 return (
     <div className={styles.tableContainer}>
@@ -1384,7 +1382,126 @@ return (
       </table>
     </div>
   );
- 
+}
+ else{
+  return (
+    <div className={styles.tableContainer}>
+      <table className={styles.dataTable}>
+        <thead>
+          <tr>
+            <th rowSpan={3}>Sr No.</th>
+            <th rowSpan={3}>Profile Id</th>
+            <th rowSpan={3}>Phone Number</th>
+            <th rowSpan={3}>Username</th>
+            <th colSpan={6} className={styles.groupHeader}>Pre-Assessment</th>
+            <th className={styles.spacerColumn}></th>
+            <th colSpan={6} className={styles.groupHeader}>Post-Assessment</th>
+          </tr>
+          <tr> 
+            <th colSpan={4}  className={styles.activityHeader}>MCQs</th>
+            <th colSpan={2}  className={styles.activityHeader}>{watch_speak_heading}</th>
+             <th className={styles.spacerColumn}></th>
+            <th colSpan={4}  className={styles.activityHeader}>MCQs</th>
+            <th colSpan={2}  className={styles.activityHeader}>{watch_speak_heading}</th>
+          </tr>
+          <tr>
+            <th className={styles.activityHeader}>
+             Day 1
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[4] ?? 0}</span>
+            </th>
+            <th>Day 2
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[5] ?? 0}</span>
+            </th>
+            <th>Day 3
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[6] ?? 0}</span>
+            </th>
+             <th className={styles.activityHeader}>
+              Total Score <br /> 
+              <span className={styles.totalLabel}> {totalScores[7] ?? 0}</span>
+            </th>
+           
+            <th className={styles.activityHeader}>
+             Day 1
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[8] ?? 0}</span>
+            </th>
+             <th className={styles.activityHeader}>
+              Total Sum <br /> 
+              <span className={styles.totalLabel}> {totalScores[9] ?? 0}</span>
+            </th>
+
+             <th className={styles.spacerColumn}></th>
+
+            
+             <th className={styles.activityHeader}>
+             Day 1
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[11] ?? 0}</span>
+            </th>
+            <th>Day 2
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[12] ?? 0}</span>
+            </th>
+            <th>Day 3
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[13] ?? 0}</span>
+            </th>
+             <th className={styles.activityHeader}>
+              Total Score <br /> 
+              <span className={styles.totalLabel}> {totalScores[14] ?? 0}</span>
+            </th>
+
+            <th className={styles.activityHeader}>
+             Day 1
+              <br />
+              <span className={styles.totalLabel}>Total: {totalScores[15] ?? 0}</span>
+            </th>
+             <th className={styles.activityHeader}>
+              Total Sum <br /> 
+              <span className={styles.totalLabel}> {totalScores[16] ?? 0}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredData.slice(1).map((row, rowIndex) => (
+            <tr
+              key={rowIndex}
+              className={rowIndex % 2 === 0 ? styles.evenRow : styles.oddRow}
+            >
+              {row.map((cell, colIndex) => {
+                // Spacer column
+                if (colIndex === 10) {
+                  return <td key={colIndex} className={styles.spacerColumn}></td>;
+                }
+
+                // Style score columns
+                const isScore = [4, 5, 6, 7,8,11,12,13,14,15].includes(colIndex);
+                let cellClass = `${styles.centerText} ${
+                  isScore ? styles.scoreCell : ''
+                }`;
+
+                if(colIndex === 9 || colIndex === 16){
+                  cellClass = `${styles.totalScoreCell}`
+                }
+                if(colIndex === 7 || colIndex === 14){
+                  cellClass = `${styles.totalScoreCell1}`
+                }
+                return (
+                  <td key={colIndex} className={cellClass}>
+                    {cell ?? ''}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+ }
 };
 
 
@@ -1475,14 +1592,6 @@ return (
                       (rollout !== "0" && rollout !== "1" && rollout !== "2")
                     ))
                   }
-
-//               disabled={
-//   (botType === "student" && !level) ||
-//   (botType === "teacher" && (
-//     ((rollout === "0" || rollout === "1") && !targetGroup) ||
-//     (rollout === "2")
-//   ))
-// }
               >
                 <option value="">Select cohort</option>
                 {botType === "teacher" && rollout === "0" ? (
@@ -1503,13 +1612,13 @@ return (
           {/* Tabs for different views */}
           <div className={styles.tabsContainer}>
             <div
-                  className={
-                    botType === "student"
-                    ? styles.tabs
-                    : botType === "teacher" && rollout === "2"
-                    ? styles.tabss
-                    : styles.tabs
-                  }
+              className={
+                botType === "student"
+                ? styles.tabs
+                : botType === "teacher" && rollout === "2"
+                ? styles.tabss
+                : styles.tabs
+              }
                 >
               <button
                 className={`${styles.tabButton} ${activeTab === "lesson" ? styles.activeTab : ""}`}
@@ -1593,6 +1702,20 @@ return (
                 </svg>
                 Progress Chart
               </button>
+            )}
+            {cohort && activeTab === "assessment" && (
+              <div>
+                <select
+                  className={styles.select}
+                  value={module}
+                  onChange={(e) => setModule(e.target.value)}
+                  disabled={!botType || !rollout || !cohort || !level}
+                >
+                  <option value="day">Day View</option>
+                  <option value="week">Week View</option>
+                  
+                </select>
+              </div>
             )}
           </div>
 
