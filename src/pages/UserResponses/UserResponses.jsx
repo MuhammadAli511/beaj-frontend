@@ -207,6 +207,20 @@ const UserResponses = () => {
         setSelectedImage(null);
     };
 
+    useEffect(() => {
+        const handleEscapeKey = (event) => {
+            if (event.key === 'Escape' && selectedImage) {
+                handleCloseModal();
+            }
+        };
+
+        document.addEventListener('keydown', handleEscapeKey);
+
+        return () => {
+            document.removeEventListener('keydown', handleEscapeKey);
+        };
+    }, [selectedImage]);
+
     return (
         <div className={styles.main_page}>
             <Navbar />
@@ -394,7 +408,6 @@ const UserResponses = () => {
                                                 <th className={styles.table_heading}>Num</th>
                                                 <th className={styles.table_heading}>Question</th>
                                                 <th className={styles.table_heading}>User Answer</th>
-                                                <th className={styles.table_heading}>Score</th>
                                             </>
                                         )}
                                         {selectedActivityType && selectedActivityType.value === 'assessmentWatchAndSpeak' && (
@@ -403,7 +416,7 @@ const UserResponses = () => {
                                                 <th className={styles.table_heading}>Question</th>
                                                 <th className={styles.table_heading}>User Audio</th>
                                                 <th className={styles.table_heading}>User Transcript</th>
-                                                <th className={styles.table_heading}>Score</th>
+                                                <th className={styles.table_heading}>Bot Image</th>
                                             </>
                                         )}
                                     </tr>
@@ -636,7 +649,6 @@ const UserResponses = () => {
                                                             <div>{response.answer}</div>
                                                         )}
                                                     </td>
-                                                    <td>{response.score}</td>
                                                 </>
                                             )}
                                             {response.activityType === 'assessmentWatchAndSpeak' && (
@@ -645,7 +657,24 @@ const UserResponses = () => {
                                                     <td><audio src={response.mediaFile} controls /></td>
                                                     <td><audio src={response.submittedUserAudio} controls /></td>
                                                     <td className={styles.submittedAnswerText}>{response.submittedAnswerText}</td>
-                                                    <td>{response.score}</td>
+                                                    <td>
+                                                        {response.submittedFeedbackText && (
+                                                            <div
+                                                                className={styles.image_container}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleImageClick(response.submittedFeedbackText);
+                                                                }}
+                                                            >
+                                                                <img
+                                                                    style={{ width: '250px', height: '250px', cursor: 'pointer' }}
+                                                                    src={response.submittedFeedbackText}
+                                                                    alt="Bot Image"
+                                                                />
+                                                                <div className={styles.image_overlay}>View</div>
+                                                            </div>
+                                                        )}
+                                                    </td>
                                                 </>
                                             )}
                                         </tr>
@@ -669,7 +698,13 @@ const UserResponses = () => {
                         className={styles.modal_content}
                         onClick={(e) => e.stopPropagation()}
                     >
+                        <div className={styles.modal_header}>
+                            <button className={styles.closeButton} onClick={handleCloseModal}>Close</button>
+                        </div>
                         <img src={selectedImage} alt="Enlarged Bot Image" />
+                        <div className={styles.modal_footer}>
+                            <button className={styles.closeButton} onClick={handleCloseModal}>Close</button>
+                        </div>
                     </div>
                 </div>
             )}

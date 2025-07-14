@@ -67,6 +67,10 @@ const EditCourseModal = ({ isOpen, onClose, course, onSave }) => {
         <div className={styles.modal}>
             <div className={styles.modalContent}>
                 <h1 className={styles.modal_heading}>Edit Course</h1>
+                <div className={styles.buttonRow}>
+                    <button className={styles.submit_button} onClick={handleSave}>Save Changes</button>
+                    <button className={styles.cancel_button} onClick={handleCancel}>Cancel</button>
+                </div>
                 <div className={styles.input_row}>
                     <div className={styles.form_group}>
                         <label className={styles.label} htmlFor="courseName">Course Name</label>
@@ -110,8 +114,10 @@ const EditCourseModal = ({ isOpen, onClose, course, onSave }) => {
                         <input className={styles.input_field} type="date" value={courseStartDate} onChange={e => setCourseStartDate(e.target.value)} id="courseStartDate" />
                     </div>
                 </div>
-                <button className={styles.submit_button} onClick={handleSave}>Save Changes</button>
-                <button className={styles.cancel_button} onClick={handleCancel}>Cancel</button>
+                <div className={styles.buttonRow}>
+                    <button className={styles.submit_button} onClick={handleSave}>Save Changes</button>
+                    <button className={styles.cancel_button} onClick={handleCancel}>Cancel</button>
+                </div>
             </div>
         </div >
     );
