@@ -144,6 +144,9 @@ const MCQsQuestionModal = ({ lesson, onClose }) => {
                         </tbody>
                     </table>
                 </div>
+                <div className={styles.modalFooter}>
+                    <button onClick={onClose} className={styles.closeButton}>Close</button>
+                </div>
             </div>
             
             {enlargedImage && (

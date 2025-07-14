@@ -183,6 +183,20 @@ const PaymentVerification = () => {
     setSelectedImage(null);
   };
 
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape' && selectedImage) {
+        closeImageModal();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [selectedImage]);
+
   return (
     <div className={styles.main_page}>
       <Navbar />
@@ -349,8 +363,13 @@ const PaymentVerification = () => {
       {selectedImage && (
         <div className={styles.image_modal} onClick={closeImageModal}>
           <div className={styles.modal_content} onClick={(e) => e.stopPropagation()}>
-            <span className={styles.close_button} onClick={closeImageModal}>&times;</span>
+            <div className={styles.modal_header}>
+              <span className={styles.close_button} onClick={closeImageModal}>&times;</span>
+            </div>
             <img src={selectedImage} alt="Payment Proof" className={styles.full_image} />
+            <div className={styles.modal_footer}>
+              <button className={styles.close_button} onClick={closeImageModal}>Close</button>
+            </div>
           </div>
         </div>
       )}

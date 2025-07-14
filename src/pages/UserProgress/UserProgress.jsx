@@ -104,6 +104,9 @@ const LeaderboardModal = ({ isOpen, onClose, targetGroup, cohort, viewType, lead
             </div>
           )}
         </div>
+        <div className={styles.footer_leader}>
+          <button className={styles.closeButton_leader} onClick={onClose}>❌ Close</button>
+        </div>
       </div>
     </div>
   );
@@ -1050,6 +1053,9 @@ const ActivityChartModal = ({ isOpen, onClose, targetGroup, cohort, userData }) 
               <p>No chart data available. Please check your data or try a different selection.</p>
             </div>
           )}
+        </div>
+        <div className={styles.footer_chart}>
+          <button className={styles.closeButton_chart} onClick={onClose}>❌ Close</button>
         </div>
       </div>
     </div>
