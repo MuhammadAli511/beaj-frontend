@@ -1135,8 +1135,14 @@ export const getAllQuestionResponses = async () => {
 };
 
 // GET api/waQuestionResponses/getByActivityType/:activityType
-export const getQuestionResponsesByActivityType = async (activityType) => {
-    const response = await fetch(`${API_URL}/waQuestionResponses/getByActivityType/${activityType}`, {
+export const getQuestionResponsesByActivityType = async (activityType, courseId = null) => {
+    let url = `${API_URL}/waQuestionResponses/getByActivityType/${activityType}`;
+
+    if (courseId) {
+        url += `?courseId=${courseId}`;
+    }
+
+    const response = await fetch(url, {
         headers: getHeaders(),
     });
 
