@@ -932,3 +932,494 @@
   color: #666;
   font-weight: 500;
 }
+
+
+
+/* Right Sidebar Styles */
+/* .right_sidebar_overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.right_sidebar {
+  width: 400px;
+  height: 100vh;
+  background: white;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.right_sidebar_header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+}
+
+.right_sidebar_header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.close_button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #666;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.close_button:hover {
+  background-color: #e9ecef;
+  color: #333;
+}
+
+.right_sidebar_content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.sidebar_loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: 15px;
+}
+
+.sidebar_loader p {
+  color: #666;
+  font-size: 14px;
+}
+
+.users_list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.users_count {
+  background: #e3f2fd;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #1976d2;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.user_item {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 15px;
+  transition: all 0.2s ease;
+}
+
+.user_item:hover {
+  background: #e9ecef;
+  border-color: #51bbcc;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user_phone {
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.user_profile,
+.user_name,
+.user_class,
+.user_day,
+.user_lesson {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user_profile {
+  color: #7c4dff;
+}
+
+.user_name {
+  color: #4caf50;
+}
+
+.user_class {
+  color: #ff9800;
+}
+
+.user_day,
+.user_lesson {
+  color: #2196f3;
+}
+
+.no_users {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #666;
+  font-style: italic;
+}
+
+.no_users p {
+  text-align: center;
+  font-size: 16px;
+} */
+
+/* Responsive design for smaller screens */
+/* @media (max-width: 768px) {
+  .right_sidebar {
+    width: 100vw;
+  }
+
+  .right_sidebar_overlay {
+    justify-content: center;
+  }
+} */
+
+
+/* Right Sidebar Styles */
+.right_sidebar_overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  backdrop-filter: blur(2px);
+}
+
+.right_sidebar {
+  width: 600px;
+  height: 100vh;
+  background: white;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.right_sidebar_header {
+  padding: 20px 24px;
+  border-bottom: 2px solid #e5e5e5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #51bbcc 0%, #4a9fb8 100%);
+  color: white;
+}
+
+.right_sidebar_header h3 {
+  margin: 0;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.close_button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close_button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.right_sidebar_content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f8f9fa;
+}
+
+.sidebar_loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  gap: 15px;
+}
+
+.sidebar_loader p {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Table Styles */
+.users_table_container {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.users_count_header {
+  padding: 16px 24px;
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  justify-content: center;
+}
+
+.users_count_badge {
+  background: linear-gradient(135deg, #51bbcc 0%, #4a9fb8 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(81, 187, 204, 0.3);
+}
+
+.table_wrapper {
+  flex: 1;
+  overflow-y: auto;
+  background: white;
+  margin: 0 16px 16px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.users_table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table_header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.table_th {
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table_body {
+  background: white;
+}
+
+.table_row {
+  border-bottom: 1px solid #f1f3f4;
+  transition: all 0.2s ease;
+}
+
+.table_row:hover {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(81, 187, 204, 0.1);
+}
+
+.table_row:last-child {
+  border-bottom: none;
+}
+
+.table_td {
+  padding: 14px 12px;
+  vertical-align: middle;
+  border-right: 1px solid #f8f9fa;
+}
+
+.table_td:last-child {
+  border-right: none;
+}
+
+.row_number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #51bbcc 0%, #4a9fb8 100%);
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Cell Styles */
+.phone_cell,
+.name_cell,
+.school_cell,
+.city_cell,
+.day_cell,
+.lesson_cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.phone_icon,
+.name_icon,
+.school_icon,
+.city_icon,
+.day_icon,
+.lesson_icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.phone_text {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.name_text {
+  color: #27ae60;
+  font-weight: 500;
+}
+
+.school_text {
+  color: #8e44ad;
+  font-weight: 500;
+}
+
+.city_text {
+  color: #e67e22;
+  font-weight: 500;
+}
+
+.day_text,
+.lesson_text {
+  color: #3498db;
+  font-weight: 600;
+  background: #e3f2fd;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.no_users {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #6c757d;
+  background: white;
+  margin: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.no_users_icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.no_users p {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .right_sidebar {
+    width: 100vw;
+  }
+
+  .right_sidebar_overlay {
+    justify-content: center;
+  }
+
+  .table_th,
+  .table_td {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+
+  .users_count_header {
+    padding: 12px 16px;
+  }
+
+  .table_wrapper {
+    margin: 0 8px 8px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .right_sidebar {
+    width: 100vw;
+  }
+
+  .table_th,
+  .table_td {
+    padding: 10px 6px;
+    font-size: 11px;
+  }
+
+  .phone_cell,
+  .name_cell,
+  .school_cell,
+  .city_cell,
+  .day_cell,
+  .lesson_cell {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+
+  .phone_icon,
+  .name_icon,
+  .school_icon,
+  .city_icon,
+  .day_icon,
+  .lesson_icon {
+    font-size: 14px;
+  }
+}

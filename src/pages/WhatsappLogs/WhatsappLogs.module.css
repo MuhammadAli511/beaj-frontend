@@ -291,23 +291,23 @@
   font-size: 14px;
 }
 
-.select :global(.react-select__control) {
+.select .react-select__control {
   border-color: #ddd;
   min-height: 38px;
   border-radius: 8px;
   box-shadow: none;
 }
 
-.select :global(.react-select__control--is-focused) {
+.select .react-select__control--is-focused {
   border-color: #51bbcc;
   box-shadow: 0 0 0 1px #51bbcc;
 }
 
-.select :global(.react-select__option--is-selected) {
+.select .react-select__option--is-selected {
   background-color: #51bbcc;
 }
 
-.select :global(.react-select__option--is-focused) {
+.select .react-select__option--is-focused {
   background-color: rgba(81, 187, 204, 0.1);
 }
 
@@ -382,6 +382,7 @@
   .message_outbound {
     max-width: 85%;
   }
+
   .bot_phone_buttons {
     flex-direction: column;
   }
@@ -500,6 +501,12 @@
   box-shadow: 0 1px 4px rgba(76, 175, 80, 0.2);
 }
 
+.profile_selected {
+  border-color: #2196f3;
+  background-color: #e3f2fd;
+  box-shadow: 0 1px 4px rgba(33, 150, 243, 0.2);
+}
+
 .profile_name_compact {
   font-weight: 600;
   color: #333;
@@ -514,6 +521,12 @@
   color: #4caf50;
   font-size: 6px;
   animation: pulse-green 2s infinite;
+}
+
+.selected_indicator {
+  color: #2196f3;
+  font-size: 8px;
+  font-weight: bold;
 }
 
 .profile_class_compact {
@@ -561,6 +574,45 @@
   align-items: center;
 }
 
+/* Selected Profile Info */
+.selected_profile_info {
+  padding: 8px 20px;
+  background-color: #e3f2fd;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.profile_info_bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.viewing_label {
+  color: #666;
+  font-weight: 500;
+}
+
+.profile_name_selected {
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.profile_details {
+  color: #666;
+  font-size: 12px;
+}
+
+.no_messages {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #666;
+  font-size: 16px;
+  text-align: center;
+}
+
 @keyframes pulse-green {
   0% {
     opacity: 1;
@@ -581,12 +633,12 @@
     gap: 8px;
     padding: 8px 15px;
   }
-  
+
   .bot_selector_compact {
     margin-left: 0;
     flex-wrap: wrap;
   }
-  
+
   .profiles_compact {
     gap: 6px;
   }
@@ -597,16 +649,16 @@
     padding: 3px 8px;
     font-size: 10px;
   }
-  
+
   .profile_compact {
     min-width: 70px;
     padding: 3px 6px;
   }
-  
+
   .profile_name_compact {
     font-size: 10px;
   }
-  
+
   .profile_class_compact {
     font-size: 8px;
   }
