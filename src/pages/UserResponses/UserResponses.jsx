@@ -51,10 +51,10 @@ const UserResponses = () => {
             setIsLoading(true);
             try {
                 const responsesResponse = await getQuestionResponsesByActivityType(selectedActivityType.value, selectedCourse.value);
-                
+
                 // Handle regular responses
                 setUserResponses(responsesResponse.data.result);
-                
+
                 // Set default week/day if not already set and we have data
                 if (responsesResponse.data.result.length > 0 && !selectedWeek && !selectedDay) {
                     const firstResponse = responsesResponse.data.result[0];
@@ -701,10 +701,7 @@ const UserResponses = () => {
                         <div className={styles.modal_header}>
                             <button className={styles.closeButton} onClick={handleCloseModal}>Close</button>
                         </div>
-                        <img src={selectedImage} alt="Enlarged Bot Image" />
-                        <div className={styles.modal_footer}>
-                            <button className={styles.closeButton} onClick={handleCloseModal}>Close</button>
-                        </div>
+                        <img src={selectedImage} alt="Enlarged Bot" />
                     </div>
                 </div>
             )}

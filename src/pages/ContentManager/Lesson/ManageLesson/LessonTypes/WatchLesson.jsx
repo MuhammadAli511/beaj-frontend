@@ -181,9 +181,28 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
             {isOpen && (
                 <div className={styles.modal}>
                     <div className={styles.modalContent}>
-                        <h2 className={styles.modal_heading}>Edit Watch Lesson</h2>
-                        {isLoading && <div>Loading...</div>}
-                        {!isLoading && lessonData && (
+                        <div className={styles.modalHeader}>
+                            <h2 className={styles.modal_heading}>Edit Watch Lesson</h2>
+                            <div className={styles.form_group_row}>
+                                <button
+                                    className={styles.submit_button}
+                                    onClick={handleSave}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? <div className="loader"></div> : "Save Changes"}
+                                </button>
+                                <button
+                                    className={styles.cancel_button}
+                                    onClick={handleCancel}
+                                    disabled={isSaving}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                        <div className={styles.modalBody}>
+                            {isLoading && <div>Loading...</div>}
+                            {!isLoading && lessonData && (
                             <div>
                                 <div className={styles.form_group}>
                                     <label className={styles.label} htmlFor="course_id">
@@ -387,24 +406,9 @@ const EditWatchLessonModal = ({ isOpen, onClose, lesson, onSave }) => {
                                         onChange={(e) => setVideo(e.target.files[0])}
                                     />
                                 </div>
-                                <div className={styles.form_group_row}>
-                                    <button
-                                        className={styles.submit_button}
-                                        onClick={handleSave}
-                                        disabled={isSaving}
-                                    >
-                                        {isSaving ? <div className="loader"></div> : "Save Changes"}
-                                    </button>
-                                    <button
-                                        className={styles.cancel_button}
-                                        onClick={handleCancel}
-                                        disabled={isSaving}
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
                             </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

@@ -328,9 +328,6 @@ const SpeakQuestionModal = ({ lesson, onClose, activity }) => {
                         </tbody>
                     </table>
                 </div>
-                <div className={styles.modalFooter}>
-                    <button onClick={onClose} className={styles.closeButton}>Close</button>
-                </div>
             </div>
         </div>
     );
