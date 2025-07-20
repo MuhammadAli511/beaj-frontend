@@ -3,7 +3,7 @@ import { Navbar, Sidebar } from "../../components"
 import styles from "./UsersData.module.css"
 import { useSidebar } from "../../components/SidebarContext"
 import CSVDownloader from "react-csv-downloader"
-import { getAllMetadata, getStudentUserJourneyStats, getStudentTrialUserJourneyStats, getstudentAnalyticsStats } from "../../helper/index"
+import { getAllMetadata, getStudentUserJourneyStats, getStudentTrialUserJourneyStats, getstudentAnalyticsStats, studentBarAnalyticsStats } from "../../helper/index"
 import { TailSpin } from "react-loader-spinner"
 import Select from "react-select"
 import { Line, Bar, Pie, Doughnut } from "react-chartjs-2"
@@ -47,6 +47,16 @@ const UsersData = () => {
     const [trialOpt, setTrialOpt] = useState({ labels: [], data: [] });
     const [cumuReg, setCumuReg] = useState({ labels: [], data: [] });
     const [lastUpdatedGraph, setLastUpdatedGraph] = useState(null);
+
+  // Right sidebar states for clicked bar data
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(false)
+  const [rightSidebarData, setRightSidebarData] = useState([])
+  const [rightSidebarLoading, setRightSidebarLoading] = useState(false)
+  const [rightSidebarTitle, setRightSidebarTitle] = useState("")
+  const [clickedBarInfo, setClickedBarInfo] = useState(null)
+
+  const [cohortName, setsetCohortName] = useState("")
+  const [gradeName, setGradeName] = useState("")
 
     const defaultGrade = { label: "Grade 1", value: "grade 1" }
     const defaultCohort = { label: "Cohort 1", value: "Cohort 1" }
@@ -278,17 +288,111 @@ const UsersData = () => {
         cohort: selectedCohort,
       },
     }))
+  };
+
+// Function to handle bar clicks for lesson completed graph (graph1)
+  const handleLessonBarClick = async (event, elements) => {
+    if (elements.length === 0) return
+
+    const clickedIndex = elements[0].index
+    const dayNumberStr = analyticsData.graph1.labels[clickedIndex];
+    const dayNumber = parseInt(dayNumberStr.split(' ')[1], 10);
+
+    const filters = analyticsFilters.graph1
+
+    if (!filters.grade || !filters.cohort) {
+      alert("Please select both grade and cohort filters")
+      return
+    }
+
+    setRightSidebarLoading(true)
+    setRightSidebarOpen(true)
+    setRightSidebarTitle(`Users on Day ${dayNumber}`)
+    setClickedBarInfo({
+      type: "lesson",
+      dayNumber: dayNumber,
+      grade: filters.grade.value,
+      cohort: filters.cohort.value,
+    })
+
+    try {
+      const courseId = getCourseId(filters.grade.value)
+      const cohortValue = filters.cohort.value === "All" ? null : filters.cohort.value
+
+      // Call API to get users by day
+      const response = await studentBarAnalyticsStats(courseId, filters.grade.value, cohortValue, 'graph1', dayNumber)
+
+      if (response.status === 200 && response.data) {
+        setRightSidebarData(response.data.users || [])
+      } else {
+        setRightSidebarData([])
+      }
+    } catch (error) {
+      console.error("Error fetching users by day:", error)
+      setRightSidebarData([])
+    } finally {
+      setRightSidebarLoading(false)
+    }
+  }
+
+  // Function to handle bar clicks for activity drop-off graph (graph2)
+  const handleActivityBarClick = async (event, elements) => {
+    if (elements.length === 0) return
+
+    const clickedIndex = elements[0].index
+    const lessonIdStr = analyticsData.graph2.labels[clickedIndex]
+    const lessonId = parseInt(lessonIdStr, 10);
+    const filters = analyticsFilters.graph2
+
+    if (!filters.grade || !filters.cohort) {
+      alert("Please select both grade and cohort filters")
+      return
+    }
+
+    setRightSidebarLoading(true)
+    setRightSidebarOpen(true)
+    setRightSidebarTitle(`Users on Lesson ${lessonId}`)
+    setClickedBarInfo({
+      type: "activity",
+      lessonId: lessonId,
+      grade: filters.grade.value,
+      cohort: filters.cohort.value,
+    })
+
+    try {
+      const courseId = getCourseId(filters.grade.value)
+      const cohortValue = filters.cohort.value === "All" ? null : filters.cohort.value
+
+      // Call API to get users by lesson
+      const response = await studentBarAnalyticsStats(courseId, filters.grade.value, cohortValue, 'graph2', lessonId)
+
+      if (response.status === 200 && response.data) {
+        setRightSidebarData(response.data.users || [])
+      } else {
+        setRightSidebarData([])
+      }
+    } catch (error) {
+      console.error("Error fetching users by lesson:", error)
+      setRightSidebarData([])
+    } finally {
+      setRightSidebarLoading(false)
+    }
+  }
+
+  // Function to close right sidebar
+  const closeRightSidebar = () => {
+    setRightSidebarOpen(false)
+    setRightSidebarData([])
+    setClickedBarInfo(null)
   }
 
 
   // Fetch data for specific graph when both grade and cohort are selected
   const fetchGraphData = async (graphType) => {
     const filters = analyticsFilters[graphType]
-
     if (!filters || !filters.grade) {
       return
     }
-
     // For graph3 and graph4, we only need grade filter
     if (graphType === "graph3" || graphType === "graph4") {
       // Graph3 and Graph4 only need grade filter
@@ -298,7 +402,6 @@ const UsersData = () => {
         return
       }
     }
-
     let courseId = null
     if (filters.grade.value !== "All") {
       courseId = getCourseId(filters.grade.value)
@@ -307,33 +410,29 @@ const UsersData = () => {
         return
       }
     }
-
     setGraphLoadingStates((prev) => ({
       ...prev,
       [graphType]: true,
     }))
-
     console.log(courseId, filters.grade.value, filters.cohort?.value, graphType)
-
     let cohortValue = filters.cohort?.value
     if (cohortValue && cohortValue === "All") {
       cohortValue = null
     }
-
     let gradeValue = filters.grade.value
     if (gradeValue === "All") {
       gradeValue = null
     }
-
     try {
+      setsetCohortName(cohortValue);
+      setGradeName(gradeValue);
       const response = await getstudentAnalyticsStats(courseId, gradeValue, cohortValue, graphType)
-
       console.log(`Response for ${graphType}:`, response)
-
       if (response.status === 200 && response.data) {
         let labels = []
-        let data1 = [], data2 = [], data=[]
-
+        let data1 = [],
+          data2 = [],
+          data = []
         switch (graphType) {
           case "graph1":
             if (response.data.lastLesson) {
@@ -408,7 +507,7 @@ const UsersData = () => {
             break
           case "graph5":
             if (response.data.lastLesson) {
-              labels = ['Not Started', 'Lagging Behind', 'Up-to-date']
+              labels = ["Not Started", "Lagging Behind", "Up-to-date"]
               const firstRow = response.data.lastLesson[0]
               const val1 = Number.parseInt(firstRow.not_started_count) || null
               const val2 = Number.parseInt(firstRow.lagging_behind_count) || null
@@ -420,19 +519,17 @@ const UsersData = () => {
           default:
             console.warn("Unknown graph type:", graphType)
         }
-        if(graphType === "graph4") {
+        if (graphType === "graph4") {
           setAnalyticsData((prev) => ({
             ...prev,
             [graphType]: { labels, data1, data2 },
           }))
+        } else {
+          setAnalyticsData((prev) => ({
+            ...prev,
+            [graphType]: { labels, data },
+          }))
         }
-        else{
-
-        setAnalyticsData((prev) => ({
-          ...prev,
-          [graphType]: { labels, data },
-        }))
-      }
       }
     } catch (error) {
       console.error(`Error fetching data for ${graphType}:`, error)
@@ -1906,36 +2003,32 @@ const UsersData = () => {
                 )}
 
           {activeTab === "analytics" && (
-             <>
+          <>
             <div className={styles.analytics_header}>
               {/* <h2>Analytics Dashboard</h2> */}
               {/* <p>Comprehensive insights into student performance and engagement metrics</p> */}
             </div>
-
             <div className={styles.analytics_grid}>
               {/* Graph 1 - Last Completed Lesson Drop-off Rate */}
               <div className={styles.analytics_card}>
-
-              
-                
                 <div className={styles.card_header}>
                   <div className={styles.card_title_section}>
                     <h3>Last Completed Lesson - Drop-off Rate</h3>
                     {/* <p>Shows drop-off rates by last completed lesson day</p> */}
-                      <div className={styles.stats_boxes}>
-                  <div className={styles.stat_box}>
-                    <h4>Total Count</h4>
-                    <p className={styles.stat_value}>
-                      {graphStats.graph1.totalCount !== null ? graphStats.graph1.totalCount : "-"}
-                    </p>
-                  </div>
-                  <div className={styles.stat_box}>
-                    <h4>Not Started Users</h4>
-                    <p className={styles.stat_value}>
-                      {graphStats.graph1.notStartedUsers !== null ? graphStats.graph1.notStartedUsers : "-"}
-                    </p>
-                  </div>
-                </div>
+                    <div className={styles.stats_boxes}>
+                      <div className={styles.stat_box}>
+                        <h4>Total Count</h4>
+                        <p className={styles.stat_value}>
+                          {graphStats.graph1.totalCount !== null ? graphStats.graph1.totalCount : "-"}
+                        </p>
+                      </div>
+                      <div className={styles.stat_box}>
+                        <h4>Not Started Users</h4>
+                        <p className={styles.stat_value}>
+                          {graphStats.graph1.notStartedUsers !== null ? graphStats.graph1.notStartedUsers : "-"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   <div className={styles.card_filters}>
                     <div className={styles.filter_group}>
@@ -1988,19 +2081,20 @@ const UsersData = () => {
                       options={{
                         responsive: true,
                         maintainAspectRatio: false,
+                        onClick: handleLessonBarClick,
                         plugins: {
                           legend: {
                             display: false,
                           },
                           datalabels: {
-                          anchor: 'center',
-                          align: 'center',
-                          color: '#000',
-                          font: {
-                            weight: 'bold',
-                            size: 12,
+                            anchor: "center",
+                            align: "center",
+                            color: "#000",
+                            font: {
+                              weight: "bold",
+                              size: 12,
+                            },
                           },
-                        },
                           tooltip: {
                             backgroundColor: "rgba(0, 0, 0, 0.8)",
                             titleColor: "#fff",
@@ -2009,13 +2103,13 @@ const UsersData = () => {
                             borderWidth: 1,
                             callbacks: {
                               label: (context) => `Users: ${context.raw}`,
+                              afterLabel: () => "Click to view users",
                             },
                           },
                         },
                         scales: {
                           y: {
                             beginAtZero: true,
-                            // max: graphStats.graph1.totalCount,
                             grid: {
                               color: "rgba(0, 0, 0, 0.1)",
                             },
@@ -2061,36 +2155,35 @@ const UsersData = () => {
                   )}
                 </div>
               </div>
-              </div>
-              <div className={styles.analytics_grid}>
+            </div>
+            <div className={styles.analytics_grid}>
               {/* Graph 2 - Last Completed Activity Drop-off Rate */}
               <div className={styles.analytics_card}>
                 <div className={styles.card_header}>
                   <div className={styles.card_title_section}>
                     <h3>Last Completed Activity - Drop-off Rate</h3>
-
                     {/* <p>Shows drop-off rates by last completed activity</p> */}
                     <div className={styles.stats_boxes}>
-                  <div className={styles.stat_box}>
-                    <h4>Total Count</h4>
-                    <p className={styles.stat_value}>
-                      {graphStats.graph1.totalCount !== null ? graphStats.graph2.totalCount : "-"}
-                    </p>
-                  </div>
-                  <div className={styles.stat_box}>
-                    <h4>Not Started Users</h4>
-                    <p className={styles.stat_value}>
-                      {graphStats.graph1.notStartedUsers !== null ? graphStats.graph2.notStartedUsers : "-"}
-                    </p>
-                  </div>
-                </div>
+                      <div className={styles.stat_box}>
+                        <h4>Total Count</h4>
+                        <p className={styles.stat_value}>
+                          {graphStats.graph2.totalCount !== null ? graphStats.graph2.totalCount : "-"}
+                        </p>
+                      </div>
+                      <div className={styles.stat_box}>
+                        <h4>Not Started Users</h4>
+                        <p className={styles.stat_value}>
+                          {graphStats.graph2.notStartedUsers !== null ? graphStats.graph2.notStartedUsers : "-"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   <div className={styles.card_filters}>
                     <div className={styles.filter_group}>
                       <label className={styles.filter_label}>Grade</label>
                       <Select
                         className={styles.select}
-                       options={gradeOptions}
+                        options={gradeOptions}
                         value={analyticsFilters.graph2.grade}
                         onChange={(option) => handleGradeChange("graph2", option)}
                         isClearable
@@ -2109,9 +2202,6 @@ const UsersData = () => {
                         placeholder="Select Cohort"
                       />
                     </div>
-                    {/* <button className={styles.clear_filters_button} onClick={() => clearAnalyticsFilters("graph2")}>
-                      Clear
-                    </button> */}
                   </div>
                 </div>
                 <div className={styles.chart_wrapper}>
@@ -2139,19 +2229,20 @@ const UsersData = () => {
                       options={{
                         responsive: true,
                         maintainAspectRatio: false,
+                        onClick: handleActivityBarClick,
                         plugins: {
                           legend: {
                             display: false,
                           },
                           datalabels: {
-                          anchor: 'center',
-                          align: 'center',
-                          color: '#000',
-                          font: {
-                            weight: 'bold',
-                            size: 12,
+                            anchor: "center",
+                            align: "center",
+                            color: "#000",
+                            font: {
+                              weight: "bold",
+                              size: 12,
+                            },
                           },
-                        },
                           tooltip: {
                             backgroundColor: "rgba(0, 0, 0, 0.8)",
                             titleColor: "#fff",
@@ -2160,13 +2251,13 @@ const UsersData = () => {
                             borderWidth: 1,
                             callbacks: {
                               label: (context) => `Users: ${context.raw}`,
+                              afterLabel: () => "Click to view users",
                             },
                           },
                         },
                         scales: {
                           y: {
                             beginAtZero: true,
-                            // max: graphStats.graph2.totalCount,
                             grid: {
                               color: "rgba(0, 0, 0, 0.1)",
                             },
@@ -2212,15 +2303,12 @@ const UsersData = () => {
                   )}
                 </div>
               </div>
-
-              
-
-              {/* Graph 4 - Engagement Trends */}
-              {/* <div className={styles.analytics_card}>
+            </div>
+            <div className={styles.analytics_grid}>
+              <div className={styles.analytics_card}>
                 <div className={styles.card_header}>
                   <div className={styles.card_title_section}>
-                    <h3>Engagement Trends</h3>
-                    <p>Monthly user engagement patterns</p>
+                    <h3>Started vs Not Started By Cohorts</h3>
                   </div>
                   <div className={styles.card_filters}>
                     <div className={styles.filter_group}>
@@ -2234,21 +2322,6 @@ const UsersData = () => {
                         placeholder="Select Grade"
                       />
                     </div>
-                    <div className={styles.filter_group}>
-                      <label className={styles.filter_label}>Cohort</label>
-                      <Select
-                        className={styles.select}
-                        options={getCohortOptions("graph4")}
-                        value={analyticsFilters.graph4.cohort}
-                        onChange={(option) => handleCohortChange("graph4", option)}
-                        isDisabled={!analyticsFilters.graph4.grade}
-                        isClearable
-                        placeholder="Select Cohort"
-                      />
-                    </div>
-                    <button className={styles.clear_filters_button} onClick={() => clearAnalyticsFilters("graph4")}>
-                      Clear
-                    </button>
                   </div>
                 </div>
                 <div className={styles.chart_wrapper}>
@@ -2258,29 +2331,27 @@ const UsersData = () => {
                       <p>Loading graph data...</p>
                     </div>
                   ) : (
-                    <Doughnut
+                    <Bar
                       data={{
                         labels: analyticsData.graph4.labels,
                         datasets: [
                           {
-                            data: analyticsData.graph4.data,
-                            backgroundColor: [
-                              "rgba(81, 187, 204, 0.8)",
-                              "rgba(54, 162, 235, 0.8)",
-                              "rgba(255, 205, 86, 0.8)",
-                              "rgba(75, 192, 192, 0.8)",
-                              "rgba(153, 102, 255, 0.8)",
-                              "rgba(255, 159, 64, 0.8)",
-                            ],
-                            borderColor: [
-                              "rgba(81, 187, 204, 1)",
-                              "rgba(54, 162, 235, 1)",
-                              "rgba(255, 205, 86, 1)",
-                              "rgba(75, 192, 192, 1)",
-                              "rgba(153, 102, 255, 1)",
-                              "rgba(255, 159, 64, 1)",
-                            ],
+                            label: "Not Started",
+                            data: analyticsData.graph4.data1,
+                            backgroundColor: "rgba(255, 99, 132, 0.8)",
+                            borderColor: "rgba(255, 99, 132, 1)",
                             borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                          },
+                          {
+                            label: "Started",
+                            data: analyticsData.graph4.data2,
+                            backgroundColor: "rgba(54, 162, 235, 0.8)",
+                            borderColor: "rgba(54, 162, 235, 1)",
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
                           },
                         ],
                       }}
@@ -2289,13 +2360,16 @@ const UsersData = () => {
                         maintainAspectRatio: false,
                         plugins: {
                           legend: {
-                            position: "bottom",
-                            labels: {
-                              padding: 20,
-                              usePointStyle: true,
-                              font: {
-                                size: 12,
-                              },
+                            display: true,
+                            position: "top",
+                          },
+                          datalabels: {
+                            anchor: "end",
+                            align: "top",
+                            color: "#000",
+                            font: {
+                              weight: "bold",
+                              size: 13,
                             },
                           },
                           tooltip: {
@@ -2305,11 +2379,49 @@ const UsersData = () => {
                             borderColor: "#51bbcc",
                             borderWidth: 1,
                             callbacks: {
-                              label: (context) => {
-                                const value = context.raw
-                                const total = context.dataset.data.reduce((sum, val) => sum + val, 0)
-                                const percentage = ((value / total) * 100).toFixed(1)
-                                return `${context.label}: ${value} (${percentage}%)`
+                              label: (context) => `${context.dataset.label}: ${context.raw}`,
+                            },
+                          },
+                        },
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            grid: {
+                              color: "rgba(0, 0, 0, 0.1)",
+                            },
+                            ticks: {
+                              color: "#666",
+                              font: {
+                                size: 12,
+                              },
+                            },
+                            title: {
+                              display: true,
+                              text: "No. of Students",
+                              color: "#333",
+                              font: {
+                                size: 14,
+                                weight: "bold",
+                              },
+                            },
+                          },
+                          x: {
+                            grid: {
+                              display: false,
+                            },
+                            ticks: {
+                              color: "#666",
+                              font: {
+                                size: 12,
+                              },
+                            },
+                            title: {
+                              display: true,
+                              text: "Cohorts",
+                              color: "#333",
+                              font: {
+                                size: 14,
+                                weight: "bold",
                               },
                             },
                           },
@@ -2318,314 +2430,170 @@ const UsersData = () => {
                     />
                   )}
                 </div>
-              </div> */}
-
-              {/* Graph 5 - Completion Rates */}
-             
               </div>
-
-              
-             <div className={styles.analytics_grid}>
-                <div className={styles.analytics_card}>
-                  <div className={styles.card_header}>
-                    <div className={styles.card_title_section}>
-                      <h3>Started vs Not Started By Cohorts</h3>
-                    </div>
-                    <div className={styles.card_filters}>
-                      <div className={styles.filter_group}>
-                        <label className={styles.filter_label}>Grade</label>
-                        <Select
-                          className={styles.select}
-                          options={gradeOptions}
-                          value={analyticsFilters.graph4.grade}
-                          onChange={(option) => handleGradeChange("graph4", option)}
-                          isClearable
-                          placeholder="Select Grade"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={styles.chart_wrapper}>
-                    {graphLoadingStates.graph4 ? (
-                      <div className={styles.graph_loader}>
-                        <TailSpin color="#51bbcc" height={40} width={40} />
-                        <p>Loading graph data...</p>
-                      </div>
-                    ) : (
-                      <Bar
-                        data={{
-                          labels: analyticsData.graph4.labels,
-                          datasets: [
-                            {
-                              label: "Not Started",
-                              data: analyticsData.graph4.data1,
-                              backgroundColor: "rgba(255, 99, 132, 0.8)",
-                              borderColor: "rgba(255, 99, 132, 1)",
-                              borderWidth: 2,
-                              borderRadius: 8,
-                              borderSkipped: false,
-                            },
-                            {
-                              label: "Started",
-                              data: analyticsData.graph4.data2,
-                              backgroundColor: "rgba(54, 162, 235, 0.8)",
-                              borderColor: "rgba(54, 162, 235, 1)",
-                              borderWidth: 2,
-                              borderRadius: 8,
-                              borderSkipped: false,
-                            }
-                          ],
-                        }}
-                        options={{
-                          responsive: true,
-                          maintainAspectRatio: false,
-                          plugins: {
-                            legend: {
-                              display: true,
-                              position: "top",
-                            },
-                            datalabels: {
-                              anchor: 'end',
-                              align: 'top',
-                              color: '#000',
-                              font: {
-                                weight: 'bold',
-                                size: 13,
-                              },
-                            },
-                            tooltip: {
-                              backgroundColor: "rgba(0, 0, 0, 0.8)",
-                              titleColor: "#fff",
-                              bodyColor: "#fff",
-                              borderColor: "#51bbcc",
-                              borderWidth: 1,
-                              callbacks: {
-                                label: (context) => `${context.dataset.label}: ${context.raw}`,
-                              },
-                            },
-                          },
-                          scales: {
-                            y: {
-                              beginAtZero: true,
-                              grid: {
-                                color: "rgba(0, 0, 0, 0.1)",
-                              },
-                              ticks: {
-                                color: "#666",
-                                font: {
-                                  size: 12,
-                                },
-                              },
-                              title: {
-                                display: true,
-                                text: "No. of Students",
-                                color: "#333",
-                                font: {
-                                  size: 14,
-                                  weight: "bold",
-                                },
-                              },
-                            },
-                            x: {
-                              grid: {
-                                display: false,
-                              },
-                              ticks: {
-                                color: "#666",
-                                font: {
-                                  size: 12,
-                                },
-                              },
-                              title: {
-                                display: true,
-                                text: "Cohorts",
-                                color: "#333",
-                                font: {
-                                  size: 14,
-                                  weight: "bold",
-                                },
-                              },
-                            },
-                          },
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-                <div className={styles.analytics_card}>
-                    <div className={styles.card_header}>
-                      <div className={styles.card_title_section}>
-                        <h3>Daily Completion Status</h3>
-                      </div>
-                      <div className={styles.card_filters}>
-                        <div className={styles.filter_group}>
-                          <label className={styles.filter_label}>Grade</label>
-                          <Select
-                            className={styles.select}
-                            options={gradeOptions}
-                            value={analyticsFilters.graph5.grade}
-                            onChange={(option) => handleGradeChange("graph5", option)}
-                            isClearable
-                            placeholder="Select Grade"
-                          />
-                        </div>
-                        <div className={styles.filter_group}>
-                          <label className={styles.filter_label}>Cohort</label>
-                          <Select
-                            className={styles.select}
-                            options={getCohortOptions("graph5")}
-                            value={analyticsFilters.graph5.cohort}
-                            onChange={(option) => handleCohortChange("graph5", option)}
-                            isDisabled={!analyticsFilters.graph5.grade}
-                            isClearable
-                            placeholder="Select Cohort"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* backgroundColor: "rgba(255, 99, 132, 0.8)",
-                      borderColor: "rgba(255, 99, 132, 1)", */}
-
-
-                    <div className={styles.chart_wrapper}>
-                      {graphLoadingStates.graph5 ? (
-                        <div className={styles.graph_loader}>
-                          <TailSpin color="#51bbcc" height={40} width={40} />
-                          <p>Loading graph data...</p>
-                        </div>
-                      ) : (
-                        <Bar
-                          data={{
-                            labels: analyticsData.graph5.labels,
-                            datasets: [
-                              {
-                                label: "Daily Completion Count",
-                                data: analyticsData.graph5.data,
-                                backgroundColor: [
-                               "rgba(79, 234, 234, 0.8)",
-                                "rgba(225, 225, 106, 0.8)",
-                                 "rgba(251, 176, 100, 0.8)",
-                              ],
-                              borderColor: [
-                                "rgba(79, 234, 234, 0.8)",
-                                "rgba(225, 225, 106, 1)",
-                                "rgba(251, 176, 100, 0.8)",
-                              ],
-                                borderWidth: 2,
-                                borderRadius: 8,
-                                borderSkipped: false,
-                              },
-                            ],
-                          }}
-                          options={{
-                            indexAxis: "y", 
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                              legend: {
-                                display: false,
-                              },
-                              datalabels: {
-                                // anchor: "end",
-                                // align: "",
-                                color: "#000",
-                                font: {
-                                  weight: "bold",
-                                  size: 12,
-                                },
-                              },
-                              tooltip: {
-                                backgroundColor: "rgba(0, 0, 0, 0.8)",
-                                titleColor: "#fff",
-                                bodyColor: "#fff",
-                                borderColor: "#51bbcc",
-                                borderWidth: 1,
-                                callbacks: {
-                                  label: (context) => `Users: ${context.raw}`,
-                                },
-                              },
-                            },
-                            scales: {
-                              x: {
-                                beginAtZero: true,
-                                grid: {
-                                  color: "rgba(0, 0, 0, 0.1)",
-                                },
-                                ticks: {
-                                  color: "#666",
-                                  font: {
-                                    size: 12,
-                                  },
-                                },
-                                title: {
-                                  display: true,
-                                  text: "No. of people",
-                                  color: "#333",
-                                  font: {
-                                    size: 14,
-                                    weight: "bold",
-                                  },
-                                },
-                              },
-                              y: {
-                                grid: {
-                                  display: false,
-                                },
-                                ticks: {
-                                  color: "#666",
-                                  font: {
-                                    size: 12,
-                                  },
-                                },
-                                title: {
-                                  display: true,
-                                  text: "Completion Status",
-                                  color: "#333",
-                                  font: {
-                                    size: 14,
-                                    weight: "bold",
-                                  },
-                                },
-                              },
-                            },
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-              </div>
-
-              <div className={styles.analytics_grid}>
-            {/* Graph 3 - Performance Analysis */}
               <div className={styles.analytics_card}>
                 <div className={styles.card_header}>
                   <div className={styles.card_title_section}>
-                    <h3>Daily Course Completion</h3>
-                    {/* <p>Shows drop-off rates by last completed activity</p> */}
-                    <div className={styles.stats_boxes}>
-                  <div className={styles.stat_box}>
-                    <h4>Expected Completion</h4>
-                    <p className={styles.stat_value}>
-                      {graphStats.graph1.totalCount !== null ? graphStats.graph3.totalCount : "-"}
-                    </p>
-                  </div>
-                  <div className={styles.stat_box}>
-                    <h4>Actual Completion</h4>
-                    <p className={styles.stat_value}>
-                      {graphStats.graph1.notStartedUsers !== null ? graphStats.graph3.notStartedUsers : "-"}
-                    </p>
-                  </div>
-                </div>
-                    {/* <p>Student performance metrics by subject</p> */}
+                    <h3>Daily Completion Status</h3>
                   </div>
                   <div className={styles.card_filters}>
                     <div className={styles.filter_group}>
                       <label className={styles.filter_label}>Grade</label>
                       <Select
                         className={styles.select}
-                       options={getGradeOptions("graph3")}
+                        options={gradeOptions}
+                        value={analyticsFilters.graph5.grade}
+                        onChange={(option) => handleGradeChange("graph5", option)}
+                        isClearable
+                        placeholder="Select Grade"
+                      />
+                    </div>
+                    <div className={styles.filter_group}>
+                      <label className={styles.filter_label}>Cohort</label>
+                      <Select
+                        className={styles.select}
+                        options={getCohortOptions("graph5")}
+                        value={analyticsFilters.graph5.cohort}
+                        onChange={(option) => handleCohortChange("graph5", option)}
+                        isDisabled={!analyticsFilters.graph5.grade}
+                        isClearable
+                        placeholder="Select Cohort"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className={styles.chart_wrapper}>
+                  {graphLoadingStates.graph5 ? (
+                    <div className={styles.graph_loader}>
+                      <TailSpin color="#51bbcc" height={40} width={40} />
+                      <p>Loading graph data...</p>
+                    </div>
+                  ) : (
+                    <Bar
+                      data={{
+                        labels: analyticsData.graph5.labels,
+                        datasets: [
+                          {
+                            label: "Daily Completion Count",
+                            data: analyticsData.graph5.data,
+                            backgroundColor: [
+                              "rgba(79, 234, 234, 0.8)",
+                              "rgba(225, 225, 106, 0.8)",
+                              "rgba(251, 176, 100, 0.8)",
+                            ],
+                            borderColor: [
+                              "rgba(79, 234, 234, 0.8)",
+                              "rgba(225, 225, 106, 1)",
+                              "rgba(251, 176, 100, 0.8)",
+                            ],
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                          },
+                        ],
+                      }}
+                      options={{
+                        indexAxis: "y",
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                          datalabels: {
+                            color: "#000",
+                            font: {
+                              weight: "bold",
+                              size: 12,
+                            },
+                          },
+                          tooltip: {
+                            backgroundColor: "rgba(0, 0, 0, 0.8)",
+                            titleColor: "#fff",
+                            bodyColor: "#fff",
+                            borderColor: "#51bbcc",
+                            borderWidth: 1,
+                            callbacks: {
+                              label: (context) => `Users: ${context.raw}`,
+                            },
+                          },
+                        },
+                        scales: {
+                          x: {
+                            beginAtZero: true,
+                            grid: {
+                              color: "rgba(0, 0, 0, 0.1)",
+                            },
+                            ticks: {
+                              color: "#666",
+                              font: {
+                                size: 12,
+                              },
+                            },
+                            title: {
+                              display: true,
+                              text: "No. of people",
+                              color: "#333",
+                              font: {
+                                size: 14,
+                                weight: "bold",
+                              },
+                            },
+                          },
+                          y: {
+                            grid: {
+                              display: false,
+                            },
+                            ticks: {
+                              color: "#666",
+                              font: {
+                                size: 12,
+                              },
+                            },
+                            title: {
+                              display: true,
+                              text: "Completion Status",
+                              color: "#333",
+                              font: {
+                                size: 14,
+                                weight: "bold",
+                              },
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className={styles.analytics_grid}>
+              {/* Graph 3 - Performance Analysis */}
+              <div className={styles.analytics_card}>
+                <div className={styles.card_header}>
+                  <div className={styles.card_title_section}>
+                    <h3>Daily Course Completion</h3>
+                    <div className={styles.stats_boxes}>
+                      <div className={styles.stat_box}>
+                        <h4>Expected Completion</h4>
+                        <p className={styles.stat_value}>
+                          {graphStats.graph3.totalCount !== null ? graphStats.graph3.totalCount : "-"}
+                        </p>
+                      </div>
+                      <div className={styles.stat_box}>
+                        <h4>Actual Completion</h4>
+                        <p className={styles.stat_value}>
+                          {graphStats.graph3.notStartedUsers !== null ? graphStats.graph3.notStartedUsers : "-"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.card_filters}>
+                    <div className={styles.filter_group}>
+                      <label className={styles.filter_label}>Grade</label>
+                      <Select
+                        className={styles.select}
+                        options={getGradeOptions("graph3")}
                         value={analyticsFilters.graph3.grade}
                         onChange={(option) => handleGradeChange("graph3", option)}
                         isClearable
@@ -2691,16 +2659,15 @@ const UsersData = () => {
                             },
                           },
                           datalabels: {
-                          anchor: 'end',
-                          align: 'bottom',
-                          color: '#000',
-                          font: {
-                            weight: 'bold',
-                            size: 12,
+                            anchor: "end",
+                            align: "bottom",
+                            color: "#000",
+                            font: {
+                              weight: "bold",
+                              size: 12,
+                            },
                           },
                         },
-                        },
-                        
                         scales: {
                           y: {
                             beginAtZero: true,
@@ -2749,12 +2716,153 @@ const UsersData = () => {
                   )}
                 </div>
               </div>
-
-
-             </div>
-
+            </div>
           </>
+        )}
+
+        {/* Right Sidebar for clicked bar data */}
+        {/* {rightSidebarOpen && (
+          <div className={styles.right_sidebar_overlay} onClick={closeRightSidebar}>
+            <div className={styles.right_sidebar} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.right_sidebar_header}>
+                <h3>{rightSidebarTitle}</h3>
+                <button className={styles.close_button} onClick={closeRightSidebar}>
+                  ✕
+                </button>
+              </div>
+              <div className={styles.right_sidebar_content}>
+                {rightSidebarLoading ? (
+                  <div className={styles.sidebar_loader}>
+                    <TailSpin color="#51bbcc" height={40} width={40} />
+                    <p>Loading users...</p>
+                  </div>
+                ) : rightSidebarData.length > 0 ? (
+                  <div className={styles.users_list}>
+                    <div className={styles.users_count}>Total Users: {rightSidebarData.length}</div>
+                    {rightSidebarData.map((user, index) => (
+                      <div key={index} className={styles.user_item}>
+                        <div className={styles.user_phone}>📱 {user.phoneNumber || "N/A"}</div>
+                        {user.profile_id && <div className={styles.user_profile}>👤 Profile: {user.profile_id}</div>}
+                        {user.name && <div className={styles.user_name}>📝 {user.name}</div>}
+                        <div className={styles.user_class}>🎓 School: {user.schoolName || "N/A"}</div>
+                       <div className={styles.user_class}>🎓 City: {user.city ||"N/A"}</div>
+                        {clickedBarInfo?.type === "lesson" && user.city && (
+                          <div className={styles.user_day}>📅 Day: {user.city}</div>
+                        )}
+                        {clickedBarInfo?.type === "activity" && user.lessonId && (
+                          <div className={styles.user_lesson}>📚 Lesson: {user.lessonId}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={styles.no_users}>
+                    <p>No users found for this selection.</p>
+                  </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )} */}
+
+        {/* Right Sidebar for clicked bar data */}
+        {rightSidebarOpen && (
+          <div className={styles.right_sidebar_overlay} onClick={closeRightSidebar}>
+            <div className={styles.right_sidebar} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.right_sidebar_header}>
+                <h3>{rightSidebarTitle}</h3>
+                <button className={styles.close_button} onClick={closeRightSidebar}>
+                  ✕
+                </button>
+              </div>
+              <div className={styles.right_sidebar_content}>
+                {rightSidebarLoading ? (
+                  <div className={styles.sidebar_loader}>
+                    <TailSpin color="#51bbcc" height={40} width={40} />
+                    <p>Loading users...</p>
+                  </div>
+                ) : rightSidebarData.length > 0 ? (
+                  <div className={styles.users_table_container}>
+                    <div className={styles.users_count_header}>
+                      <span className={styles.users_count_badge}>Total Users: {rightSidebarData.length} {gradeName} {cohortName}</span>
+                    </div>
+                    <div className={styles.table_wrapper}>
+                      <table className={styles.users_table}>
+                        <thead className={styles.table_header}>
+                          <tr>
+                            <th className={styles.table_th}>#</th>
+                            <th className={styles.table_th}>Profile</th>
+                            <th className={styles.table_th}>Phone</th>
+                            <th className={styles.table_th}>Name</th>
+                            <th className={styles.table_th}>School</th>
+                            <th className={styles.table_th}>City</th>
+                            {/* {clickedBarInfo?.type === "lesson" && <th className={styles.table_th}>Day</th>}
+                            {clickedBarInfo?.type === "activity" && <th className={styles.table_th}>Lesson</th>} */}
+                          </tr>
+                        </thead>
+                        <tbody className={styles.table_body}>
+                          {rightSidebarData.map((user, index) => (
+                            <tr key={index} className={styles.table_row}>
+                              <td className={styles.table_td}>
+                                <span className={styles.row_number}>{index + 1}</span>
+                              </td>
+                              <td className={styles.table_td}>
+                                <div className={styles.phone_cell}>
+                                  {/* <span className={styles.phone_icon}>📱</span> */}
+                                  <span >
+                                    {user.profile_id || "N/A"}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className={styles.table_td}>
+                                <div className={styles.phone_cell}>
+                                  {/* <span className={styles.phone_icon}>📱</span> */}
+                                  <span >
+                                    {user.phoneNumber || "N/A"}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className={styles.table_td}>
+                                <div className={styles.name_cell}>
+                                  {/* <span className={styles.name_icon}>👤</span> */}
+                                  <span>{user.name|| "N/A"}</span>
+                                </div>
+                              </td>
+                              <td className={styles.table_td}>
+                                <div className={styles.school_cell}>
+                                  {/* <span className={styles.school_icon}>🏫</span> */}
+                                  <span >{user.schoolName || "N/A"}</span>
+                                </div>
+                              </td>
+                               <td className={styles.table_td}>
+                                <div className={styles.school_cell}>
+                                  {/* <span className={styles.school_icon}>🏫</span> */}
+                                  <span >{user.city || "N/A"}</span>
+                                </div>
+                              </td>
+                              {/* <td className={styles.table_td}>
+                                <div className={styles.school_cell}>
+                                  
+                                  <span >{user.city || "N/A"}</span>
+                                </div>
+                              </td> */}
+                              
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.no_users}>
+                    <div className={styles.no_users_icon}>📊</div>
+                    <p>No users found for this selection.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
             </div>
         </div>
     );

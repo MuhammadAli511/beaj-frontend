@@ -977,8 +977,8 @@ export const getAllActivityLogs = async () => {
 };
 
 // GET api/waUserActivityLogs/getByPhoneNumber/:phoneNumber
-export const getActivityLogsByPhoneNumber = async (phoneNumber, botPhoneNumberId, page = 1, pageSize = 15) => {
-    const response = await fetch(`${API_URL}/waUserActivityLogs/getByPhoneNumber/${phoneNumber}?page=${page}&pageSize=${pageSize}&botPhoneNumberId=${botPhoneNumberId}`, {
+export const getActivityLogsByPhoneNumber = async (phoneNumber, botPhoneNumberId, profile_id, page = 1, pageSize = 15) => {
+    const response = await fetch(`${API_URL}/waUserActivityLogs/getByPhoneNumber/${phoneNumber}?page=${page}&pageSize=${pageSize}&botPhoneNumberId=${botPhoneNumberId}&profile_id=${profile_id}`, {
         headers: getHeaders(),
     });
 
@@ -1104,6 +1104,17 @@ export const getstudentAnalyticsStats = async (courseId, grade, cohort, graphTyp
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ courseId, grade, cohort, graphType }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+export const studentBarAnalyticsStats = async (courseId, grade, cohort, graphType, parameterId) => {
+    const response = await fetch(`${API_URL}/stats/studentBarAnalyticsStats`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ courseId, grade, cohort, graphType, parameterId }),
     });
 
     const data = await response.json();
