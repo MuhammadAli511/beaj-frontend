@@ -813,9 +813,28 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
             {isOpen && (
                 <div className={styles.modal}>
                     <div className={styles.modalContent}>
-                        <h2 className={styles.modal_heading}>Edit MCQ Lesson</h2>
-                        {isLoading && <div>Loading...</div>}
-                        {!isLoading && lessonData && (
+                        <div className={styles.modalHeader}>
+                            <h2 className={styles.modal_heading}>Edit MCQ Lesson</h2>
+                            <div className={styles.form_group_row}>
+                                <button
+                                    className={styles.submit_button}
+                                    onClick={handleSave}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? <div className="loader"></div> : "Save Changes"}
+                                </button>
+                                <button
+                                    className={styles.cancel_button}
+                                    onClick={handleCancel}
+                                    disabled={isSaving}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                        <div className={styles.modalBody}>
+                            {isLoading && <div>Loading...</div>}
+                            {!isLoading && lessonData && (
                             <div>
                                 <div className={styles.form_group}>
                                     <label className={styles.label} htmlFor="course_id">Select Course</label>
@@ -1329,25 +1348,9 @@ const EditMCQLessonModal = ({ isOpen, onClose, lesson, onSave, activity }) => {
                                     </div>
                                 ))}
                                 <button className={styles.add_button} onClick={addNewQuestion}>Add New Question</button>
-
-                                <div className={styles.form_group_row}>
-                                    <button
-                                        className={styles.submit_button}
-                                        onClick={handleSave}
-                                        disabled={isSaving}
-                                    >
-                                        {isSaving ? <div className="loader"></div> : "Save Changes"}
-                                    </button>
-                                    <button
-                                        className={styles.cancel_button}
-                                        onClick={handleCancel}
-                                        disabled={isSaving}
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
                             </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

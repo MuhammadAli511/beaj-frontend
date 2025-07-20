@@ -99,11 +99,34 @@ img {
 
 .modalContent {
   background-color: white;
-  padding: 20px;
-  border-radius: 5px;
+  padding: 0;
+  border-radius: 12px;
   width: 600px;
-  height: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgb(249, 245, 245);
+  border-radius: 12px 12px 0 0;
+  padding: 20px 30px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modalBody {
+  flex: 1;
+  padding: 20px 30px;
   overflow-y: auto;
+  max-height: calc(80vh - 140px);
 }
 
 .modal_heading {
@@ -113,7 +136,7 @@ img {
   font-style: normal;
   font-weight: 400;
   line-height: normal;
-  margin-bottom: 20px;
+  margin: 0;
   text-align: center;
 }
 
@@ -129,6 +152,12 @@ img {
   flex-direction: row;
   width: 100%;
   margin-top: 50px;
+  justify-content: center;
+  gap: 15px;
+}
+
+.modalHeader .form_group_row {
+  margin-top: 0;
 }
 
 .label {
@@ -167,20 +196,18 @@ img {
 }
 
 .submit_button {
-  width: 180px;
-  height: 50px;
+  min-width: 140px;
+  height: 44px;
   padding: 10px 20px;
   cursor: pointer;
   border: none;
-  border-radius: 5px;
-  background-color: #d4de00;
-  color: #000000;
+  border-radius: 8px;
+  background-color: #51bbcc;
+  color: white;
   font-family: "Poppins", sans-serif;
-  font-size: 18px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-  align-self: center;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .migrate_button {
@@ -199,25 +226,30 @@ img {
 }
 
 .cancel_button {
-  width: 180px;
-  height: 50px;
+  min-width: 140px;
+  height: 44px;
   padding: 10px 20px;
   cursor: pointer;
   border: none;
-  border-radius: 5px;
-  background-color: #ff0000;
-  color: #ffffff;
+  border-radius: 8px;
+  background-color: #ff5252;
+  color: white;
   font-family: "Poppins", sans-serif;
-  font-size: 18px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-  align-self: center;
-  margin-left: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .submit_button:hover {
-  background-color: #c4ce00;
+  background-color: #3d8f9d;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cancel_button:hover {
+  background-color: #e63946;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
 .test_button {

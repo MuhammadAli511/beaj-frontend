@@ -104,12 +104,34 @@ img {
 
 .modalContent {
   background-color: white;
-  padding: 30px;
+  padding: 0;
   border-radius: 12px;
   width: 700px;
   max-height: 80vh;
-  overflow-y: auto;
+  overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgb(249, 245, 245);
+  border-radius: 12px 12px 0 0;
+  padding: 20px 30px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modalBody {
+  flex: 1;
+  padding: 20px 30px;
+  overflow-y: auto;
+  max-height: calc(80vh - 140px);
 }
 
 .modal_heading {
@@ -117,7 +139,7 @@ img {
   font-family: "Poppins", sans-serif;
   font-size: 22px;
   font-weight: 600;
-  margin-bottom: 25px;
+  margin: 0;
   text-align: center;
 }
 
@@ -135,6 +157,10 @@ img {
   margin-top: 40px;
   justify-content: center;
   gap: 15px;
+}
+
+.modalHeader .form_group_row {
+  margin-top: 0;
 }
 
 .label {

@@ -1836,6 +1836,20 @@ const CreateLesson = () => {
                         </div>
                         {wsQuestions.map((question, qIndex) => (
                             <div key={qIndex} className={styles.question_box}>
+                                <div className={styles.question_header}>
+                                    <h3 className={styles.question_title}>
+                                        {enableDifficultyLevel && question.difficultyLevel
+                                            ? `Question ${question.questionNumber} - ${question.difficultyLevel.charAt(0).toUpperCase() + question.difficultyLevel.slice(1)}`
+                                            : `Question ${qIndex + 1}`
+                                        }
+                                    </h3>
+                                    {(enableDifficultyLevel ? wsQuestions.length > 3 && qIndex % 3 === 0 : wsQuestions.length > 1) &&
+                                        <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>
+                                            Remove Question{enableDifficultyLevel ? ' (All Variants)' : ''}
+                                        </button>
+                                    }
+                                </div>
+
                                 <div className={styles.input_row}>
                                     <div className={styles.media_toggle_container}>
                                         <div className={styles.toggle_buttons}>
@@ -1889,12 +1903,6 @@ const CreateLesson = () => {
                                             />
                                         )}
                                     </div>
-                                    
-                                    {(enableDifficultyLevel ? wsQuestions.length > 3 && qIndex % 3 === 0 : wsQuestions.length > 1) &&
-                                        <button className={styles.remove_button} onClick={(e) => removeWsQuestion(qIndex, e)}>
-                                            Remove Question{enableDifficultyLevel ? ' (All Variants)' : ''}
-                                        </button>
-                                    }
                                 </div>
 
                                 {/* Custom Feedback Section for watchAndAudio */}
