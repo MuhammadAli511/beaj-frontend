@@ -76,7 +76,7 @@ const UsersData = () => {
     graph1: { labels: [], data: [] },
     graph2: { labels: [], data: [] },
     graph3: { labels: [], data: [] },
-    graph4: { labels: [], data1: [], data2: [] },
+    graph4: { labels: [], data1: [], data2: [], data3: [] },
     graph5: { labels: [], data: [] },
   })
 
@@ -431,7 +431,7 @@ const UsersData = () => {
       if (response.status === 200 && response.data) {
         let labels = []
         let data1 = [],
-          data2 = [],
+          data2 = [],data3 = [],
           data = []
         switch (graphType) {
           case "graph1":
@@ -500,6 +500,10 @@ const UsersData = () => {
                 return isNaN(val) ? null : val
               })
               data2 = response.data.lastLesson.map((item) => {
+                const val = Number.parseInt(item.started_user_count)
+                return isNaN(val) ? null : val
+              })
+              data3 = response.data.lastLesson.map((item) => {
                 const val = Number.parseInt(item.not_started_user_count)
                 return isNaN(val) ? null : val
               })
@@ -522,7 +526,7 @@ const UsersData = () => {
         if (graphType === "graph4") {
           setAnalyticsData((prev) => ({
             ...prev,
-            [graphType]: { labels, data1, data2 },
+            [graphType]: { labels, data1, data2, data3 },
           }))
         } else {
           setAnalyticsData((prev) => ({
@@ -2336,10 +2340,11 @@ const UsersData = () => {
                         labels: analyticsData.graph4.labels,
                         datasets: [
                           {
-                            label: "Not Started",
+                            label: "Total",
                             data: analyticsData.graph4.data1,
-                            backgroundColor: "rgba(255, 99, 132, 0.8)",
-                            borderColor: "rgba(255, 99, 132, 1)",
+                            backgroundColor: "rgba(54, 162, 235, 0.8)",
+                            borderColor: "rgba(54, 162, 235, 1)",
+                            
                             borderWidth: 2,
                             borderRadius: 8,
                             borderSkipped: false,
@@ -2347,8 +2352,17 @@ const UsersData = () => {
                           {
                             label: "Started",
                             data: analyticsData.graph4.data2,
-                            backgroundColor: "rgba(54, 162, 235, 0.8)",
-                            borderColor: "rgba(54, 162, 235, 1)",
+                            backgroundColor: "rgba(61, 220, 90, 0.8)",
+                            borderColor: "rgba(61, 220, 90, 1)",
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                          },
+                          {
+                            label: "Not Started",
+                            data: analyticsData.graph4.data3,
+                            backgroundColor: "rgba(255, 99, 132, 0.8)",
+                            borderColor: "rgba(255, 99, 132, 1)",
                             borderWidth: 2,
                             borderRadius: 8,
                             borderSkipped: false,
@@ -2364,8 +2378,8 @@ const UsersData = () => {
                             position: "top",
                           },
                           datalabels: {
-                            anchor: "end",
-                            align: "top",
+                            anchor: "top",
+                            align: "center",
                             color: "#000",
                             font: {
                               weight: "bold",
@@ -2572,7 +2586,7 @@ const UsersData = () => {
               <div className={styles.analytics_card}>
                 <div className={styles.card_header}>
                   <div className={styles.card_title_section}>
-                    <h3>Daily Course Completion</h3>
+                    <h3>Daily Lesson Completion</h3>
                     <div className={styles.stats_boxes}>
                       <div className={styles.stat_box}>
                         <h4>Expected Completion</h4>
@@ -2626,7 +2640,7 @@ const UsersData = () => {
                         labels: analyticsData.graph3.labels,
                         datasets: [
                           {
-                            label: "Daily Completion",
+                            label: "Daily Lesson Completion",
                             data: analyticsData.graph3.data,
                             borderColor: "rgba(153, 102, 255, 0.8)",
                             backgroundColor: "rgba(231, 186, 233, 0.1)",
@@ -2791,11 +2805,17 @@ const UsersData = () => {
                         <thead className={styles.table_header}>
                           <tr>
                             <th className={styles.table_th}>#</th>
-                            <th className={styles.table_th}>Profile</th>
                             <th className={styles.table_th}>Phone</th>
                             <th className={styles.table_th}>Name</th>
                             <th className={styles.table_th}>School</th>
                             <th className={styles.table_th}>City</th>
+                            <th className={styles.table_th}>Cohort</th>
+                            <th className={styles.table_th}>Customer Source</th>
+                            <th className={styles.table_th}>Customer Channel</th>
+                            <th className={styles.table_th}>Profile</th>
+                            <th className={styles.table_th}>Class</th>
+                            <th className={styles.table_th}>Rollout</th>
+                            
                             {/* {clickedBarInfo?.type === "lesson" && <th className={styles.table_th}>Day</th>}
                             {clickedBarInfo?.type === "activity" && <th className={styles.table_th}>Lesson</th>} */}
                           </tr>
@@ -2806,14 +2826,7 @@ const UsersData = () => {
                               <td className={styles.table_td}>
                                 <span className={styles.row_number}>{index + 1}</span>
                               </td>
-                              <td className={styles.table_td}>
-                                <div className={styles.phone_cell}>
-                                  {/* <span className={styles.phone_icon}>📱</span> */}
-                                  <span >
-                                    {user.profile_id || "N/A"}
-                                  </span>
-                                </div>
-                              </td>
+                              
                               <td className={styles.table_td}>
                                 <div className={styles.phone_cell}>
                                   {/* <span className={styles.phone_icon}>📱</span> */}
@@ -2840,6 +2853,49 @@ const UsersData = () => {
                                   <span >{user.city || "N/A"}</span>
                                 </div>
                               </td>
+                               <td className={styles.table_td}>
+                                <div className={styles.school_cell}>
+                                  {/* <span className={styles.school_icon}>🏫</span> */}
+                                  <span >{user.cohort || "N/A"}</span>
+                                </div>
+                              </td>
+                               
+                               <td className={styles.table_td}>
+                                <div className={styles.school_cell}>
+                                  {/* <span className={styles.school_icon}>🏫</span> */}
+                                  <span >{user.customerSource || "N/A"}</span>
+                                </div>
+                              </td>
+                              <td className={styles.table_td}>
+                                <div className={styles.school_cell}>
+                                  {/* <span className={styles.school_icon}>🏫</span> */}
+                                  <span >{user.customerChannel || "N/A"}</span>
+                                </div>
+                              </td>
+                              <td className={styles.table_td}>
+                                <div className={styles.phone_cell}>
+                                  {/* <span className={styles.phone_icon}>📱</span> */}
+                                  <span >
+                                    {user.profile_id || "N/A"}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className={styles.table_td}>
+                                <div className={styles.school_cell}>
+                                  {/* <span className={styles.school_icon}>🏫</span> */}
+                                  <span >{user.classLevel || "N/A"}</span>
+                                </div>
+                              </td>
+
+                              <td className={styles.table_td}>
+                                <div className={styles.phone_cell}>
+                                  {/* <span className={styles.phone_icon}>📱</span> */}
+                                  <span >
+                                    {user.rollout || "N/A"}
+                                  </span>
+                                </div>
+                              </td>
+
                               {/* <td className={styles.table_td}>
                                 <div className={styles.school_cell}>
                                   
