@@ -790,3 +790,89 @@
   width: 50px; /* Light yellow or any distinct color */
   /* font-weight: bold; */
 }
+
+
+/* Add these new styles for the stats cards */
+.statsCardsContainer {
+  display: flex;
+  gap: 20px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+  /* justify-content: space-between; */
+}
+
+.statsCard {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  min-width: 200px;
+  max-width: 250px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.statsCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.cardIcon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.cardValue {
+  font-size: 32px;
+  font-weight: bold;
+  color: #2c3e50;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Responsive design for cards */
+@media (max-width: 1200px) {
+  .statsCardsContainer {
+    justify-content: center;
+  }
+
+  .statsCard {
+    min-width: 180px;
+    max-width: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .statsCardsContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .statsCard {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+/* Existing styles remain the same... */
