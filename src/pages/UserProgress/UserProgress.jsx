@@ -11,6 +11,61 @@ import ChartDataLabels from "chartjs-plugin-datalabels"
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ChartDataLabels)
 
+const StatsCards = ({ cardData, botType, rollout, level, targetGroup }) => {
+  // Determine if cards should be shown based on conditions
+  const shouldShowCards = () => {
+    return (
+      (botType === "student" && rollout === "2" && level) ||
+      (botType === "teacher" && rollout === "2")
+    );
+  };
+
+  if (!shouldShowCards() || !cardData) {
+    return null;
+  }
+
+  const cards = [
+    {
+      title: "Total Users",
+      value: cardData.totalUsers || 0,
+      color: "#3498db",
+      show: botType === "teacher" || (botType === "student" && level),
+    },
+    {
+      title: "Started Main Course",
+      value: cardData.startedMainCourse || 0,
+      color: "#e74c3c",
+      show: true,
+    },
+    {
+      title: "Started Pre-Assessment",
+      value: cardData.startedPreAssessment || 0,
+      color: "#f39c12",
+      show: true,
+    },
+  ];
+
+  const visibleCards = cards.filter((card) => card.show);
+
+  return (
+    <div className={styles.statsCardsContainer}>
+      {visibleCards.map((card, index) => (
+        <div
+          key={index}
+          className={styles.statsCard}
+          style={{ borderTop: `4px solid ${card.color}` }}
+        >
+          <div className={styles.cardHeader}>
+            {/* Icon can be added here later if needed */}
+            <h3 className={styles.cardTitle}>{card.title}</h3>
+          </div>
+          <div className={styles.cardValue}>{card.value}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 
 const LeaderboardModal = ({ isOpen, onClose, targetGroup, cohort, viewType, leaderboardImages = [], loading }) => {
   const [selectedIndex, setSelectedIndex] = useState(leaderboardImages[0]?.columnIndex || null);
@@ -635,6 +690,7 @@ const UserProgress = () => {
   const [leaderboardBuffer, setLeaderboardBuffer] = useState('');
   const [leaderboardImages, setLeaderboardImages] = useState([]);
   const [module, setModule] = useState('week');
+  const [cardData, setCardData] = useState(null);
 
   // Activity chart state
   const [showActivityChart, setShowActivityChart] = useState(false);
@@ -773,6 +829,21 @@ const UserProgress = () => {
             let rows = arrayList.map(row => [...row]);
             setUserData(rows);
             setFilteredData(rows);
+
+
+            const userStats = response.data.data.userStats;
+            const [totalUsers, startedCourse, completedCourse, startedAssessment, completedAssessment] = userStats[0];
+            const cardStats = { 
+              totalUsers: totalUsers || 0, 
+              startedMainCourse: startedCourse || 0,
+              completedMainCourse: completedCourse || 0,
+              startedPreAssessment: startedAssessment || 0,
+              completedPreAssessment: completedAssessment || 0,
+            }
+
+            setCardData(cardStats)
+
+
           } else {
             console.error("Error fetching data:", response);
           }
@@ -1595,6 +1666,18 @@ return (
 
           </div>
         </div>
+
+        {/* Stats Cards Section - Added after tabs */}
+          {activeTab && !loading && (
+            <StatsCards
+              cardData={cardData}
+              botType={botType}
+              rollout={rollout}
+              level={level}
+              targetGroup={targetGroup}
+            />
+          )}
+
 
         {/* Search bar and buttons */}
         
