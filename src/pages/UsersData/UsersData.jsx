@@ -2809,12 +2809,14 @@ const UsersData = () => {
                             <th className={styles.table_th}>Name</th>
                             <th className={styles.table_th}>School</th>
                             <th className={styles.table_th}>City</th>
+                             <th className={styles.table_th}>Status</th>
                             <th className={styles.table_th}>Cohort</th>
                             <th className={styles.table_th}>Customer Source</th>
                             <th className={styles.table_th}>Customer Channel</th>
                             <th className={styles.table_th}>Profile</th>
                             <th className={styles.table_th}>Class</th>
                             <th className={styles.table_th}>Rollout</th>
+                            
                             
                             {/* {clickedBarInfo?.type === "lesson" && <th className={styles.table_th}>Day</th>}
                             {clickedBarInfo?.type === "activity" && <th className={styles.table_th}>Lesson</th>} */}
@@ -2853,6 +2855,20 @@ const UsersData = () => {
                                   <span >{user.city || "N/A"}</span>
                                 </div>
                               </td>
+                              <td className={styles.table_td}>
+                                  <div className={styles.phone_cell}>
+                                    <span
+                                      className={
+                                        user.status === "Active"
+                                          ? styles.status_active
+                                          : styles.status_inactive
+                                      }
+                                    >
+                                      {user.status || "N/A"}
+                                    </span>
+                                  </div>
+                                </td>
+
                                <td className={styles.table_td}>
                                 <div className={styles.school_cell}>
                                   {/* <span className={styles.school_icon}>🏫</span> */}
@@ -2886,6 +2902,7 @@ const UsersData = () => {
                                   <span >{user.classLevel || "N/A"}</span>
                                 </div>
                               </td>
+                               
 
                               <td className={styles.table_td}>
                                 <div className={styles.phone_cell}>
@@ -2895,6 +2912,7 @@ const UsersData = () => {
                                   </span>
                                 </div>
                               </td>
+                             
 
                               {/* <td className={styles.table_td}>
                                 <div className={styles.school_cell}>

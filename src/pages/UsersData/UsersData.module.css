@@ -1423,3 +1423,13 @@
     font-size: 14px;
   }
 }
+
+.status_active {
+  color: green;
+  font-weight: bold;
+}
+
+.status_inactive {
+  color: red;
+  font-weight: bold;
+}
