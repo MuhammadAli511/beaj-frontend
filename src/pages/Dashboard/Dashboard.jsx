@@ -34,7 +34,7 @@ ChartJS.register(
 const Dashboard = () => {
     const { isSidebarOpen } = useSidebar();
     const [botStatus, setBotStatus] = useState(null);
-    const [courseStats, setCourseStats] = useState([]);
+    const [courseStats, setCourseStats] = useState({});
     const [courseStatsLoading, setCourseStatsLoading] = useState(true);
     const [courseStatsError, setCourseStatsError] = useState(null);
 
@@ -62,7 +62,7 @@ const Dashboard = () => {
             try {
                 setCourseStatsLoading(true);
                 const response = await getStudentCourseStats();
-                setCourseStats(response.data || []);
+                setCourseStats(response.data || {});
             } catch (err) {
                 console.error("Error fetching course stats:", err);
                 setCourseStatsError("Failed to load course statistics.");
@@ -82,33 +82,72 @@ const Dashboard = () => {
             postAssessment: []
         };
 
-        stats.forEach(stat => {
-            const description = stat.description;
-            if (description.includes('Total Users') || description.includes('Started Users')) {
-                organized.overall.push(stat);
-            } else if (description.includes('Pre-Assessment')) {
-                organized.preAssessment.push(stat);
-            } else if (description.includes('Main Course')) {
-                organized.mainCourse.push(stat);
-            } else if (description.includes('Post-Assessment')) {
-                organized.postAssessment.push(stat);
-            }
-        });
+        // Handle new API response structure
+        if (stats.totalUsers) {
+            organized.overall.push({
+                description: 'Total Users',
+                count: parseInt(stats.totalUsers[0]?.total_users || 0)
+            });
+        }
+
+        if (stats.oneMessage) {
+            organized.overall.push({
+                description: 'Users with at least one message',
+                count: parseInt(stats.oneMessage[0]?.one_message_count || 0)
+            });
+        }
+
+        if (stats.preAssessment) {
+            organized.preAssessment = stats.preAssessment.map(item => ({
+                description: item.heading,
+                count: parseInt(item.completion_count || 0)
+            }));
+        }
+
+        if (stats.actualCourse) {
+            organized.mainCourse = stats.actualCourse.map(item => ({
+                description: item.heading,
+                count: parseInt(item.completion_count || 0)
+            }));
+        }
 
         return organized;
     };
 
     const organizedStats = organizeStatsData(courseStats);
 
-    // Create funnel data from SQL response
+    // Create funnel data from new API response structure
     const createFunnelData = (stats) => {
         const funnelLabels = [];
         const funnelCounts = [];
 
-        stats.forEach(stat => {
-            funnelLabels.push(stat.description);
-            funnelCounts.push(stat.count);
-        });
+        // Start with Total Users
+        if (stats.totalUsers) {
+            funnelLabels.push('Total Users');
+            funnelCounts.push(parseInt(stats.totalUsers[0]?.total_users || 0));
+        }
+
+        // Add Users with Messages
+        if (stats.oneMessage) {
+            funnelLabels.push('Users with Messages');
+            funnelCounts.push(parseInt(stats.oneMessage[0]?.one_message_count || 0));
+        }
+
+        // Add all pre-assessment milestones
+        if (stats.preAssessment && stats.preAssessment.length > 0) {
+            stats.preAssessment.forEach(item => {
+                funnelLabels.push(`Pre: ${item.heading}`);
+                funnelCounts.push(parseInt(item.completion_count || 0));
+            });
+        }
+
+        // Add all actual course milestones
+        if (stats.actualCourse && stats.actualCourse.length > 0) {
+            stats.actualCourse.forEach(item => {
+                funnelLabels.push(item.heading);
+                funnelCounts.push(parseInt(item.completion_count || 0));
+            });
+        }
 
         return {
             labels: funnelLabels,
@@ -196,18 +235,15 @@ const Dashboard = () => {
             </h3>
             <div className={styles.statsGrid}>
                 {stats.map((stat, index) => {
-                    const isCompleted = stat.description.includes('Completed');
-                    const baseTitle = stat.description
-                        .replace('Pre-Assessment ', '')
-                        .replace('Main Course ', '')
-                        .replace('Post-Assessment ', '');
+                    const isCompleted = stat.description.includes('Complete');
+                    const isStarted = stat.description.includes('Start');
                     
                     return (
                         <StatCard
                             key={index}
-                            title={baseTitle}
+                            title={stat.description}
                             count={stat.count}
-                            subtitle={isCompleted ? 'Completed' : 'Started'}
+                            subtitle={isCompleted ? 'Completed' : isStarted ? 'Started' : ''}
                         />
                     );
                 })}
@@ -272,7 +308,7 @@ const Dashboard = () => {
                             {/* Main Course Stats */}
                             {organizedStats.mainCourse.length > 0 && (
                                 <StatSection
-                                    title="Main Course Progress"
+                                    title="Actual Course Progress"
                                     stats={organizedStats.mainCourse}
                                     color="#4ECDC4"
                                 />
@@ -288,7 +324,7 @@ const Dashboard = () => {
                             )}
 
                             {/* Conversion Funnel Chart at the end */}
-                            {courseStats.length > 0 && (
+                            {(courseStats.totalUsers || courseStats.oneMessage || courseStats.preAssessment || courseStats.actualCourse) && (
                                 <div className={styles.funnelChart}>
                                     <Line data={createFunnelData(courseStats)} options={funnelOptions} />
                                 </div>
