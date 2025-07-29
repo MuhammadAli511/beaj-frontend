@@ -12,6 +12,7 @@ import UserFeedback from './UserFeedback/UserFeedback';
 import UserResponses from './UserResponses/UserResponses';
 import UserProgress from './UserProgress/UserProgress';
 import PaymentVerification from './PaymentVerification/PaymentVerification';
+import AIServices from './AIServices/AIServices';
 
 export {
     NotFound,
@@ -28,5 +29,6 @@ export {
     UserResponses,
     UserProgress,
     PaymentVerification,
+    AIServices,
 };
 

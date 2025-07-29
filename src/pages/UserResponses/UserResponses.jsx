@@ -207,6 +207,181 @@ const UserResponses = () => {
         setSelectedImage(null);
     };
 
+    const downloadCSV = () => {
+        if (filteredResponses.length === 0) {
+            alert('No data to download');
+            return;
+        }
+
+        // Define headers based on activity type
+        let headers = ['Phone Number'];
+        
+        if (selectedActivityType) {
+            switch (selectedActivityType.value) {
+                case 'read':
+                case 'listenAndSpeak':
+                    headers = ['Phone Number', 'Question Number', 'Question', 'User Audio URL', 'User Transcript'];
+                    break;
+                case 'mcqs':
+                    headers = ['Phone Number', 'Question Number', 'Question', 'User Answer'];
+                    break;
+                case 'watchAndSpeak':
+                case 'assessmentWatchAndSpeak':
+                    headers = ['Phone Number', 'Question Number', 'Question', 'User Audio URL', 'User Transcript', 'Bot Image URL'];
+                    break;
+                case 'watchAndAudio':
+                    headers = ['Phone Number', 'Question Number', 'Question', 'User Audio URL'];
+                    break;
+                case 'watchAndImage':
+                    headers = ['Phone Number', 'Question Number', 'Question', 'User Image URL'];
+                    break;
+                case 'conversationalQuestionsBot':
+                case 'conversationalMonologueBot':
+                case 'speakingPractice':
+                    headers = ['Phone Number', 'Question Number', 'Question', 'User Audio URL', 'User Transcript', 'Bot Audio URL'];
+                    break;
+                case 'conversationalAgencyBot':
+                    headers = ['Phone Number', 'Question Number', 'Question', 'User Audio URL', 'User Transcript', 'Bot Audio URL', 'Bot Image URL'];
+                    break;
+                case 'feedbackAudio':
+                    headers = ['Phone Number', 'Question', 'User Audio URL'];
+                    break;
+                case 'feedbackMcqs':
+                case 'assessmentMcqs':
+                    headers = ['Phone Number', 'Question Number', 'Question', 'User Answer'];
+                    break;
+                default:
+                    headers = ['Phone Number', 'Question Number', 'Question', 'User Response'];
+            }
+        }
+
+        // Convert data to CSV format
+        const csvData = [headers];
+        
+        filteredResponses.forEach(response => {
+            let row = [response.phoneNumber || ''];
+            
+            if (selectedActivityType) {
+                switch (selectedActivityType.value) {
+                    case 'read':
+                    case 'listenAndSpeak':
+                        row = [
+                            response.phoneNumber || '',
+                            response.questionNumber || '',
+                            (response.text || response.question || '').replace(/\n/g, ' ').replace(/,/g, ';'),
+                            response.submittedUserAudio || '',
+                            (response.submittedAnswerText || '').replace(/\n/g, ' ').replace(/,/g, ';')
+                        ];
+                        break;
+                    case 'mcqs':
+                        row = [
+                            response.phoneNumber || '',
+                            response.questionNumber || '',
+                            (response.question || '').replace(/\n/g, ' ').replace(/,/g, ';'),
+                            Array.isArray(response.answer) ? response.answer.join('; ') : (response.answer || '')
+                        ];
+                        break;
+                    case 'watchAndSpeak':
+                    case 'assessmentWatchAndSpeak':
+                        row = [
+                            response.phoneNumber || '',
+                            response.questionNumber || '',
+                            response.mediaFile || '',
+                            response.submittedUserAudio || '',
+                            (response.submittedAnswerText || '').replace(/\n/g, ' ').replace(/,/g, ';'),
+                            response.submittedFeedbackText || ''
+                        ];
+                        break;
+                    case 'watchAndAudio':
+                        row = [
+                            response.phoneNumber || '',
+                            response.questionNumber || '',
+                            response.mediaFile || '',
+                            response.submittedUserAudio || ''
+                        ];
+                        break;
+                    case 'watchAndImage':
+                        row = [
+                            response.phoneNumber || '',
+                            response.questionNumber || '',
+                            response.mediaFile || '',
+                            response.submittedUserAudio || ''
+                        ];
+                        break;
+                    case 'conversationalQuestionsBot':
+                    case 'conversationalMonologueBot':
+                    case 'speakingPractice':
+                        row = [
+                            response.phoneNumber || '',
+                            response.questionNumber || '',
+                            response.mediaFile || '',
+                            response.submittedUserAudio || '',
+                            (response.submittedAnswerText || '').replace(/\n/g, ' ').replace(/,/g, ';'),
+                            response.submittedFeedbackAudio || ''
+                        ];
+                        break;
+                    case 'conversationalAgencyBot':
+                        row = [
+                            response.phoneNumber || '',
+                            response.questionNumber || '',
+                            response.mediaFile || '',
+                            response.submittedUserAudio || '',
+                            (response.submittedAnswerText || '').replace(/\n/g, ' ').replace(/,/g, ';'),
+                            response.submittedFeedbackAudio || '',
+                            response.submittedFeedbackText || ''
+                        ];
+                        break;
+                    case 'feedbackAudio':
+                        row = [
+                            response.phoneNumber || '',
+                            response.mediaFile || '',
+                            response.submittedUserAudio || ''
+                        ];
+                        break;
+                    case 'feedbackMcqs':
+                    case 'assessmentMcqs':
+                        row = [
+                            response.phoneNumber || '',
+                            response.questionNumber || '',
+                            (response.question || '').replace(/\n/g, ' ').replace(/,/g, ';'),
+                            Array.isArray(response.answer) ? response.answer.join('; ') : (response.answer || '')
+                        ];
+                        break;
+                    default:
+                        row = [
+                            response.phoneNumber || '',
+                            response.questionNumber || '',
+                            (response.question || '').replace(/\n/g, ' ').replace(/,/g, ';'),
+                            (response.submittedAnswerText || response.answer || '').replace(/\n/g, ' ').replace(/,/g, ';')
+                        ];
+                }
+            }
+            
+            csvData.push(row);
+        });
+
+        // Convert to CSV string
+        const csvString = csvData.map(row => 
+            row.map(field => `"${field}"`).join(',')
+        ).join('\n');
+
+        // Create and download file
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        
+        const activityType = selectedActivityType ? selectedActivityType.label : 'All';
+        const courseName = selectedCourse ? selectedCourse.label : 'All';
+        const fileName = `user_responses_${activityType}_${courseName}_${new Date().toISOString().split('T')[0]}.csv`;
+        
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     useEffect(() => {
         const handleEscapeKey = (event) => {
             if (event.key === 'Escape' && selectedImage) {
@@ -286,7 +461,16 @@ const UserResponses = () => {
                     </div>
                 </div>
 
-
+                {/* Download CSV Button */}
+                <div className={styles.actions_container}>
+                    <button 
+                        className={styles.download_button}
+                        onClick={downloadCSV}
+                        disabled={filteredResponses.length === 0}
+                    >
+                        📥 Download CSV ({filteredResponses.length} records)
+                    </button>
+                </div>
 
                 <div className={styles.table_container}>
                     {isLoading ? (

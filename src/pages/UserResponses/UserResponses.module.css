@@ -33,6 +33,42 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
+.actions_container {
+  display: flex;
+  justify-content: flex-end;
+  margin: 20px 0 10px 0;
+  padding: 0;
+}
+
+.download_button {
+  background: #51bbcc;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(81, 187, 204, 0.2);
+}
+
+.download_button:hover:not(:disabled) {
+  background: #45a3b8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(81, 187, 204, 0.3);
+}
+
+.download_button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .filter_group {
   flex: 1;
   min-width: 200px;
@@ -324,6 +360,22 @@
   .pagination {
     flex-wrap: wrap;
   }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .actions_container {
+        justify-content: center;
+        margin: 15px 0;
+    }
+    
+    .download_button {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+        padding: 14px 20px;
+        font-size: 16px;
+    }
 }
 
 /* MCQ Statistics Styles */

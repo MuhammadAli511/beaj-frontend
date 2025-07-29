@@ -1239,3 +1239,22 @@ export const clearCache = async () => {
     const data = await response.json();
     return { status: response.status, data };
 };
+
+// AI SERVICES
+// API call for speech to text conversion
+export const speechToText = async (file, language = 'en') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('language', language);
+
+    const response = await fetch(`${API_URL}/aiServices/speech-to-text`, {
+        method: "POST",
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        },
+        body: formData,
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};

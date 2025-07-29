@@ -41,7 +41,7 @@ const Sidebar = () => {
         ],
         Content: [
             { name: "Content Manager", path: "/content-manager", roles: ["admin", "kid-lesson-creator", "teacher-lesson-creator"] },
-            // { name: "Prompt Playground", path: "/prompt-playground", roles: ["admin"] },
+            { name: "AI Services", path: "/ai-services", roles: ["admin"] },
         ],
     };
 

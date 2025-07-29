@@ -14,7 +14,8 @@ import {
   UserFeedback,
   UserResponses,
   UserProgress,
-  PaymentVerification
+  PaymentVerification,
+  AIServices
 } from "./pages";
 import { SidebarProvider } from "./components/SidebarContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -122,6 +123,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
                 <UserProgress />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-services"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AIServices />
               </ProtectedRoute>
             }
           />
