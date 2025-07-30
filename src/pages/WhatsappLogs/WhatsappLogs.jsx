@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect, useRef } from "react"
 import { Navbar, Sidebar } from "../../components"
 import styles from "./WhatsappLogs.module.css"
@@ -15,6 +13,7 @@ import Select from "react-select"
 
 const PAGE_SIZE = 15
 const INACTIVE_DAYS_THRESHOLD = 3
+const LOCALSTORAGE_KEY = "right_sidebar_whatsapp_logs_session";
 
 const WhatsappLogs = () => {
   const { isSidebarOpen } = useSidebar()
@@ -41,6 +40,9 @@ const WhatsappLogs = () => {
   const [activeSessionLoading, setActiveSessionLoading] = useState(false)
   const [selectedProfileId, setSelectedProfileId] = useState(null)
 
+  // LocalStorage state
+  const [isLoadingFromStorage, setIsLoadingFromStorage] = useState(true)
+
   const BOT_PHONE_NUMBERS = [
     { label: "Teacher Bot", value: "410117285518514" },
     { label: "Student Bot", value: "608292759037444" },
@@ -60,18 +62,104 @@ const WhatsappLogs = () => {
     })),
   ]
 
+  // LocalStorage functions
+  const saveToLocalStorage = (phoneNumber, profileId, botType) => {
+    const sessionData = {
+      phoneNumber,
+      profileId,
+      botType,
+      timestamp: Date.now(),
+    }
+    localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(sessionData))
+  }
+
+  const getFromLocalStorage = () => {
+    try {
+      const stored = localStorage.getItem(LOCALSTORAGE_KEY)
+      return stored ? JSON.parse(stored) : null
+    } catch (error) {
+      console.error("Error reading from localStorage:", error)
+      return null
+    }
+  }
+
+  const clearLocalStorage = () => {
+    localStorage.removeItem(LOCALSTORAGE_KEY)
+  }
+
+  // Clear localStorage when filters change
+  const handleSearchChange = (value) => {
+    setSearchQuery(value)
+    if (value !== "") {
+      clearLocalStorage()
+    }
+  }
+
   const handleCohortsChange = (selectedOptions) => {
     if (selectedOptions.some((option) => option.value === "All")) {
       setSelectedCohorts(["All"])
     } else {
       setSelectedCohorts(selectedOptions.map((option) => option.value))
     }
+    // Clear localStorage when cohort filter changes
+    clearLocalStorage()
+  }
+
+  const handlePhoneNumberClick = (phoneNumber) => {
+    setSelectedPhoneNumber(phoneNumber)
+    // Don't save to localStorage here, wait until bot and profile are selected
+  }
+
+  const handleBotPhoneSelect = async (botPhone) => {
+    setSelectedBotPhone(botPhone)
+    // Reset pagination when changing bot phone
+    setPage(1)
+    setHasMore(true)
+    setActivityLogs([])
+
+    if (selectedPhoneNumber) {
+      // Fetch active session for this bot
+      await fetchActiveSession(selectedPhoneNumber, botPhone)
+
+      // Save to localStorage when bot is selected
+      if (selectedProfileId) {
+        saveToLocalStorage(selectedPhoneNumber, selectedProfileId, botPhone)
+      }
+    }
+
+    // Clear localStorage when bot changes (if it's a manual change)
+    if (!isLoadingFromStorage) {
+      clearLocalStorage()
+    }
+  }
+
+  const handleProfileSelect = (profileId) => {
+    if (!profileId) return
+    setSelectedProfileId(profileId)
+    // Reset pagination when changing profile
+    setPage(1)
+    setHasMore(true)
+    setActivityLogs([])
+
+    // Save to localStorage when profile is selected
+    if (selectedPhoneNumber && selectedBotPhone) {
+      saveToLocalStorage(selectedPhoneNumber, profileId, selectedBotPhone)
+    }
+
+    // Fetch logs for the selected profile if bot is selected
+    if (selectedPhoneNumber && selectedBotPhone) {
+      loadLogsForProfile(profileId)
+    }
+
+    // Clear localStorage when profile changes (if it's a manual change)
+    if (!isLoadingFromStorage) {
+      clearLocalStorage()
+    }
   }
 
   const processMessageContent = (content) => {
     // Handle null or undefined content
     if (!content) return { url: "", caption: "" }
-
     // If content is an array, use first element as URL and second as caption
     if (Array.isArray(content)) {
       return {
@@ -79,12 +167,10 @@ const WhatsappLogs = () => {
         caption: content[1] || "",
       }
     }
-
     // If it's a string, handle the comma case
     if (typeof content === "string") {
       // Remove trailing comma if it exists
       const trimmedContent = content.endsWith(",") ? content.slice(0, -1) : content
-
       // Split by comma if it exists
       const parts = trimmedContent.split(",")
       if (parts.length > 1) {
@@ -93,13 +179,11 @@ const WhatsappLogs = () => {
           caption: parts[1].trim(),
         }
       }
-
       return {
         url: trimmedContent,
         caption: "",
       }
     }
-
     // For any other type, return empty values
     return { url: "", caption: "" }
   }
@@ -112,12 +196,50 @@ const WhatsappLogs = () => {
     return "unknown"
   }
 
+  // Load initial data from localStorage
+  const loadFromLocalStorage = async (phoneNumbers) => {
+    const storedData = getFromLocalStorage()
+
+    if (storedData && storedData.phoneNumber && storedData.profileId && storedData.botType) {
+      // Check if the phone number exists in the current data
+      const phoneExists = phoneNumbers.some((user) => user.phoneNumber === storedData.phoneNumber)
+
+      if (phoneExists) {
+        setIsLoadingFromStorage(true)
+
+        // Set the stored values
+        setSelectedPhoneNumber(storedData.phoneNumber)
+        setSelectedBotPhone(storedData.botType)
+        setSelectedProfileId(storedData.profileId)
+        setSearchQuery(storedData.phoneNumber);
+
+        // Fetch profiles data
+        await fetchProfilesData(storedData.phoneNumber)
+
+        // Fetch active session
+        await fetchActiveSession(storedData.phoneNumber, storedData.botType)
+
+        // Load logs for the stored profile
+        await loadLogsForProfile(storedData.profileId, storedData.phoneNumber, storedData.botType)
+
+        setIsLoadingFromStorage(false)
+        return true
+      } else {
+        // Phone number doesn't exist, clear localStorage
+        clearLocalStorage()
+      }
+    }
+
+    setIsLoadingFromStorage(false)
+    return false
+  }
+
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoadingFromStorage(true)
       setUsersLoading(true)
       try {
         const combinedResponse = await getCombinedUserData()
-
         if (combinedResponse.data && Array.isArray(combinedResponse.data)) {
           const usersWithActivity = combinedResponse.data.map((user) => {
             const timestamp = user.last_message_timestamp
@@ -125,15 +247,17 @@ const WhatsappLogs = () => {
             const lastMessageDate = new Date(timestamp)
             const diffTime = Math.abs(now - lastMessageDate)
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
             return {
               ...user,
               lastMessageTimestamp: timestamp,
               inactiveDays: diffDays,
             }
           })
-
           setPhoneNumbers(usersWithActivity)
+
+          // Try to load from localStorage after phone numbers are loaded
+          await loadFromLocalStorage(usersWithActivity);
+          clearLocalStorage();
         }
       } catch (error) {
         console.error("Error fetching data:", error)
@@ -144,16 +268,18 @@ const WhatsappLogs = () => {
     fetchData()
   }, [])
 
-  // Reset states when phone number changes
+  // Reset states when phone number changes (but not when loading from localStorage)
   useEffect(() => {
-    if (!selectedPhoneNumber) {
-      setSelectedBotPhone(null)
-      setActivityLogs([])
-      setProfilesData([])
-      setActiveSession(null)
-      setSelectedProfileId(null)
+    if (!selectedPhoneNumber || isLoadingFromStorage) {
       return
     }
+
+    // Only reset if not loading from localStorage
+    setSelectedBotPhone(null)
+    setActivityLogs([])
+    setProfilesData([])
+    setActiveSession(null)
+    setSelectedProfileId(null)
 
     // Fetch profiles immediately when phone number is selected
     fetchProfilesData(selectedPhoneNumber)
@@ -163,7 +289,6 @@ const WhatsappLogs = () => {
     try {
       if (!phoneNumber || !botPhoneNumber || !profileId) return []
       const logs = await getActivityLogsByPhoneNumber(phoneNumber, botPhoneNumber, profileId, currentPage, PAGE_SIZE)
-
       let filteredLogs = logs.data || []
       if (profileId && filteredLogs.length > 0) {
         filteredLogs = filteredLogs.filter((log) => log.profile_id === profileId)
@@ -188,10 +313,10 @@ const WhatsappLogs = () => {
             profile.profile_id !== undefined &&
             profile.profile_id.toString().trim() !== "",
         )
-
         setProfilesData(validProfiles)
-        // Auto-select first profile if available
-        if (validProfiles.length > 0) {
+
+        // Auto-select first profile if available and not loading from localStorage
+        if (validProfiles.length > 0 && !isLoadingFromStorage && !selectedProfileId) {
           setSelectedProfileId(validProfiles[0].profile_id)
         }
       }
@@ -209,8 +334,10 @@ const WhatsappLogs = () => {
       const response = await getActiveSessionByPhoneNumberAndBotPhoneNumberId(phoneNumber, botPhoneNumberId)
       if (response.data && response.data.profile_id) {
         setActiveSession(response.data)
-        // Set active profile as selected by default
-        setSelectedProfileId(response.data.profile_id)
+        // Set active profile as selected by default only if not loading from localStorage
+        if (!isLoadingFromStorage && !selectedProfileId) {
+          setSelectedProfileId(response.data.profile_id)
+        }
       } else {
         setActiveSession(null)
       }
@@ -222,31 +349,13 @@ const WhatsappLogs = () => {
     }
   }
 
-  // Handle profile selection
-  const handleProfileSelect = (profileId) => {
-    if (!profileId) return
-
-    setSelectedProfileId(profileId)
-    // Reset pagination when changing profile
-    setPage(1)
-    setHasMore(true)
-    setActivityLogs([])
-
-    // Fetch logs for the selected profile if bot is selected
-    if (selectedPhoneNumber && selectedBotPhone) {
-      loadLogsForProfile(profileId)
-    }
-  }
-
-  const loadLogsForProfile = async (profileId) => {
-    if (!profileId || !selectedPhoneNumber || !selectedBotPhone) return
-
+  const loadLogsForProfile = async (profileId, phoneNumber = selectedPhoneNumber, botPhone = selectedBotPhone) => {
+    if (!profileId || !phoneNumber || !botPhone) return
     setMessagesLoading(true)
     try {
-      const logs = await fetchLogs(selectedPhoneNumber, selectedBotPhone, 1, profileId)
+      const logs = await fetchLogs(phoneNumber, botPhone, 1, profileId)
       setActivityLogs(logs.reverse())
       setHasMore(logs.length === PAGE_SIZE)
-
       setTimeout(() => {
         if (chatContainerRef.current) {
           chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
@@ -259,23 +368,9 @@ const WhatsappLogs = () => {
     }
   }
 
-  // Handle bot phone selection
-  const handleBotPhoneSelect = async (botPhone) => {
-    setSelectedBotPhone(botPhone)
-    // Reset pagination when changing bot phone
-    setPage(1)
-    setHasMore(true)
-    setActivityLogs([])
-
-    if (selectedPhoneNumber) {
-      // Fetch active session for this bot
-      await fetchActiveSession(selectedPhoneNumber, botPhone)
-    }
-  }
-
   // Effect to load logs when bot is selected and we have a selected profile
   useEffect(() => {
-    if (selectedPhoneNumber && selectedBotPhone && selectedProfileId) {
+    if (selectedPhoneNumber && selectedBotPhone && selectedProfileId && !isLoadingFromStorage) {
       loadLogsForProfile(selectedProfileId)
     }
   }, [selectedPhoneNumber, selectedBotPhone, selectedProfileId])
@@ -283,25 +378,20 @@ const WhatsappLogs = () => {
   const handleScroll = async () => {
     if (!chatContainerRef.current) return
     const { scrollTop } = chatContainerRef.current
-
     // If we are close to the very top and have more logs to fetch
     if (scrollTop <= 0 && hasMore && !isLoadingMore && !messagesLoading) {
       setIsLoadingMore(true)
       const oldScrollHeight = chatContainerRef.current.scrollHeight
       const nextPage = page + 1
       const olderLogs = await fetchLogs(selectedPhoneNumber, selectedBotPhone, nextPage, selectedProfileId)
-
       setActivityLogs((prev) => {
         return [...olderLogs.reverse(), ...prev]
       })
-
       setPage(nextPage)
       setHasMore(olderLogs.length === PAGE_SIZE)
-
       const newScrollHeight = chatContainerRef.current.scrollHeight
       const heightDiff = newScrollHeight - oldScrollHeight
       chatContainerRef.current.scrollTop = heightDiff
-
       setIsLoadingMore(false)
     }
   }
@@ -309,10 +399,8 @@ const WhatsappLogs = () => {
   const filteredPhoneNumbers = phoneNumbers.filter((user) => {
     const phone = user.phoneNumber || ""
     const userCohort = user.cohort || ""
-
     const matchesSearch = phone.includes(searchQuery)
     const matchesCohort = selectedCohorts.includes("All") || selectedCohorts.includes(userCohort)
-
     return matchesSearch && matchesCohort
   })
 
@@ -330,7 +418,7 @@ const WhatsappLogs = () => {
                 type="text"
                 placeholder="Search by phone number ..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className={styles.search_input}
               />
               <div className={styles.cohort_filter}>
@@ -356,7 +444,7 @@ const WhatsappLogs = () => {
                     <li
                       key={user.profile_id}
                       className={`${selectedPhoneNumber === user.phoneNumber ? styles.active : ""} ${styles.user_item}`}
-                      onClick={() => setSelectedPhoneNumber(user.phoneNumber)}
+                      onClick={() => handlePhoneNumberClick(user.phoneNumber)}
                     >
                       <div className={styles.user_info}>
                         <span>{user.phoneNumber}</span>
