@@ -130,7 +130,7 @@ function App() {
           <Route
             path="/users-data"
             element={
-              <ProtectedRoute allowedRoles={["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
+              <ProtectedRoute allowedRoles={["facilitator", "admin"]}>
                 <UsersData />
               </ProtectedRoute>
             }
