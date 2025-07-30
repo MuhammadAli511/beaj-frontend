@@ -919,6 +919,19 @@ export const getAlluserProgressByModule = async (botType, rollout, level, cohort
     return { status: response.status, data };
 }
 
+export const getUserProgressBarStats = async ( botType, level, cohort, rollout, courseId1, courseId4, condition) => {
+    const queryParams = new URLSearchParams({
+        botType, level, cohort, rollout, courseId1, courseId4, condition
+    }).toString();
+
+    const response = await fetch(`${API_URL}/userProgress/getUserProgressBarStats?${queryParams}`, {
+        headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+}
+
 export const getcohortList = async (botType, rollout, level, targetGroup) => {
     const queryParams = new URLSearchParams({
         botType, rollout, level, targetGroup
@@ -1111,22 +1124,33 @@ export const getStudentTrialUserJourneyStats = async (date) => {
     return { status: response.status, data };
 };
 
-export const getstudentAnalyticsStats = async (courseId, grade, cohort, graphType) => {
+export const getstudentAnalyticsStats = async (courseId, grade, cohort, graphType, userType) => {
     const response = await fetch(`${API_URL}/stats/studentAnalyticsStats`, {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({ courseId, grade, cohort, graphType }),
+        body: JSON.stringify({ courseId, grade, cohort, graphType, userType }),
     });
 
     const data = await response.json();
     return { status: response.status, data };
 };
 
-export const studentBarAnalyticsStats = async (courseId, grade, cohort, graphType, parameterId) => {
+export const getAnalyticsStats = async (botType) => {
+    const response = await fetch(`${API_URL}/stats/userAnalyticsStats`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ botType }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+export const studentBarAnalyticsStats = async (courseId, grade, cohort, graphType, parameterId, userType) => {
     const response = await fetch(`${API_URL}/stats/studentBarAnalyticsStats`, {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({ courseId, grade, cohort, graphType, parameterId }),
+        body: JSON.stringify({ courseId, grade, cohort, graphType, parameterId, userType }),
     });
 
     const data = await response.json();

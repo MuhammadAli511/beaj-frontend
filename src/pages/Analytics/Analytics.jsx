@@ -7,7 +7,7 @@ import StudentCourseAnalytics from "./StudentCourseAnalytics"
 
 const Analytics = () => {
   const { isSidebarOpen } = useSidebar()
-  const [activeTab, setActiveTab] = useState("registration")
+  const [activeTab, setActiveTab] = useState("analytics")
 
   return (
     <div className={styles.main_page}>
@@ -17,20 +17,19 @@ const Analytics = () => {
         <h1>Analytics</h1>
         
         <div className={styles.tabs}>
+           <button
+            className={`${styles.tab_button} ${activeTab === "analytics" ? styles.active_tab : ""}`}
+            onClick={() => setActiveTab("analytics")}
+          >
+            Course Analytics
+          </button>
           <button
             className={`${styles.tab_button} ${activeTab === "registration" ? styles.active_tab : ""}`}
             onClick={() => setActiveTab("registration")}
           >
             Student Registration Analytics
           </button>
-          <button
-            className={`${styles.tab_button} ${activeTab === "analytics" ? styles.active_tab : ""}`}
-            onClick={() => setActiveTab("analytics")}
-          >
-            Student Course Analytics
-          </button>
         </div>
-
         <div className={styles.tab_content}>
           {activeTab === "registration" && <StudentRegistrationAnalytics />}
           {activeTab === "analytics" && <StudentCourseAnalytics />}
