@@ -101,11 +101,44 @@
   background-color: rgba(81, 187, 204, 0.1);
 }
 
+.stats_and_actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 0 5px;
+}
+
 .stats_info {
   color: #666;
   font-weight: 500;
-  margin-bottom: 15px;
-  text-align: center;
+}
+
+.download_button {
+  background: #51bbcc;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download_button:hover:not(:disabled) {
+  background: #45a5b8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(81, 187, 204, 0.3);
+}
+
+.download_button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .error_message {
@@ -390,8 +423,20 @@
     min-width: unset;
   }
   
+  .stats_and_actions {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  
   .stats_info {
     text-align: center;
+  }
+  
+  .download_button {
+    width: 100%;
+    max-width: 200px;
+    justify-content: center;
   }
   
   .action_buttons {
