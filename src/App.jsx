@@ -7,11 +7,10 @@ import {
   ContentManager,
   WhatsappLogs,
   PromptPlayground,
-  UsersData,
+  Analytics,
   PurchaseCourse,
   AddUsers,
   LastActiveUsers,
-  UserFeedback,
   UserResponses,
   UserProgress,
   PaymentVerification,
@@ -78,14 +77,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/user-feedback"
-            element={
-              <ProtectedRoute allowedRoles={["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
-                <UserFeedback />
-              </ProtectedRoute>
-            }
-          />
+
           <Route
             path="/user-responses"
             element={
@@ -111,14 +103,14 @@ function App() {
             }
           />
           <Route
-            path="/users-data"
+            path="/analytics"
             element={
               <ProtectedRoute allowedRoles={["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
-                <UsersData />
+                <Analytics />
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/user-progress"
             element={
               <ProtectedRoute allowedRoles={["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"]}>

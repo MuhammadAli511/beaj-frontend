@@ -4,12 +4,11 @@ import Dashboard from './Dashboard/Dashboard';
 import ContentManager from './ContentManager/ContentManager';
 import AddUsers from './AddUsers/AddUsers';
 import PromptPlayground from './PromptPlayground/PromptPlayground';
-import UsersData from './UsersData/UsersData';
+import Analytics from './Analytics/Analytics';
 import WhatsappLogs from './WhatsappLogs/WhatsappLogs';
 import PurchaseCourse from './PurchaseCourse/PurchaseCourse';
 import LastActiveUsers from './LastActiveUsers/LastActiveUsers';
-import UserFeedback from './UserFeedback/UserFeedback';
-import UserResponses from './UserResponses/UserResponses';
+import UserResponses from './UserResponses/UserResponsesAndFeedback';
 import UserProgress from './UserProgress/UserProgress';
 import PaymentVerification from './PaymentVerification/PaymentVerification';
 import AIServices from './AIServices/AIServices';
@@ -21,11 +20,10 @@ export {
     ContentManager,
     AddUsers,
     PromptPlayground,
-    UsersData,
+    Analytics,
     WhatsappLogs,
     PurchaseCourse,
     LastActiveUsers,
-    UserFeedback,
     UserResponses,
     UserProgress,
     PaymentVerification,
