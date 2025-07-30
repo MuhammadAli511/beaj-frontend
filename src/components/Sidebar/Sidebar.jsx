@@ -31,6 +31,7 @@ const Sidebar = () => {
         Users: [
             { name: "Analytics", path: "/analytics", roles: ["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"] },
             { name: "User Responses", path: "/user-responses", roles: ["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"] },
+            { name: "Users Data", path: "/users-data", roles: ["admin"] },
             { name: "Whatsapp Logs", path: "/whatsapp-logs", roles: ["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"] },
             { name: "User Progress", path: "/user-progress", roles: ["facilitator", "admin", "kid-lesson-creator", "teacher-lesson-creator"] },
             // { name: "Add Users", path: "/add-users", roles: ["admin"] },

@@ -908,7 +908,7 @@ export const createAudioChatLog = async (userAudio, prompt) => {
 // GET api/userProgress/getAllUserProgressData
 export const getAlluserProgressByModule = async (botType, rollout, level, cohort, targetGroup, courseId1, courseId2, courseId3, courseId4, courseId5, module, assessmentView) => {
     const queryParams = new URLSearchParams({
-        botType, rollout, level, cohort, targetGroup, courseId1, courseId2, courseId3, courseId4, courseId5, module,assessmentView
+        botType, rollout, level, cohort, targetGroup, courseId1, courseId2, courseId3, courseId4, courseId5, module, assessmentView
     }).toString();
 
     const response = await fetch(`${API_URL}/userProgress/getAllUserProgressData?${queryParams}`, {
@@ -919,9 +919,9 @@ export const getAlluserProgressByModule = async (botType, rollout, level, cohort
     return { status: response.status, data };
 }
 
-export const getcohortList = async ( botType,rollout,level,targetGroup) => {
+export const getcohortList = async (botType, rollout, level, targetGroup) => {
     const queryParams = new URLSearchParams({
-        botType,rollout,level,targetGroup
+        botType, rollout, level, targetGroup
     }).toString();
 
     const response = await fetch(`${API_URL}/userProgress/getcohortList?${queryParams}`, {
@@ -937,6 +937,18 @@ export const getcohortList = async ( botType,rollout,level,targetGroup) => {
 export const getAllMetadata = async () => {
     const response = await fetch(`${API_URL}/waUserMetaData/getAll`, {
         headers: getHeaders(),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// POST api/waUserMetaData/update
+export const updateUserMetaData = async (phoneNumber, profile_id, metadata) => {
+    const response = await fetch(`${API_URL}/waUserMetaData/update`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ phoneNumber, profile_id, metadata }),
     });
 
     const data = await response.json();
