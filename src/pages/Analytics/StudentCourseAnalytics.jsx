@@ -1228,7 +1228,7 @@ const StudentCourseAnalytics = () => {
                   <div className={styles.analytics_card_percentage}>{graphStats.graph3.percentage}%</div>
                 </div>
                 <div className={styles.stat_box}>
-                  <h4>Daily Completion Rate</h4>
+                  <h4>Average Lesson Completion</h4>
                   <p className={styles.stat_value}>
                     {graphStats.graph3.dailyCompletionRate !== null ? graphStats.graph3.dailyCompletionRate : "-"}
                   </p>
