@@ -1,10 +1,159 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navbar, Sidebar } from "../../components";
 import styles from './UsersData.module.css';
 import { useSidebar } from '../../components/SidebarContext';
-import { getAllMetadata, updateUserMetaData } from '../../helper';
+import { getMetadataProgress, updateUserMetaData } from '../../helper';
 import { TailSpin } from 'react-loader-spinner';
-import Select from 'react-select';
+
+// Custom Multi-Select Dropdown Component
+const CustomMultiSelect = ({ options, value, onChange, placeholder, label }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const dropdownRef = useRef(null);
+    const searchInputRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+                setSearchTerm('');
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (isOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [isOpen]);
+
+    const handleOptionToggle = (option, event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const isSelected = value.some(item => item.value === option.value);
+        if (isSelected) {
+            onChange(value.filter(item => item.value !== option.value));
+        } else {
+            onChange([...value, option]);
+        }
+    };
+
+    const handleSelectAll = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onChange(filteredOptions);
+    };
+
+    const handleClearAll = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onChange([]);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const handleSearchKeyDown = (event) => {
+        event.stopPropagation();
+    };
+
+    // Filter options based on search term
+    const filteredOptions = options.filter(option =>
+        option.label && typeof option.label === 'string' &&
+        option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Sort filtered options: selected first, then unselected
+    const sortedOptions = [...filteredOptions].sort((a, b) => {
+        const aSelected = value.some(item => item.value === a.value);
+        const bSelected = value.some(item => item.value === b.value);
+        if (aSelected && !bSelected) return -1;
+        if (!aSelected && bSelected) return 1;
+        return 0;
+    });
+
+    return (
+        <div className={styles.custom_select_container} ref={dropdownRef}>
+            <div
+                className={styles.custom_select_trigger}
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <span className={styles.custom_select_placeholder}>
+                    {value.length > 0 ? `${value.length} selected` : placeholder}
+                </span>
+                <span className={`${styles.custom_select_arrow} ${isOpen ? styles.open : ''}`}>▼</span>
+            </div>
+
+            {isOpen && (
+                <div className={styles.custom_select_dropdown}>
+                    <div className={styles.search_container}>
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            placeholder="Search options..."
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            onKeyDown={handleSearchKeyDown}
+                            className={styles.dropdown_search_input}
+                        />
+                    </div>
+                    <div className={styles.dropdown_actions}>
+                        <button
+                            className={styles.action_button}
+                            onClick={handleSelectAll}
+                            type="button"
+                        >
+                            Select All {filteredOptions.length > 0 && `(${filteredOptions.length})`}
+                        </button>
+                        <button
+                            className={styles.action_button}
+                            onClick={handleClearAll}
+                            type="button"
+                        >
+                            Clear All
+                        </button>
+                    </div>
+                    <div className={styles.options_container}>
+                        {sortedOptions.length > 0 ? (
+                            sortedOptions.map((option) => {
+                                const isSelected = value.some(item => item.value === option.value);
+                                return (
+                                    <div
+                                        key={option.value}
+                                        className={`${styles.custom_select_option} ${isSelected ? styles.selected : ''}`}
+                                        onClick={(event) => handleOptionToggle(option, event)}
+                                    >
+                                        <div className={styles.custom_checkbox_container}>
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => { }} // Handled by parent onClick
+                                                className={styles.custom_checkbox}
+                                            />
+                                            <span className={styles.checkmark}></span>
+                                        </div>
+                                        <span className={styles.option_label}>{option.label}</span>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div className={styles.no_options}>
+                                No options found
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
 
 const UsersData = () => {
     const { isSidebarOpen } = useSidebar();
@@ -18,13 +167,19 @@ const UsersData = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(20);
 
-    // Filters
-    const [selectedCohort, setSelectedCohort] = useState(null);
-    const [selectedCity, setSelectedCity] = useState(null);
-    const [selectedCustomerSource, setSelectedCustomerSource] = useState(null);
-    const [selectedCustomerChannel, setSelectedCustomerChannel] = useState(null);
-    const [selectedSchool, setSelectedSchool] = useState(null);
-    const [selectedRollout, setSelectedRollout] = useState(null);
+    // Filters - changed to arrays for multi-select
+    const [selectedCohort, setSelectedCohort] = useState([]);
+    const [selectedCity, setSelectedCity] = useState([]);
+    const [selectedCustomerSource, setSelectedCustomerSource] = useState([]);
+    const [selectedCustomerChannel, setSelectedCustomerChannel] = useState([]);
+    const [selectedSchool, setSelectedSchool] = useState([]);
+    const [selectedRollout, setSelectedRollout] = useState([]);
+    const [selectedAmountPaid, setSelectedAmountPaid] = useState([]);
+    const [selectedClassLevel, setSelectedClassLevel] = useState([]);
+    const [selectedProfileType, setSelectedProfileType] = useState([]);
+    const [selectedCourseName, setSelectedCourseName] = useState([]);
+    const [selectedWeek, setSelectedWeek] = useState([]);
+    const [selectedDay, setSelectedDay] = useState([]);
 
     // Editable columns
     const editableColumns = [
@@ -49,7 +204,11 @@ const UsersData = () => {
         { key: 'classLevel', label: 'Class Level', editable: false },
         { key: 'rollout', label: 'Rollout', editable: false },
         { key: 'customerSource', label: 'Customer Source', editable: true },
-        { key: 'customerChannel', label: 'Customer Channel', editable: true }
+        { key: 'customerChannel', label: 'Customer Channel', editable: true },
+        { key: 'profile_type', label: 'Profile Type', editable: false },
+        { key: 'coursename', label: 'Course Name', editable: false },
+        { key: 'currentWeek', label: 'Week', editable: false },
+        { key: 'currentDay', label: 'Day', editable: false }
     ];
 
     useEffect(() => {
@@ -58,39 +217,99 @@ const UsersData = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, selectedCohort, selectedCity, selectedCustomerSource, selectedCustomerChannel, selectedSchool, selectedRollout]);
+    }, [searchQuery, selectedCohort, selectedCity, selectedCustomerSource, selectedCustomerChannel, selectedSchool, selectedRollout, selectedAmountPaid, selectedClassLevel, selectedProfileType, selectedCourseName, selectedWeek, selectedDay]);
 
-    // Generate filter options from data
-    const cohortOptions = [...new Set(userData.map(user => user.cohort).filter(Boolean))]
-        .sort()
-        .map(cohort => ({ value: cohort, label: cohort }));
+    // Generate filter options from data with null/none options
+    const cohortOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.cohort).filter(Boolean))]
+            .sort()
+            .map(cohort => ({ value: cohort, label: cohort }))
+    ];
 
-    const cityOptions = [...new Set(userData.map(user => user.city).filter(Boolean))]
-        .sort()
-        .map(city => ({ value: city, label: city }));
+    const cityOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.city).filter(Boolean))]
+            .sort()
+            .map(city => ({ value: city, label: city }))
+    ];
 
-    const customerSourceOptions = [...new Set(userData.map(user => user.customerSource).filter(Boolean))]
-        .sort()
-        .map(source => ({ value: source, label: source }));
+    const customerSourceOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.customerSource).filter(Boolean))]
+            .sort()
+            .map(source => ({ value: source, label: source }))
+    ];
 
-    const customerChannelOptions = [...new Set(userData.map(user => user.customerChannel).filter(Boolean))]
-        .sort()
-        .map(channel => ({ value: channel, label: channel }));
+    const customerChannelOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.customerChannel).filter(Boolean))]
+            .sort()
+            .map(channel => ({ value: channel, label: channel }))
+    ];
 
-    const schoolOptions = [...new Set(userData.map(user => user.schoolName).filter(Boolean))]
-        .sort()
-        .map(school => ({ value: school, label: school }));
+    const schoolOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.schoolName).filter(Boolean))]
+            .sort()
+            .map(school => ({ value: school, label: school }))
+    ];
 
-    const rolloutOptions = [...new Set(userData.map(user => user.rollout).filter(Boolean))]
-        .sort()
-        .map(rollout => ({ value: rollout, label: rollout }));
+    const rolloutOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.rollout).filter(val => val !== null && val !== undefined && val !== ''))]
+            .sort()
+            .map(rollout => ({ value: rollout, label: rollout.toString() }))
+    ];
+
+    const amountPaidOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.amountPaid).filter(val => val !== null && val !== undefined && val !== ''))]
+            .sort((a, b) => parseFloat(a) - parseFloat(b))
+            .map(amount => ({ value: amount, label: amount.toString() }))
+    ];
+
+    const classLevelOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.classLevel).filter(Boolean))]
+            .sort()
+            .map(level => ({ value: level, label: level }))
+    ];
+
+    const profileTypeOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.profile_type).filter(Boolean))]
+            .sort()
+            .map(profileType => ({ value: profileType, label: profileType }))
+    ];
+
+    const courseNameOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.coursename).filter(Boolean))]
+            .sort()
+            .map(coursename => ({ value: coursename, label: coursename }))
+    ];
+
+    const weekOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.currentWeek).filter(val => val !== null && val !== undefined && val !== ''))]
+            .sort((a, b) => parseFloat(a) - parseFloat(b))
+            .map(week => ({ value: week, label: week.toString() }))
+    ];
+
+    const dayOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.currentDay).filter(val => val !== null && val !== undefined && val !== ''))]
+            .sort((a, b) => parseFloat(a) - parseFloat(b))
+            .map(day => ({ value: day, label: day.toString() }))
+    ];
 
     const fetchUserData = async () => {
         try {
             setLoading(true);
-            const response = await getAllMetadata();
-            if (response.status === 200) {
-                setUserData(response.data);
+            const response = await getMetadataProgress();
+            if (response.status === 200 && response.data.success) {
+                setUserData(response.data.data);
             } else {
                 setError('Failed to fetch user data');
             }
@@ -154,6 +373,30 @@ const UsersData = () => {
         }));
     };
 
+    // Helper function to clear all filters
+    const clearAllFilters = () => {
+        setSelectedCohort([]);
+        setSelectedCity([]);
+        setSelectedAmountPaid([]);
+        setSelectedClassLevel([]);
+        setSelectedCustomerSource([]);
+        setSelectedCustomerChannel([]);
+        setSelectedSchool([]);
+        setSelectedRollout([]);
+        setSelectedProfileType([]);
+        setSelectedCourseName([]);
+        setSelectedWeek([]);
+        setSelectedDay([]);
+    };
+
+    // Check if any filters are active
+    const hasActiveFilters = selectedCohort.length > 0 || selectedCity.length > 0 ||
+        selectedAmountPaid.length > 0 || selectedClassLevel.length > 0 ||
+        selectedCustomerSource.length > 0 || selectedCustomerChannel.length > 0 ||
+        selectedSchool.length > 0 || selectedRollout.length > 0 ||
+        selectedProfileType.length > 0 || selectedCourseName.length > 0 ||
+        selectedWeek.length > 0 || selectedDay.length > 0;
+
     const downloadCSV = () => {
         // Create CSV headers from displayColumns
         const headers = displayColumns.map(column => column.label).join(',');
@@ -162,21 +405,21 @@ const UsersData = () => {
         const rows = filteredData.map(user => {
             return displayColumns.map(column => {
                 let value = user[column.key] || '';
-                
+
                 // Convert to string and clean up
                 value = String(value).trim();
-                
+
                 // Replace newlines, carriage returns, and tabs with spaces
                 value = value.replace(/[\r\n\t]+/g, ' ');
-                
+
                 // Remove extra whitespace
                 value = value.replace(/\s+/g, ' ');
-                
+
                 // Escape commas, quotes, and newlines in CSV values
                 if (typeof value === 'string' && (value.includes(',') || value.includes('"') || value.includes('\n') || value.includes('\r'))) {
                     return `"${value.replace(/"/g, '""')}"`;
                 }
-                
+
                 return value;
             }).join(',');
         });
@@ -196,6 +439,18 @@ const UsersData = () => {
         document.body.removeChild(link);
     };
 
+    // Helper function to check if value matches filter (including null handling)
+    const matchesFilter = (userValue, selectedValues) => {
+        if (!selectedValues || selectedValues.length === 0) return true;
+
+        return selectedValues.some(selected => {
+            if (selected.value === 'null') {
+                return !userValue || userValue === '' || userValue === null || userValue === undefined;
+            }
+            return userValue === selected.value;
+        });
+    };
+
     // Filter data based on search query and filters
     const filteredData = userData.filter(user => {
         // Search query filter
@@ -205,18 +460,30 @@ const UsersData = () => {
             (user.name && user.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
             (user.city && user.city.toLowerCase().includes(searchQuery.toLowerCase())) ||
             (user.schoolName && user.schoolName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (user.cohort && user.cohort.toString().toLowerCase().includes(searchQuery.toLowerCase()))
+            (user.cohort && user.cohort.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (user.amountPaid && user.amountPaid.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (user.classLevel && user.classLevel.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (user.profile_type && user.profile_type.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (user.coursename && user.coursename.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (user.currentWeek && user.currentWeek.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (user.currentDay && user.currentDay.toString().toLowerCase().includes(searchQuery.toLowerCase()))
         );
 
-        // Filter matches
-        const cohortMatch = !selectedCohort || user.cohort === selectedCohort.value;
-        const cityMatch = !selectedCity || user.city === selectedCity.value;
-        const customerSourceMatch = !selectedCustomerSource || user.customerSource === selectedCustomerSource.value;
-        const customerChannelMatch = !selectedCustomerChannel || user.customerChannel === selectedCustomerChannel.value;
-        const schoolMatch = !selectedSchool || user.schoolName === selectedSchool.value;
-        const rolloutMatch = !selectedRollout || user.rollout === selectedRollout.value;
+        // Filter matches using helper function
+        const cohortMatch = matchesFilter(user.cohort, selectedCohort);
+        const cityMatch = matchesFilter(user.city, selectedCity);
+        const customerSourceMatch = matchesFilter(user.customerSource, selectedCustomerSource);
+        const customerChannelMatch = matchesFilter(user.customerChannel, selectedCustomerChannel);
+        const schoolMatch = matchesFilter(user.schoolName, selectedSchool);
+        const rolloutMatch = matchesFilter(user.rollout, selectedRollout);
+        const amountPaidMatch = matchesFilter(user.amountPaid, selectedAmountPaid);
+        const classLevelMatch = matchesFilter(user.classLevel, selectedClassLevel);
+        const profileTypeMatch = matchesFilter(user.profile_type, selectedProfileType);
+        const courseNameMatch = matchesFilter(user.coursename, selectedCourseName);
+        const weekMatch = matchesFilter(user.currentWeek, selectedWeek);
+        const dayMatch = matchesFilter(user.currentDay, selectedDay);
 
-        return searchMatch && cohortMatch && cityMatch && customerSourceMatch && customerChannelMatch && schoolMatch && rolloutMatch;
+        return searchMatch && cohortMatch && cityMatch && customerSourceMatch && customerChannelMatch && schoolMatch && rolloutMatch && amountPaidMatch && classLevelMatch && profileTypeMatch && courseNameMatch && weekMatch && dayMatch;
     });
 
     // Pagination
@@ -298,7 +565,7 @@ const UsersData = () => {
                         <label className={styles.filter_label}>Search</label>
                         <input
                             type="text"
-                            placeholder="Search by phone, name, city, school, or cohort..."
+                            placeholder="Search by phone, name, city, school, cohort, amount, or class level..."
                             value={searchQuery}
                             onChange={(e) => {
                                 setSearchQuery(e.target.value);
@@ -309,68 +576,122 @@ const UsersData = () => {
                     </div>
                     <div className={styles.filter_group}>
                         <label className={styles.filter_label}>Cohort</label>
-                        <Select
-                            className={styles.select}
+                        <CustomMultiSelect
                             options={cohortOptions}
                             value={selectedCohort}
                             onChange={setSelectedCohort}
-                            isClearable
-                            placeholder="Select Cohort"
+                            placeholder="Select Cohort(s)"
+                            label="Cohort"
                         />
                     </div>
                     <div className={styles.filter_group}>
                         <label className={styles.filter_label}>City</label>
-                        <Select
-                            className={styles.select}
+                        <CustomMultiSelect
                             options={cityOptions}
                             value={selectedCity}
                             onChange={setSelectedCity}
-                            isClearable
-                            placeholder="Select City"
+                            placeholder="Select City(s)"
+                            label="City"
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Amount Paid</label>
+                        <CustomMultiSelect
+                            options={amountPaidOptions}
+                            value={selectedAmountPaid}
+                            onChange={setSelectedAmountPaid}
+                            placeholder="Select Amount(s)"
+                            label="Amount Paid"
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Class Level</label>
+                        <CustomMultiSelect
+                            options={classLevelOptions}
+                            value={selectedClassLevel}
+                            onChange={setSelectedClassLevel}
+                            placeholder="Select Class Level(s)"
+                            label="Class Level"
                         />
                     </div>
                     <div className={styles.filter_group}>
                         <label className={styles.filter_label}>Customer Source</label>
-                        <Select
-                            className={styles.select}
+                        <CustomMultiSelect
                             options={customerSourceOptions}
                             value={selectedCustomerSource}
                             onChange={setSelectedCustomerSource}
-                            isClearable
-                            placeholder="Select Customer Source"
+                            placeholder="Select Customer Source(s)"
+                            label="Customer Source"
                         />
                     </div>
                     <div className={styles.filter_group}>
                         <label className={styles.filter_label}>Customer Channel</label>
-                        <Select
-                            className={styles.select}
+                        <CustomMultiSelect
                             options={customerChannelOptions}
                             value={selectedCustomerChannel}
                             onChange={setSelectedCustomerChannel}
-                            isClearable
-                            placeholder="Select Customer Channel"
+                            placeholder="Select Customer Channel(s)"
+                            label="Customer Channel"
                         />
                     </div>
                     <div className={styles.filter_group}>
                         <label className={styles.filter_label}>School</label>
-                        <Select
-                            className={styles.select}
+                        <CustomMultiSelect
                             options={schoolOptions}
                             value={selectedSchool}
                             onChange={setSelectedSchool}
-                            isClearable
-                            placeholder="Select School"
+                            placeholder="Select School(s)"
+                            label="School"
                         />
                     </div>
                     <div className={styles.filter_group}>
                         <label className={styles.filter_label}>Rollout</label>
-                        <Select
-                            className={styles.select}
+                        <CustomMultiSelect
                             options={rolloutOptions}
                             value={selectedRollout}
                             onChange={setSelectedRollout}
-                            isClearable
-                            placeholder="Select Rollout"
+                            placeholder="Select Rollout(s)"
+                            label="Rollout"
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Profile Type</label>
+                        <CustomMultiSelect
+                            options={profileTypeOptions}
+                            value={selectedProfileType}
+                            onChange={setSelectedProfileType}
+                            placeholder="Select Profile Type(s)"
+                            label="Profile Type"
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Course Name</label>
+                        <CustomMultiSelect
+                            options={courseNameOptions}
+                            value={selectedCourseName}
+                            onChange={setSelectedCourseName}
+                            placeholder="Select Course Name(s)"
+                            label="Course Name"
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Week</label>
+                        <CustomMultiSelect
+                            options={weekOptions}
+                            value={selectedWeek}
+                            onChange={setSelectedWeek}
+                            placeholder="Select Week(s)"
+                            label="Week"
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Day</label>
+                        <CustomMultiSelect
+                            options={dayOptions}
+                            value={selectedDay}
+                            onChange={setSelectedDay}
+                            placeholder="Select Day(s)"
+                            label="Day"
                         />
                     </div>
                 </div>
@@ -379,13 +700,23 @@ const UsersData = () => {
                     <div className={styles.stats_info}>
                         Total Users: {filteredData.length}
                     </div>
-                    <button
-                        onClick={downloadCSV}
-                        className={styles.download_button}
-                        disabled={filteredData.length === 0}
-                    >
-                        Download CSV
-                    </button>
+                    <div className={styles.action_buttons}>
+                        {hasActiveFilters && (
+                            <button
+                                onClick={clearAllFilters}
+                                className={styles.clear_filters_button}
+                            >
+                                Clear Filters
+                            </button>
+                        )}
+                        <button
+                            onClick={downloadCSV}
+                            className={styles.download_button}
+                            disabled={filteredData.length === 0}
+                        >
+                            Download CSV
+                        </button>
+                    </div>
                 </div>
 
                 {loading ? (
