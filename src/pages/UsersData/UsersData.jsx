@@ -17,7 +17,7 @@ const UsersData = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(20);
-    
+
     // Filters
     const [selectedCohort, setSelectedCohort] = useState(null);
     const [selectedCity, setSelectedCity] = useState(null);
@@ -55,32 +55,32 @@ const UsersData = () => {
     useEffect(() => {
         fetchUserData();
     }, []);
-    
+
     useEffect(() => {
         setCurrentPage(1);
     }, [searchQuery, selectedCohort, selectedCity, selectedCustomerSource, selectedCustomerChannel, selectedSchool, selectedRollout]);
-    
+
     // Generate filter options from data
     const cohortOptions = [...new Set(userData.map(user => user.cohort).filter(Boolean))]
         .sort()
         .map(cohort => ({ value: cohort, label: cohort }));
-        
+
     const cityOptions = [...new Set(userData.map(user => user.city).filter(Boolean))]
         .sort()
         .map(city => ({ value: city, label: city }));
-        
+
     const customerSourceOptions = [...new Set(userData.map(user => user.customerSource).filter(Boolean))]
         .sort()
         .map(source => ({ value: source, label: source }));
-        
+
     const customerChannelOptions = [...new Set(userData.map(user => user.customerChannel).filter(Boolean))]
         .sort()
         .map(channel => ({ value: channel, label: channel }));
-        
+
     const schoolOptions = [...new Set(userData.map(user => user.schoolName).filter(Boolean))]
         .sort()
         .map(school => ({ value: school, label: school }));
-        
+
     const rolloutOptions = [...new Set(userData.map(user => user.rollout).filter(Boolean))]
         .sort()
         .map(rollout => ({ value: rollout, label: rollout }));
@@ -114,7 +114,7 @@ const UsersData = () => {
     const handleSave = async () => {
         try {
             setSaving(true);
-            
+
             // Prepare metadata object with only editable fields
             const metadata = {};
             editableColumns.forEach(column => {
@@ -131,7 +131,7 @@ const UsersData = () => {
 
             if (response.status === 200) {
                 // Update the local data
-                const updatedData = userData.map(user => 
+                const updatedData = userData.map(user =>
                     user.profile_id === editingUserId ? { ...editData } : user
                 );
                 setUserData(updatedData);
@@ -154,6 +154,48 @@ const UsersData = () => {
         }));
     };
 
+    const downloadCSV = () => {
+        // Create CSV headers from displayColumns
+        const headers = displayColumns.map(column => column.label).join(',');
+
+        // Create CSV rows from filteredData
+        const rows = filteredData.map(user => {
+            return displayColumns.map(column => {
+                let value = user[column.key] || '';
+                
+                // Convert to string and clean up
+                value = String(value).trim();
+                
+                // Replace newlines, carriage returns, and tabs with spaces
+                value = value.replace(/[\r\n\t]+/g, ' ');
+                
+                // Remove extra whitespace
+                value = value.replace(/\s+/g, ' ');
+                
+                // Escape commas, quotes, and newlines in CSV values
+                if (typeof value === 'string' && (value.includes(',') || value.includes('"') || value.includes('\n') || value.includes('\r'))) {
+                    return `"${value.replace(/"/g, '""')}"`;
+                }
+                
+                return value;
+            }).join(',');
+        });
+
+        // Combine headers and rows
+        const csvContent = [headers, ...rows].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `users_data_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     // Filter data based on search query and filters
     const filteredData = userData.filter(user => {
         // Search query filter
@@ -165,7 +207,7 @@ const UsersData = () => {
             (user.schoolName && user.schoolName.toLowerCase().includes(searchQuery.toLowerCase())) ||
             (user.cohort && user.cohort.toString().toLowerCase().includes(searchQuery.toLowerCase()))
         );
-        
+
         // Filter matches
         const cohortMatch = !selectedCohort || user.cohort === selectedCohort.value;
         const cityMatch = !selectedCity || user.city === selectedCity.value;
@@ -173,7 +215,7 @@ const UsersData = () => {
         const customerChannelMatch = !selectedCustomerChannel || user.customerChannel === selectedCustomerChannel.value;
         const schoolMatch = !selectedSchool || user.schoolName === selectedSchool.value;
         const rolloutMatch = !selectedRollout || user.rollout === selectedRollout.value;
-        
+
         return searchMatch && cohortMatch && cityMatch && customerSourceMatch && customerChannelMatch && schoolMatch && rolloutMatch;
     });
 
@@ -243,7 +285,7 @@ const UsersData = () => {
             <Sidebar />
             <div className={`${styles.content} ${!isSidebarOpen ? styles.sidebar_closed : ''}`}>
                 <h1>Users Data</h1>
-                
+
                 {error && (
                     <div className={styles.error_message}>
                         {error}
@@ -332,9 +374,18 @@ const UsersData = () => {
                         />
                     </div>
                 </div>
-                
-                <div className={styles.stats_info}>
-                    Total Users: {filteredData.length}
+
+                <div className={styles.stats_and_actions}>
+                    <div className={styles.stats_info}>
+                        Total Users: {filteredData.length}
+                    </div>
+                    <button
+                        onClick={downloadCSV}
+                        className={styles.download_button}
+                        disabled={filteredData.length === 0}
+                    >
+                        Download CSV
+                    </button>
                 </div>
 
                 {loading ? (
@@ -358,7 +409,7 @@ const UsersData = () => {
                             <tbody className={styles.table_body}>
                                 {currentData.map((user, index) => {
                                     const isEditing = editingUserId === user.profile_id;
-                                    
+
                                     return (
                                         <tr key={user.profile_id || `${user.phoneNumber}-${index}`}>
                                             {displayColumns.map(column => (
