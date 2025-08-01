@@ -919,7 +919,7 @@ export const getAlluserProgressByModule = async (botType, rollout, level, cohort
     return { status: response.status, data };
 }
 
-export const getUserProgressBarStats = async ( botType, level, cohort, rollout, courseId1, courseId4, condition) => {
+export const getUserProgressBarStats = async (botType, level, cohort, rollout, courseId1, courseId4, condition) => {
     const queryParams = new URLSearchParams({
         botType, level, cohort, rollout, courseId1, courseId4, condition
     }).toString();
@@ -1289,6 +1289,16 @@ export const speechToText = async (file, language = 'en') => {
             'Authorization': `Bearer ${getToken()}`
         },
         body: formData,
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
+// METADATA + PROGRESS + COURSE
+export const getMetadataProgress = async () => {
+    const response = await fetch(`${API_URL}/userProgress/getMetadataProgress`, {
+        headers: getHeaders(),
     });
 
     const data = await response.json();
