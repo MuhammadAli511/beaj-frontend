@@ -46,6 +46,13 @@ const StatsCards = ({ cardData, botType, rollout, level, targetGroup, onCardClic
       cardName: "started_pre_assessment",
     },
     {
+      title: "Started Not Completed Pre-Assessment",
+      value: cardData.startedNotCompletedPreAssessment || 0,
+      color: "#3498db",
+      show: true,
+      cardName: "started_not_completed_assessment",
+    },
+    {
       title: "Completed Pre-Assessment",
       value: cardData.completedPreAssessment || 0,
       color: "#3be339ff",
@@ -65,6 +72,13 @@ const StatsCards = ({ cardData, botType, rollout, level, targetGroup, onCardClic
       color: "#f39c12",
       show: true,
       cardName: "started_main_course",
+    },
+    {
+      title: "Started Not Completed Main Course",
+      value: cardData.startedNotCompletedMainCourse || 0,
+      color: "#3498db",
+      show: true,
+      cardName: "started_not_completed_main",
     },
     {
       title: "Completed Main Course",
@@ -954,6 +968,8 @@ const UserProgress = () => {
               startedPreAssessment,
               completedPreAssessment,
               completedAssessmentButNotStartedMain,
+              startedNotCompletedPreAssessment,
+              startedNotCompletedMainCourse,
               notStartedPreAssessment,
             ] = userStats[0]
             const cardStats = {
@@ -964,6 +980,8 @@ const UserProgress = () => {
               completedPreAssessment: completedPreAssessment || 0,
               completedAssessmentButNotStartedMain: completedAssessmentButNotStartedMain || 0,
               notStartedPreAssessment: notStartedPreAssessment || 0,
+              startedNotCompletedPreAssessment:startedNotCompletedPreAssessment || 0,
+              startedNotCompletedMainCourse: startedNotCompletedMainCourse || 0,
             }
             setCardData(cardStats)
           } else {

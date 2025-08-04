@@ -1146,6 +1146,17 @@ export const getAnalyticsStats = async (botType) => {
     return { status: response.status, data };
 };
 
+export const studentCardAnalyticsStats = async (courseId, grade, cohort, graphType, statType, userType) => {
+    const response = await fetch(`${API_URL}/stats/studentCardAnalyticsStats`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ courseId, grade, cohort, graphType, statType, userType }),
+    });
+
+    const data = await response.json();
+    return { status: response.status, data };
+};
+
 export const studentBarAnalyticsStats = async (courseId, grade, cohort, graphType, parameterId, userType) => {
     const response = await fetch(`${API_URL}/stats/studentBarAnalyticsStats`, {
         method: "POST",

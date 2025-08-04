@@ -1519,7 +1519,7 @@
 }
 
 /* Responsive design for analytics cards */
-@media (max-width: 1200px) {
+@media (max-width: 2000px) {
   .analytics_cards_container {
     justify-content: center;
   }
@@ -1556,7 +1556,7 @@
   position: relative;
   margin-top: 10px;
   min-height: 300px; /* Minimum height */
-  max-height: 1000px; /* Maximum height to prevent excessive growth */
+  max-height: 3000px; /* Maximum height to prevent excessive growth */
 }
 
 /* Ensure horizontal charts have proper spacing */
@@ -1568,13 +1568,13 @@
 @media (max-width: 768px) {
   .chart_wrapper {
     min-height: 250px;
-    max-height: 1000px;
+    max-height: 3000px;
   }
 }
 
 @media (max-width: 480px) {
   .chart_wrapper {
     min-height: 200px;
-    max-height: 1000px;
+    max-height: 3000px;
   }
 }
