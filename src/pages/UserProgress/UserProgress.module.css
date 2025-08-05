@@ -893,8 +893,8 @@
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   flex: 1;
-  min-width: 200px;
-  max-width: 300px;
+  min-width: 100px;
+  max-width: 200px;
   transition: all 0.3s ease;
   position: relative;
 }
