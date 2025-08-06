@@ -29,7 +29,8 @@
 .language_selection {
     display: flex;
     align-items: center;
-    gap: 15px;
+    justify-content: space-between;
+    gap: 30px;
     margin-bottom: 25px;
     padding: 20px;
     background: #f8fdfe;
@@ -37,14 +38,23 @@
     border: 1px solid #e0f4f7;
 }
 
-.language_label {
+.selection_item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.language_label,
+.provider_label {
     font-weight: 600;
     color: #333;
     font-size: 16px;
     min-width: 140px;
 }
 
-.language_dropdown {
+.language_dropdown,
+.provider_dropdown {
     padding: 10px 15px;
     border: 2px solid #c2e7ed;
     border-radius: 6px;
@@ -55,13 +65,16 @@
     cursor: pointer;
     transition: all 0.2s ease;
     min-width: 120px;
+    flex: 1;
 }
 
-.language_dropdown:hover {
+.language_dropdown:hover,
+.provider_dropdown:hover {
     border-color: #51bbcc;
 }
 
-.language_dropdown:focus {
+.language_dropdown:focus,
+.provider_dropdown:focus {
     outline: none;
     border-color: #51bbcc;
     box-shadow: 0 0 0 3px rgba(81, 187, 204, 0.2);
@@ -309,16 +322,25 @@
     .language_selection {
         flex-direction: column;
         align-items: flex-start;
-        gap: 10px;
+        gap: 20px;
         padding: 15px;
     }
     
-    .language_label {
+    .selection_item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    .language_label,
+    .provider_label {
         min-width: auto;
         font-size: 14px;
     }
     
-    .language_dropdown {
+    .language_dropdown,
+    .provider_dropdown {
         width: 100%;
         min-width: auto;
     }

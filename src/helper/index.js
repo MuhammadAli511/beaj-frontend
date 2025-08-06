@@ -1289,10 +1289,11 @@ export const clearCache = async () => {
 
 // AI SERVICES
 // API call for speech to text conversion
-export const speechToText = async (file, language = 'en') => {
+export const speechToText = async (file, language, provider) => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('language', language);
+    formData.append('provider', provider);
 
     const response = await fetch(`${API_URL}/aiServices/speech-to-text`, {
         method: "POST",
