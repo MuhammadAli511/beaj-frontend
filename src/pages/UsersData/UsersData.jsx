@@ -298,6 +298,8 @@ const UsersData = () => {
     const [selectedWeek, setSelectedWeek] = useState([]);
     const [selectedDay, setSelectedDay] = useState([]);
     const [selectedDaysSinceLastActive, setSelectedDaysSinceLastActive] = useState(null);
+    const [selectedAcceptableMessages, setSelectedAcceptableMessages] = useState([]);
+    const [selectedActivityType, setSelectedActivityType] = useState([]);
 
     // Sorting state
     const [sortColumn, setSortColumn] = useState(null);
@@ -331,7 +333,9 @@ const UsersData = () => {
         { key: 'coursename', label: 'Course Name', editable: false },
         { key: 'currentWeek', label: 'Week', editable: false },
         { key: 'currentDay', label: 'Day', editable: false },
-        { key: 'days_since_last_active', label: 'Days Since Last Active', editable: false }
+        { key: 'days_since_last_active', label: 'Days Since Last Active', editable: false },
+        { key: 'acceptableMessages', label: 'Acceptable Messages', editable: false },
+        { key: 'activityType', label: 'Activity Type', editable: false }
     ];
 
     useEffect(() => {
@@ -340,7 +344,7 @@ const UsersData = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, selectedCohort, selectedCity, selectedCustomerSource, selectedCustomerChannel, selectedSchool, selectedRollout, selectedAmountPaid, selectedClassLevel, selectedProfileType, selectedCourseName, selectedWeek, selectedDay, selectedDaysSinceLastActive]);
+    }, [searchQuery, selectedCohort, selectedCity, selectedCustomerSource, selectedCustomerChannel, selectedSchool, selectedRollout, selectedAmountPaid, selectedClassLevel, selectedProfileType, selectedCourseName, selectedWeek, selectedDay, selectedDaysSinceLastActive, selectedAcceptableMessages, selectedActivityType]);
 
     // Generate filter options from data with null/none options
     const cohortOptions = [
@@ -434,6 +438,25 @@ const UsersData = () => {
             .map(days => ({ value: days, label: days.toString() }))
     ];
 
+    const acceptableMessagesOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => {
+            if (Array.isArray(user.acceptableMessages)) {
+                return user.acceptableMessages.join(', ');
+            }
+            return user.acceptableMessages;
+        }).filter(Boolean))]
+            .sort()
+            .map(messages => ({ value: messages, label: messages }))
+    ];
+
+    const activityTypeOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.activityType).filter(Boolean))]
+            .sort()
+            .map(activityType => ({ value: activityType, label: activityType }))
+    ];
+
     const fetchUserData = async () => {
         try {
             setLoading(true);
@@ -518,6 +541,8 @@ const UsersData = () => {
         setSelectedWeek([]);
         setSelectedDay([]);
         setSelectedDaysSinceLastActive(null);
+        setSelectedAcceptableMessages([]);
+        setSelectedActivityType([]);
     };
 
     // Check if any filters are active
@@ -527,7 +552,8 @@ const UsersData = () => {
         selectedSchool.length > 0 || selectedRollout.length > 0 ||
         selectedProfileType.length > 0 || selectedCourseName.length > 0 ||
         selectedWeek.length > 0 || selectedDay.length > 0 ||
-        selectedDaysSinceLastActive !== null;
+        selectedDaysSinceLastActive !== null || selectedAcceptableMessages.length > 0 ||
+        selectedActivityType.length > 0;
 
     const downloadCSV = () => {
         // Create CSV headers from displayColumns
@@ -671,7 +697,13 @@ const UsersData = () => {
             (user.coursename && user.coursename.toLowerCase().includes(searchQuery.toLowerCase())) ||
             (user.currentWeek && user.currentWeek.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
             (user.currentDay && user.currentDay.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (user.days_since_last_active && user.days_since_last_active.toString().toLowerCase().includes(searchQuery.toLowerCase()))
+            (user.days_since_last_active && user.days_since_last_active.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (user.acceptableMessages && (
+                Array.isArray(user.acceptableMessages) ? 
+                    user.acceptableMessages.join(', ').toLowerCase().includes(searchQuery.toLowerCase()) :
+                    user.acceptableMessages.toString().toLowerCase().includes(searchQuery.toLowerCase())
+            )) ||
+            (user.activityType && user.activityType.toLowerCase().includes(searchQuery.toLowerCase()))
         );
 
         // Filter matches using helper function
@@ -688,8 +720,15 @@ const UsersData = () => {
         const weekMatch = matchesFilter(user.currentWeek, selectedWeek);
         const dayMatch = matchesFilter(user.currentDay, selectedDay);
         const daysSinceLastActiveMatch = matchesDaysSinceLastActive(user.days_since_last_active, selectedDaysSinceLastActive);
+        
+        // Handle acceptableMessages filtering (array or string)
+        const acceptableMessagesValue = Array.isArray(user.acceptableMessages) ? 
+            user.acceptableMessages.join(', ') : user.acceptableMessages;
+        const acceptableMessagesMatch = matchesFilter(acceptableMessagesValue, selectedAcceptableMessages);
+        
+        const activityTypeMatch = matchesFilter(user.activityType, selectedActivityType);
 
-        return searchMatch && cohortMatch && cityMatch && customerSourceMatch && customerChannelMatch && schoolMatch && rolloutMatch && amountPaidMatch && classLevelMatch && profileTypeMatch && courseNameMatch && weekMatch && dayMatch && daysSinceLastActiveMatch;
+        return searchMatch && cohortMatch && cityMatch && customerSourceMatch && customerChannelMatch && schoolMatch && rolloutMatch && amountPaidMatch && classLevelMatch && profileTypeMatch && courseNameMatch && weekMatch && dayMatch && daysSinceLastActiveMatch && acceptableMessagesMatch && activityTypeMatch;
     });
 
     // Apply sorting to filtered data
@@ -774,7 +813,7 @@ const UsersData = () => {
                         <label className={styles.filter_label}>Search</label>
                         <input
                             type="text"
-                            placeholder="Search by phone, name, city, school, cohort, amount, or class level..."
+                            placeholder="Search by phone, name, city, school, cohort, amount, class level, acceptable messages, or activity type..."
                             value={searchQuery}
                             onChange={(e) => {
                                 setSearchQuery(e.target.value);
@@ -913,6 +952,26 @@ const UsersData = () => {
                             label="Days Since Last Active"
                         />
                     </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Acceptable Messages</label>
+                        <CustomMultiSelect
+                            options={acceptableMessagesOptions}
+                            value={selectedAcceptableMessages}
+                            onChange={setSelectedAcceptableMessages}
+                            placeholder="Select Acceptable Messages"
+                            label="Acceptable Messages"
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Activity Type</label>
+                        <CustomMultiSelect
+                            options={activityTypeOptions}
+                            value={selectedActivityType}
+                            onChange={setSelectedActivityType}
+                            placeholder="Select Activity Type(s)"
+                            label="Activity Type"
+                        />
+                    </div>
                 </div>
 
                 <div className={styles.stats_and_actions}>
@@ -1002,6 +1061,10 @@ const UsersData = () => {
                                                             >
                                                                 {user[column.key] === 0 ? 'Today' : (user[column.key] || '-')}
                                                             </span>
+                                                        ) : column.key === 'acceptableMessages' ? (
+                                                            Array.isArray(user[column.key]) ? 
+                                                                user[column.key].join(', ') || '-' :
+                                                                user[column.key] || '-'
                                                         ) : (
                                                             user[column.key] || '-'
                                                         )
