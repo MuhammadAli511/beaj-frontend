@@ -16,6 +16,8 @@ const UserResponsesTab = () => {
     const [selectedWeek, setSelectedWeek] = useState(null);
     const [selectedDay, setSelectedDay] = useState(null);
     const [selectedActivityType, setSelectedActivityType] = useState(null);
+    const [selectedQuestion, setSelectedQuestion] = useState(null);
+    const [selectedLessonId, setSelectedLessonId] = useState(null);
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -70,7 +72,13 @@ const UserResponsesTab = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, selectedWeek, selectedDay, selectedActivityType, selectedCourse]);
+    }, [searchQuery, selectedWeek, selectedDay, selectedActivityType, selectedCourse, selectedQuestion, selectedLessonId]);
+
+    // Reset question and lessonId filters when activity type changes
+    useEffect(() => {
+        setSelectedQuestion(null);
+        setSelectedLessonId(null);
+    }, [selectedActivityType]);
 
     const weekOptions = Array.from({ length: 4 }, (_, i) => ({
         value: i + 1,
@@ -99,6 +107,41 @@ const UserResponsesTab = () => {
         { value: 'assessmentWatchAndSpeak', label: 'Assessment Watch and Speak' },
     ];
 
+    // Generate question options for MCQ activities
+    const questionOptions = React.useMemo(() => {
+        if (!selectedActivityType || !['mcqs', 'feedbackMcqs', 'assessmentMcqs'].includes(selectedActivityType.value)) {
+            return [];
+        }
+
+        const uniqueQuestions = [...new Set(
+            userResponses
+                .filter(response => response.question && response.question.trim())
+                .map(response => response.question.trim())
+        )].sort();
+
+        return uniqueQuestions.map((question, index) => ({
+            value: question,
+            label: `Q${index + 1}: ${question.length > 50 ? question.substring(0, 50) + '...' : question}`
+        }));
+    }, [userResponses, selectedActivityType]);
+
+    // Determine if question filter should be shown
+    const shouldShowQuestionFilter = selectedActivityType && ['mcqs', 'feedbackMcqs', 'assessmentMcqs'].includes(selectedActivityType.value);
+
+    // Generate lesson ID options
+    const lessonIdOptions = React.useMemo(() => {
+        const uniqueLessonIds = [...new Set(
+            userResponses
+                .filter(response => response.lessonId !== null && response.lessonId !== undefined)
+                .map(response => response.lessonId)
+        )].sort((a, b) => a - b);
+
+        return uniqueLessonIds.map(lessonId => ({
+            value: lessonId,
+            label: `Lesson ${lessonId}`
+        }));
+    }, [userResponses]);
+
     const excludeCourses = ['Level 1 - Kids', 'Free Trial', 'FAST COURSE TESTING', 'Level 3 Testing'];
 
     const courseOptions = Object.entries(courses)
@@ -116,7 +159,9 @@ const UserResponsesTab = () => {
         const dayMatch = !selectedDay || response.dayNumber === selectedDay.value;
         const activityMatch = !selectedActivityType || response.activityType === selectedActivityType.value;
         const courseMatch = !selectedCourse || Number(response.courseId) === selectedCourse.value;
-        return searchMatch && weekMatch && dayMatch && activityMatch && courseMatch;
+        const questionMatch = !selectedQuestion || (response.question && response.question.trim() === selectedQuestion.value);
+        const lessonIdMatch = !selectedLessonId || response.lessonId === selectedLessonId.value;
+        return searchMatch && weekMatch && dayMatch && activityMatch && courseMatch && questionMatch && lessonIdMatch;
     }).sort((a, b) => {
         if (a.phoneNumber && b.phoneNumber) {
             const phoneComparison = a.phoneNumber.localeCompare(b.phoneNumber);
@@ -201,6 +246,7 @@ const UserResponsesTab = () => {
                 <th className={styles.table_heading}>Course</th>
                 <th className={styles.table_heading}>Week</th>
                 <th className={styles.table_heading}>Day</th>
+                <th className={styles.table_heading}>Lesson ID</th>
             </>
         );
 
@@ -253,12 +299,13 @@ const UserResponsesTab = () => {
     const renderTableRow = (response, index) => {
         const commonCells = (
             <>
-                <td>{response.profile_id}</td>
+                <td>{response.profileId}</td>
                 <td>{response.phoneNumber}</td>
                 <td>{response.name}</td>
                 <td>{courses[response.courseId] || response.courseId}</td>
                 <td>{response.weekNumber}</td>
                 <td>{response.dayNumber}</td>
+                <td>{response.lessonId}</td>
             </>
         );
 
@@ -418,6 +465,30 @@ const UserResponsesTab = () => {
                         onChange={setSelectedDay}
                         isClearable
                         placeholder="Select Day"
+                    />
+                </div>
+                {shouldShowQuestionFilter && (
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Question</label>
+                        <Select
+                            className={styles.select}
+                            options={questionOptions}
+                            value={selectedQuestion}
+                            onChange={setSelectedQuestion}
+                            isClearable
+                            placeholder={questionOptions.length === 0 ? "No questions available" : "Select Question"}
+                        />
+                    </div>
+                )}
+                <div className={styles.filter_group}>
+                    <label className={styles.filter_label}>Lesson ID</label>
+                    <Select
+                        className={styles.select}
+                        options={lessonIdOptions}
+                        value={selectedLessonId}
+                        onChange={setSelectedLessonId}
+                        isClearable
+                        placeholder={lessonIdOptions.length === 0 ? "No lessons available" : "Select Lesson ID"}
                     />
                 </div>
             </div>

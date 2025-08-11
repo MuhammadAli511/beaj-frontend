@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ManageLesson.module.css';
-import { getAllCategories, getCoursesByCategoryId, getLessonsByCourse, migrateLesson, clearCache } from '../../../../helper';
+import { getAllCategories, getCoursesByCategoryId, getLessonsByCourse, migrateLesson, clearCache, getLessonById } from '../../../../helper';
 
 import WatchLesson from './LessonTypes/WatchLesson';
 import ReadLesson from './LessonTypes/ReadLesson';
 import SpeakLesson from './LessonTypes/SpeakLesson';
 import MCQsLesson from './LessonTypes/MCQsLesson';
+import MCQsQuestionModal from './LessonTypes/MCQsQuestionModal';
+import SpeakQuestionModal from './LessonTypes/SpeakQuestionModal';
 import MigrateLessonModal from '../../../../components/MigrateLessonModal/MigrateLessonModal';
 
 const allLessonTypes = [
@@ -36,6 +38,12 @@ const ManageLesson = () => {
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [isMigrateLessonModalOpen, setIsMigrateLessonModalOpen] = useState(false);
     const [isDuplicateLessonModalOpen, setIsDuplicateLessonModalOpen] = useState(false);
+    const [isMCQModalOpen, setIsMCQModalOpen] = useState(false);
+    const [isSpeakQuestionModalOpen, setIsSpeakQuestionModalOpen] = useState(false);
+    const [fullLessonData, setFullLessonData] = useState(null);
+    const [isLoadingModal, setIsLoadingModal] = useState(false);
+    const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+    const [selectedVideo, setSelectedVideo] = useState(null);
     const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT == "DEV";
     const [weeks, setWeeks] = useState([]);
     const [days, setDays] = useState([]);
@@ -221,6 +229,83 @@ const ManageLesson = () => {
         setIsDuplicateLessonModalOpen(false);
     };
 
+    const openMCQModal = async (lesson) => {
+        setIsLoadingModal(true);
+        setSelectedLesson(lesson);
+        try {
+            const lessonResponse = await getLessonById(lesson.LessonId);
+            if (lessonResponse.status === 200) {
+                setFullLessonData(lessonResponse.data);
+                setIsMCQModalOpen(true);
+            } else {
+                alert(lessonResponse.data.message);
+            }
+        } catch (error) {
+            alert('Error loading lesson details: ' + error);
+        } finally {
+            setIsLoadingModal(false);
+        }
+    };
+
+    const closeMCQModal = () => {
+        setSelectedLesson(null);
+        setFullLessonData(null);
+        setIsMCQModalOpen(false);
+    };
+
+    const openSpeakQuestionModal = async (lesson) => {
+        setIsLoadingModal(true);
+        setSelectedLesson(lesson);
+        try {
+            const lessonResponse = await getLessonById(lesson.LessonId);
+            if (lessonResponse.status === 200) {
+                setFullLessonData(lessonResponse.data);
+                setIsSpeakQuestionModalOpen(true);
+            } else {
+                alert(lessonResponse.data.message);
+            }
+        } catch (error) {
+            alert('Error loading lesson details: ' + error);
+        } finally {
+            setIsLoadingModal(false);
+        }
+    };
+
+    const closeSpeakQuestionModal = () => {
+        setSelectedLesson(null);
+        setFullLessonData(null);
+        setIsSpeakQuestionModalOpen(false);
+    };
+
+    const openVideoModal = async (lesson) => {
+        setIsLoadingModal(true);
+        setSelectedLesson(lesson);
+        try {
+            const lessonResponse = await getLessonById(lesson.LessonId);
+            if (lessonResponse.status === 200) {
+                const fullData = lessonResponse.data;
+                if (fullData.documentFiles && fullData.documentFiles[0]) {
+                    setSelectedVideo(fullData.documentFiles[0]);
+                    setIsVideoModalOpen(true);
+                } else {
+                    alert('No video found for this lesson.');
+                }
+            } else {
+                alert(lessonResponse.data.message);
+            }
+        } catch (error) {
+            alert('Error loading video: ' + error);
+        } finally {
+            setIsLoadingModal(false);
+        }
+    };
+
+    const closeVideoModal = () => {
+        setSelectedLesson(null);
+        setSelectedVideo(null);
+        setIsVideoModalOpen(false);
+    };
+
     const handleMigrateLesson = async (lesson, selectedCourseId) => {
         try {
             const migrateResponse = await migrateLesson(lesson.LessonId, selectedCourseId);
@@ -315,6 +400,7 @@ const ManageLesson = () => {
                                     <th className={styles.table_heading}>Sequence Number</th>
                                     <th className={styles.table_heading}>Activity</th>
                                     <th className={styles.table_heading}>Activity Alias</th>
+                                    <th className={styles.table_heading}>Content</th>
                                     <th className={styles.table_heading}>Status</th>
                                     <th className={styles.table_heading}>Duplicate</th>
                                     {isDevEnvironment && <th className={styles.table_heading}>Migrate</th>}
@@ -330,6 +416,48 @@ const ManageLesson = () => {
                                         <td>{lesson.SequenceNumber}</td>
                                         <td>{lesson.activity}</td>
                                         <td>{lesson.activityAlias}</td>
+                                        <td style={{ width: "15%" }}>
+                                            {/* Activity-specific content display */}
+                                            {(lesson.activity === 'video' || lesson.activity === 'videoEnd') && (
+                                                <button
+                                                    className={styles.submit_button}
+                                                    onClick={() => openVideoModal(lesson)}
+                                                    disabled={isLoadingModal}
+                                                >
+                                                    {isLoadingModal && selectedLesson?.LessonId === lesson.LessonId ? 'Loading...' : 'Show Video'}
+                                                </button>
+                                            )}
+                                            {(lesson.activity === 'mcqs' || lesson.activity === 'feedbackMcqs' || lesson.activity === 'assessmentMcqs') && (
+                                                <button
+                                                    className={styles.submit_button}
+                                                    onClick={() => openMCQModal(lesson)}
+                                                    disabled={isLoadingModal}
+                                                >
+                                                    {isLoadingModal && selectedLesson?.LessonId === lesson.LessonId ? 'Loading...' : 'Show Questions'}
+                                                </button>
+                                            )}
+                                            {(lesson.activity === 'listenAndSpeak' || lesson.activity === 'watchAndSpeak' || 
+                                              lesson.activity === 'watchAndAudio' || lesson.activity === 'watchAndImage' ||
+                                              lesson.activity === 'conversationalQuestionsBot' || lesson.activity === 'conversationalMonologueBot' ||
+                                              lesson.activity === 'conversationalAgencyBot' || lesson.activity === 'speakingPractice' ||
+                                              lesson.activity === 'feedbackAudio' || lesson.activity === 'assessmentWatchAndSpeak') && (
+                                                <button
+                                                    className={styles.submit_button}
+                                                    onClick={() => openSpeakQuestionModal(lesson)}
+                                                    disabled={isLoadingModal}
+                                                >
+                                                    {isLoadingModal && selectedLesson?.LessonId === lesson.LessonId ? 'Loading...' : 'Show Questions'}
+                                                </button>
+                                            )}
+                                            {lesson.activity === 'read' && (
+                                                <span style={{ color: '#666', fontStyle: 'italic' }}>Text Content</span>
+                                            )}
+                                            {!['video', 'videoEnd', 'mcqs', 'feedbackMcqs', 'assessmentMcqs', 'listenAndSpeak', 'watchAndSpeak', 
+                                               'watchAndAudio', 'watchAndImage', 'conversationalQuestionsBot', 'conversationalMonologueBot',
+                                               'conversationalAgencyBot', 'speakingPractice', 'feedbackAudio', 'assessmentWatchAndSpeak', 'read'].includes(lesson.activity) && (
+                                                <span style={{ color: '#999' }}>-</span>
+                                            )}
+                                        </td>
                                         <td style={{ width: "10%" }}>
                                             <span className={lesson.status === "Active" ? styles.active : styles.inactive}>
                                                 {lesson.status || "Not Available"}
@@ -491,6 +619,36 @@ const ManageLesson = () => {
                 modalTitle="Duplicate Lesson"
                 buttonText="Duplicate"
             />
+            {isMCQModalOpen && selectedLesson && fullLessonData && (
+                <MCQsQuestionModal
+                    lesson={fullLessonData}
+                    onClose={closeMCQModal}
+                    activity={selectedLesson.activity}
+                />
+            )}
+            {isSpeakQuestionModalOpen && selectedLesson && fullLessonData && (
+                <SpeakQuestionModal
+                    lesson={fullLessonData}
+                    onClose={closeSpeakQuestionModal}
+                    activity={selectedLesson.activity}
+                />
+            )}
+            {isVideoModalOpen && selectedVideo && selectedLesson && (
+                <div className={styles.video_modal_overlay} onClick={closeVideoModal}>
+                    <div className={styles.video_modal_content} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.video_modal_header}>
+                            <h3 className={styles.video_modal_title}>Lesson {selectedLesson.LessonId} - {selectedLesson.activity}</h3>
+                            <button className={styles.video_close_button} onClick={closeVideoModal}>
+                                Close
+                            </button>
+                        </div>
+                        <video controls className={styles.modal_video} autoPlay>
+                            <source src={selectedVideo.video} type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

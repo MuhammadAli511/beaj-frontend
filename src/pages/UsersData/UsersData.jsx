@@ -5,6 +5,123 @@ import { useSidebar } from '../../components/SidebarContext';
 import { getMetadataProgress, updateUserMetaData } from '../../helper';
 import { TailSpin } from 'react-loader-spinner';
 
+// Custom Single-Select Dropdown Component
+const CustomSingleSelect = ({ options, value, onChange, placeholder, label }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const dropdownRef = useRef(null);
+    const searchInputRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+                setSearchTerm('');
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (isOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [isOpen]);
+
+    const handleOptionSelect = (option, event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onChange(option);
+        setIsOpen(false);
+        setSearchTerm('');
+    };
+
+    const handleClear = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onChange(null);
+        setIsOpen(false);
+        setSearchTerm('');
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const handleSearchKeyDown = (event) => {
+        event.stopPropagation();
+    };
+
+    // Filter options based on search term
+    const filteredOptions = options.filter(option =>
+        option.label && typeof option.label === 'string' &&
+        option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+        <div className={styles.custom_select_container} ref={dropdownRef}>
+            <div
+                className={styles.custom_select_trigger}
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <span className={styles.custom_select_placeholder}>
+                    {value ? value.label : placeholder}
+                </span>
+                <span className={`${styles.custom_select_arrow} ${isOpen ? styles.open : ''}`}>▼</span>
+            </div>
+
+            {isOpen && (
+                <div className={styles.custom_select_dropdown}>
+                    <div className={styles.search_container}>
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            placeholder="Search options..."
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            onKeyDown={handleSearchKeyDown}
+                            className={styles.dropdown_search_input}
+                        />
+                    </div>
+                    <div className={styles.dropdown_actions}>
+                        <button
+                            className={styles.action_button}
+                            onClick={handleClear}
+                            type="button"
+                        >
+                            Clear Selection
+                        </button>
+                    </div>
+                    <div className={styles.options_container}>
+                        {filteredOptions.length > 0 ? (
+                            filteredOptions.map((option) => {
+                                const isSelected = value && value.value === option.value;
+                                return (
+                                    <div
+                                        key={option.value}
+                                        className={`${styles.custom_select_option} ${isSelected ? styles.selected : ''}`}
+                                        onClick={(event) => handleOptionSelect(option, event)}
+                                    >
+                                        <span className={styles.option_label}>{option.label}</span>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div className={styles.no_options}>
+                                No options found
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 // Custom Multi-Select Dropdown Component
 const CustomMultiSelect = ({ options, value, onChange, placeholder, label }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -180,6 +297,13 @@ const UsersData = () => {
     const [selectedCourseName, setSelectedCourseName] = useState([]);
     const [selectedWeek, setSelectedWeek] = useState([]);
     const [selectedDay, setSelectedDay] = useState([]);
+    const [selectedDaysSinceLastActive, setSelectedDaysSinceLastActive] = useState(null);
+    const [selectedAcceptableMessages, setSelectedAcceptableMessages] = useState([]);
+    const [selectedActivityType, setSelectedActivityType] = useState([]);
+
+    // Sorting state
+    const [sortColumn, setSortColumn] = useState(null);
+    const [sortDirection, setSortDirection] = useState('asc'); // 'asc' or 'desc'
 
     // Editable columns
     const editableColumns = [
@@ -208,7 +332,10 @@ const UsersData = () => {
         { key: 'profile_type', label: 'Profile Type', editable: false },
         { key: 'coursename', label: 'Course Name', editable: false },
         { key: 'currentWeek', label: 'Week', editable: false },
-        { key: 'currentDay', label: 'Day', editable: false }
+        { key: 'currentDay', label: 'Day', editable: false },
+        { key: 'days_since_last_active', label: 'Days Since Last Active', editable: false },
+        { key: 'acceptableMessages', label: 'Acceptable Messages', editable: false },
+        { key: 'activityType', label: 'Activity Type', editable: false }
     ];
 
     useEffect(() => {
@@ -217,7 +344,7 @@ const UsersData = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, selectedCohort, selectedCity, selectedCustomerSource, selectedCustomerChannel, selectedSchool, selectedRollout, selectedAmountPaid, selectedClassLevel, selectedProfileType, selectedCourseName, selectedWeek, selectedDay]);
+    }, [searchQuery, selectedCohort, selectedCity, selectedCustomerSource, selectedCustomerChannel, selectedSchool, selectedRollout, selectedAmountPaid, selectedClassLevel, selectedProfileType, selectedCourseName, selectedWeek, selectedDay, selectedDaysSinceLastActive, selectedAcceptableMessages, selectedActivityType]);
 
     // Generate filter options from data with null/none options
     const cohortOptions = [
@@ -304,6 +431,32 @@ const UsersData = () => {
             .map(day => ({ value: day, label: day.toString() }))
     ];
 
+    const daysSinceLastActiveOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.days_since_last_active).filter(val => val !== null && val !== undefined && val !== ''))]
+            .sort((a, b) => parseFloat(a) - parseFloat(b))
+            .map(days => ({ value: days, label: days.toString() }))
+    ];
+
+    const acceptableMessagesOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => {
+            if (Array.isArray(user.acceptableMessages)) {
+                return user.acceptableMessages.join(', ');
+            }
+            return user.acceptableMessages;
+        }).filter(Boolean))]
+            .sort()
+            .map(messages => ({ value: messages, label: messages }))
+    ];
+
+    const activityTypeOptions = [
+        { value: 'null', label: 'None/Null' },
+        ...[...new Set(userData.map(user => user.activityType).filter(Boolean))]
+            .sort()
+            .map(activityType => ({ value: activityType, label: activityType }))
+    ];
+
     const fetchUserData = async () => {
         try {
             setLoading(true);
@@ -387,6 +540,9 @@ const UsersData = () => {
         setSelectedCourseName([]);
         setSelectedWeek([]);
         setSelectedDay([]);
+        setSelectedDaysSinceLastActive(null);
+        setSelectedAcceptableMessages([]);
+        setSelectedActivityType([]);
     };
 
     // Check if any filters are active
@@ -395,14 +551,16 @@ const UsersData = () => {
         selectedCustomerSource.length > 0 || selectedCustomerChannel.length > 0 ||
         selectedSchool.length > 0 || selectedRollout.length > 0 ||
         selectedProfileType.length > 0 || selectedCourseName.length > 0 ||
-        selectedWeek.length > 0 || selectedDay.length > 0;
+        selectedWeek.length > 0 || selectedDay.length > 0 ||
+        selectedDaysSinceLastActive !== null || selectedAcceptableMessages.length > 0 ||
+        selectedActivityType.length > 0;
 
     const downloadCSV = () => {
         // Create CSV headers from displayColumns
         const headers = displayColumns.map(column => column.label).join(',');
 
-        // Create CSV rows from filteredData
-        const rows = filteredData.map(user => {
+        // Create CSV rows from sortedData
+        const rows = sortedData.map(user => {
             return displayColumns.map(column => {
                 let value = user[column.key] || '';
 
@@ -451,6 +609,78 @@ const UsersData = () => {
         });
     };
 
+    // Helper function to check if value matches single-select filter (including null handling)
+    const matchesSingleFilter = (userValue, selectedValue) => {
+        if (!selectedValue) return true;
+
+        if (selectedValue.value === 'null') {
+            return !userValue || userValue === '' || userValue === null || userValue === undefined;
+        }
+        return userValue === selectedValue.value;
+    };
+
+    // Helper function to check if days_since_last_active is less than or equal to selected value
+    const matchesDaysSinceLastActive = (userValue, selectedValue) => {
+        if (!selectedValue) return true;
+
+        if (selectedValue.value === 'null') {
+            return !userValue || userValue === '' || userValue === null || userValue === undefined;
+        }
+        
+        const userDays = parseFloat(userValue);
+        const selectedDays = parseFloat(selectedValue.value);
+        
+        // Return true if user's days_since_last_active is less than or equal to selected value
+        return !isNaN(userDays) && !isNaN(selectedDays) && userDays <= selectedDays;
+    };
+
+    // Sorting function
+    const handleSort = (columnKey) => {
+        // Don't sort phoneNumber and profile_id columns
+        if (columnKey === 'phoneNumber' || columnKey === 'profile_id') {
+            return;
+        }
+
+        if (sortColumn === columnKey) {
+            // Toggle direction if same column
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            // New column, start with ascending
+            setSortColumn(columnKey);
+            setSortDirection('asc');
+        }
+    };
+
+    // Sort data function
+    const sortData = (data) => {
+        if (!sortColumn) return data;
+
+        return [...data].sort((a, b) => {
+            let aValue = a[sortColumn];
+            let bValue = b[sortColumn];
+
+            // Handle null/undefined values
+            if (aValue == null && bValue == null) return 0;
+            if (aValue == null) return sortDirection === 'asc' ? 1 : -1;
+            if (bValue == null) return sortDirection === 'asc' ? -1 : 1;
+
+            // Handle numeric values (amountPaid, days_since_last_active, currentWeek, currentDay)
+            if (['amountPaid', 'days_since_last_active', 'currentWeek', 'currentDay'].includes(sortColumn)) {
+                aValue = parseFloat(aValue) || 0;
+                bValue = parseFloat(bValue) || 0;
+                return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+            }
+
+            // Handle string values
+            aValue = String(aValue).toLowerCase();
+            bValue = String(bValue).toLowerCase();
+
+            if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+            if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+    };
+
     // Filter data based on search query and filters
     const filteredData = userData.filter(user => {
         // Search query filter
@@ -466,7 +696,14 @@ const UsersData = () => {
             (user.profile_type && user.profile_type.toLowerCase().includes(searchQuery.toLowerCase())) ||
             (user.coursename && user.coursename.toLowerCase().includes(searchQuery.toLowerCase())) ||
             (user.currentWeek && user.currentWeek.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (user.currentDay && user.currentDay.toString().toLowerCase().includes(searchQuery.toLowerCase()))
+            (user.currentDay && user.currentDay.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (user.days_since_last_active && user.days_since_last_active.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (user.acceptableMessages && (
+                Array.isArray(user.acceptableMessages) ? 
+                    user.acceptableMessages.join(', ').toLowerCase().includes(searchQuery.toLowerCase()) :
+                    user.acceptableMessages.toString().toLowerCase().includes(searchQuery.toLowerCase())
+            )) ||
+            (user.activityType && user.activityType.toLowerCase().includes(searchQuery.toLowerCase()))
         );
 
         // Filter matches using helper function
@@ -482,15 +719,26 @@ const UsersData = () => {
         const courseNameMatch = matchesFilter(user.coursename, selectedCourseName);
         const weekMatch = matchesFilter(user.currentWeek, selectedWeek);
         const dayMatch = matchesFilter(user.currentDay, selectedDay);
+        const daysSinceLastActiveMatch = matchesDaysSinceLastActive(user.days_since_last_active, selectedDaysSinceLastActive);
+        
+        // Handle acceptableMessages filtering (array or string)
+        const acceptableMessagesValue = Array.isArray(user.acceptableMessages) ? 
+            user.acceptableMessages.join(', ') : user.acceptableMessages;
+        const acceptableMessagesMatch = matchesFilter(acceptableMessagesValue, selectedAcceptableMessages);
+        
+        const activityTypeMatch = matchesFilter(user.activityType, selectedActivityType);
 
-        return searchMatch && cohortMatch && cityMatch && customerSourceMatch && customerChannelMatch && schoolMatch && rolloutMatch && amountPaidMatch && classLevelMatch && profileTypeMatch && courseNameMatch && weekMatch && dayMatch;
+        return searchMatch && cohortMatch && cityMatch && customerSourceMatch && customerChannelMatch && schoolMatch && rolloutMatch && amountPaidMatch && classLevelMatch && profileTypeMatch && courseNameMatch && weekMatch && dayMatch && daysSinceLastActiveMatch && acceptableMessagesMatch && activityTypeMatch;
     });
 
+    // Apply sorting to filtered data
+    const sortedData = sortData(filteredData);
+
     // Pagination
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const currentData = filteredData.slice(startIndex, endIndex);
+    const currentData = sortedData.slice(startIndex, endIndex);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -565,7 +813,7 @@ const UsersData = () => {
                         <label className={styles.filter_label}>Search</label>
                         <input
                             type="text"
-                            placeholder="Search by phone, name, city, school, cohort, amount, or class level..."
+                            placeholder="Search by phone, name, city, school, cohort, amount, class level, acceptable messages, or activity type..."
                             value={searchQuery}
                             onChange={(e) => {
                                 setSearchQuery(e.target.value);
@@ -694,11 +942,41 @@ const UsersData = () => {
                             label="Day"
                         />
                     </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Days Since Last Active</label>
+                        <CustomSingleSelect
+                            options={daysSinceLastActiveOptions}
+                            value={selectedDaysSinceLastActive}
+                            onChange={setSelectedDaysSinceLastActive}
+                            placeholder="Select Days Since Last Active"
+                            label="Days Since Last Active"
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Acceptable Messages</label>
+                        <CustomMultiSelect
+                            options={acceptableMessagesOptions}
+                            value={selectedAcceptableMessages}
+                            onChange={setSelectedAcceptableMessages}
+                            placeholder="Select Acceptable Messages"
+                            label="Acceptable Messages"
+                        />
+                    </div>
+                    <div className={styles.filter_group}>
+                        <label className={styles.filter_label}>Activity Type</label>
+                        <CustomMultiSelect
+                            options={activityTypeOptions}
+                            value={selectedActivityType}
+                            onChange={setSelectedActivityType}
+                            placeholder="Select Activity Type(s)"
+                            label="Activity Type"
+                        />
+                    </div>
                 </div>
 
                 <div className={styles.stats_and_actions}>
                     <div className={styles.stats_info}>
-                        Total Users: {filteredData.length}
+                        Total Users: {sortedData.length}
                     </div>
                     <div className={styles.action_buttons}>
                         {hasActiveFilters && (
@@ -712,7 +990,7 @@ const UsersData = () => {
                         <button
                             onClick={downloadCSV}
                             className={styles.download_button}
-                            disabled={filteredData.length === 0}
+                            disabled={sortedData.length === 0}
                         >
                             Download CSV
                         </button>
@@ -729,11 +1007,34 @@ const UsersData = () => {
                         <table className={styles.table}>
                             <thead className={styles.heading_row}>
                                 <tr>
-                                    {displayColumns.map(column => (
-                                        <th key={column.key} className={styles.table_heading}>
-                                            {column.label}
-                                        </th>
-                                    ))}
+                                    {displayColumns.map(column => {
+                                        const isSortable = column.key !== 'phoneNumber' && column.key !== 'profile_id';
+                                        const isCurrentSort = sortColumn === column.key;
+                                        
+                                        return (
+                                            <th 
+                                                key={column.key} 
+                                                className={`${styles.table_heading} ${isSortable ? styles.sortable_header : ''}`}
+                                                onClick={() => isSortable && handleSort(column.key)}
+                                                style={{ cursor: isSortable ? 'pointer' : 'default' }}
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    {column.label}
+                                                    {isSortable && (
+                                                        <span style={{ 
+                                                            fontSize: '14px', 
+                                                            fontWeight: 'bold',
+                                                            opacity: isCurrentSort ? 1 : 0.6,
+                                                            color: isCurrentSort ? '#007bff' : '#666'
+                                                        }}>
+                                                            {isCurrentSort && sortDirection === 'asc' ? '▲' : 
+                                                             isCurrentSort && sortDirection === 'desc' ? '▼' : '⇅'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </th>
+                                        );
+                                    })}
                                     <th className={styles.table_heading}>Actions</th>
                                 </tr>
                             </thead>
@@ -753,7 +1054,20 @@ const UsersData = () => {
                                                             className={styles.edit_input}
                                                         />
                                                     ) : (
-                                                        user[column.key] || '-'
+                                                        column.key === 'days_since_last_active' ? (
+                                                            <span 
+                                                                title={user.lastUpdated ? `Last updated: ${new Date(user.lastUpdated).toLocaleString()}` : 'No last updated date available'}
+                                                                style={{ cursor: 'help' }}
+                                                            >
+                                                                {user[column.key] === 0 ? 'Today' : (user[column.key] || '-')}
+                                                            </span>
+                                                        ) : column.key === 'acceptableMessages' ? (
+                                                            Array.isArray(user[column.key]) ? 
+                                                                user[column.key].join(', ') || '-' :
+                                                                user[column.key] || '-'
+                                                        ) : (
+                                                            user[column.key] || '-'
+                                                        )
                                                     )}
                                                 </td>
                                             ))}

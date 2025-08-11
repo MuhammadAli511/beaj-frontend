@@ -9,11 +9,31 @@ const SpeechToText = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState('en');
+    const [selectedProvider, setSelectedProvider] = useState('openai');
     const fileInputRef = useRef(null);
 
-    const languageOptions = [
-        { value: 'en', label: 'English' },
-        { value: 'ur', label: 'Urdu' }
+    const getLanguageOptions = () => {
+        const baseOptions = [
+            { value: 'en', label: 'English' },
+            { value: 'ur', label: 'Urdu' },
+            { value: 'none', label: 'None' },
+        ];
+        
+        if (selectedProvider === 'gemini') {
+            return [
+                ...baseOptions,
+                { value: 'roman_urdu', label: 'Roman Urdu' }
+            ];
+        }
+        
+        return baseOptions;
+    };
+
+    const providerOptions = [
+        { value: 'openai', label: 'OpenAI' },
+        { value: 'azure', label: 'Azure' },
+        { value: 'elevenlabs', label: 'ElevenLabs' },
+        { value: 'gemini', label: 'Gemini' },
     ];
 
     const handleFileSelect = (event) => {
@@ -60,7 +80,7 @@ const SpeechToText = () => {
         setTranscript('');
 
         try {
-            const result = await speechToText(selectedFile, selectedLanguage);
+            const result = await speechToText(selectedFile, selectedLanguage, selectedProvider);
             if (result.data.transcription) {
                 setTranscript(result.data.transcription);
             } else {
@@ -113,18 +133,41 @@ const SpeechToText = () => {
 
             <div className={styles.upload_section}>
                 <div className={styles.language_selection}>
-                    <label className={styles.language_label}>Select Language:</label>
-                    <select
-                        className={styles.language_dropdown}
-                        value={selectedLanguage}
-                        onChange={(e) => setSelectedLanguage(e.target.value)}
-                    >
-                        {languageOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                    <div className={styles.selection_item}>
+                        <label className={styles.provider_label}>Select Provider:</label>
+                        <select
+                            className={styles.provider_dropdown}
+                            value={selectedProvider}
+                            onChange={(e) => {
+                                const newProvider = e.target.value;
+                                setSelectedProvider(newProvider);
+                                // Reset language to 'en' if current language is not available for new provider
+                                if (selectedLanguage === 'roman_urdu' && newProvider !== 'gemini') {
+                                    setSelectedLanguage('en');
+                                }
+                            }}
+                        >
+                            {providerOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className={styles.selection_item}>
+                        <label className={styles.language_label}>Select Language:</label>
+                        <select
+                            className={styles.language_dropdown}
+                            value={selectedLanguage}
+                            onChange={(e) => setSelectedLanguage(e.target.value)}
+                        >
+                            {getLanguageOptions().map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 <div
