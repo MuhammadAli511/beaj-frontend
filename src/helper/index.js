@@ -919,9 +919,9 @@ export const getAlluserProgressByModule = async (botType, rollout, level, cohort
     return { status: response.status, data };
 }
 
-export const getUserProgressBarStats = async (botType, level, cohort, rollout, courseId1, courseId4, condition) => {
+export const getUserProgressBarStats = async (botType, level, cohort, rollout, courseId1, courseId4, courseId5, condition) => {
     const queryParams = new URLSearchParams({
-        botType, level, cohort, rollout, courseId1, courseId4, condition
+        botType, level, cohort, rollout, courseId1, courseId4,courseId5, condition
     }).toString();
 
     const response = await fetch(`${API_URL}/userProgress/getUserProgressBarStats?${queryParams}`, {

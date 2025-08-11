@@ -87,6 +87,13 @@ const StatsCards = ({ cardData, botType, rollout, level, targetGroup, onCardClic
       show: true,
       cardName: "completed_main_course",
     },
+    {
+      title: "Active Users (Last 4 Days)",
+      value: cardData.getActiveUsers || 0,
+      color: "#e989faff",
+      show: true,
+      cardName: "get_active_users",
+    },
   ]
 
   const visibleCards = cards.filter((card) => card.show)
@@ -892,6 +899,7 @@ const UserProgress = () => {
       // Get the appropriate course IDs for the API call
       const mainCourseId = courseIds.courseId1 // Main course
       const preAssessmentCourseId = courseIds.courseId4 // Pre-assessment course
+      const postAssessmentCourseId = courseIds.courseId5 // Post-assessment course
 
       // Call the API with the specified parameters
       const response = await getUserProgressBarStats(
@@ -901,6 +909,7 @@ const UserProgress = () => {
         rollout,
         mainCourseId, // courseId1 - main course
         preAssessmentCourseId, // courseId2 - pre assessment
+        postAssessmentCourseId, // courseId3 - post assessment
         cardName, // condition - card name
       )
 
@@ -971,6 +980,7 @@ const UserProgress = () => {
               startedNotCompletedPreAssessment,
               startedNotCompletedMainCourse,
               notStartedPreAssessment,
+              getActiveUsers,
             ] = userStats[0]
             const cardStats = {
               totalUsers: totalUsers || 0,
@@ -982,6 +992,7 @@ const UserProgress = () => {
               notStartedPreAssessment: notStartedPreAssessment || 0,
               startedNotCompletedPreAssessment:startedNotCompletedPreAssessment || 0,
               startedNotCompletedMainCourse: startedNotCompletedMainCourse || 0,
+              getActiveUsers: getActiveUsers || 0,
             }
             setCardData(cardStats)
           } else {
@@ -1955,7 +1966,7 @@ const UserProgress = () => {
                 <div className={styles.users_table_container}>
                   <div className={styles.users_count_header}>
                     <span className={styles.users_count_badge}>
-                      Total Users: {rightSidebarData.length} | Card: {selectedCardName}
+                      Total Users: {rightSidebarData.length}
                     </span>
                   </div>
                   <div className={styles.table_wrapper}>
