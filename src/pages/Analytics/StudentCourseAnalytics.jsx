@@ -247,11 +247,7 @@ const StudentCourseAnalytics = () => {
 
   // Handle phone number click in sidebar - save to localStorage and navigate
   const handlePhoneNumberClick = (phoneNumber, profileId, botType) => {
-    // Save to localStorage
     saveToLocalStorage(phoneNumber, profileId, botType)
-    // Navigate to WhatsApp logs (you would implement navigation here)
-    // For example: router.push('/whatsapp-logs')
-    console.log("Navigating to WhatsApp logs with:", { phoneNumber, profileId, botType })
   }
 
   // LocalStorage functions
@@ -746,10 +742,6 @@ const StudentCourseAnalytics = () => {
       [graphType]: true,
     }))
 
-    console.log(
-      `Fetching ${graphType} for userType: ${userTypeValue}, primaryFilter: ${primaryFilterValue}, cohort: ${cohortValue}, courseId: ${courseId}, filter1: ${filter1Value}, filter2: ${filter2Value}`,
-    )
-
     try {
       setCohortName(cohortValue)
       setGradeName(primaryFilterValue) // This will be grade or level
@@ -768,8 +760,6 @@ const StudentCourseAnalytics = () => {
         response = await getstudentAnalyticsStats(courseId, primaryFilterValue, cohortValue, graphType, userTypeValue)
       }
 
-      console.log(`Response for ${graphType}:`, response)
-
       if (response.status === 200 && response.data) {
         let labels = []
         let data1 = [],
@@ -787,12 +777,9 @@ const StudentCourseAnalytics = () => {
               })
             }
             const lastLessonsTotal = response.data.lastLesssonTotal || []
-            console.log(lastLessonsTotal)
             const [firstArrayGraph1 = []] = lastLessonsTotal
             
             const [totalCountGraph1 = null, notStartedUsersGraph1 = null, started_users1 = null, completed1 = null] = firstArrayGraph1
-            console.log(started_users1)
-            console.log(`Data for ${graphType}:`, lastLessonsTotal)
             setGraphStats((prev) => ({
               ...prev,
               graph1: {
@@ -820,7 +807,6 @@ const StudentCourseAnalytics = () => {
             const lastLessonsTotal1 = response.data.lastLesssonTotal || []
             const [firstArrayGraph2 = []] = lastLessonsTotal1
             const [totalCountGraph2 = null, notStartedUsersGraph2 = null, started_users2 = null, completed2 = null] = firstArrayGraph2
-            console.log(`Data for ${graphType}:`, lastLessonsTotal1)
             setGraphStats((prev) => ({
               ...prev,
               graph2: {
@@ -848,7 +834,6 @@ const StudentCourseAnalytics = () => {
               const expectedTotal = Number.parseInt(firstRow.expected_total_lessons) || 0
               const actualTotal = Number.parseInt(firstRow.actual_total_lessons) || 0
               const dailyRate = expectedTotal > 0 ? Math.round((actualTotal / expectedTotal) * 100) + "%" : null
-              console.log(`Graph3 Expected: ${expectedTotal}, Actual: ${actualTotal}`)
               setGraphStats((prev) => ({
                 ...prev,
                 graph3: {
@@ -915,7 +900,6 @@ const StudentCourseAnalytics = () => {
                 return isNaN(val) ? null : val
               })
             }
-            console.log("Graph6 data:", response.data.lastLesson)
             break
 
           case "graph7":
@@ -926,7 +910,6 @@ const StudentCourseAnalytics = () => {
                 return isNaN(val) ? null : val
               })
             }
-            console.log("Graph7 data:", response.data.lastLesson)
             break
 
           case "graph8":
@@ -937,7 +920,6 @@ const StudentCourseAnalytics = () => {
                 return isNaN(val) ? null : val
               })
             }
-            console.log("Graph8 data:", response.data.lastLesson)
             break
 
           default:

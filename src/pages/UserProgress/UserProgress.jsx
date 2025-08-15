@@ -862,12 +862,7 @@ const UserProgress = () => {
 
   // Handle phone number click in sidebar - save to localStorage and navigate
   const handlePhoneNumberClick = (phoneNumber, profileId, botType) => {
-    // Save to localStorage
     saveToLocalStorage(phoneNumber, profileId, botType)
-
-    // Navigate to WhatsApp logs (you would implement navigation here)
-    // For example: router.push('/whatsapp-logs')
-    console.log("Navigating to WhatsApp logs with:", { phoneNumber, profileId, botType })
   }
 
 
@@ -914,7 +909,6 @@ const UserProgress = () => {
       )
 
       if (response.status === 200 && response.data.data?.users) {
-        console.log(response.data.data.users);
         setRightSidebarData(response.data.data.users);
       } else {
         setRightSidebarData([])
