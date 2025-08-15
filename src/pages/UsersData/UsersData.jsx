@@ -405,9 +405,9 @@ const UsersData = () => {
 
     const profileTypeOptions = [
         { value: 'null', label: 'None/Null' },
-        ...[...new Set(userData.map(user => user.profile_type).filter(Boolean))]
-            .sort()
-            .map(profileType => ({ value: profileType, label: profileType }))
+        { value: 'teacher', label: 'Teacher' },
+        { value: 'kid', label: 'Kid' },
+        { value: 'others', label: 'Others' }
     ];
 
     const courseNameOptions = [
@@ -634,6 +634,23 @@ const UsersData = () => {
         return !isNaN(userDays) && !isNaN(selectedDays) && userDays <= selectedDays;
     };
 
+    // Helper function to check profile type matches (including "others" logic)
+    const matchesProfileType = (userValue, selectedValues) => {
+        if (!selectedValues || selectedValues.length === 0) return true;
+
+        return selectedValues.some(selected => {
+            if (selected.value === 'null') {
+                return !userValue || userValue === '' || userValue === null || userValue === undefined;
+            }
+            if (selected.value === 'others') {
+                // "others" matches anything that's not "teacher" or "kid" and not null/empty
+                const hasValue = userValue && userValue !== '' && userValue !== null && userValue !== undefined;
+                return hasValue && userValue !== 'teacher' && userValue !== 'kid';
+            }
+            return userValue === selected.value;
+        });
+    };
+
     // Sorting function
     const handleSort = (columnKey) => {
         // Don't sort phoneNumber and profile_id columns
@@ -715,7 +732,7 @@ const UsersData = () => {
         const rolloutMatch = matchesFilter(user.rollout, selectedRollout);
         const amountPaidMatch = matchesFilter(user.amountPaid, selectedAmountPaid);
         const classLevelMatch = matchesFilter(user.classLevel, selectedClassLevel);
-        const profileTypeMatch = matchesFilter(user.profile_type, selectedProfileType);
+        const profileTypeMatch = matchesProfileType(user.profile_type, selectedProfileType);
         const courseNameMatch = matchesFilter(user.coursename, selectedCourseName);
         const weekMatch = matchesFilter(user.currentWeek, selectedWeek);
         const dayMatch = matchesFilter(user.currentDay, selectedDay);
