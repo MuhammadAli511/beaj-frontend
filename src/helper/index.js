@@ -28,6 +28,36 @@ export const loginBeajEmployee = async ({ email, password }) => {
     return { status: response.status, data };
 };
 
+export const validateSheetData = async ({ sheetId, sheetTitle }) => {
+  try {
+    const response = await fetch(`${API_URL}/lesson/validateIngestion`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ sheetId, sheetTitle }),
+    })
+    const data = await response.json()
+    console.log("Ingestion Validation Response:", data)
+    return { status: response.status, data }
+  } catch (error) {
+    return { status: 500, data: { message: error.message } }
+  }
+}
+
+export const processIngestionData = async ({ courseId, sheetId, sheetTitle }) => {
+  try {
+    const response = await fetch(`${API_URL}/lesson/processIngestion`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ courseId, sheetId, sheetTitle }),
+    })
+    const data = await response.json();
+    console.log("Process Ingestion Response:", data);
+    return { status: response.status, data }
+  } catch (error) {
+    return { status: 500, data: { message: error.message } }
+  }
+}
+
 
 // CATEGORY
 // API call to create a category
