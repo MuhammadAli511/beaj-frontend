@@ -123,11 +123,12 @@ const ContentIngestor = () => {
 
 const validateData = async () => {
   const sheetId = extractSpreadsheetId(sheetUrl)
+  //  const sheetId = sheetUrl;
 
-  if (!sheetId) {
-    addLog("Invalid Google Sheet URL. Please provide a valid Google Sheets URL.", "error")
-    return false
-  }
+  // if (!sheetId) {
+  //   addLog("Invalid Google Sheet URL. Please provide a valid Google Sheets URL.", "error")
+  //   return false
+  // }
 
   try {
     addLog("Starting validation...", "info")
@@ -136,18 +137,45 @@ const validateData = async () => {
 
     if (response.status === 200) {
       addLog("Validation successful!", "success")
-
+      let responseData = response.data.result;
       // Show full response in logs
-      if (response.data) {
-        addLog(JSON.stringify(response.data, null, 2), "success")  // << 👈 stringify nicely
+      if (responseData.valid) {
+        if (responseData.valid?.length) {
+          // addLog("Valid items:", "success")
+          responseData.valid.forEach((item, idx) => {
+            addLog(`${item}`, "success")
+          })
+        }
+        // addLog(JSON.stringify(response.data, null, 2), "success") 
+      }
+      if (responseData.errors) {
+        if (responseData.errors?.length) {
+          // addLog("Invalid items:", "error")
+          responseData.errors.forEach((item, idx) => {
+            addLog(`${item}`, "error")
+          })
+        }
       }
 
-      return true
+      if (responseData.warnings) {
+        if (responseData.warnings?.length) {
+          // addLog("Warning items:", "warning")
+          responseData.warnings.forEach((item, idx) => {
+            addLog(`${item}`, "warning")
+          })
+        }
+      }
+       if (!responseData.errors?.length) {
+        return true
+       }
+       else{
+        return false
+       }
     } else {
       addLog("Validation failed!", "error")
 
       if (response.data) {
-        addLog(JSON.stringify(response.data, null, 2), "error")  // << 👈 stringify errors too
+        addLog(JSON.stringify(response.data, null, 2), "error") 
       }
 
       return false
@@ -172,10 +200,36 @@ const ingestContent = async () => {
     })
 
     if (response.status === 200) {
-      addLog("Content ingestion completed successfully!", "success")
-
       if (response.data) {
-        addLog(JSON.stringify(response.data, null, 2), "success")  // << 👈 stringify logs
+        let responseData = response.data.result;
+         // Show full response in logs
+      if (responseData.valid) {
+        if (responseData.valid?.length) {
+          // addLog("Valid items:", "success")
+          responseData.valid.forEach((item, idx) => {
+            addLog(`${item}`, "success")
+          })
+        }
+        // addLog(JSON.stringify(response.data, null, 2), "success") 
+      }
+      if (responseData.errors) {
+        if (responseData.errors?.length) {
+          // addLog("Invalid items:", "error")
+          responseData.errors.forEach((item, idx) => {
+            addLog(`${item}`, "error")
+          })
+        }
+      }
+
+      if (responseData.warnings) {
+        if (responseData.warnings?.length) {
+          // addLog("Warning items:", "warning")
+          responseData.warnings.forEach((item, idx) => {
+            addLog(`${item}`, "warning")
+          })
+        }
+      }
+      addLog("Content ingestion completed successfully!", "success")
       }
     } else {
       addLog("Content ingestion failed!", "error")
@@ -200,11 +254,11 @@ const ingestContent = async () => {
     setLogs([]) // Clear previous logs
 
     try {
-      // const validationSuccess = await validateData()
+      const validationSuccess = await validateData()
 
-      // if (validationSuccess) {
-        await ingestContent()
-      // }
+      if (validationSuccess) {
+          await ingestContent()
+      }
     } finally {
       setIsProcessing(false)
     }
