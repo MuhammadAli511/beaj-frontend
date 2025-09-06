@@ -49,6 +49,36 @@ export const createCategory = async (courseCategoryName, file, categorySequenceN
     return { status: response.status, data };
 };
 
+export const validateSheetData = async ({ sheetId, sheetTitle, courseId }) => {
+  try {
+    const response = await fetch(`${API_URL}/lesson/validateIngestion`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ sheetId, sheetTitle, courseId }),
+    })
+    const data = await response.json()
+    console.log("Ingestion Validation Response:", data)
+    return { status: response.status, data }
+  } catch (error) {
+    return { status: 500, data: { message: error.message } }
+  }
+}
+
+export const processIngestionData = async ({ courseId, sheetId, sheetTitle, validationResult }) => {
+  try {
+    const response = await fetch(`${API_URL}/lesson/processIngestion`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ courseId, sheetId, sheetTitle, validationResult }),
+    })
+    const data = await response.json();
+    console.log("Process Ingestion Response:", data);
+    return { status: response.status, data }
+  } catch (error) {
+    return { status: 500, data: { message: error.message } }
+  }
+}
+
 // API call to get all categories
 export const getAllCategories = async () => {
     const response = await fetch(`${API_URL}/courseCategory/getAll`, {
