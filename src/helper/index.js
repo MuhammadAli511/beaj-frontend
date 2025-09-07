@@ -31,12 +31,12 @@ export const loginBeajEmployee = async ({ email, password }) => {
 
 // CONTENT INGESTION
 // API call to validate the sheet data
-export const validateSheetData = async ({ sheetId, sheetTitle }) => {
+export const validateSheetData = async ({ courseId, sheetId, sheetTitle }) => {
     try {
         const response = await fetch(`${API_URL}/contentIngestion/validateIngestion`, {
             method: "POST",
             headers: getHeaders(),
-            body: JSON.stringify({ sheetId, sheetTitle }),
+            body: JSON.stringify({ courseId, sheetId, sheetTitle }),
         })
         const data = await response.json()
         console.log("Ingestion Validation Response:", data)

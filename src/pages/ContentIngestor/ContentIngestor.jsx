@@ -132,7 +132,7 @@ const ContentIngestor = () => {
     try {
       addLog("Starting validation...", "info")
 
-      const response = await validateSheetData({ sheetId, sheetTitle: tabName });
+      const response = await validateSheetData({ courseId: selectedCourseId, sheetId, sheetTitle: tabName });
       console.log("Validation Response:", response)
 
       if (response.status === 200) {
@@ -184,12 +184,13 @@ const ContentIngestor = () => {
 
   const ingestContent = async () => {
     const sheetId = extractSpreadsheetId(sheetUrl)
+    const courseId = selectedCourseId
 
     try {
       addLog("Starting content ingestion...", "info")
 
       const response = await processIngestionData({
-        courseId: selectedCourseId,
+        courseId,
         sheetId,
         sheetTitle: tabName,
       })
