@@ -121,127 +121,117 @@ const ContentIngestor = () => {
     setLogs((prev) => [...prev, { message, type, timestamp }])
   }
 
-const validateData = async () => {
-  const sheetId = extractSpreadsheetId(sheetUrl)
-  //  const sheetId = sheetUrl;
+  const validateData = async () => {
+    const sheetId = extractSpreadsheetId(sheetUrl)
 
-  // if (!sheetId) {
-  //   addLog("Invalid Google Sheet URL. Please provide a valid Google Sheets URL.", "error")
-  //   return false
-  // }
-
-  try {
-    addLog("Starting validation...", "info")
-
-    const response = await validateSheetData({ sheetId, sheetTitle: tabName })
-
-    if (response.status === 200) {
-      addLog("Validation successful!", "success")
-      let responseData = response.data.result;
-      // Show full response in logs
-      if (responseData.valid) {
-        if (responseData.valid?.length) {
-          // addLog("Valid items:", "success")
-          responseData.valid.forEach((item, idx) => {
-            addLog(`${item}`, "success")
-          })
-        }
-        // addLog(JSON.stringify(response.data, null, 2), "success") 
-      }
-      if (responseData.errors) {
-        if (responseData.errors?.length) {
-          // addLog("Invalid items:", "error")
-          responseData.errors.forEach((item, idx) => {
-            addLog(`${item}`, "error")
-          })
-        }
-      }
-
-      if (responseData.warnings) {
-        if (responseData.warnings?.length) {
-          // addLog("Warning items:", "warning")
-          responseData.warnings.forEach((item, idx) => {
-            addLog(`${item}`, "warning")
-          })
-        }
-      }
-       if (!responseData.errors?.length) {
-        return true
-       }
-       else{
-        return false
-       }
-    } else {
-      addLog("Validation failed!", "error")
-
-      if (response.data) {
-        addLog(JSON.stringify(response.data, null, 2), "error") 
-      }
-
+    if (!sheetId) {
+      addLog("Invalid Google Sheet URL. Please provide a valid Google Sheets URL.", "error")
       return false
     }
-  } catch (error) {
-    addLog(`Validation error: ${error.message}`, "error")
-    return false
-  }
-}
 
+    try {
+      addLog("Starting validation...", "info")
 
-const ingestContent = async () => {
-  const sheetId = extractSpreadsheetId(sheetUrl)
+      const response = await validateSheetData({ sheetId, sheetTitle: tabName });
+      console.log("Validation Response:", response)
 
-  try {
-    addLog("Starting content ingestion...", "info")
-
-    const response = await processIngestionData({
-      courseId: selectedCourseId,
-      sheetId,
-      sheetTitle: tabName,
-    })
-
-    if (response.status === 200) {
-      if (response.data) {
+      if (response.status === 200) {
+        addLog("Validation successful!", "success")
         let responseData = response.data.result;
-         // Show full response in logs
-      if (responseData.valid) {
-        if (responseData.valid?.length) {
-          // addLog("Valid items:", "success")
-          responseData.valid.forEach((item, idx) => {
-            addLog(`${item}`, "success")
-          })
+        if (responseData.valid) {
+          if (responseData.valid?.length) {
+            responseData.valid.forEach((item, idx) => {
+              addLog(`${item}`, "success")
+            })
+          }
         }
-        // addLog(JSON.stringify(response.data, null, 2), "success") 
-      }
-      if (responseData.errors) {
-        if (responseData.errors?.length) {
-          // addLog("Invalid items:", "error")
-          responseData.errors.forEach((item, idx) => {
-            addLog(`${item}`, "error")
-          })
+        if (responseData.errors) {
+          if (responseData.errors?.length) {
+            responseData.errors.forEach((item, idx) => {
+              addLog(`${item}`, "error")
+            })
+          }
         }
-      }
 
-      if (responseData.warnings) {
-        if (responseData.warnings?.length) {
-          // addLog("Warning items:", "warning")
-          responseData.warnings.forEach((item, idx) => {
-            addLog(`${item}`, "warning")
-          })
+        if (responseData.warnings) {
+          if (responseData.warnings?.length) {
+            responseData.warnings.forEach((item, idx) => {
+              addLog(`${item}`, "warning")
+            })
+          }
         }
-      }
-      addLog("Content ingestion completed successfully!", "success")
-      }
-    } else {
-      addLog("Content ingestion failed!", "error")
+        if (!responseData.errors?.length) {
+          return true
+        }
+        else {
+          return false
+        }
+      } else {
+        addLog("Validation failed!", "error")
 
-      if (response.data) {
-        addLog(JSON.stringify(response.data, null, 2), "error")
+        if (response.data) {
+          addLog(JSON.stringify(response.data, null, 2), "error")
+        }
+
+        return false
       }
+    } catch (error) {
+      addLog(`Validation error: ${error.message}`, "error")
+      return false
     }
-  } catch (error) {
-    addLog(`Ingestion error: ${error.message}`, "error")
   }
-}
+
+
+  const ingestContent = async () => {
+    const sheetId = extractSpreadsheetId(sheetUrl)
+
+    try {
+      addLog("Starting content ingestion...", "info")
+
+      const response = await processIngestionData({
+        courseId: selectedCourseId,
+        sheetId,
+        sheetTitle: tabName,
+      })
+
+      if (response.status === 200) {
+        if (response.data) {
+          let responseData = response.data.result;
+          if (responseData.valid) {
+            if (responseData.valid?.length) {
+              responseData.valid.forEach((item, idx) => {
+                addLog(`${item}`, "success")
+              })
+            }
+          }
+          if (responseData.errors) {
+            if (responseData.errors?.length) {
+              responseData.errors.forEach((item, idx) => {
+                addLog(`${item}`, "error")
+              })
+            }
+          }
+
+          if (responseData.warnings) {
+            if (responseData.warnings?.length) {
+              responseData.warnings.forEach((item, idx) => {
+                addLog(`${item}`, "warning")
+              })
+            }
+          }
+          addLog("Content ingestion completed successfully!", "success")
+        }
+      } else {
+        addLog("Content ingestion failed!", "error")
+
+        if (response.data) {
+          addLog(JSON.stringify(response.data, null, 2), "error")
+        }
+      }
+    } catch (error) {
+      addLog(`Ingestion error: ${error.message}`, "error")
+    }
+  }
 
 
   const handleIngest = async () => {
@@ -256,9 +246,9 @@ const ingestContent = async () => {
     try {
       const validationSuccess = await validateData()
 
-      if (validationSuccess) {
-          await ingestContent()
-      }
+      // if (validationSuccess) {
+      //   await ingestContent()
+      // }
     } finally {
       setIsProcessing(false)
     }
