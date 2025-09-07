@@ -174,6 +174,7 @@ const ContentIngestor = () => {
 
       if (response.status === 200) {
         const responseData = response.data.result;
+        // Pass the complete response data including any errors
         setProcessingResults(responseData)
         setCurrentStage("results")
       } else {
@@ -225,7 +226,7 @@ const ContentIngestor = () => {
   const ValidationResultsPage = () => {
     if (!validationResults) return null
 
-    const { stats, errors } = validationResults
+    const { stats, errors, activities } = validationResults
     const hasErrors = errors && errors.length > 0
 
     return (
@@ -257,6 +258,63 @@ const ContentIngestor = () => {
             <div className={styles.stat_label}>Outdated to Remove</div>
           </div>
         </div>
+
+        {/* Activity Breakdown Table */}
+        {activities && activities.length > 0 && (
+          <div className={styles.activity_breakdown}>
+            <div className={styles.breakdown_header}>
+              <h3>Activity Breakdown</h3>
+              <div className={styles.status_legend}>
+                <div className={styles.legend_item}>
+                  <span className={`${styles.legend_color} ${styles.create}`}></span>
+                  <span>CREATE</span>
+                </div>
+                <div className={styles.legend_item}>
+                  <span className={`${styles.legend_color} ${styles.update}`}></span>
+                  <span>UPDATE</span>
+                </div>
+                <div className={styles.legend_item}>
+                  <span className={`${styles.legend_color} ${styles.skip}`}></span>
+                  <span>SKIP</span>
+                </div>
+              </div>
+            </div>
+            <div className={styles.table_container}>
+              <table className={styles.activity_table}>
+                <thead>
+                  <tr>
+                    <th>Week</th>
+                    <th>Day</th>
+                    <th>Seq</th>
+                    <th>Activity Type</th>
+                    <th>Start Row</th>
+                    <th>End Row</th>
+                    <th>Status</th>
+                    <th>Alias</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activities.map((activity, index) => (
+                    <tr key={index} className={`${styles.activity_row} ${styles[activity.status?.toLowerCase() || 'default']}`}>
+                      <td>{activity.week}</td>
+                      <td>{activity.day}</td>
+                      <td>{activity.seq}</td>
+                      <td>{activity.activityType}</td>
+                      <td>{activity.startRow}</td>
+                      <td>{activity.endRow}</td>
+                      <td>
+                        <span className={`${styles.status_badge} ${styles[activity.status?.toLowerCase() || 'default']}`}>
+                          {activity.status || 'UNKNOWN'}
+                        </span>
+                      </td>
+                      <td className={styles.alias_cell}>{activity.alias}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Error Section */}
         {hasErrors && (
@@ -364,7 +422,10 @@ const ContentIngestor = () => {
   const FinalResultsPage = () => {
     if (!processingResults) return null
 
-    const hasError = processingResults.error
+    // Check for network/API errors OR processing errors in the response
+    const hasNetworkError = processingResults.error
+    const hasProcessingErrors = processingResults.errors && processingResults.errors.length > 0
+    const hasAnyErrors = hasNetworkError || hasProcessingErrors
 
     return (
       <div className={styles.results_container}>
@@ -373,12 +434,58 @@ const ContentIngestor = () => {
         </div>
         
         <div className={styles.results_content}>
-          {hasError ? (
+          {hasAnyErrors ? (
             <div className={styles.error_results}>
               <div className={styles.warning_icon}>⚠️</div>
               <h3>Processing Completed with Issues</h3>
-              <div className={styles.error_details}>
-                {processingResults.message}
+              
+              {/* Show network errors */}
+              {hasNetworkError && (
+                <div className={styles.error_details}>
+                  <strong>System Error:</strong> {processingResults.message}
+                </div>
+              )}
+              
+              {/* Show processing errors */}
+              {hasProcessingErrors && (
+                <div className={styles.error_details}>
+                  <strong>Processing Errors:</strong>
+                  <ul className={styles.error_list}>
+                    {processingResults.errors.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {/* Show what was successfully processed */}
+              {processingResults.stats && (
+                <div className={styles.final_stats}>
+                  <h4>What was completed:</h4>
+                  {processingResults.stats.totalCreated > 0 && (
+                    <div className={styles.final_stat_item}>
+                      ✅ Successfully created {processingResults.stats.totalCreated} activities
+                    </div>
+                  )}
+                  {processingResults.stats.totalUpdated > 0 && (
+                    <div className={styles.final_stat_item}>
+                      ✅ Successfully updated {processingResults.stats.totalUpdated} activities
+                    </div>
+                  )}
+                  {processingResults.stats.totalDeleted > 0 && (
+                    <div className={styles.final_stat_item}>
+                      ✅ Successfully removed {processingResults.stats.totalDeleted} outdated activities
+                    </div>
+                  )}
+                  <div className={styles.final_stat_item}>
+                    <strong>Total processed: {processingResults.stats.totalProcessed || 0} activities</strong>
+                  </div>
+                </div>
+              )}
+              
+              <div className={styles.next_steps}>
+                <h4>Next Steps:</h4>
+                <p>You may need to manually check and fix the failed items listed above.</p>
               </div>
             </div>
           ) : (
@@ -387,9 +494,32 @@ const ContentIngestor = () => {
               <h3>Processing Complete!</h3>
               
               <div className={styles.final_stats}>
-                <div className={styles.final_stat_item}>
-                  Content ingestion completed successfully!
-                </div>
+                {processingResults.stats ? (
+                  <>
+                    {processingResults.stats.totalCreated > 0 && (
+                      <div className={styles.final_stat_item}>
+                        Successfully created {processingResults.stats.totalCreated} activities
+                      </div>
+                    )}
+                    {processingResults.stats.totalUpdated > 0 && (
+                      <div className={styles.final_stat_item}>
+                        Successfully updated {processingResults.stats.totalUpdated} activities
+                      </div>
+                    )}
+                    {processingResults.stats.totalDeleted > 0 && (
+                      <div className={styles.final_stat_item}>
+                        Successfully removed {processingResults.stats.totalDeleted} outdated activities
+                      </div>
+                    )}
+                    <div className={styles.final_stat_item}>
+                      <strong>Total: {processingResults.stats.totalProcessed || 0} activities processed</strong>
+                    </div>
+                  </>
+                ) : (
+                  <div className={styles.final_stat_item}>
+                    Content ingestion completed successfully!
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -413,76 +543,76 @@ const ContentIngestor = () => {
       case "results":
         return <FinalResultsPage />
       default:
-        return (
+  return (
           <>
-            <div className={styles.header}>
-              <h2>Content Ingestor</h2>
+        <div className={styles.header}>
+          <h2>Content Ingestor</h2>
+        </div>
+
+        <div className={styles.form_container}>
+          <div className={styles.form_row}>
+            <div className={styles.form_group}>
+              <label htmlFor="category">Select Category:</label>
+              <select
+                id="category"
+                value={selectedCategoryId}
+                onChange={(e) => setSelectedCategoryId(e.target.value)}
+                className={styles.dropdown}
+              >
+                {categories.map((category) => (
+                  <option key={category.CourseCategoryId} value={category.CourseCategoryId}>
+                    {category.CourseCategoryName}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <div className={styles.form_container}>
-              <div className={styles.form_row}>
-                <div className={styles.form_group}>
-                  <label htmlFor="category">Select Category:</label>
-                  <select
-                    id="category"
-                    value={selectedCategoryId}
-                    onChange={(e) => setSelectedCategoryId(e.target.value)}
-                    className={styles.dropdown}
-                  >
-                    {categories.map((category) => (
-                      <option key={category.CourseCategoryId} value={category.CourseCategoryId}>
-                        {category.CourseCategoryName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <div className={styles.form_group}>
+              <label htmlFor="course">Select Course:</label>
+              <select
+                id="course"
+                value={selectedCourseId}
+                onChange={(e) => setSelectedCourseId(e.target.value)}
+                className={styles.dropdown}
+              >
+                {courses.map((course) => (
+                  <option key={course.CourseId} value={course.CourseId}>
+                    {course.CourseName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-                <div className={styles.form_group}>
-                  <label htmlFor="course">Select Course:</label>
-                  <select
-                    id="course"
-                    value={selectedCourseId}
-                    onChange={(e) => setSelectedCourseId(e.target.value)}
-                    className={styles.dropdown}
-                  >
-                    {courses.map((course) => (
-                      <option key={course.CourseId} value={course.CourseId}>
-                        {course.CourseName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+          <div className={styles.form_group}>
+            <label htmlFor="tabName">Google Sheet Tab Name:</label>
+            <input
+              type="text"
+              id="tabName"
+              value={tabName}
+              onChange={(e) => setTabName(e.target.value)}
+              placeholder="Enter tab name (e.g., Sheet1)"
+              className={styles.text_input}
+            />
+          </div>
 
-              <div className={styles.form_group}>
-                <label htmlFor="tabName">Google Sheet Tab Name:</label>
-                <input
-                  type="text"
-                  id="tabName"
-                  value={tabName}
-                  onChange={(e) => setTabName(e.target.value)}
-                  placeholder="Enter tab name (e.g., Sheet1)"
-                  className={styles.text_input}
-                />
-              </div>
+          <div className={styles.form_group}>
+            <label htmlFor="sheetUrl">Google Sheet URL:</label>
+            <textarea
+              id="sheetUrl"
+              value={sheetUrl}
+              onChange={(e) => setSheetUrl(e.target.value)}
+              placeholder="Enter Google Sheet URL"
+              className={styles.url_input}
+              rows={3}
+            />
+          </div>
 
-              <div className={styles.form_group}>
-                <label htmlFor="sheetUrl">Google Sheet URL:</label>
-                <textarea
-                  id="sheetUrl"
-                  value={sheetUrl}
-                  onChange={(e) => setSheetUrl(e.target.value)}
-                  placeholder="Enter Google Sheet URL"
-                  className={styles.url_input}
-                  rows={3}
-                />
-              </div>
-
-              <div className={styles.button_container}>
-                <button onClick={handleIngest} disabled={isProcessing} className={styles.ingest_button}>
+          <div className={styles.button_container}>
+            <button onClick={handleIngest} disabled={isProcessing} className={styles.ingest_button}>
                   {isProcessing ? "Validating..." : "Validate Sheet"}
-                </button>
-              </div>
+              </button>
+                </div>
             </div>
           </>
         )
