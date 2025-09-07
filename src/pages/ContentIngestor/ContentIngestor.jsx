@@ -13,8 +13,13 @@ const ContentIngestor = () => {
   const [selectedCourseId, setSelectedCourseId] = useState("")
   const [tabName, setTabName] = useState("")
   const [sheetUrl, setSheetUrl] = useState("")
-  const [logs, setLogs] = useState([])
   const [isProcessing, setIsProcessing] = useState(false)
+  
+  // New state for multi-stage flow
+  const [currentStage, setCurrentStage] = useState("form") // form, validation, confirmation, processing, results
+  const [validationResults, setValidationResults] = useState(null)
+  const [processingResults, setProcessingResults] = useState(null)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   const { isSidebarOpen } = useSidebar()
   const userRole = typeof window !== "undefined" ? localStorage.getItem("role") : null
@@ -76,20 +81,16 @@ const ContentIngestor = () => {
               if (filteredAndSortedCourses.length > 0) {
                 setSelectedCourseId(filteredAndSortedCourses[0].CourseId)
               }
-            } else {
-              addLog(coursesResponse.data.message || "Failed to fetch courses", "error")
             }
           }
-        } else {
-          addLog(categoriesResponse.data.message || "Failed to fetch categories", "error")
         }
       } catch (error) {
-        addLog(`Error fetching data: ${error.message}`, "error")
+        console.error(`Error fetching data: ${error.message}`)
       }
     }
 
     fetchCategoriesAndDefaultCourses()
-  }, [userRole])
+  }, [userRole]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update courses when category changes
   useEffect(() => {
@@ -108,7 +109,7 @@ const ContentIngestor = () => {
             }
           }
         } catch (error) {
-          addLog(`Error fetching courses: ${error.message}`, "error")
+          console.error(`Error fetching courses: ${error.message}`)
         }
       }
     }
@@ -116,67 +117,43 @@ const ContentIngestor = () => {
     fetchCoursesForCategory()
   }, [selectedCategoryId])
 
-  const addLog = (message, type = "info") => {
-    const timestamp = new Date().toLocaleTimeString()
-    setLogs((prev) => [...prev, { message, type, timestamp }])
-  }
-
   const validateData = async () => {
     const sheetId = extractSpreadsheetId(sheetUrl)
 
     if (!sheetId) {
-      addLog("Invalid Google Sheet URL. Please provide a valid Google Sheets URL.", "error")
+      console.error("Invalid Google Sheet URL. Please provide a valid Google Sheets URL.")
       return false
     }
 
     try {
-      addLog("Starting validation...", "info")
 
       const response = await validateSheetData({ courseId: selectedCourseId, sheetId, sheetTitle: tabName });
       console.log("Validation Response:", response)
 
       if (response.status === 200) {
-        addLog("Validation successful!", "success")
-        let responseData = response.data.result;
-        if (responseData.valid) {
-          if (responseData.valid?.length) {
-            responseData.valid.forEach((item, idx) => {
-              addLog(`${item}`, "success")
-            })
-          }
-        }
-        if (responseData.errors) {
-          if (responseData.errors?.length) {
-            responseData.errors.forEach((item, idx) => {
-              addLog(`${item}`, "error")
-            })
-          }
-        }
-
-        if (responseData.warnings) {
-          if (responseData.warnings?.length) {
-            responseData.warnings.forEach((item, idx) => {
-              addLog(`${item}`, "warning")
-            })
-          }
-        }
-        if (!responseData.errors?.length) {
+        const responseData = response.data.result;
+        
+        // Store validation results for the new UI
+        setValidationResults(responseData)
+        
+        // Check if there are errors that prevent processing
+        const hasErrors = responseData.errors && responseData.errors.length > 0
+        
+        if (!hasErrors) {
+          // Move to validation results stage
+          setCurrentStage("validation")
           return true
-        }
-        else {
+        } else {
+          // Still show validation stage but with errors
+          setCurrentStage("validation")
           return false
         }
       } else {
-        addLog("Validation failed!", "error")
-
-        if (response.data) {
-          addLog(JSON.stringify(response.data, null, 2), "error")
-        }
-
+        console.error("Validation failed!", response.data)
         return false
       }
     } catch (error) {
-      addLog(`Validation error: ${error.message}`, "error")
+      console.error(`Validation error: ${error.message}`)
       return false
     }
   }
@@ -187,7 +164,7 @@ const ContentIngestor = () => {
     const courseId = selectedCourseId
 
     try {
-      addLog("Starting content ingestion...", "info")
+      setCurrentStage("processing")
 
       const response = await processIngestionData({
         courseId,
@@ -196,67 +173,320 @@ const ContentIngestor = () => {
       })
 
       if (response.status === 200) {
-        if (response.data) {
-          let responseData = response.data.result;
-          if (responseData.valid) {
-            if (responseData.valid?.length) {
-              responseData.valid.forEach((item, idx) => {
-                addLog(`${item}`, "success")
-              })
-            }
-          }
-          if (responseData.errors) {
-            if (responseData.errors?.length) {
-              responseData.errors.forEach((item, idx) => {
-                addLog(`${item}`, "error")
-              })
-            }
-          }
-
-          if (responseData.warnings) {
-            if (responseData.warnings?.length) {
-              responseData.warnings.forEach((item, idx) => {
-                addLog(`${item}`, "warning")
-              })
-            }
-          }
-          addLog("Content ingestion completed successfully!", "success")
-        }
+        const responseData = response.data.result;
+        setProcessingResults(responseData)
+        setCurrentStage("results")
       } else {
-        addLog("Content ingestion failed!", "error")
-
-        if (response.data) {
-          addLog(JSON.stringify(response.data, null, 2), "error")
-        }
+        setProcessingResults({ error: true, message: response.data })
+        setCurrentStage("results")
       }
     } catch (error) {
-      addLog(`Ingestion error: ${error.message}`, "error")
+      setProcessingResults({ error: true, message: error.message })
+      setCurrentStage("results")
     }
   }
 
 
   const handleIngest = async () => {
     if (!selectedCategoryId || !selectedCourseId || !tabName || !sheetUrl) {
-      addLog("Please fill in all fields before proceeding.", "error")
       return
     }
 
     setIsProcessing(true)
-    setLogs([]) // Clear previous logs
 
     try {
-      const validationSuccess = await validateData()
-
-      // if (validationSuccess) {
-      //   await ingestContent()
-      // }
+      await validateData()
     } finally {
       setIsProcessing(false)
     }
   }
 
-  const clearLogs = () => {
-    setLogs([])
+  const handleConfirmProcessing = async () => {
+    setShowConfirmDialog(false)
+    setIsProcessing(true)
+    try {
+      await ingestContent()
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleBackToForm = () => {
+    setCurrentStage("form")
+    setValidationResults(null)
+    setProcessingResults(null)
+  }
+
+  const handleProceedWithProcessing = () => {
+    setShowConfirmDialog(true)
+  }
+
+  // Component for Validation Results Page
+  const ValidationResultsPage = () => {
+    if (!validationResults) return null
+
+    const { stats, errors } = validationResults
+    const hasErrors = errors && errors.length > 0
+
+    return (
+      <div className={styles.validation_container}>
+        <div className={styles.header}>
+          <h2>Validation Results</h2>
+        </div>
+
+        {/* Stats Cards */}
+        <div className={styles.stats_grid}>
+          <div className={styles.stat_card}>
+            <div className={styles.stat_number}>{stats?.totalActivities || 0}</div>
+            <div className={styles.stat_label}>Activities Found</div>
+          </div>
+          <div className={styles.stat_card}>
+            <div className={styles.stat_number}>{stats?.activitiesToProcess || 0}</div>
+            <div className={styles.stat_label}>Marked for Processing</div>
+          </div>
+          <div className={styles.stat_card}>
+            <div className={styles.stat_number}>{stats?.toCreate || 0}</div>
+            <div className={styles.stat_label}>New Activities to Create</div>
+          </div>
+          <div className={styles.stat_card}>
+            <div className={styles.stat_number}>{stats?.toUpdate || 0}</div>
+            <div className={styles.stat_label}>Existing to Update</div>
+          </div>
+          <div className={styles.stat_card}>
+            <div className={styles.stat_number}>{stats?.toDelete || 0}</div>
+            <div className={styles.stat_label}>Outdated to Remove</div>
+          </div>
+        </div>
+
+        {/* Error Section */}
+        {hasErrors && (
+          <div className={styles.error_section}>
+            <h3>Issues Found</h3>
+            <div className={styles.error_box}>
+              {errors.map((error, index) => (
+                <div key={index} className={styles.error_message}>
+                  {error}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className={styles.action_buttons}>
+          <button onClick={handleBackToForm} className={styles.back_button}>
+            Back to Form
+          </button>
+          {hasErrors ? (
+            <button disabled className={styles.proceed_button_disabled}>
+              Fix issues first
+            </button>
+          ) : (
+            <button onClick={handleProceedWithProcessing} className={styles.proceed_button}>
+              Proceed with Processing
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Component for Confirmation Dialog
+  const ConfirmationDialog = () => {
+    if (!showConfirmDialog || !validationResults) return null
+
+    const { stats } = validationResults
+
+    return (
+      <div className={styles.dialog_overlay}>
+        <div className={styles.dialog_content}>
+          <h3>Ready to Process Your Course Content?</h3>
+          <p>This will make the following changes to your course:</p>
+          
+          <div className={styles.changes_list}>
+            {stats?.toCreate > 0 && (
+              <div className={styles.change_item}>
+                <span className={styles.check_icon}>✅</span>
+                Create {stats.toCreate} new activities
+              </div>
+            )}
+            {stats?.toUpdate > 0 && (
+              <div className={styles.change_item}>
+                <span className={styles.check_icon}>✅</span>
+                Update {stats.toUpdate} existing activities
+              </div>
+            )}
+            {stats?.toDelete > 0 && (
+              <div className={styles.change_item}>
+                <span className={styles.remove_icon}>❌</span>
+                Remove {stats.toDelete} outdated activities
+              </div>
+            )}
+          </div>
+          
+          <p className={styles.warning_text}>This action cannot be undone.</p>
+          
+          <div className={styles.dialog_buttons}>
+            <button onClick={() => setShowConfirmDialog(false)} className={styles.cancel_button}>
+              Cancel
+            </button>
+            <button onClick={handleConfirmProcessing} className={styles.confirm_button}>
+              Yes, Proceed
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Component for Processing Progress Page
+  const ProcessingProgressPage = () => (
+    <div className={styles.processing_container}>
+      <div className={styles.header}>
+        <h2>Processing Content</h2>
+      </div>
+      
+      <div className={styles.progress_content}>
+        <div className={styles.spinner}></div>
+        <h3>Processing your activities...</h3>
+        <p>Please wait while we create, update, and remove activities as needed.</p>
+        
+        <div className={styles.progress_steps}>
+          <div className={styles.progress_step}>Creating new activities...</div>
+          <div className={styles.progress_step}>Updating existing activities...</div>
+          <div className={styles.progress_step}>Removing outdated activities...</div>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Component for Final Results Page
+  const FinalResultsPage = () => {
+    if (!processingResults) return null
+
+    const hasError = processingResults.error
+
+    return (
+      <div className={styles.results_container}>
+        <div className={styles.header}>
+          <h2>Processing Complete</h2>
+        </div>
+        
+        <div className={styles.results_content}>
+          {hasError ? (
+            <div className={styles.error_results}>
+              <div className={styles.warning_icon}>⚠️</div>
+              <h3>Processing Completed with Issues</h3>
+              <div className={styles.error_details}>
+                {processingResults.message}
+              </div>
+            </div>
+          ) : (
+            <div className={styles.success_results}>
+              <div className={styles.success_icon}>✅</div>
+              <h3>Processing Complete!</h3>
+              
+              <div className={styles.final_stats}>
+                <div className={styles.final_stat_item}>
+                  Content ingestion completed successfully!
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div className={styles.final_actions}>
+            <button onClick={handleBackToForm} className={styles.new_ingestion_button}>
+              Start New Ingestion
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const renderCurrentStage = () => {
+    switch (currentStage) {
+      case "validation":
+        return <ValidationResultsPage />
+      case "processing":
+        return <ProcessingProgressPage />
+      case "results":
+        return <FinalResultsPage />
+      default:
+        return (
+          <>
+            <div className={styles.header}>
+              <h2>Content Ingestor</h2>
+            </div>
+
+            <div className={styles.form_container}>
+              <div className={styles.form_row}>
+                <div className={styles.form_group}>
+                  <label htmlFor="category">Select Category:</label>
+                  <select
+                    id="category"
+                    value={selectedCategoryId}
+                    onChange={(e) => setSelectedCategoryId(e.target.value)}
+                    className={styles.dropdown}
+                  >
+                    {categories.map((category) => (
+                      <option key={category.CourseCategoryId} value={category.CourseCategoryId}>
+                        {category.CourseCategoryName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className={styles.form_group}>
+                  <label htmlFor="course">Select Course:</label>
+                  <select
+                    id="course"
+                    value={selectedCourseId}
+                    onChange={(e) => setSelectedCourseId(e.target.value)}
+                    className={styles.dropdown}
+                  >
+                    {courses.map((course) => (
+                      <option key={course.CourseId} value={course.CourseId}>
+                        {course.CourseName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className={styles.form_group}>
+                <label htmlFor="tabName">Google Sheet Tab Name:</label>
+                <input
+                  type="text"
+                  id="tabName"
+                  value={tabName}
+                  onChange={(e) => setTabName(e.target.value)}
+                  placeholder="Enter tab name (e.g., Sheet1)"
+                  className={styles.text_input}
+                />
+              </div>
+
+              <div className={styles.form_group}>
+                <label htmlFor="sheetUrl">Google Sheet URL:</label>
+                <textarea
+                  id="sheetUrl"
+                  value={sheetUrl}
+                  onChange={(e) => setSheetUrl(e.target.value)}
+                  placeholder="Enter Google Sheet URL"
+                  className={styles.url_input}
+                  rows={3}
+                />
+              </div>
+
+              <div className={styles.button_container}>
+                <button onClick={handleIngest} disabled={isProcessing} className={styles.ingest_button}>
+                  {isProcessing ? "Validating..." : "Validate Sheet"}
+                </button>
+              </div>
+            </div>
+          </>
+        )
+    }
   }
 
   return (
@@ -264,95 +494,9 @@ const ContentIngestor = () => {
       <Navbar />
       {isSidebarOpen && <Sidebar />}
       <div className={styles.content}>
-        <div className={styles.header}>
-          <h2>Content Ingestor</h2>
-        </div>
-
-        <div className={styles.form_container}>
-          <div className={styles.form_row}>
-            <div className={styles.form_group}>
-              <label htmlFor="category">Select Category:</label>
-              <select
-                id="category"
-                value={selectedCategoryId}
-                onChange={(e) => setSelectedCategoryId(e.target.value)}
-                className={styles.dropdown}
-              >
-                {categories.map((category) => (
-                  <option key={category.CourseCategoryId} value={category.CourseCategoryId}>
-                    {category.CourseCategoryName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.form_group}>
-              <label htmlFor="course">Select Course:</label>
-              <select
-                id="course"
-                value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
-                className={styles.dropdown}
-              >
-                {courses.map((course) => (
-                  <option key={course.CourseId} value={course.CourseId}>
-                    {course.CourseName}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className={styles.form_group}>
-            <label htmlFor="tabName">Google Sheet Tab Name:</label>
-            <input
-              type="text"
-              id="tabName"
-              value={tabName}
-              onChange={(e) => setTabName(e.target.value)}
-              placeholder="Enter tab name (e.g., Sheet1)"
-              className={styles.text_input}
-            />
-          </div>
-
-          <div className={styles.form_group}>
-            <label htmlFor="sheetUrl">Google Sheet URL:</label>
-            <textarea
-              id="sheetUrl"
-              value={sheetUrl}
-              onChange={(e) => setSheetUrl(e.target.value)}
-              placeholder="Enter Google Sheet URL"
-              className={styles.url_input}
-              rows={3}
-            />
-          </div>
-
-          <div className={styles.button_container}>
-            <button onClick={handleIngest} disabled={isProcessing} className={styles.ingest_button}>
-              {isProcessing ? "Processing..." : "Ingestor"}
-            </button>
-            {logs.length > 0 && (
-              <button onClick={clearLogs} className={styles.clear_button}>
-                Clear Logs
-              </button>
-            )}
-          </div>
-        </div>
-
-        {logs.length > 0 && (
-          <div className={styles.logs_container}>
-            <h3>Process Logs</h3>
-            <div className={styles.logs}>
-              {logs.map((log, index) => (
-                <div key={index} className={`${styles.log_entry} ${styles[log.type]}`}>
-                  <span className={styles.timestamp}>[{log.timestamp}]</span>
-                  <span className={styles.log_message}>{log.message}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {renderCurrentStage()}
       </div>
+      <ConfirmationDialog />
     </div>
   )
 }
