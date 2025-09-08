@@ -128,7 +128,6 @@ const ContentIngestor = () => {
     try {
 
       const response = await validateSheetData({ courseId: selectedCourseId, sheetId, sheetTitle: tabName });
-      console.log("Validation Response:", response)
 
       if (response.status === 200) {
         const responseData = response.data.result;
