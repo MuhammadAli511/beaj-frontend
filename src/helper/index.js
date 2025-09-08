@@ -29,6 +29,40 @@ export const loginBeajEmployee = async ({ email, password }) => {
 };
 
 
+// CONTENT INGESTION
+// API call to validate the sheet data
+export const validateSheetData = async ({ courseId, sheetId, sheetTitle }) => {
+    try {
+        const response = await fetch(`${API_URL}/contentIngestion/validateIngestion`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify({ courseId, sheetId, sheetTitle }),
+        })
+        const data = await response.json()
+        console.log("Ingestion Validation Response:", data)
+        return { status: response.status, data }
+    } catch (error) {
+        return { status: 500, data: { message: error.message } }
+    }
+};
+
+// API call to process the ingestion data
+export const processIngestionData = async ({ courseId, sheetId, sheetTitle }) => {
+    try {
+        const response = await fetch(`${API_URL}/contentIngestion/processIngestion`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify({ courseId, sheetId, sheetTitle }),
+        })
+        const data = await response.json();
+        console.log("Process Ingestion Response:", data);
+        return { status: response.status, data }
+    } catch (error) {
+        return { status: 500, data: { message: error.message } }
+    }
+};
+
+
 // CATEGORY
 // API call to create a category
 export const createCategory = async (courseCategoryName, file, categorySequenceNum) => {
@@ -921,7 +955,7 @@ export const getAlluserProgressByModule = async (botType, rollout, level, cohort
 
 export const getUserProgressBarStats = async (botType, level, cohort, rollout, courseId1, courseId4, courseId5, condition) => {
     const queryParams = new URLSearchParams({
-        botType, level, cohort, rollout, courseId1, courseId4,courseId5, condition
+        botType, level, cohort, rollout, courseId1, courseId4, courseId5, condition
     }).toString();
 
     const response = await fetch(`${API_URL}/userProgress/getUserProgressBarStats?${queryParams}`, {

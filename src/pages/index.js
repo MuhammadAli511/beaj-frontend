@@ -13,7 +13,7 @@ import UserProgress from './UserProgress/UserProgress';
 import PaymentVerification from './PaymentVerification/PaymentVerification';
 import AIServices from './AIServices/AIServices';
 import UsersData from './UsersData/UsersData';
-
+import ContentIngestor from './ContentIngestor/ContentIngestor';
 export {
     NotFound,
     Login,
@@ -30,5 +30,6 @@ export {
     PaymentVerification,
     AIServices,
     UsersData,
+    ContentIngestor,
 };
 

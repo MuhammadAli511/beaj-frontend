@@ -15,7 +15,8 @@ import {
   UserProgress,
   PaymentVerification,
   AIServices,
-  UsersData
+  UsersData,
+  ContentIngestor,
 } from "./pages";
 import { SidebarProvider } from "./components/SidebarContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -75,6 +76,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
                 <ContentManager />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/content-ingestor"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "kid-lesson-creator", "teacher-lesson-creator"]}>
+                <ContentIngestor />
               </ProtectedRoute>
             }
           />
