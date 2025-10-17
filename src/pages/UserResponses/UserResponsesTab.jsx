@@ -251,16 +251,61 @@ const UserResponsesTab = () => {
         );
 
         switch (selectedActivityType.value) {
+            case 'conversationalAgencyBot':
+                return (
+                    <>
+                        {commonHeaders}
+                        <th className={styles.table_heading}>Question Number</th>
+                        <th className={styles.table_heading}>Bot Question</th>
+                        <th className={styles.table_heading}>User Response Text</th>
+                        <th className={styles.table_heading}>User Audio</th>
+                        <th className={styles.table_heading}>Bot Feedback Text</th>
+                        <th className={styles.table_heading}>Bot Feedback Audio</th>
+                    </>
+                );
+
+            case 'conversationalQuestionsBot':
+                return (
+                    <>
+                        {commonHeaders}
+                        <th className={styles.table_heading}>Question Number</th>
+                        <th className={styles.table_heading}>Bot Question</th>
+                        <th className={styles.table_heading}>User Answer Text</th>
+                        <th className={styles.table_heading}>User Audio</th>
+                        <th className={styles.table_heading}>Bot Feedback Text</th>
+                        <th className={styles.table_heading}>Feedback Image</th>
+                    </>
+                );
+
+            case 'conversationalMonologueBot':
+                return (
+                    <>
+                        {commonHeaders}
+                        <th className={styles.table_heading}>Prompt</th>
+                        <th className={styles.table_heading}>User Speech Audio</th>
+                        <th className={styles.table_heading}>Bot Feedback Text</th>
+                        <th className={styles.table_heading}>Bot Feedback Audio</th>
+                        <th className={styles.table_heading}>Fluency Score</th>
+                    </>
+                );
+
+            case 'speakingPractice':
+                return (
+                    <>
+                        {commonHeaders}
+                        <th className={styles.table_heading}>Question Number</th>
+                        <th className={styles.table_heading}>Question Audio/Text</th>
+                        <th className={styles.table_heading}>User Audio</th>
+                        <th className={styles.table_heading}>User Text Response</th>
+                    </>
+                );
+
             case 'read':
             case 'listenAndSpeak':
             case 'mcqs':
             case 'watchAndSpeak':
             case 'watchAndAudio':
             case 'watchAndImage':
-            case 'conversationalQuestionsBot':
-            case 'conversationalMonologueBot':
-            case 'conversationalAgencyBot':
-            case 'speakingPractice':
             case 'feedbackAudio':
             case 'feedbackMcqs':
                 return (
@@ -271,6 +316,7 @@ const UserResponsesTab = () => {
                         <th className={styles.table_heading}>Answer</th>
                     </>
                 );
+
             case 'assessmentMcqs':
                 return (
                     <>
@@ -280,6 +326,7 @@ const UserResponsesTab = () => {
                         <th className={styles.table_heading}>Answer</th>
                     </>
                 );
+
             case 'assessmentWatchAndSpeak':
                 return (
                     <>
@@ -291,6 +338,7 @@ const UserResponsesTab = () => {
                         <th className={styles.table_heading}>Feedback Image</th>
                     </>
                 );
+
             default:
                 return commonHeaders;
         }
@@ -312,16 +360,233 @@ const UserResponsesTab = () => {
         if (!selectedActivityType) return null;
 
         switch (selectedActivityType.value) {
+            case 'speakingPractice':
+                return (
+                    <tr key={index}>
+                        {commonCells}
+                        <td>{response.questionNumber}</td>
+                        <td>
+                            {response.mediaFile ? (
+                                <audio src={response.mediaFile} controls />
+                            ) : (
+                                response.question || '—'
+                            )}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedUserAudio)
+                                ? response.submittedUserAudio.map((audioUrl, i) => (
+                                      <div key={i} style={{ marginBottom: '8px' }}>
+                                          <audio src={audioUrl} controls />
+                                      </div>
+                                  ))
+                                : response.submittedUserAudio ? (
+                                      <audio src={response.submittedUserAudio} controls />
+                                  ) : (
+                                      '—'
+                                  )}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedAnswerText)
+                                ? response.submittedAnswerText.map((text, i) => (
+                                      <div
+                                          key={i}
+                                          dangerouslySetInnerHTML={{
+                                              __html: text
+                                                  .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
+                                                  .replace(/\\n/g, '<br />')
+                                          }}
+                                      />
+                                  ))
+                                : response.submittedAnswerText ? (
+                                      <div
+                                          dangerouslySetInnerHTML={{
+                                              __html: response.submittedAnswerText
+                                                  .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
+                                                  .replace(/\\n/g, '<br />')
+                                          }}
+                                      />
+                                  ) : (
+                                      '—'
+                                  )}
+                        </td>
+                    </tr>
+                );
+
+            case 'conversationalAgencyBot':
+                return (
+                    <tr key={index}>
+                        {commonCells}
+                        <td>{response.questionNumber}</td>
+                        <td>
+                            {response.question ? (
+                                <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: response.question
+                                            .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
+                                            .replace(/\\n/g, '<br />')
+                                    }}
+                                />
+                            ) : (
+                                '—'
+                            )}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedAnswerText)
+                                ? response.submittedAnswerText.map((text, i) => (
+                                      <div key={i} style={{ marginBottom: '4px' }}>{text}</div>
+                                  ))
+                                : response.submittedAnswerText || '—'}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedUserAudio)
+                                ? response.submittedUserAudio.map((url, i) => (
+                                      <div key={i} style={{ marginBottom: '8px' }}>
+                                          <audio src={url} controls />
+                                      </div>
+                                  ))
+                                : response.submittedUserAudio ? (
+                                      <audio src={response.submittedUserAudio} controls />
+                                  ) : (
+                                      '—'
+                                  )}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedFeedbackText)
+                                ? response.submittedFeedbackText.map((fb, i) => (
+                                      <div key={i} style={{ marginBottom: '4px' }}>{fb}</div>
+                                  ))
+                                : response.submittedFeedbackText || '—'}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedFeedbackAudio)
+                                ? response.submittedFeedbackAudio.map((url, i) => (
+                                      <div key={i} style={{ marginBottom: '8px' }}>
+                                          <audio src={url} controls />
+                                      </div>
+                                  ))
+                                : response.submittedFeedbackAudio ? (
+                                      <audio src={response.submittedFeedbackAudio} controls />
+                                  ) : (
+                                      '—'
+                                  )}
+                        </td>
+                    </tr>
+                );
+
+            case 'conversationalQuestionsBot':
+                return (
+                    <tr key={index}>
+                        {commonCells}
+                        <td>{response.questionNumber}</td>
+                        <td>
+                            {response.question ? (
+                                <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: response.question
+                                            .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
+                                            .replace(/\\n/g, '<br />')
+                                    }}
+                                />
+                            ) : (
+                                '—'
+                            )}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedAnswerText)
+                                ? response.submittedAnswerText.map((t, i) => <div key={i} style={{ marginBottom: '4px' }}>{t}</div>)
+                                : response.submittedAnswerText || '—'}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedUserAudio)
+                                ? response.submittedUserAudio.map((a, i) => (
+                                      <div key={i} style={{ marginBottom: '8px' }}>
+                                          <audio src={a} controls />
+                                      </div>
+                                  ))
+                                : response.submittedUserAudio ? (
+                                      <audio src={response.submittedUserAudio} controls />
+                                  ) : (
+                                      '—'
+                                  )}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedFeedbackText)
+                                ? response.submittedFeedbackText.map((text, i) => (
+                                      <div key={i} style={{ marginBottom: '4px' }}>{text}</div>
+                                  ))
+                                : response.submittedFeedbackText || '—'}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedFeedbackAudio)
+                                ? response.submittedFeedbackAudio.map((img, i) => (
+                                      <div
+                                          key={i}
+                                          onClick={() => handleImageClick(img)}
+                                          className={styles.image_container}
+                                      >
+                                          <img
+                                              src={img}
+                                              alt={`Feedback ${i + 1}`}
+                                              style={{ width: '250px', height: '250px', cursor: 'pointer' }}
+                                          />
+                                          <div className={styles.image_overlay}>View</div>
+                                      </div>
+                                  ))
+                                : response.submittedFeedbackAudio ? (
+                                      <div
+                                          onClick={() => handleImageClick(response.submittedFeedbackAudio)}
+                                          className={styles.image_container}
+                                      >
+                                          <img
+                                              src={response.submittedFeedbackAudio}
+                                              alt="Feedback"
+                                              style={{ width: '250px', height: '250px', cursor: 'pointer' }}
+                                          />
+                                          <div className={styles.image_overlay}>View</div>
+                                      </div>
+                                  ) : (
+                                      '—'
+                                  )}
+                        </td>
+                    </tr>
+                );
+
+            case 'conversationalMonologueBot':
+                return (
+                    <tr key={index}>
+                        {commonCells}
+                        <td>{response.question || '—'}</td>
+                        <td>
+                            {Array.isArray(response.submittedUserAudio)
+                                ? response.submittedUserAudio.map((a, i) => (
+                                      <div key={i} style={{ marginBottom: '8px' }}>
+                                          <audio src={a} controls />
+                                      </div>
+                                  ))
+                                : response.submittedUserAudio ? (
+                                      <audio src={response.submittedUserAudio} controls />
+                                  ) : (
+                                      '—'
+                                  )}
+                        </td>
+                        <td>{response.submittedFeedbackText || '—'}</td>
+                        <td>
+                            {response.submittedFeedbackAudio ? (
+                                <audio src={response.submittedFeedbackAudio} controls />
+                            ) : (
+                                '—'
+                            )}
+                        </td>
+                        <td>{response.fluencyScore || '—'}</td>
+                    </tr>
+                );
+
             case 'read':
             case 'listenAndSpeak':
             case 'mcqs':
             case 'watchAndSpeak':
             case 'watchAndAudio':
             case 'watchAndImage':
-            case 'conversationalQuestionsBot':
-            case 'conversationalMonologueBot':
-            case 'conversationalAgencyBot':
-            case 'speakingPractice':
             case 'feedbackAudio':
             case 'feedbackMcqs':
                 return (
@@ -348,6 +613,7 @@ const UserResponsesTab = () => {
                         </td>
                     </tr>
                 );
+
             case 'assessmentMcqs':
                 return (
                     <tr key={index}>
@@ -373,6 +639,7 @@ const UserResponsesTab = () => {
                         </td>
                     </tr>
                 );
+
             case 'assessmentWatchAndSpeak':
                 return (
                     <tr key={index}>
@@ -401,6 +668,7 @@ const UserResponsesTab = () => {
                         </td>
                     </tr>
                 );
+
             default:
                 return (
                     <tr key={index}>
