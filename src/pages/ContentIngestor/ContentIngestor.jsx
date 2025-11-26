@@ -322,7 +322,7 @@ const ContentIngestor = () => {
             <div className={styles.error_box}>
               {errors.map((error, index) => (
                 <div key={index} className={styles.error_message}>
-                  {error}
+                  {typeof error === 'object' ? error.message || JSON.stringify(error) : error}
                 </div>
               ))}
             </div>
@@ -441,7 +441,7 @@ const ContentIngestor = () => {
               {/* Show network errors */}
               {hasNetworkError && (
                 <div className={styles.error_details}>
-                  <strong>System Error:</strong> {processingResults.message}
+                  <strong>System Error:</strong> {typeof processingResults.message === 'object' ? JSON.stringify(processingResults.message) : processingResults.message}
                 </div>
               )}
               
@@ -451,7 +451,7 @@ const ContentIngestor = () => {
                   <strong>Processing Errors:</strong>
                   <ul className={styles.error_list}>
                     {processingResults.errors.map((error, index) => (
-                      <li key={index}>{error}</li>
+                      <li key={index}>{typeof error === 'object' ? error.message || JSON.stringify(error) : error}</li>
                     ))}
                   </ul>
                 </div>
