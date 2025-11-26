@@ -300,10 +300,24 @@ const UserResponsesTab = () => {
                     </>
                 );
 
+            case 'watchAndSpeak':
+                return (
+                    <>
+                        {commonHeaders}
+                        <th className={styles.table_heading}>Question ID</th>
+                        <th className={styles.table_heading}>Question Number</th>
+                        <th className={styles.table_heading}>Question</th>
+                        <th className={styles.table_heading}>Alias</th>
+                        <th className={styles.table_heading}>User Transcript</th>
+                        <th className={styles.table_heading}>User Audio</th>
+                        <th className={styles.table_heading}>Image Feedback</th>
+                        <th className={styles.table_heading}>Answer</th>
+                    </>
+                );
+
             case 'read':
             case 'listenAndSpeak':
             case 'mcqs':
-            case 'watchAndSpeak':
             case 'watchAndAudio':
             case 'watchAndImage':
             case 'feedbackAudio':
@@ -581,10 +595,100 @@ const UserResponsesTab = () => {
                     </tr>
                 );
 
+            case 'watchAndSpeak':
+                return (
+                    <tr key={index}>
+                        {commonCells}
+                        <td>{response.questionId || '—'}</td>
+                        <td>{response.questionNumber}</td>
+                        <td>
+                            {response.mediaFile ? (
+                                <video src={response.mediaFile} controls style={{ width: '300px' }} />
+                            ) : (
+                                '—'
+                            )}
+                        </td>
+                        <td>
+                            {response.alias ? (
+                                <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: response.alias
+                                            .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
+                                            .replace(/\\n/g, '<br />')
+                                    }}
+                                />
+                            ) : (
+                                '—'
+                            )}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedAnswerText)
+                                ? response.submittedAnswerText.map((text, i) => (
+                                      <div key={i} style={{ marginBottom: '4px' }}>{text}</div>
+                                  ))
+                                : response.submittedAnswerText || '—'}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedUserAudio)
+                                ? response.submittedUserAudio.map((audioUrl, i) => (
+                                      <div key={i} style={{ marginBottom: '8px' }}>
+                                          <audio src={audioUrl} controls />
+                                      </div>
+                                  ))
+                                : response.submittedUserAudio ? (
+                                      <audio src={response.submittedUserAudio} controls />
+                                  ) : (
+                                      '—'
+                                  )}
+                        </td>
+                        <td>
+                            {Array.isArray(response.submittedFeedbackText)
+                                ? response.submittedFeedbackText.map((imgUrl, i) => (
+                                      <div
+                                          key={i}
+                                          onClick={() => handleImageClick(imgUrl)}
+                                          className={styles.image_container}
+                                          style={{ marginBottom: '8px' }}
+                                      >
+                                          <img
+                                              src={imgUrl}
+                                              alt={`Feedback ${i + 1}`}
+                                              style={{ width: '250px', height: '250px', cursor: 'pointer' }}
+                                          />
+                                          <div className={styles.image_overlay}>View</div>
+                                      </div>
+                                  ))
+                                : response.submittedFeedbackText ? (
+                                      <div
+                                          onClick={() => handleImageClick(response.submittedFeedbackText)}
+                                          className={styles.image_container}
+                                      >
+                                          <img
+                                              src={response.submittedFeedbackText}
+                                              alt="Feedback"
+                                              style={{ width: '250px', height: '250px', cursor: 'pointer' }}
+                                          />
+                                          <div className={styles.image_overlay}>View</div>
+                                      </div>
+                                  ) : (
+                                      '—'
+                                  )}
+                        </td>
+                        <td>
+                            {Array.isArray(response.answer) ? (
+                                response.answer.map((ans, i) => (
+                                    <div key={i}>{ans}</div>
+                                ))
+                            ) : (
+                                <div>{response.answer || '—'}</div>
+                            )}
+                        </td>
+                    </tr>
+                );
+
             case 'read':
             case 'listenAndSpeak':
             case 'mcqs':
-            case 'watchAndSpeak':
             case 'watchAndAudio':
             case 'watchAndImage':
             case 'feedbackAudio':
