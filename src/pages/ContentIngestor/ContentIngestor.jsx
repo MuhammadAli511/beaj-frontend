@@ -181,9 +181,17 @@ const ContentIngestor = () => {
         setCurrentStage("results")
       }
     } catch (error) {
-      setProcessingResults({ error: true, message: error.message })
-      setCurrentStage("results")
-    }
+  const normalizedError = {
+    error: true,
+    message: error?.response?.data?.message || error.message || "Unexpected error",
+    errors: error?.response?.data?.errors || [],
+    stats: null
+  }
+
+  setProcessingResults(normalizedError)
+  setCurrentStage("results")
+}
+
   }
 
 
@@ -422,9 +430,14 @@ const ContentIngestor = () => {
     if (!processingResults) return null
 
     // Check for network/API errors OR processing errors in the response
-    const hasNetworkError = processingResults.error
-    const hasProcessingErrors = processingResults.errors && processingResults.errors.length > 0
-    const hasAnyErrors = hasNetworkError || hasProcessingErrors
+    // NORMALIZE ERROR FIELDS
+    const hasNetworkError = processingResults?.error || false
+    const hasProcessingErrors = Array.isArray(processingResults?.errors) && processingResults.errors.length > 0
+    const hasValidationErrors = Array.isArray(processingResults?.validationErrors) && processingResults.validationErrors.length > 0
+
+    // Combined
+    const hasAnyErrors = hasNetworkError || hasProcessingErrors || hasValidationErrors
+
 
     return (
       <div className={styles.results_container}>
@@ -441,7 +454,13 @@ const ContentIngestor = () => {
               {/* Show network errors */}
               {hasNetworkError && (
                 <div className={styles.error_details}>
-                  <strong>System Error:</strong> {typeof processingResults.message === 'object' ? JSON.stringify(processingResults.message) : processingResults.message}
+                  <strong>System Error:</strong> 
+                  {processingResults?.message 
+                    ? (typeof processingResults.message === "object" 
+                        ? JSON.stringify(processingResults.message) 
+                        : processingResults.message)
+                    : "Unknown network or server error"}
+
                 </div>
               )}
               
@@ -450,9 +469,12 @@ const ContentIngestor = () => {
                 <div className={styles.error_details}>
                   <strong>Processing Errors:</strong>
                   <ul className={styles.error_list}>
-                    {processingResults.errors.map((error, index) => (
-                      <li key={index}>{typeof error === 'object' ? error.message || JSON.stringify(error) : error}</li>
+                   {(processingResults.errors || processingResults.validationErrors || []).map((error, index) => (
+                      <li key={index}>
+                        {typeof error === "object" ? error.message || JSON.stringify(error) : error}
+                      </li>
                     ))}
+
                   </ul>
                 </div>
               )}
