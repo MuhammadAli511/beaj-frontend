@@ -31,6 +31,39 @@ const ContentIngestor = () => {
     return match ? match[1] : null
   }
 
+  // Generic retry wrapper: retries only on network-level failures
+  const retryRequest = async (fn, { retries = 3, initialDelay = 1000 } = {}) => {
+    let attempt = 0
+    let delay = initialDelay
+
+    while (attempt < retries) {
+      attempt += 1
+      try {
+        // quick offline check
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+          throw new Error('offline')
+        }
+
+        const res = await fn()
+        return res
+      } catch (err) {
+        // Determine if this is a network error we should retry
+        const msg = (err && err.message) ? err.message.toLowerCase() : ''
+        const isNetwork = msg.includes('failed to fetch') || msg === 'offline' || err.name === 'TypeError' || msg.includes('network') || msg.includes('net::err_internet_disconnected')
+
+        // If not a network error, rethrow immediately (don't retry)
+        if (!isNetwork) throw err
+
+        // If we reached max attempts, throw
+        if (attempt >= retries) throw err
+
+        // wait (simple backoff)
+        await new Promise(res => setTimeout(res, delay))
+        delay *= 2
+      }
+    }
+  }
+
   // Helper function to filter and sort courses
   const filterAndSortCourses = (coursesData) => {
     return coursesData
@@ -126,33 +159,32 @@ const ContentIngestor = () => {
     }
 
     try {
-
-      const response = await validateSheetData({ courseId: selectedCourseId, sheetId, sheetTitle: tabName });
+      // retry only when network errors occur
+      const response = await retryRequest(() => validateSheetData({ courseId: selectedCourseId, sheetId, sheetTitle: tabName }))
 
       if (response.status === 200) {
         const responseData = response.data.result;
-        
         // Store validation results for the new UI
         setValidationResults(responseData)
-        
+
         // Check if there are errors that prevent processing
         const hasErrors = responseData.errors && responseData.errors.length > 0
-        
-        if (!hasErrors) {
-          // Move to validation results stage
-          setCurrentStage("validation")
-          return true
-        } else {
-          // Still show validation stage but with errors
-          setCurrentStage("validation")
-          return false
-        }
+
+        // Always show validation stage so user can inspect
+        setCurrentStage("validation")
+
+        // If validation returned application-level errors, do not auto-retry
+        return !hasErrors
       } else {
         console.error("Validation failed!", response.data)
         return false
       }
     } catch (error) {
-      console.error(`Validation error: ${error.message}`)
+      // If retryRequest throws, it's a network-level failure after retries
+      console.error(`Validation error after retries: ${error.message}`)
+      // You can set a processingResults record if you want to show the error in results page
+      setProcessingResults({ error: true, message: error.message || 'Validation network error', errors: [], stats: null })
+      setCurrentStage("results")
       return false
     }
   }
@@ -165,11 +197,11 @@ const ContentIngestor = () => {
     try {
       setCurrentStage("processing")
 
-      const response = await processIngestionData({
+      const response = await retryRequest(() => processIngestionData({
         courseId,
         sheetId,
         sheetTitle: tabName,
-      })
+      }))
 
       if (response.status === 200) {
         const responseData = response.data.result;
@@ -177,11 +209,19 @@ const ContentIngestor = () => {
         setProcessingResults(responseData)
         setCurrentStage("results")
       } else {
-        setProcessingResults({ error: true, message: response.data })
+        setProcessingResults({ error: true, message: response.data, errors: response.data?.errors || [], stats: response.data?.stats || null })
         setCurrentStage("results")
       }
     } catch (error) {
-      setProcessingResults({ error: true, message: error.message })
+      // Network-level failure after retries
+      const normalizedError = {
+        error: true,
+        message: error?.response?.data?.message || error.message || "Unexpected error",
+        errors: error?.response?.data?.errors || [],
+        stats: null
+      }
+
+      setProcessingResults(normalizedError)
       setCurrentStage("results")
     }
   }
@@ -422,9 +462,14 @@ const ContentIngestor = () => {
     if (!processingResults) return null
 
     // Check for network/API errors OR processing errors in the response
-    const hasNetworkError = processingResults.error
-    const hasProcessingErrors = processingResults.errors && processingResults.errors.length > 0
-    const hasAnyErrors = hasNetworkError || hasProcessingErrors
+    // NORMALIZE ERROR FIELDS
+    const hasNetworkError = processingResults?.error || false
+    const hasProcessingErrors = Array.isArray(processingResults?.errors) && processingResults.errors.length > 0
+    const hasValidationErrors = Array.isArray(processingResults?.validationErrors) && processingResults.validationErrors.length > 0
+
+    // Combined
+    const hasAnyErrors = hasNetworkError || hasProcessingErrors || hasValidationErrors
+
 
     return (
       <div className={styles.results_container}>
@@ -441,7 +486,13 @@ const ContentIngestor = () => {
               {/* Show network errors */}
               {hasNetworkError && (
                 <div className={styles.error_details}>
-                  <strong>System Error:</strong> {typeof processingResults.message === 'object' ? JSON.stringify(processingResults.message) : processingResults.message}
+                  <strong>System Error:</strong> 
+                  {processingResults?.message 
+                    ? (typeof processingResults.message === "object" 
+                        ? JSON.stringify(processingResults.message) 
+                        : processingResults.message)
+                    : "Unknown network or server error"}
+
                 </div>
               )}
               
@@ -450,9 +501,12 @@ const ContentIngestor = () => {
                 <div className={styles.error_details}>
                   <strong>Processing Errors:</strong>
                   <ul className={styles.error_list}>
-                    {processingResults.errors.map((error, index) => (
-                      <li key={index}>{typeof error === 'object' ? error.message || JSON.stringify(error) : error}</li>
+                   {(processingResults.errors || processingResults.validationErrors || []).map((error, index) => (
+                      <li key={index}>
+                        {typeof error === "object" ? error.message || JSON.stringify(error) : error}
+                      </li>
                     ))}
+
                   </ul>
                 </div>
               )}
