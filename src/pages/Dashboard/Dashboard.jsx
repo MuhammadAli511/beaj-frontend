@@ -49,7 +49,9 @@ const Dashboard = () => {
                     setBotStatus(false);
                 }
             } catch (err) {
-                console.error("Error fetching bot status:", err);
+                if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+                    console.error("Error fetching bot status:", err);
+                }
             }
         };
 
@@ -64,7 +66,9 @@ const Dashboard = () => {
                 const response = await getStudentCourseStats();
                 setCourseStats(response.data || {});
             } catch (err) {
-                console.error("Error fetching course stats:", err);
+                if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+                    console.error("Error fetching course stats:", err);
+                }
                 setCourseStatsError("Failed to load course statistics.");
             } finally {
                 setCourseStatsLoading(false);

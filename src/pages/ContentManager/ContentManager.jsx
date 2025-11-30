@@ -14,14 +14,15 @@ import ManageAlias from "./Alias/ManageAlias/ManageAlias"
 import CreateConstant from "./Constant/CreateConstant/CreateConstant"
 import ManageConstant from "./Constant/ManageConstant/ManageConstant"
 import { useSidebar } from "../../components/SidebarContext"
+import { secureStorage } from "../../utils/xssProtection"
 
 const ContentManager = () => {
     const { isSidebarOpen } = useSidebar();
     const [mainTab, setMainTab] = useState('Manage');
     const [subTab, setSubTab] = useState('Lesson'); // Default to Lesson for all users
     
-    // Get user role from localStorage
-    const userRole = localStorage.getItem('role');
+    // Get user role from secure storage
+    const userRole = secureStorage.getItem('role');
     
     // Check if user is a lesson creator
     const isLessonCreator = userRole === 'kid-lesson-creator' || userRole === 'teacher-lesson-creator';

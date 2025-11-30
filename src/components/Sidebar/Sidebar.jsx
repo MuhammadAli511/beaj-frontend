@@ -2,17 +2,16 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 import greater_arrow from '../../assets/images/greater_arrow.svg';
+import { secureStorage } from '../../utils/xssProtection';
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const role = localStorage.getItem('role');
+    const role = secureStorage.getItem('role');
     const [collapsedSections, setCollapsedSections] = useState({});
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        localStorage.removeItem('email');
+        secureStorage.clear();
         navigate("/");
     };
 

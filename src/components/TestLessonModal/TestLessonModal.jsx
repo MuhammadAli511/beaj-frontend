@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./TestLessonModal.module.css";
+import { toast } from 'react-toastify';
+import { handleError } from "../../utils/errorHandler";
 
 const TestLessonModal = ({ isOpen, onClose, lesson, onTest }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -18,12 +20,12 @@ const TestLessonModal = ({ isOpen, onClose, lesson, onTest }) => {
          const phoneRegex = /^\+92\d{10}$/;
 
         if (!TestPhoneNumber) {
-            alert("Please enter a phone number.");
+            toast.error("Please enter a phone number.");
             return;
         }
 
         if (!phoneRegex.test(TestPhoneNumber)) {
-            alert("Invalid phone number.\nFormat should be: +923XXXXXXXXX (10 digits after +92)");
+            toast.error("Invalid phone number. Format should be: +923XXXXXXXXX (10 digits after +92)");
             return;
         }
 
@@ -31,8 +33,9 @@ const TestLessonModal = ({ isOpen, onClose, lesson, onTest }) => {
 
         try {
             await onTest(TestPhoneNumber, lesson);
+            toast.success("Lesson test initiated successfully!");
         } catch (error) {
-            alert("Testing failed.");
+            handleError(error, 'Test Lesson');
         } finally {
             setIsTesting(false);
         }

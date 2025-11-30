@@ -1,9 +1,11 @@
+import { secureStorage } from '../utils/xssProtection';
+
 const API_URL = process.env.REACT_APP_API_URL;
-const PROD_API_URL = "https://beaj-backend-prod.azurewebsites.net/api";
+const PROD_API_URL = process.env.REACT_APP_PROD_API_URL;
 
 // Function to get the stored JWT token
 const getToken = () => {
-    return localStorage.getItem('token');
+    return secureStorage.getItem('token');
 };
 
 // Function to create headers with the JWT token
@@ -39,7 +41,9 @@ export const validateSheetData = async ({ courseId, sheetId, sheetTitle }) => {
             body: JSON.stringify({ courseId, sheetId, sheetTitle }),
         })
         const data = await response.json()
-        console.log("Ingestion Validation Response:", data)
+        if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+            console.log("Ingestion Validation Response:", data);
+        }
         return { status: response.status, data }
     } catch (error) {
         return { status: 500, data: { message: error.message } }
@@ -55,7 +59,9 @@ export const processIngestionData = async ({ courseId, sheetId, sheetTitle }) =>
             body: JSON.stringify({ courseId, sheetId, sheetTitle }),
         })
         const data = await response.json();
-        console.log("Process Ingestion Response:", data);
+        if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+            console.log("Process Ingestion Response:", data);
+        }
         return { status: response.status, data }
     } catch (error) {
         return { status: 500, data: { message: error.message } }

@@ -5,6 +5,8 @@ import { Navbar, Sidebar } from "../../components"
 import styles from "./ContentIngestor.module.css"
 import { useSidebar } from "../../components/SidebarContext"
 import { getAllCategories, getCoursesByCategoryId, validateSheetData, processIngestionData } from "../../helper"
+import { secureStorage } from "../../utils/xssProtection"
+import { filterAndSortCourses, filterCategoriesByRole } from "../../constants/courseFilters"
 
 const ContentIngestor = () => {
   const [categories, setCategories] = useState([])
@@ -22,7 +24,7 @@ const ContentIngestor = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   const { isSidebarOpen } = useSidebar()
-  const userRole = typeof window !== "undefined" ? localStorage.getItem("role") : null
+  const userRole = typeof window !== "undefined" ? secureStorage.getItem("role") : null
 
   // Helper function to extract spreadsheet ID from Google Sheets URL
   const extractSpreadsheetId = (url) => {
@@ -118,7 +120,9 @@ const ContentIngestor = () => {
           }
         }
       } catch (error) {
-        console.error(`Error fetching data: ${error.message}`)
+        if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+          console.error(`Error fetching data: ${error.message}`);
+        }
       }
     }
 
@@ -142,7 +146,9 @@ const ContentIngestor = () => {
             }
           }
         } catch (error) {
-          console.error(`Error fetching courses: ${error.message}`)
+          if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+            console.error(`Error fetching courses: ${error.message}`);
+          }
         }
       }
     }
@@ -176,12 +182,16 @@ const ContentIngestor = () => {
         // If validation returned application-level errors, do not auto-retry
         return !hasErrors
       } else {
-        console.error("Validation failed!", response.data)
+        if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+          console.error("Validation failed!", response.data);
+        }
         return false
       }
     } catch (error) {
       // If retryRequest throws, it's a network-level failure after retries
-      console.error(`Validation error after retries: ${error.message}`)
+      if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+        console.error(`Validation error after retries: ${error.message}`);
+      }
       // You can set a processingResults record if you want to show the error in results page
       setProcessingResults({ error: true, message: error.message || 'Validation network error', errors: [], stats: null })
       setCurrentStage("results")

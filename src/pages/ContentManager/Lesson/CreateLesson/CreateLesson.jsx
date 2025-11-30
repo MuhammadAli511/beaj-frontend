@@ -6,6 +6,7 @@ import {
     createListenAndSpeakLesson, createMCQLesson, createWatchAndSpeakLesson,
     createConversationalBotLesson, createSpeakingPracticeLesson
 } from '../../../../utils/createLessonFunctions';
+import { secureStorage } from '../../../../utils/xssProtection';
 
 const SelectField = ({ label, options, onChange, value, name, id }) => (
     <div className={styles.form_group}>
@@ -73,8 +74,8 @@ const CreateLesson = () => {
     const [status, setStatus] = useState('Active');
     const [showAllCourses, setShowAllCourses] = useState(false);
 
-    // Get user role from localStorage
-    const userRole = localStorage.getItem('role');
+    // Get user role from secure storage
+    const userRole = secureStorage.getItem('role');
 
     // Helper function to filter and sort courses
     const filterAndSortCourses = (coursesData) => {

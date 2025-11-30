@@ -78,7 +78,9 @@ const WhatsappLogs = () => {
       const stored = localStorage.getItem(LOCALSTORAGE_KEY)
       return stored ? JSON.parse(stored) : null
     } catch (error) {
-      console.error("Error reading from localStorage:", error)
+      if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+        console.error("Error reading from localStorage:", error);
+      }
       return null
     }
   }
@@ -260,7 +262,9 @@ const WhatsappLogs = () => {
           clearLocalStorage();
         }
       } catch (error) {
-        console.error("Error fetching data:", error)
+        if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+          console.error("Error fetching data:", error);
+        }
       } finally {
         setUsersLoading(false)
       }
@@ -295,7 +299,9 @@ const WhatsappLogs = () => {
       }
       return filteredLogs
     } catch (error) {
-      console.error("Error fetching activity logs:", error)
+      if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+        console.error("Error fetching activity logs:", error);
+      }
       return []
     }
   }
@@ -321,7 +327,9 @@ const WhatsappLogs = () => {
         }
       }
     } catch (error) {
-      console.error("Error fetching profiles:", error)
+      if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+        console.error("Error fetching profiles:", error);
+      }
       setProfilesData([])
     } finally {
       setProfilesLoading(false)
@@ -342,7 +350,9 @@ const WhatsappLogs = () => {
         setActiveSession(null)
       }
     } catch (error) {
-      console.error("Error fetching active session:", error)
+      if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+        console.error("Error fetching active session:", error);
+      }
       setActiveSession(null)
     } finally {
       setActiveSessionLoading(false)
@@ -362,7 +372,9 @@ const WhatsappLogs = () => {
         }
       }, 100)
     } catch (error) {
-      console.error("Error fetching logs for profile:", error)
+      if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+        console.error("Error fetching logs for profile:", error);
+      }
     } finally {
       setMessagesLoading(false)
     }

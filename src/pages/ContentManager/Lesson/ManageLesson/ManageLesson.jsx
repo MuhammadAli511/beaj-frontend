@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ManageLesson.module.css';
 import { getAllCategories, getCoursesByCategoryId, getLessonsByCourse, migrateLesson, clearCache, getLessonById } from '../../../../helper';
+import { filterAndSortCourses, filterCategoriesByRole } from '../../../../constants/courseFilters';
+import { secureStorage } from '../../../../utils/xssProtection';
 
 import WatchLesson from './LessonTypes/WatchLesson';
 import ReadLesson from './LessonTypes/ReadLesson';
@@ -44,34 +46,14 @@ const ManageLesson = () => {
     const [isLoadingModal, setIsLoadingModal] = useState(false);
     const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
     const [selectedVideo, setSelectedVideo] = useState(null);
-    const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT == "DEV";
+    const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT === "DEV";
     const [weeks, setWeeks] = useState([]);
     const [days, setDays] = useState([]);
     const [selectedWeek, setSelectedWeek] = useState('all');
     const [selectedDay, setSelectedDay] = useState('all');
 
-    // Get user role from localStorage
-    const userRole = localStorage.getItem('role');
-
-    // Helper function to filter and sort courses
-    const filterAndSortCourses = (coursesData) => {
-        return coursesData
-            .filter(course =>
-                !course.CourseName.includes('2024') &&
-                !course.CourseName.includes('Level 3 - T1 - January 27, 2025') &&
-                !course.CourseName.includes('Level 3 - T2 - January 27, 2025') &&
-                !course.CourseName.includes('Level 1 - T1 - January 27, 2025') &&
-                !course.CourseName.includes('Level 1 - T2 - January 27, 2025') &&
-                !course.CourseName.includes('Level 2 - T1 - February 24, 2025') &&
-                !course.CourseName.includes('Level 2 - T2 - February 24, 2025') &&
-                !course.CourseName.includes('Level 3 - T1 - April 7, 2025') &&
-                !course.CourseName.includes('Level 3 - T2 - April 7, 2025') &&
-                course.CourseName !== 'Free Trial'
-            )
-            .sort((a, b) => {
-                return a.CourseName.localeCompare(b.CourseName);
-            });
-    };
+    // Get user role from secure storage
+    const userRole = secureStorage.getItem('role');
 
     // Filter lesson types based on role
     const getLessonTypes = () => {
@@ -79,24 +61,6 @@ const ManageLesson = () => {
             return ['All']; // Only show 'All' tab for these roles
         }
         return allLessonTypes; // Show all tabs for other roles
-    };
-
-    // Filter categories based on role
-    const filterCategoriesByRole = (categoriesData) => {
-        if (userRole === 'kid-lesson-creator') {
-            return categoriesData.filter(category =>
-                category.CourseCategoryName === "Chatbot Courses - Kids"
-            );
-        } else if (userRole === 'teacher-lesson-creator') {
-            return categoriesData.filter(category =>
-                category.CourseCategoryName === "Chatbot Courses - Teachers"
-            );
-        } else {
-            // For other roles, show categories with "Chatbot" in their name
-            return categoriesData.filter(category =>
-                category.CourseCategoryName.includes("Chatbot")
-            );
-        }
     };
 
     useEffect(() => {
