@@ -1970,17 +1970,11 @@ const UserProgress = () => {
                           <th className={styles.table_th}>#</th>
                           <th className={styles.table_th}>Phone</th>
                           <th className={styles.table_th}>Name</th>
-                          
                           <th className={styles.table_th}>School</th>
-                          {/* <th className={styles.table_th}>Status</th> */}
                           <th className={styles.table_th}>City</th>
                           <th className={styles.table_th}>Profile ID</th>
-                          {/* <th className={styles.table_th}>Cohort</th> */}
-                          {/* <th className={styles.table_th}>Class Level</th> */}
                           <th className={styles.table_th}>Customer Source</th>
                           <th className={styles.table_th}>Customer Channel</th>
-                          {/* <th className={styles.table_th}>Amount Paid</th> */}
-                          {/* <th className={styles.table_th}>Rollout</th> */}
                         </tr>
                       </thead>
                       <tbody className={styles.table_body}>
@@ -2009,13 +2003,6 @@ const UserProgress = () => {
                                 >
                                   <span>{user.phoneNumber || "N/A"}</span>
                                 </a>
-                                {/* <Link
-                                  to={`/whatsapp-logs`}
-                                  className={styles.clickable_phone_link}
-                                >
-                                  <span>{user.phoneNumber || "N/A"}</span>
-                                </Link> */}
-                                
                               </div>
                             </td>
                             <td className={styles.table_td}>
@@ -2023,21 +2010,11 @@ const UserProgress = () => {
                                 <span>{user.name ||  "N/A"}</span>
                               </div>
                             </td>
-                           
                             <td className={styles.table_td}>
                               <div className={styles.school_cell}>
                                 <span>{user.schoolName || "N/A"}</span>
                               </div>
                             </td>
-                            {/* <td className={styles.table_td}>
-                              <div className={styles.phone_cell}>
-                                <span
-                                  className={user.status === "Active" ? styles.status_active : styles.status_inactive}
-                                >
-                                  {user.status || "N/A"}
-                                </span>
-                              </div>
-                            </td> */}
                             <td className={styles.table_td}>
                               <div className={styles.school_cell}>
                                 <span>{user.city || "N/A"}</span>
@@ -2048,16 +2025,6 @@ const UserProgress = () => {
                                 <span>{user.profile_id || "N/A"}</span>
                               </div>
                             </td>
-                            {/* <td className={styles.table_td}>
-                              <div className={styles.school_cell}>
-                                <span>{user.cohort || "N/A"}</span>
-                              </div>
-                            </td>
-                            <td className={styles.table_td}>
-                              <div className={styles.school_cell}>
-                                <span>{user.classLevel || "N/A"}</span>
-                              </div>
-                            </td> */}
                             <td className={styles.table_td}>
                               <div className={styles.school_cell}>
                                 <span>{user.customerSource || "N/A"}</span>
@@ -2068,16 +2035,6 @@ const UserProgress = () => {
                                 <span>{user.customerChannel || "N/A"}</span>
                               </div>
                             </td>
-                            {/* <td className={styles.table_td}>
-                              <div className={styles.school_cell}>
-                                <span>{user.amountPaid || "N/A"}</span>
-                              </div>
-                            </td>
-                            <td className={styles.table_td}>
-                              <div className={styles.phone_cell}>
-                                <span>{user.rollout || "N/A"}</span>
-                              </div>
-                            </td> */}
                           </tr>
                         ))}
                       </tbody>
