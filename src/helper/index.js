@@ -1,9 +1,11 @@
+import { secureStorage } from '../utils/xssProtection';
+
 const API_URL = process.env.REACT_APP_API_URL;
-const PROD_API_URL = "https://beaj-backend-prod.azurewebsites.net/api";
+const PROD_API_URL = process.env.REACT_APP_PROD_API_URL;
 
 // Function to get the stored JWT token
 const getToken = () => {
-    return localStorage.getItem('token');
+    return secureStorage.getItem('token');
 };
 
 // Function to create headers with the JWT token
@@ -39,7 +41,9 @@ export const validateSheetData = async ({ courseId, sheetId, sheetTitle }) => {
             body: JSON.stringify({ courseId, sheetId, sheetTitle }),
         })
         const data = await response.json()
-        console.log("Ingestion Validation Response:", data)
+        if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+            console.log("Ingestion Validation Response:", data);
+        }
         return { status: response.status, data }
     } catch (error) {
         return { status: 500, data: { message: error.message } }
@@ -55,7 +59,9 @@ export const processIngestionData = async ({ courseId, sheetId, sheetTitle }) =>
             body: JSON.stringify({ courseId, sheetId, sheetTitle }),
         })
         const data = await response.json();
-        console.log("Process Ingestion Response:", data);
+        if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+            console.log("Process Ingestion Response:", data);
+        }
         return { status: response.status, data }
     } catch (error) {
         return { status: 500, data: { message: error.message } }
@@ -86,16 +92,6 @@ export const createCategory = async (courseCategoryName, file, categorySequenceN
 // API call to get all categories
 export const getAllCategories = async () => {
     const response = await fetch(`${API_URL}/courseCategory/getAll`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
-
-// API call to get a category by ID
-export const getCategoryById = async (categoryId) => {
-    const response = await fetch(`${API_URL}/courseCategory/getById/${categoryId}`, {
         headers: getHeaders(),
     });
 
@@ -255,15 +251,6 @@ export const getAllCourseWeeks = async () => {
     return { status: response.status, data };
 };
 
-// API call to get a course week by ID
-export const getCourseWeekById = async (courseWeekId) => {
-    const response = await fetch(`${API_URL}/courseWeek/getById/${courseWeekId}`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
 
 // API call to update a course week
 export const updateCourseWeek = async (courseWeekId, weekNumber, image, description, courseId) => {
@@ -467,16 +454,6 @@ export const createLesson = async (lessonType, dayNumber, activity, activityAlia
     return { status: response.status, data };
 };
 
-// API call to get all lessons
-export const getAllLessons = async () => {
-    const response = await fetch(`${API_URL}/lesson/getAll`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
-
 // API call to get a lesson by ID
 export const getLessonById = async (lessonId) => {
     const response = await fetch(`${API_URL}/lesson/getById/${lessonId}`, {
@@ -595,25 +572,6 @@ export const uploadDocumentFile = async (file, lessonId, language, mediaType) =>
     return { status: response.status, data };
 };
 
-// API call to get all document files
-export const getAllDocumentFiles = async () => {
-    const response = await fetch(`${API_URL}/documentFiles/getAll`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
-
-// API call to get a document file by ID
-export const getDocumentFileById = async (documentFileId) => {
-    const response = await fetch(`${API_URL}/documentFiles/getById/${documentFileId}`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
 
 // API call to update a document file
 export const updateDocumentFile = async (documentFileId, file, lessonId, language, mediaType) => {
@@ -673,25 +631,7 @@ export const createSpeakActivityQuestion = async (question, video, image, answer
     return { status: response.status, data };
 };
 
-// API call to get all speak activity questions
-export const getAllSpeakActivityQuestions = async () => {
-    const response = await fetch(`${API_URL}/speakActivityQuestion/getAll`, {
-        headers: getHeaders(),
-    });
 
-    const data = await response.json();
-    return { status: response.status, data };
-};
-
-// API call to get a speak activity question by ID
-export const getSpeakActivityQuestionById = async (speakActivityQuestionId) => {
-    const response = await fetch(`${API_URL}/speakActivityQuestion/getById/${speakActivityQuestionId}`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
 
 // API call to update a speak activity question
 export const updateSpeakActivityQuestion = async (speakActivityQuestionId, question, video, image, answer, lessonId, questionNumber, activityType, customFeedbackText = null, customFeedbackImage = null, customFeedbackAudio = null, difficultyLevel = null) => {
@@ -760,16 +700,6 @@ export const createMultipleChoiceQuestion = async (file, image, video, questionT
             'Authorization': `Bearer ${getToken()}`
         },
         body: formData,
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
-
-// API call to get all Multiple Choice Questions
-export const getAllMultipleChoiceQuestions = async () => {
-    const response = await fetch(`${API_URL}/multipleChoiceQuestion/getAll`, {
-        headers: getHeaders(),
     });
 
     const data = await response.json();
@@ -854,25 +784,6 @@ export const createMultipleChoiceQuestionAnswer = async (answerText, file, image
     return { status: response.status, data };
 };
 
-// API call to get all Multiple Choice Question Answers
-export const getAllMultipleChoiceQuestionAnswers = async () => {
-    const response = await fetch(`${API_URL}/multipleChoiceQuestionAnswer/getAll`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
-
-// API call to get a Multiple Choice Question Answer by ID
-export const getMultipleChoiceQuestionAnswerById = async (multipleChoiceQuestionAnswerId) => {
-    const response = await fetch(`${API_URL}/multipleChoiceQuestionAnswer/getById/${multipleChoiceQuestionAnswerId}`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
 
 // API call to update a Multiple Choice Question Answer
 export const updateMultipleChoiceQuestionAnswer = async (multipleChoiceQuestionAnswerId, answerText, file, image, isCorrect, multipleChoiceQuestionId, sequenceNumber, customAnswerFeedbackText, customAnswerFeedbackImage, customAnswerFeedbackAudio) => {
@@ -1025,15 +936,6 @@ export const assignTargetGroup = async (phoneNumber, profile_id, targetGroup) =>
 
 
 // ACTIVITY LOGS
-// GET  api/waUserActivityLogs/getAll
-export const getAllActivityLogs = async () => {
-    const response = await fetch(`${API_URL}/waUserActivityLogs/getAll`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
 
 // GET api/waUserActivityLogs/getByPhoneNumber/:phoneNumber
 export const getActivityLogsByPhoneNumber = async (phoneNumber, botPhoneNumberId, profile_id, page = 1, pageSize = 15) => {
@@ -1045,15 +947,6 @@ export const getActivityLogsByPhoneNumber = async (phoneNumber, botPhoneNumberId
     return { status: response.status, data };
 };
 
-// GET api/waUserActivityLogs/getLastMessageTime
-export const getLastMessageTime = async () => {
-    const response = await fetch(`${API_URL}/waUserActivityLogs/getLastMessageTime`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
 
 
 // PURCHASED COURSES
@@ -1113,15 +1006,6 @@ export const getCompletedCourses = async (phoneNumber) => {
 
 
 // STATS
-// GET api/stats/dashboardCardsFunnel
-export const getDashboardCardsFunnel = async () => {
-    const response = await fetch(`${API_URL}/stats/dashboardCardsFunnel`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
 
 // POST api/stats/lastActiveUsers
 export const getLastActiveUsers = async (days, cohorts) => {
@@ -1227,15 +1111,6 @@ export const getAllFeedback = async () => {
 };
 
 // QUESTION RESPONSES
-// GET api/waQuestionResponses/getAll
-export const getAllQuestionResponses = async () => {
-    const response = await fetch(`${API_URL}/waQuestionResponses/getAll`, {
-        headers: getHeaders(),
-    });
-
-    const data = await response.json();
-    return { status: response.status, data };
-};
 
 // GET api/waQuestionResponses/getByActivityType/:activityType
 export const getQuestionResponsesByActivityType = async (activityType, courseId = null) => {

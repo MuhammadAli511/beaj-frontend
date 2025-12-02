@@ -5,6 +5,9 @@ import beaj_logo from "../../assets/images/beaj_logo.png";
 import styles from "./Login.module.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { secureStorage } from "../../utils/xssProtection";
+import { getRoleFromToken, getEmailFromToken } from "../../utils/jwtUtils";
+import { handleError } from "../../utils/errorHandler";
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -28,26 +31,30 @@ const Login = () => {
             setIsLoading(true);
             const response = await loginBeajEmployee({ email, password });
             if (response.status === 200) {
-                localStorage.setItem('token', response.data.token);
-                localStorage.setItem('email', email);
-                if (email == "facilitator@beaj.org") {
-                    localStorage.setItem('role', "facilitator");
-                } else if (email == "kid-lesson-creator@beaj.org") {
-                    localStorage.setItem('role', "kid-lesson-creator");
-                } else if (email == "teacher-lesson-creator@beaj.org") {
-                    localStorage.setItem('role', "teacher-lesson-creator");
-                } else if (email == "super-admin@beaj.org") {
-                    localStorage.setItem('role', "admin");
+                const token = response.data.token;
+                
+                // Store token securely
+                secureStorage.setItem('token', token);
+                
+                // Extract role and email from JWT token
+                const role = getRoleFromToken(token);
+                const tokenEmail = getEmailFromToken(token);
+                
+                if (role && tokenEmail) {
+                    secureStorage.setItem('email', tokenEmail);
+                    secureStorage.setItem('role', role);
+                    
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    navigate("/dashboard");
                 } else {
-                    navigate("/login");
+                    toast.error("Invalid token received. Please contact administrator.");
+                    secureStorage.clear();
                 }
-                await new Promise(resolve => setTimeout(resolve, 500));
-                navigate("/dashboard");
             } else {
                 toast.error(response.data.message || "Invalid Credentials");
             }
         } catch (error) {
-            alert(error);
+            handleError(error, 'Login');
         } finally {
             setIsLoading(false);
         }
