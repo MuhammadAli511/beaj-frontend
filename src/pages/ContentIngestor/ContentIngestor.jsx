@@ -34,37 +34,37 @@ const ContentIngestor = () => {
   }
 
   // Generic retry wrapper: retries only on network-level failures
-  const retryRequest = async (fn, { retries = 3, initialDelay = 1000 } = {}) => {
-    let attempt = 0
-    let delay = initialDelay
+  // const retryRequest = async (fn, { retries = 3, initialDelay = 1000 } = {}) => {
+  //   let attempt = 0
+  //   let delay = initialDelay
 
-    while (attempt < retries) {
-      attempt += 1
-      try {
-        // quick offline check
-        if (typeof navigator !== 'undefined' && !navigator.onLine) {
-          throw new Error('offline')
-        }
+  //   while (attempt < retries) {
+  //     attempt += 1
+  //     try {
+  //       // quick offline check
+  //       if (typeof navigator !== 'undefined' && !navigator.onLine) {
+  //         throw new Error('offline')
+  //       }
 
-        const res = await fn()
-        return res
-      } catch (err) {
-        // Determine if this is a network error we should retry
-        const msg = (err && err.message) ? err.message.toLowerCase() : ''
-        const isNetwork = msg.includes('failed to fetch') || msg === 'offline' || err.name === 'TypeError' || msg.includes('network') || msg.includes('net::err_internet_disconnected')
+  //       const res = await fn()
+  //       return res
+  //     } catch (err) {
+  //       // Determine if this is a network error we should retry
+  //       const msg = (err && err.message) ? err.message.toLowerCase() : ''
+  //       const isNetwork = msg.includes('failed to fetch') || msg === 'offline' || err.name === 'TypeError' || msg.includes('network') || msg.includes('net::err_internet_disconnected')
 
-        // If not a network error, rethrow immediately (don't retry)
-        if (!isNetwork) throw err
+  //       // If not a network error, rethrow immediately (don't retry)
+  //       if (!isNetwork) throw err
 
-        // If we reached max attempts, throw
-        if (attempt >= retries) throw err
+  //       // If we reached max attempts, throw
+  //       if (attempt >= retries) throw err
 
-        // wait (simple backoff)
-        await new Promise(res => setTimeout(res, delay))
-        delay *= 2
-      }
-    }
-  }
+  //       // wait (simple backoff)
+  //       await new Promise(res => setTimeout(res, delay))
+  //       delay *= 2
+  //     }
+  //   }
+  // }
 
   // Helper function to filter and sort courses
   const filterAndSortCourses = (coursesData) => {
@@ -166,7 +166,8 @@ const ContentIngestor = () => {
 
     try {
       // retry only when network errors occur
-      const response = await retryRequest(() => validateSheetData({ courseId: selectedCourseId, sheetId, sheetTitle: tabName }))
+      // const response = await retryRequest(() => validateSheetData({ courseId: selectedCourseId, sheetId, sheetTitle: tabName }))
+      const response = await validateSheetData({ courseId: selectedCourseId, sheetId, sheetTitle: tabName })
 
       if (response.status === 200) {
         const responseData = response.data.result;
@@ -189,12 +190,12 @@ const ContentIngestor = () => {
       }
     } catch (error) {
       // If retryRequest throws, it's a network-level failure after retries
-      if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
-        console.error(`Validation error after retries: ${error.message}`);
-      }
-      // You can set a processingResults record if you want to show the error in results page
-      setProcessingResults({ error: true, message: error.message || 'Validation network error', errors: [], stats: null })
-      setCurrentStage("results")
+      // if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+      //   console.error(`Validation error after retries: ${error.message}`);
+      // }
+      // // You can set a processingResults record if you want to show the error in results page
+      // setProcessingResults({ error: true, message: error.message || 'Validation network error', errors: [], stats: null })
+      // setCurrentStage("results")
       return false
     }
   }
@@ -207,11 +208,16 @@ const ContentIngestor = () => {
     try {
       setCurrentStage("processing")
 
-      const response = await retryRequest(() => processIngestionData({
+      // const response = await retryRequest(() => processIngestionData({
+      //   courseId,
+      //   sheetId,
+      //   sheetTitle: tabName,
+      // }))
+      const response = await processIngestionData({
         courseId,
         sheetId,
         sheetTitle: tabName,
-      }))
+      })
 
       if (response.status === 200) {
         const responseData = response.data.result;
@@ -224,15 +230,15 @@ const ContentIngestor = () => {
       }
     } catch (error) {
       // Network-level failure after retries
-      const normalizedError = {
-        error: true,
-        message: error?.response?.data?.message || error.message || "Unexpected error",
-        errors: error?.response?.data?.errors || [],
-        stats: null
-      }
+      // const normalizedError = {
+      //   error: true,
+      //   message: error?.response?.data?.message || error.message || "Unexpected error",
+      //   errors: error?.response?.data?.errors || [],
+      //   stats: null
+      // }
 
-      setProcessingResults(normalizedError)
-      setCurrentStage("results")
+      // setProcessingResults(normalizedError)
+      // setCurrentStage("results")
     }
   }
 
@@ -472,15 +478,10 @@ const ContentIngestor = () => {
     if (!processingResults) return null
 
     // Check for network/API errors OR processing errors in the response
-    // NORMALIZE ERROR FIELDS
-    const hasNetworkError = processingResults?.error || false
-    const hasProcessingErrors = Array.isArray(processingResults?.errors) && processingResults.errors.length > 0
-    const hasValidationErrors = Array.isArray(processingResults?.validationErrors) && processingResults.validationErrors.length > 0
-
-    // Combined
-    const hasAnyErrors = hasNetworkError || hasProcessingErrors || hasValidationErrors
-
-
+    // const hasNetworkError = processingResults.error
+    const hasProcessingErrors = processingResults.errors && processingResults.errors.length > 0
+    // const hasAnyErrors = hasNetworkError || hasProcessingErrors
+     const hasAnyErrors = hasProcessingErrors
     return (
       <div className={styles.results_container}>
         <div className={styles.header}>
@@ -494,7 +495,7 @@ const ContentIngestor = () => {
               <h3>Processing Completed with Issues</h3>
               
               {/* Show network errors */}
-              {hasNetworkError && (
+              {/* {hasNetworkError && (
                 <div className={styles.error_details}>
                   <strong>System Error:</strong> 
                   {processingResults?.message 
@@ -504,7 +505,7 @@ const ContentIngestor = () => {
                     : "Unknown network or server error"}
 
                 </div>
-              )}
+              )} */}
               
               {/* Show processing errors */}
               {hasProcessingErrors && (
