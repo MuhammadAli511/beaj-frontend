@@ -422,10 +422,10 @@ const ContentIngestor = () => {
     if (!processingResults) return null
 
     // Check for network/API errors OR processing errors in the response
-    const hasNetworkError = processingResults.error
+    // const hasNetworkError = processingResults.error
     const hasProcessingErrors = processingResults.errors && processingResults.errors.length > 0
-    const hasAnyErrors = hasNetworkError || hasProcessingErrors
-
+    // const hasAnyErrors = hasNetworkError || hasProcessingErrors
+     const hasAnyErrors = hasProcessingErrors
     return (
       <div className={styles.results_container}>
         <div className={styles.header}>
@@ -439,11 +439,11 @@ const ContentIngestor = () => {
               <h3>Processing Completed with Issues</h3>
               
               {/* Show network errors */}
-              {hasNetworkError && (
+              {/* {hasNetworkError && (
                 <div className={styles.error_details}>
                   <strong>System Error:</strong> {typeof processingResults.message === 'object' ? JSON.stringify(processingResults.message) : processingResults.message}
                 </div>
-              )}
+              )} */}
               
               {/* Show processing errors */}
               {hasProcessingErrors && (
