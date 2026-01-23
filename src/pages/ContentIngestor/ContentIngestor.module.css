@@ -621,6 +621,42 @@
   font-size: 16px;
 }
 
+.progress_message {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.progress_hint {
+  color: #999;
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+.progress_bar_container {
+  width: 100%;
+  max-width: 500px;
+  height: 12px;
+  background: #e9ecef;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 20px auto;
+}
+
+.progress_bar {
+  height: 100%;
+  background: linear-gradient(90deg, #51bbcc, #3a9aaa);
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+.progress_percentage {
+  font-size: 18px;
+  font-weight: 600;
+  color: #51bbcc;
+  margin-top: 10px;
+}
+
 .progress_steps {
   text-align: left;
   max-width: 400px;
@@ -640,6 +676,41 @@
   font-weight: bold;
   position: absolute;
   left: 0;
+}
+
+/* Validation progress (in form) */
+.validation_progress {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.validation_progress .progress_bar_container {
+  margin: 0 0 10px 0;
+}
+
+.progress_info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress_phase {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.validation_progress .progress_percentage {
+  font-size: 14px;
+  margin-top: 0;
+}
+
+.validation_progress .progress_message {
+  margin: 10px 0 0 0;
+  font-size: 13px;
+  color: #888;
 }
 
 /* Final Results Page Styles */

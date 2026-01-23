@@ -22,6 +22,9 @@ const ContentIngestor = () => {
   const [validationResults, setValidationResults] = useState(null)
   const [processingResults, setProcessingResults] = useState(null)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  
+  // Progress tracking for async jobs
+  const [jobProgress, setJobProgress] = useState({ progress: 0, phase: '', message: '' })
 
   const { isSidebarOpen } = useSidebar()
   const userRole = typeof window !== "undefined" ? secureStorage.getItem("role") : null
@@ -164,18 +167,27 @@ const ContentIngestor = () => {
       return false
     }
 
+    // Reset progress
+    setJobProgress({ progress: 0, phase: 'Starting validation...', message: '' })
+
     try {
-      // retry only when network errors occur
-      // const response = await retryRequest(() => validateSheetData({ courseId: selectedCourseId, sheetId, sheetTitle: tabName }))
-      const response = await validateSheetData({ courseId: selectedCourseId, sheetId, sheetTitle: tabName })
+      // Progress callback for polling updates
+      const onProgress = (progressData) => {
+        setJobProgress({
+          progress: progressData.progress || 0,
+          phase: progressData.phase || 'Processing...',
+          message: progressData.message || ''
+        })
+      }
+
+      const response = await validateSheetData({ courseId: selectedCourseId, sheetId, sheetTitle: tabName }, onProgress)
 
       if (response.status === 200) {
-        const responseData = response.data.result;
         // Store validation results for the new UI
-        setValidationResults(responseData)
+        setValidationResults(response.data)
 
         // Check if there are errors that prevent processing
-        const hasErrors = responseData.errors && responseData.errors.length > 0
+        const hasErrors = response.data.errors && response.data.errors.length > 0
 
         // Always show validation stage so user can inspect
         setCurrentStage("validation")
@@ -186,16 +198,25 @@ const ContentIngestor = () => {
         if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
           console.error("Validation failed!", response.data);
         }
+        // Show error in validation results
+        setValidationResults({ 
+          errors: [response.data?.message || 'Validation failed'], 
+          stats: null, 
+          activities: [] 
+        })
+        setCurrentStage("validation")
         return false
       }
     } catch (error) {
-      // If retryRequest throws, it's a network-level failure after retries
-      // if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
-      //   console.error(`Validation error after retries: ${error.message}`);
-      // }
-      // // You can set a processingResults record if you want to show the error in results page
-      // setProcessingResults({ error: true, message: error.message || 'Validation network error', errors: [], stats: null })
-      // setCurrentStage("results")
+      if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
+        console.error(`Validation error: ${error.message}`);
+      }
+      setValidationResults({ 
+        errors: [error.message || 'Validation network error'], 
+        stats: null, 
+        activities: [] 
+      })
+      setCurrentStage("validation")
       return false
     }
   }
@@ -207,38 +228,41 @@ const ContentIngestor = () => {
 
     try {
       setCurrentStage("processing")
+      // Reset progress
+      setJobProgress({ progress: 0, phase: 'Starting processing...', message: '' })
 
-      // const response = await retryRequest(() => processIngestionData({
-      //   courseId,
-      //   sheetId,
-      //   sheetTitle: tabName,
-      // }))
+      // Progress callback for polling updates
+      const onProgress = (progressData) => {
+        setJobProgress({
+          progress: progressData.progress || 0,
+          phase: progressData.phase || 'Processing...',
+          message: progressData.message || ''
+        })
+      }
+
       const response = await processIngestionData({
         courseId,
         sheetId,
         sheetTitle: tabName,
-      })
+      }, onProgress)
 
       if (response.status === 200) {
-        const responseData = response.data.result;
         // Pass the complete response data including any errors
-        setProcessingResults(responseData)
+        setProcessingResults(response.data)
         setCurrentStage("results")
       } else {
-        setProcessingResults({ error: true, message: response.data, errors: response.data?.errors || [], stats: response.data?.stats || null })
+        setProcessingResults({ error: true, message: response.data?.message || response.data, errors: response.data?.errors || [], stats: response.data?.stats || null })
         setCurrentStage("results")
       }
     } catch (error) {
-      // Network-level failure after retries
-      // const normalizedError = {
-      //   error: true,
-      //   message: error?.response?.data?.message || error.message || "Unexpected error",
-      //   errors: error?.response?.data?.errors || [],
-      //   stats: null
-      // }
-
-      // setProcessingResults(normalizedError)
-      // setCurrentStage("results")
+      const normalizedError = {
+        error: true,
+        message: error?.message || "Unexpected error",
+        errors: [error?.message || "Processing failed"],
+        stats: null
+      }
+      setProcessingResults(normalizedError)
+      setCurrentStage("results")
     }
   }
 
@@ -461,14 +485,18 @@ const ContentIngestor = () => {
       
       <div className={styles.progress_content}>
         <div className={styles.spinner}></div>
-        <h3>Processing your activities...</h3>
-        <p>Please wait while we create, update, and remove activities as needed.</p>
+        <h3>{jobProgress.phase || 'Processing your activities...'}</h3>
+        {jobProgress.message && <p className={styles.progress_message}>{jobProgress.message}</p>}
         
-        <div className={styles.progress_steps}>
-          <div className={styles.progress_step}>Creating new activities...</div>
-          <div className={styles.progress_step}>Updating existing activities...</div>
-          <div className={styles.progress_step}>Removing outdated activities...</div>
+        <div className={styles.progress_bar_container}>
+          <div 
+            className={styles.progress_bar} 
+            style={{ width: `${jobProgress.progress}%` }}
+          ></div>
         </div>
+        <div className={styles.progress_percentage}>{jobProgress.progress}%</div>
+        
+        <p className={styles.progress_hint}>Please wait while we create, update, and remove activities as needed.</p>
       </div>
     </div>
   )
@@ -676,7 +704,23 @@ const ContentIngestor = () => {
             <button onClick={handleIngest} disabled={isProcessing} className={styles.ingest_button}>
                   {isProcessing ? "Validating..." : "Validate Sheet"}
               </button>
-                </div>
+          </div>
+          
+          {isProcessing && (
+            <div className={styles.validation_progress}>
+              <div className={styles.progress_bar_container}>
+                <div 
+                  className={styles.progress_bar} 
+                  style={{ width: `${jobProgress.progress}%` }}
+                ></div>
+              </div>
+              <div className={styles.progress_info}>
+                <span className={styles.progress_phase}>{jobProgress.phase || 'Starting...'}</span>
+                <span className={styles.progress_percentage}>{jobProgress.progress}%</span>
+              </div>
+              {jobProgress.message && <p className={styles.progress_message}>{jobProgress.message}</p>}
+            </div>
+          )}
             </div>
           </>
         )

@@ -32,39 +32,96 @@ export const loginBeajEmployee = async ({ email, password }) => {
 
 
 // CONTENT INGESTION
-// API call to validate the sheet data
-export const validateSheetData = async ({ courseId, sheetId, sheetTitle }) => {
+
+// API call to get job status (for polling)
+export const getIngestionJobStatus = async (jobId) => {
     try {
+        const response = await fetch(`${API_URL}/contentIngestion/job/${jobId}`, {
+            headers: getHeaders(),
+        });
+        const data = await response.json();
+        return { status: response.status, data };
+    } catch (error) {
+        return { status: 500, data: { message: error.message } };
+    }
+};
+
+// Helper to poll job until completion
+const pollJobUntilComplete = async (jobId, onProgress = null, pollInterval = 5000) => {
+    while (true) {
+        const { status: httpStatus, data } = await getIngestionJobStatus(jobId);
+        
+        if (httpStatus !== 200) {
+            return { status: httpStatus, data };
+        }
+
+        // Call progress callback if provided
+        if (onProgress) {
+            onProgress(data);
+        }
+
+        if (data.status === 'completed') {
+            return { status: 200, data: data.result };
+        }
+
+        if (data.status === 'failed') {
+            return { status: 500, data: { message: data.error || 'Job failed' } };
+        }
+
+        // Wait before next poll
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+    }
+};
+
+// API call to validate the sheet data
+export const validateSheetData = async ({ courseId, sheetId, sheetTitle }, onProgress = null) => {
+    try {
+        // Start validation job
         const response = await fetch(`${API_URL}/contentIngestion/validateIngestion`, {
             method: "POST",
             headers: getHeaders(),
             body: JSON.stringify({ courseId, sheetId, sheetTitle }),
-        })
-        const data = await response.json()
+        });
+        const data = await response.json();
+
         if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
-            console.log("Ingestion Validation Response:", data);
+            console.log("Ingestion Validation Started:", data);
         }
-        return { status: response.status, data }
+
+        if (response.status !== 202 || !data.jobId) {
+            return { status: response.status, data: { message: data.message || 'Failed to start validation job' } };
+        }
+
+        // Poll for completion
+        return await pollJobUntilComplete(data.jobId, onProgress);
     } catch (error) {
-        return { status: 500, data: { message: error.message } }
+        return { status: 500, data: { message: error.message } };
     }
 };
 
 // API call to process the ingestion data
-export const processIngestionData = async ({ courseId, sheetId, sheetTitle }) => {
+export const processIngestionData = async ({ courseId, sheetId, sheetTitle }, onProgress = null) => {
     try {
+        // Start processing job
         const response = await fetch(`${API_URL}/contentIngestion/processIngestion`, {
             method: "POST",
             headers: getHeaders(),
             body: JSON.stringify({ courseId, sheetId, sheetTitle }),
-        })
+        });
         const data = await response.json();
+
         if (process.env.REACT_APP_ENVIRONMENT === 'DEV') {
-            console.log("Process Ingestion Response:", data);
+            console.log("Process Ingestion Started:", data);
         }
-        return { status: response.status, data }
+
+        if (response.status !== 202 || !data.jobId) {
+            return { status: response.status, data: { message: data.message || 'Failed to start processing job' } };
+        }
+
+        // Poll for completion
+        return await pollJobUntilComplete(data.jobId, onProgress);
     } catch (error) {
-        return { status: 500, data: { message: error.message } }
+        return { status: 500, data: { message: error.message } };
     }
 };
 
