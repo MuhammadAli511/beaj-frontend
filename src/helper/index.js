@@ -1275,7 +1275,7 @@ export const speechToText = async (file, language, provider) => {
 
 // METADATA + PROGRESS + COURSE
 export const getMetadataProgress = async () => {
-    const response = await fetch(`${API_URL}/userProgress/getMetadataProgress`, {
+    const response = await fetch(`${API_URL}/userProgress/all-users-status`, {
         headers: getHeaders(),
     });
 
